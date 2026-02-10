@@ -134,6 +134,12 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
+      {suggestionData?.suggestionId && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
+          Criando corrida a partir de uma sugestão. Os campos nome, cidade e data
+          foram pré-preenchidos. Ao salvar, a sugestão será marcada como aprovada.
+        </div>
+      )}
       {/* Basic Info */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">Informações Básicas</h2>

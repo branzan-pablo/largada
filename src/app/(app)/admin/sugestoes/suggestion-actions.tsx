@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import Link from "next/link";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 interface SuggestionActionsProps {
   suggestion: {
@@ -16,8 +18,10 @@ interface SuggestionActionsProps {
 
 export function SuggestionActions({ suggestion }: SuggestionActionsProps) {
   const router = useRouter();
+  const [isRejecting, setIsRejecting] = useState(false);
 
   const handleReject = async () => {
+    setIsRejecting(true);
     const res = await fetch("/api/suggestions", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -30,6 +34,7 @@ export function SuggestionActions({ suggestion }: SuggestionActionsProps) {
     } else {
       toast.error("Erro ao rejeitar sugestão");
     }
+    setIsRejecting(false);
   };
 
   const approveParams = new URLSearchParams({
@@ -43,10 +48,17 @@ export function SuggestionActions({ suggestion }: SuggestionActionsProps) {
     <div className="flex gap-2">
       <Button size="sm" asChild>
         <Link href={`/admin/corridas/nova?${approveParams.toString()}`}>
-          Aprovar
+          Criar corrida
+          <ArrowRight className="ml-1 h-3.5 w-3.5" />
         </Link>
       </Button>
-      <Button size="sm" variant="outline" onClick={handleReject}>
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={handleReject}
+        disabled={isRejecting}
+      >
+        {isRejecting && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
         Rejeitar
       </Button>
     </div>
