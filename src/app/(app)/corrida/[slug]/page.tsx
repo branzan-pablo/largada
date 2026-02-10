@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RaceDistanceBadges } from "@/components/races/race-distance-badges";
 import { RacePrizeBadge } from "@/components/races/race-prize-badge";
 import { RaceStatusBadge } from "@/components/races/race-status-badge";
+import { RsvpButton } from "@/components/rsvp/rsvp-button";
 import {
   CalendarDays,
   Clock,
@@ -67,6 +68,22 @@ export default async function RaceDetailPage({ params }: PageProps) {
     !deadlinePassed &&
     new Date(typedRace.registration_deadline).getTime() - Date.now() <
       3 * 24 * 60 * 60 * 1000;
+
+  // Fetch current user's RSVP status
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let userRsvped = false;
+  if (user) {
+    const { data: rsvp } = await supabase
+      .from("rsvps")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("race_id", typedRace.id)
+      .single();
+    userRsvped = !!rsvp;
+  }
 
   // Fetch RSVP participants
   const { data: rsvps } = await supabase
@@ -248,16 +265,17 @@ export default async function RaceDetailPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* RSVP placeholder - will be implemented in Phase 6 */}
+          {/* RSVP */}
           <div className="rounded-lg border p-4 space-y-3">
             <h3 className="font-semibold">Vou nessa!</h3>
             <p className="text-sm text-muted-foreground">
               {typedRace.rsvp_count} {typedRace.rsvp_count === 1 ? "pessoa confirmou" : "pessoas confirmaram"}
             </p>
-            <Button variant="outline" className="w-full" disabled>
-              <Users className="mr-2 h-4 w-4" />
-              Vou nessa ({typedRace.rsvp_count})
-            </Button>
+            <RsvpButton
+              raceId={typedRace.id}
+              initialRsvped={userRsvped}
+              initialCount={typedRace.rsvp_count}
+            />
           </div>
         </aside>
       </div>
