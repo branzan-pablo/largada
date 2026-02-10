@@ -17,12 +17,12 @@ export function MyRacesClient() {
   const [past, setPast] = useState<Race[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const supabaseRef = useRef(createClient());
+  const fetchedRef = useRef(false);
 
   const fetchRaces = useCallback(async (userId: string) => {
     const supabase = supabaseRef.current;
     const today = new Date().toISOString().split("T")[0];
 
-    // Get all race IDs the user RSVPed to
     const { data: rsvps } = await supabase
       .from("rsvps")
       .select("race_id")
@@ -37,21 +37,20 @@ export function MyRacesClient() {
 
     const raceIds = rsvps.map((r) => r.race_id);
 
-    // Fetch upcoming
-    const { data: upcomingData } = await supabase
-      .from("races")
-      .select("*")
-      .in("id", raceIds)
-      .gte("date", today)
-      .order("date", { ascending: true });
-
-    // Fetch past
-    const { data: pastData } = await supabase
-      .from("races")
-      .select("*")
-      .in("id", raceIds)
-      .lt("date", today)
-      .order("date", { ascending: false });
+    const [{ data: upcomingData }, { data: pastData }] = await Promise.all([
+      supabase
+        .from("races")
+        .select("*")
+        .in("id", raceIds)
+        .gte("date", today)
+        .order("date", { ascending: true }),
+      supabase
+        .from("races")
+        .select("*")
+        .in("id", raceIds)
+        .lt("date", today)
+        .order("date", { ascending: false }),
+    ]);
 
     setUpcoming((upcomingData as Race[]) ?? []);
     setPast((pastData as Race[]) ?? []);
@@ -60,10 +59,15 @@ export function MyRacesClient() {
 
   useEffect(() => {
     if (authLoading) return;
+
     if (!user) {
-      router.replace("/login");
+      router.replace("/login?redirect=/perfil/minhas-corridas");
       return;
     }
+
+    // Prevent double-fetch
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
     fetchRaces(user.id);
   }, [user, authLoading, router, fetchRaces]);
 

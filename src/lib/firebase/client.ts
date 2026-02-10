@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
@@ -9,15 +9,20 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-export const firebaseApp =
-  getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+function getFirebaseApp(): FirebaseApp | null {
+  if (!firebaseConfig.projectId) return null;
+  return getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+}
 
 export async function getFCMToken(): Promise<string | null> {
   try {
+    const app = getFirebaseApp();
+    if (!app) return null;
+
     const supported = await isSupported();
     if (!supported) return null;
 
-    const messaging = getMessaging(firebaseApp);
+    const messaging = getMessaging(app);
     const token = await getToken(messaging, {
       vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
     });

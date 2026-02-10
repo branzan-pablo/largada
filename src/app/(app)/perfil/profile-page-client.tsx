@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { REGION_CITIES } from "@/lib/constants";
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
-import { LogOut, Loader2, Mail, MapPin, Bell } from "lucide-react";
+import { LogOut, Loader2, Mail, MapPin, Bell, Heart, MessageSquarePlus, ChevronRight } from "lucide-react";
 
 export function ProfilePageClient() {
   const { user, profile, isLoading, signOut, refetchProfile } = useAuth();
@@ -172,6 +173,32 @@ export function ProfilePageClient() {
           {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Salvar alterações
         </Button>
+      </div>
+
+      <Separator />
+
+      {/* Navigation links */}
+      <div className="space-y-1">
+        <Link
+          href="/perfil/minhas-corridas"
+          className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"
+        >
+          <div className="flex items-center gap-2">
+            <Heart className="h-4 w-4" />
+            <span className="text-sm font-medium">Minhas Corridas</span>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </Link>
+        <Link
+          href="/perfil/sugestoes"
+          className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"
+        >
+          <div className="flex items-center gap-2">
+            <MessageSquarePlus className="h-4 w-4" />
+            <span className="text-sm font-medium">Minhas Sugestões</span>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </Link>
       </div>
 
       <Separator />

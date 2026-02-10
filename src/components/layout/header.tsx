@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
@@ -15,10 +16,13 @@ import {
 export function Header() {
   const { user, profile, isLoading, signOut } = useAuth();
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   const handleSignOut = async () => {
+    setOpen(false);
     await signOut();
-    router.replace("/");
+    router.push("/");
+    router.refresh();
   };
 
   return (
@@ -51,7 +55,7 @@ export function Header() {
           {isLoading ? (
             <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
           ) : user ? (
-            <Popover>
+            <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <button className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
@@ -66,6 +70,7 @@ export function Header() {
                 <div className="space-y-1">
                   <Link
                     href="/perfil"
+                    onClick={() => setOpen(false)}
                     className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
                   >
                     <User className="h-4 w-4" />
@@ -73,6 +78,7 @@ export function Header() {
                   </Link>
                   <Link
                     href="/perfil/minhas-corridas"
+                    onClick={() => setOpen(false)}
                     className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
                   >
                     <Heart className="h-4 w-4" />
@@ -81,6 +87,7 @@ export function Header() {
                   {profile?.role === "admin" && (
                     <Link
                       href="/admin"
+                      onClick={() => setOpen(false)}
                       className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
                     >
                       <Shield className="h-4 w-4" />

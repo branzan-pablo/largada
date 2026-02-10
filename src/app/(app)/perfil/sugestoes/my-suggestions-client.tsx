@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import { MessageSquarePlus, CalendarDays, MapPin } from "lucide-react";
+import { toast } from "sonner";
+import { MessageSquarePlus, CalendarDays, MapPin, Trash2, Loader2 } from "lucide-react";
 import type { RaceSuggestion } from "@/types/race";
 
 const STATUS_MAP = {
@@ -41,6 +43,26 @@ export function MySuggestionsClient() {
     }
     fetchSuggestions(user.id);
   }, [user, authLoading, router, fetchSuggestions]);
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/suggestions?id=${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || "Erro ao excluir sugestão.");
+        return;
+      }
+      setSuggestions((prev) => prev.filter((s) => s.id !== id));
+      toast.success("Sugestão excluída.");
+    } catch {
+      toast.error("Erro ao excluir sugestão.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (authLoading || isLoading) return null;
 
@@ -84,7 +106,24 @@ export function MySuggestionsClient() {
                 <p className="text-sm text-muted-foreground">{s.notes}</p>
               )}
             </div>
-            <Badge variant={status.variant}>{status.label}</Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant={status.variant}>{status.label}</Badge>
+              {s.status === "pending" && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-destructive hover:text-destructive"
+                  disabled={deletingId === s.id}
+                  onClick={() => handleDelete(s.id)}
+                >
+                  {deletingId === s.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
+            </div>
           </div>
         );
       })}

@@ -99,3 +99,55 @@ export async function PATCH(request: Request) {
 
   return NextResponse.json(data);
 }
+
+export async function DELETE(request: Request) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+
+  if (!id) {
+    return NextResponse.json({ error: "ID é obrigatório" }, { status: 400 });
+  }
+
+  // Only allow deleting own pending suggestions
+  const { data: suggestion } = await supabase
+    .from("race_suggestions")
+    .select("user_id, status")
+    .eq("id", id)
+    .single();
+
+  if (!suggestion) {
+    return NextResponse.json({ error: "Sugestão não encontrada" }, { status: 404 });
+  }
+
+  if (suggestion.user_id !== user.id) {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  }
+
+  if (suggestion.status !== "pending") {
+    return NextResponse.json(
+      { error: "Apenas sugestões pendentes podem ser excluídas" },
+      { status: 400 }
+    );
+  }
+
+  const { error } = await supabase
+    .from("race_suggestions")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  return NextResponse.json({ success: true });
+}
