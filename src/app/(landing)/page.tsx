@@ -94,7 +94,7 @@ export default function LandingPage() {
       </section>
 
       {/* ==================== Seção 2: Problema ==================== */}
-      <section id="problema" className="bg-muted/30 px-4 py-20">
+      <section id="problema" className="bg-muted/30 px-4 py-12 md:py-16">
         <div className="mx-auto max-w-screen-xl">
           <h2 className="mb-4 text-center text-2xl font-bold md:text-3xl">
             Conhece essa situação?
@@ -136,7 +136,7 @@ export default function LandingPage() {
       </section>
 
       {/* ==================== Seção 3: Features ==================== */}
-      <section id="features" className="px-4 py-20">
+      <section id="features" className="px-4 py-12 md:py-16">
         <div className="mx-auto max-w-screen-xl">
           <h2 className="mb-4 text-center text-2xl font-bold md:text-3xl">
             Tudo que você precisa
@@ -193,7 +193,7 @@ export default function LandingPage() {
       </section>
 
       {/* ==================== Seção 4: Como Funciona ==================== */}
-      <section id="como-funciona" className="bg-muted/30 px-4 py-20">
+      <section id="como-funciona" className="bg-muted/30 px-4 py-12 md:py-16">
         <div className="mx-auto max-w-screen-xl">
           <h2 className="mb-12 text-center text-2xl font-bold md:text-3xl">
             Simples de usar
@@ -237,7 +237,7 @@ export default function LandingPage() {
       </section>
 
       {/* ==================== Seção 5: Social Proof ==================== */}
-      <section id="depoimentos" className="px-4 py-20">
+      <section id="depoimentos" className="px-4 py-12 md:py-16">
         <div className="mx-auto max-w-screen-xl">
           <h2 className="mb-12 text-center text-2xl font-bold md:text-3xl">
             O que dizem os corredores
@@ -286,7 +286,7 @@ export default function LandingPage() {
       </section>
 
       {/* ==================== Seção 6: CTA Final ==================== */}
-      <section className="bg-primary px-4 py-20 text-center text-white">
+      <section className="bg-primary px-4 py-12 md:py-16 text-center text-white">
         <h2 className="text-2xl font-bold md:text-3xl">
           Pronto para encontrar sua próxima corrida?
         </h2>
