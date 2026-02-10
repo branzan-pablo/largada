@@ -10,7 +10,6 @@ import {
   CalendarDays,
   MapPin,
   Users,
-  Trophy,
   Filter,
   Smartphone,
   Award,
@@ -95,7 +94,7 @@ export default function LandingPage() {
       </section>
 
       {/* ==================== Seção 2: Problema ==================== */}
-      <section id="problema" className="border-t bg-muted/30 px-4 py-20">
+      <section id="problema" className="bg-muted/30 px-4 py-20">
         <div className="mx-auto max-w-screen-xl">
           <h2 className="mb-4 text-center text-2xl font-bold md:text-3xl">
             Conhece essa situação?
@@ -136,140 +135,39 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ==================== Seção 3: Solução ==================== */}
-      <section id="solucao" className="px-4 py-20">
+      {/* ==================== Seção 3: Features ==================== */}
+      <section id="features" className="px-4 py-20">
         <div className="mx-auto max-w-screen-xl">
           <h2 className="mb-4 text-center text-2xl font-bold md:text-3xl">
-            O Largada resolve
-          </h2>
-          <p className="mx-auto mb-16 max-w-lg text-center text-muted-foreground">
-            Cada dor tem uma solução simples e direta.
-          </p>
-
-          <div className="space-y-20">
-            {/* Solução 1 */}
-            <div className="grid items-center gap-8 md:grid-cols-2">
-              <div>
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Filter className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">
-                  Calendário centralizado com filtros
-                </h3>
-                <p className="text-muted-foreground">
-                  Todas as corridas da região em um só lugar. Filtre por cidade,
-                  distância, data, tipo de premiação e raio em km. Nunca mais
-                  perca tempo procurando.
-                </p>
-              </div>
-              <div className="rounded-xl border bg-muted/30 p-6">
-                <div className="space-y-2">
-                  {["São José do Rio Preto", "Votuporanga", "Araçatuba"].map((city) => (
-                    <div key={city} className="flex items-center gap-2 rounded-lg bg-background px-3 py-2 text-sm">
-                      <MapPin className="h-4 w-4 text-primary" />
-                      {city}
-                    </div>
-                  ))}
-                  <div className="flex gap-2 pt-2">
-                    {["5K", "10K", "21K"].map((d) => (
-                      <span key={d} className="rounded-full border px-3 py-1 text-xs font-medium">
-                        {d}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Solução 2 */}
-            <div className="grid items-center gap-8 md:grid-cols-2">
-              <div className="order-2 md:order-1">
-                <div className="mx-auto max-w-xs rounded-xl border bg-muted/30 p-4">
-                  <div className="mb-2 flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm text-white">
-                    <Bell className="h-4 w-4" />
-                    <div>
-                      <p className="font-medium text-xs">Nova corrida na sua região!</p>
-                      <p className="text-[10px] text-white/80">Corrida Noturna em Rio Preto — 5K e 10K</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm">
-                    <Bell className="h-4 w-4 text-yellow-600" />
-                    <div>
-                      <p className="font-medium text-xs">Inscrição expirando!</p>
-                      <p className="text-[10px] text-muted-foreground">Faltam 3 dias para a Maratona do Interior</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="order-1 md:order-2">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Bell className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">
-                  Notificações inteligentes
-                </h3>
-                <p className="text-muted-foreground">
-                  Receba alertas quando uma nova corrida for cadastrada na sua
-                  região e lembretes antes do prazo de inscrição acabar.
-                </p>
-              </div>
-            </div>
-
-            {/* Solução 3 */}
-            <div className="grid items-center gap-8 md:grid-cols-2">
-              <div>
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <CheckCircle className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">
-                  &ldquo;Vou nessa!&rdquo; — veja quem vai
-                </h3>
-                <p className="text-muted-foreground">
-                  Marque presença nas corridas e veja quais amigos e conhecidos
-                  também vão participar. Motivação para treinar e correr junto.
-                </p>
-              </div>
-              <div className="rounded-xl border bg-muted/30 p-6">
-                <p className="mb-3 text-sm font-medium">Participantes (23)</p>
-                <div className="flex flex-wrap gap-2">
-                  {["Ana S.", "Carlos M.", "Fernanda L.", "João P.", "Maria R.", "+18 mais"].map((name) => (
-                    <span key={name} className="flex items-center gap-1 rounded-full bg-background px-3 py-1 text-xs border">
-                      <Users className="h-3 w-3 text-primary" />
-                      {name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== Seção 4: Features ==================== */}
-      <section id="features" className="border-t bg-muted/30 px-4 py-20">
-        <div className="mx-auto max-w-screen-xl">
-          <h2 className="mb-12 text-center text-2xl font-bold md:text-3xl">
             Tudo que você precisa
           </h2>
+          <p className="mx-auto mb-12 max-w-lg text-center text-muted-foreground">
+            Ferramentas pensadas para facilitar a vida do corredor.
+          </p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[
+              {
+                icon: Filter,
+                title: "Calendário com filtros",
+                desc: "Filtre por cidade, distância, data e tipo de premiação.",
+              },
               {
                 icon: MapPin,
                 title: "Filtro por raio",
                 desc: "Encontre corridas em até 10, 25, 50 ou 100 km de você.",
               },
               {
+                icon: Bell,
+                title: "Notificações inteligentes",
+                desc: "Alertas de novas corridas e lembretes antes do prazo acabar.",
+              },
+              {
+                icon: CheckCircle,
+                title: "\"Vou nessa!\"",
+                desc: "Marque presença e veja quem mais vai participar.",
+              },
+              {
                 icon: Award,
-                title: "Filtro por premiação",
-                desc: "Dinheiro, troféu ou ambos. Filtre pelo tipo de prêmio.",
-              },
-              {
-                icon: Search,
-                title: "Busca por texto",
-                desc: "Pesquise por nome da corrida, cidade ou organizador.",
-              },
-              {
-                icon: Trophy,
                 title: "Detalhes completos",
                 desc: "Distâncias, percurso, valor, prazo, organizador e mais.",
               },
@@ -277,11 +175,6 @@ export default function LandingPage() {
                 icon: Smartphone,
                 title: "Instala como app",
                 desc: "Adicione à tela inicial e use como um app nativo (PWA).",
-              },
-              {
-                icon: Bell,
-                title: "Push notifications",
-                desc: "Saiba na hora quando uma nova corrida for cadastrada.",
               },
             ].map((feature) => (
               <div
@@ -299,8 +192,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ==================== Seção 5: Como Funciona ==================== */}
-      <section id="como-funciona" className="px-4 py-20">
+      {/* ==================== Seção 4: Como Funciona ==================== */}
+      <section id="como-funciona" className="bg-muted/30 px-4 py-20">
         <div className="mx-auto max-w-screen-xl">
           <h2 className="mb-12 text-center text-2xl font-bold md:text-3xl">
             Simples de usar
@@ -340,15 +233,11 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          {/* Connector line (desktop only) */}
-          <div className="relative mx-auto mt-[-120px] mb-[-40px] hidden sm:block">
-            <div className="absolute left-[calc(16.67%+28px)] right-[calc(16.67%+28px)] top-[28px] border-t-2 border-dashed border-primary/30" />
-          </div>
         </div>
       </section>
 
-      {/* ==================== Seção 6: Social Proof ==================== */}
-      <section id="depoimentos" className="border-t bg-muted/30 px-4 py-20">
+      {/* ==================== Seção 5: Social Proof ==================== */}
+      <section id="depoimentos" className="px-4 py-20">
         <div className="mx-auto max-w-screen-xl">
           <h2 className="mb-12 text-center text-2xl font-bold md:text-3xl">
             O que dizem os corredores
@@ -396,8 +285,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ==================== Seção 7: CTA Final ==================== */}
-      <section className="bg-primary px-4 py-16 text-center text-white">
+      {/* ==================== Seção 6: CTA Final ==================== */}
+      <section className="bg-primary px-4 py-20 text-center text-white">
         <h2 className="text-2xl font-bold md:text-3xl">
           Pronto para encontrar sua próxima corrida?
         </h2>
@@ -419,8 +308,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ==================== Seção 8: Footer ==================== */}
-      <footer className="border-t bg-muted/50 px-4 py-10">
+      {/* ==================== Seção 7: Footer ==================== */}
+      <footer className="bg-muted/50 px-4 py-10">
         <div className="mx-auto max-w-screen-xl">
           <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between">
             <div>
