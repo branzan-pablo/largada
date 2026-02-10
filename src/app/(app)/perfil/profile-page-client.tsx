@@ -17,12 +17,14 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { REGION_CITIES } from "@/lib/constants";
+import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
-import { LogOut, Loader2, Mail, MapPin } from "lucide-react";
+import { LogOut, Loader2, Mail, MapPin, Bell } from "lucide-react";
 
 export function ProfilePageClient() {
   const { user, profile, isLoading, signOut, refetchProfile } = useAuth();
   const router = useRouter();
+  const { permission, isSupported, requestPermission } = useNotifications();
 
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
   const [city, setCity] = useState(profile?.city ?? "");
@@ -136,15 +138,33 @@ export function ProfilePageClient() {
 
         <div className="flex items-center justify-between rounded-lg border p-4">
           <div className="space-y-0.5">
-            <Label htmlFor="notifications">Notificações</Label>
+            <Label htmlFor="notifications" className="flex items-center gap-1.5">
+              <Bell className="h-4 w-4" />
+              Notificações
+            </Label>
             <p className="text-sm text-muted-foreground">
               Receba alertas de novas corridas na sua região
             </p>
+            {isSupported && permission === "denied" && (
+              <p className="text-xs text-destructive">
+                Notificações bloqueadas no navegador. Libere nas configurações do site.
+              </p>
+            )}
           </div>
           <Switch
             id="notifications"
             checked={notificationsEnabled}
-            onCheckedChange={setNotificationsEnabled}
+            disabled={isSupported && permission === "denied"}
+            onCheckedChange={async (checked) => {
+              if (checked && isSupported && permission !== "granted") {
+                const granted = await requestPermission();
+                if (!granted) {
+                  toast.error("Permissão de notificação negada pelo navegador.");
+                  return;
+                }
+              }
+              setNotificationsEnabled(checked);
+            }}
           />
         </div>
 
