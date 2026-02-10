@@ -4,7 +4,6 @@ import { LandingHeader } from "@/components/landing/landing-header";
 import {
   ArrowRight,
   ChevronDown,
-  Search,
   Globe,
   Bell,
   CalendarDays,
@@ -13,9 +12,7 @@ import {
   Filter,
   Smartphone,
   Award,
-  UserPlus,
   CheckCircle,
-  Quote,
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -99,7 +96,7 @@ export default function LandingPage() {
           <h2 className="mb-4 text-center text-2xl font-bold md:text-3xl">
             Conhece essa situação?
           </h2>
-          <p className="mx-auto mb-12 max-w-lg text-center text-muted-foreground">
+          <p className="mx-auto mb-10 max-w-lg text-center text-muted-foreground">
             Todo corredor do interior já passou por isso.
           </p>
           <div className="grid gap-6 sm:grid-cols-3">
@@ -141,7 +138,7 @@ export default function LandingPage() {
           <h2 className="mb-4 text-center text-2xl font-bold md:text-3xl">
             Tudo que você precisa
           </h2>
-          <p className="mx-auto mb-12 max-w-lg text-center text-muted-foreground">
+          <p className="mx-auto mb-10 max-w-lg text-center text-muted-foreground">
             Ferramentas pensadas para facilitar a vida do corredor.
           </p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -192,100 +189,27 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ==================== Seção 4: Como Funciona ==================== */}
-      <section id="como-funciona" className="bg-muted/30 px-4 py-12 md:py-16">
+      {/* ==================== Seção 4: Números ==================== */}
+      <section className="bg-muted/30 px-4 py-12 md:py-16">
         <div className="mx-auto max-w-screen-xl">
-          <h2 className="mb-12 text-center text-2xl font-bold md:text-3xl">
-            Simples de usar
-          </h2>
-          <div className="grid gap-8 sm:grid-cols-3">
+          <div className="grid gap-8 text-center sm:grid-cols-3">
             {[
-              {
-                step: 1,
-                icon: UserPlus,
-                title: "Crie sua conta",
-                desc: "Rápido, com Google ou email. Sem burocracia.",
-              },
-              {
-                step: 2,
-                icon: Search,
-                title: "Encontre corridas",
-                desc: "Filtre por cidade, distância e data na sua região.",
-              },
-              {
-                step: 3,
-                icon: CheckCircle,
-                title: "Marque presença",
-                desc: "Clique em \"Vou nessa\" e receba lembretes automáticos.",
-              },
-            ].map((item) => (
-              <div key={item.step} className="flex flex-col items-center text-center">
-                <div className="relative mb-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white">
-                    <item.icon className="h-6 w-6" />
-                  </div>
-                  <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-background text-xs font-bold border-2 border-primary text-primary">
-                    {item.step}
-                  </span>
-                </div>
-                <h3 className="mb-1 font-semibold">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== Seção 5: Social Proof ==================== */}
-      <section id="depoimentos" className="px-4 py-12 md:py-16">
-        <div className="mx-auto max-w-screen-xl">
-          <h2 className="mb-12 text-center text-2xl font-bold md:text-3xl">
-            O que dizem os corredores
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-3">
-            {[
-              {
-                name: "Ana Carolina",
-                city: "São José do Rio Preto",
-                text: "Finalmente um lugar só pra ver as corridas da região. Não perco mais inscrição!",
-              },
-              {
-                name: "Marcos Oliveira",
-                city: "Votuporanga",
-                text: "O melhor é ver quem vai participar. Sempre combino com os amigos pelo app.",
-              },
-              {
-                name: "Fernanda Lima",
-                city: "Araçatuba",
-                text: "Os filtros são incríveis. Consigo achar corridas de 5K perto de casa em segundos.",
-              },
-            ].map((testimonial) => (
-              <div
-                key={testimonial.name}
-                className="rounded-xl border bg-background p-6"
-              >
-                <Quote className="mb-3 h-5 w-5 text-primary/40" />
-                <p className="mb-4 text-sm text-muted-foreground">
-                  &ldquo;{testimonial.text}&rdquo;
+              { value: "12+", label: "Corridas cadastradas" },
+              { value: "3", label: "Cidades da região" },
+              { value: "100%", label: "Gratuito para corredores" },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <p className="text-4xl font-bold text-primary">{stat.value}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {stat.label}
                 </p>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                    {testimonial.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{testimonial.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {testimonial.city}
-                    </p>
-                  </div>
-                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ==================== Seção 6: CTA Final ==================== */}
+      {/* ==================== Seção 5: CTA Final ==================== */}
       <section className="bg-primary px-4 py-12 md:py-16 text-center text-white">
         <h2 className="text-2xl font-bold md:text-3xl">
           Pronto para encontrar sua próxima corrida?
@@ -293,22 +217,22 @@ export default function LandingPage() {
         <p className="mt-3 text-white/80">
           Gratuito. Sem pegadinha. Feito por corredores, para corredores.
         </p>
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Button
             size="lg"
             variant="secondary"
             asChild
             className="text-primary font-semibold"
           >
-            <Link href="/login">
-              Criar conta grátis
+            <Link href="/corridas">
+              Explorar corridas
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>
       </section>
 
-      {/* ==================== Seção 7: Footer ==================== */}
+      {/* ==================== Footer ==================== */}
       <footer className="bg-muted/50 px-4 py-10">
         <div className="mx-auto max-w-screen-xl">
           <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between">
