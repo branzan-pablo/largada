@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import type { Race, RaceFilters } from "@/types/race";
 import { ITEMS_PER_PAGE } from "@/lib/constants";
 
@@ -11,6 +11,26 @@ interface UseInfiniteRacesResult {
   hasMore: boolean;
   loadMore: () => void;
   sentinelRef: (node: HTMLDivElement | null) => void;
+}
+
+function buildUrl(filters: RaceFilters, search: string, pageNum: number) {
+  const params = new URLSearchParams();
+  params.set("page", String(pageNum));
+  params.set("limit", String(ITEMS_PER_PAGE));
+
+  if (filters.city) params.set("city", filters.city);
+  if (filters.dateFrom) params.set("dateFrom", filters.dateFrom);
+  if (filters.dateTo) params.set("dateTo", filters.dateTo);
+  if (filters.distances?.length)
+    params.set("distances", filters.distances.join(","));
+  if (filters.prizeType?.length)
+    params.set("prizeType", filters.prizeType.join(","));
+  if (search) params.set("search", search);
+  if (filters.lat) params.set("lat", String(filters.lat));
+  if (filters.lng) params.set("lng", String(filters.lng));
+  if (filters.radius) params.set("radius", String(filters.radius));
+
+  return `/api/races?${params.toString()}`;
 }
 
 export function useInfiniteRaces(
@@ -24,50 +44,58 @@ export function useInfiniteRaces(
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  const buildUrl = useCallback(
-    (pageNum: number) => {
-      const params = new URLSearchParams();
-      params.set("page", String(pageNum));
-      params.set("limit", String(ITEMS_PER_PAGE));
-
-      if (filters.city) params.set("city", filters.city);
-      if (filters.dateFrom) params.set("dateFrom", filters.dateFrom);
-      if (filters.dateTo) params.set("dateTo", filters.dateTo);
-      if (filters.distances?.length)
-        params.set("distances", filters.distances.join(","));
-      if (filters.prizeType?.length)
-        params.set("prizeType", filters.prizeType.join(","));
-      if (debouncedSearch) params.set("search", debouncedSearch);
-      if (filters.lat) params.set("lat", String(filters.lat));
-      if (filters.lng) params.set("lng", String(filters.lng));
-      if (filters.radius) params.set("radius", String(filters.radius));
-
-      return `/api/races?${params.toString()}`;
-    },
-    [filters, debouncedSearch]
+  // Stable serialized key that only changes when filter values actually change
+  const filterKey = useMemo(
+    () =>
+      JSON.stringify({
+        city: filters.city,
+        dateFrom: filters.dateFrom,
+        dateTo: filters.dateTo,
+        distances: filters.distances,
+        prizeType: filters.prizeType,
+        lat: filters.lat,
+        lng: filters.lng,
+        radius: filters.radius,
+        search: debouncedSearch,
+      }),
+    [filters.city, filters.dateFrom, filters.dateTo, filters.distances, filters.prizeType, filters.lat, filters.lng, filters.radius, debouncedSearch]
   );
 
-  // Reset on filter change
+  // Keep a ref to filters so the effect closure always reads the latest
+  const filtersRef = useRef(filters);
+  const searchRef = useRef(debouncedSearch);
+  filtersRef.current = filters;
+  searchRef.current = debouncedSearch;
+
+  // Reset and fetch on filter change
   useEffect(() => {
+    let cancelled = false;
+
     setPage(1);
     setHasMore(true);
     setIsLoading(true);
 
     const fetchInitial = async () => {
       try {
-        const res = await fetch(buildUrl(1));
+        const res = await fetch(buildUrl(filtersRef.current, searchRef.current, 1));
         const json = await res.json();
-        setRaces(json.data ?? []);
-        setHasMore(json.hasMore ?? false);
+        if (!cancelled) {
+          setRaces(json.data ?? []);
+          setHasMore(json.hasMore ?? false);
+        }
       } catch {
-        setRaces([]);
+        if (!cancelled) setRaces([]);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     fetchInitial();
-  }, [buildUrl]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [filterKey]);
 
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
@@ -75,7 +103,7 @@ export function useInfiniteRaces(
 
     const nextPage = page + 1;
     try {
-      const res = await fetch(buildUrl(nextPage));
+      const res = await fetch(buildUrl(filtersRef.current, searchRef.current, nextPage));
       const json = await res.json();
       setRaces((prev) => [...prev, ...(json.data ?? [])]);
       setHasMore(json.hasMore ?? false);
@@ -85,7 +113,7 @@ export function useInfiniteRaces(
     } finally {
       setIsLoadingMore(false);
     }
-  }, [page, hasMore, isLoadingMore, buildUrl]);
+  }, [page, hasMore, isLoadingMore]);
 
   const sentinelRef = useCallback(
     (node: HTMLDivElement | null) => {
