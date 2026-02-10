@@ -92,8 +92,42 @@ export default async function RaceDetailPage({ params }: PageProps) {
     .eq("race_id", typedRace.id)
     .limit(10);
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    name: typedRace.name,
+    startDate: `${typedRace.date}T${typedRace.start_time || "06:00"}`,
+    location: {
+      "@type": "Place",
+      name: typedRace.address,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: typedRace.city,
+        addressRegion: typedRace.state,
+        addressCountry: "BR",
+      },
+    },
+    description: typedRace.description || `Corrida de rua em ${typedRace.city}`,
+    organizer: typedRace.organizer
+      ? { "@type": "Organization", name: typedRace.organizer }
+      : undefined,
+    url: `${baseUrl}/corrida/${typedRace.slug}`,
+    eventStatus:
+      typedRace.status === "cancelled"
+        ? "https://schema.org/EventCancelled"
+        : typedRace.status === "postponed"
+          ? "https://schema.org/EventPostponed"
+          : "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+  };
+
   return (
     <div className="mx-auto max-w-screen-lg px-4 py-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Header */}
       <div className="mb-6 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
