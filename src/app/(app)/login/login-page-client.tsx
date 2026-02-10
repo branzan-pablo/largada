@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -13,12 +13,16 @@ import { Separator } from "@/components/ui/separator";
 import { LoginForm } from "@/components/auth/login-form";
 import { RegisterForm } from "@/components/auth/register-form";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import { useAuth } from "@/contexts/auth-context";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
 export function LoginPageClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { user, isLoading } = useAuth();
   const error = searchParams.get("error");
+  const redirect = searchParams.get("redirect");
 
   useEffect(() => {
     if (error === "auth") {
@@ -27,6 +31,22 @@ export function LoginPageClient() {
       toast.error("Erro ao confirmar email. Tente novamente.");
     }
   }, [error]);
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace(redirect || "/corridas");
+    }
+  }, [isLoading, user, router, redirect]);
+
+  if (isLoading || user) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardContent className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-md">

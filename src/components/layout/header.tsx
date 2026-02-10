@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, LogOut, Shield } from "lucide-react";
+import { User, LogOut, Shield, Heart } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -13,6 +14,12 @@ import {
 
 export function Header() {
   const { user, profile, isLoading, signOut } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace("/");
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -22,19 +29,21 @@ export function Header() {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          <Link
-            href="/corridas"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            Corridas
-          </Link>
           {user && (
-            <Link
-              href="/sugerir"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              Sugerir Corrida
-            </Link>
+            <>
+              <Link
+                href="/sugerir"
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                Sugerir Corrida
+              </Link>
+              <Link
+                href="/perfil/minhas-corridas"
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                Minhas Corridas
+              </Link>
+            </>
           )}
         </nav>
 
@@ -66,7 +75,7 @@ export function Header() {
                     href="/perfil/minhas-corridas"
                     className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
                   >
-                    <User className="h-4 w-4" />
+                    <Heart className="h-4 w-4" />
                     Minhas Corridas
                   </Link>
                   {profile?.role === "admin" && (
@@ -79,7 +88,7 @@ export function Header() {
                     </Link>
                   )}
                   <button
-                    onClick={signOut}
+                    onClick={handleSignOut}
                     className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-accent"
                   >
                     <LogOut className="h-4 w-4" />
