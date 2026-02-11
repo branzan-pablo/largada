@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { SUGGESTION_DAILY_LIMIT } from "@/lib/constants";
+import { notifyNewSuggestion } from "@/lib/notifications";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -46,6 +47,9 @@ export async function POST(request: Request) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  // Notify admins about new suggestion (fire and forget)
+  notifyNewSuggestion(body.name, body.city).catch(() => {});
 
   return NextResponse.json(data, { status: 201 });
 }

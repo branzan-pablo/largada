@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { slugify } from "@/lib/utils";
 import { haversineDistance } from "@/lib/geo";
 import { ITEMS_PER_PAGE } from "@/lib/constants";
+import { notifyNewRace } from "@/lib/notifications";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -174,6 +175,9 @@ export async function POST(request: Request) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  // Send push notifications to users in the same city (fire and forget)
+  notifyNewRace(data.id).catch(() => {});
 
   return NextResponse.json(data, { status: 201 });
 }
