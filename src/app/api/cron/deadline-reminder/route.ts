@@ -60,6 +60,9 @@ export async function GET(request: Request) {
 
     if (targetTokens.length === 0) continue;
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const raceUrl = `${baseUrl}/corrida/${race.slug}`;
+
     try {
       const messaging = getAdminMessaging();
       const result = await messaging.sendEachForMulticast({
@@ -69,18 +72,18 @@ export async function GET(request: Request) {
           body: `Faltam 3 dias para o prazo de inscrição: ${race.name}. Não perca!`,
         },
         data: {
-          url: `/corrida/${race.slug}`,
+          url: raceUrl,
         },
         webpush: {
           fcmOptions: {
-            link: `/corrida/${race.slug}`,
+            link: raceUrl,
           },
         },
       });
 
       totalSent += result.successCount;
-    } catch {
-      // Continue with next race
+    } catch (error) {
+      console.error("[notifications] deadline reminder failed for race:", race.id, error);
     }
   }
 

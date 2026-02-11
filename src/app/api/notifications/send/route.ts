@@ -46,6 +46,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ sent: 0 });
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const raceUrl = `${baseUrl}/corrida/${race.slug}`;
+
     try {
       const messaging = getAdminMessaging();
       const result = await messaging.sendEachForMulticast({
@@ -55,11 +58,11 @@ export async function POST(request: Request) {
           body: `${race.name} em ${race.city}. Confira os detalhes.`,
         },
         data: {
-          url: `/corrida/${race.slug}`,
+          url: raceUrl,
         },
         webpush: {
           fcmOptions: {
-            link: `/corrida/${race.slug}`,
+            link: raceUrl,
           },
         },
       });

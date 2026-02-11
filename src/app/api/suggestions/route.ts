@@ -49,7 +49,7 @@ export async function POST(request: Request) {
   }
 
   // Notify admins about new suggestion (fire and forget)
-  notifyNewSuggestion(body.name, body.city).catch(() => {});
+  notifyNewSuggestion(body.name, body.city).catch((err) => console.error("[notifications] notifyNewSuggestion failed:", err));
 
   return NextResponse.json(data, { status: 201 });
 }
