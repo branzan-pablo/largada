@@ -31,8 +31,8 @@ export default async function AdminLayout({
     <div className="flex min-h-screen">
       <aside className="hidden w-60 border-r bg-muted/30 md:block">
         <div className="p-6">
-          <Link href="/admin" className="text-lg font-bold text-primary">
-            Largada Admin
+          <Link href="/admin" className="text-lg font-extrabold uppercase tracking-wider text-primary">
+            Largada <span className="text-xs font-semibold normal-case tracking-normal text-muted-foreground">Admin</span>
           </Link>
         </div>
         <nav className="space-y-1 px-3">
