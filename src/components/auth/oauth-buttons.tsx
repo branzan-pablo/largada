@@ -19,19 +19,12 @@ export function OAuthButtons() {
     });
   };
 
-  const handleStravaLogin = async () => {
+  const handleStravaLogin = () => {
     setIsLoadingStrava(true);
-    // Strava uses a custom OAuth provider configured in Supabase
-    // If not configured, this will show an error
-    await supabase.auth.signInWithOAuth({
-      provider: "google", // placeholder - replace with strava when configured
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: {
-          // Strava-specific scopes would go here
-        },
-      },
-    });
+    const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
+    const redirectUri = `${window.location.origin}/auth/strava/callback`;
+    const scope = "read,profile:read_all";
+    window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&approval_prompt=auto`;
   };
 
   return (
