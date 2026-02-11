@@ -14,18 +14,26 @@ export function NotificationPrompt() {
       typeof window === "undefined" ||
       !("serviceWorker" in navigator) ||
       !("Notification" in window) ||
-      Notification.permission !== "granted" ||
       !process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
       registeredRef.current
     ) {
       return;
     }
 
+    // Already denied — can't ask again
+    if (Notification.permission === "denied") return;
+
     registeredRef.current = true;
 
-    // Register FCM token (getFCMToken handles SW registration internally)
     (async () => {
       try {
+        // Ask for permission if not yet granted
+        let permission = Notification.permission;
+        if (permission === "default") {
+          permission = await Notification.requestPermission();
+        }
+        if (permission !== "granted") return;
+
         const { getFCMToken } = await import("@/lib/firebase/client");
         const token = await getFCMToken();
         if (!token) return;
