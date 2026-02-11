@@ -45,57 +45,53 @@ export function RaceList() {
         </div>
       </div>
 
-      <div className="flex gap-6">
-        {/* Desktop filters sidebar */}
-        <aside className="hidden w-64 shrink-0 md:block">
-          <RaceFiltersDesktop
-            filters={filters}
-            onFiltersChange={setFilters}
-            isLoggedIn={!!user}
-          />
-        </aside>
+      {/* Desktop filters — horizontal bar above cards */}
+      <RaceFiltersDesktop
+        filters={filters}
+        onFiltersChange={setFilters}
+        isLoggedIn={!!user}
+      />
 
-        {/* Race grid */}
-        <div className="flex-1">
-          {isLoading ? (
+      {/* Race grid */}
+      <div className="mt-4">
+        {isLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <RaceCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : races.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <Trophy className="mb-4 h-12 w-12 text-muted-foreground/50" />
+            <h3 className="text-lg font-semibold">
+              Nenhuma corrida encontrada
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Tente ajustar os filtros ou a busca.
+            </p>
+          </div>
+        ) : (
+          <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <RaceCardSkeleton key={i} />
+              {races.map((race) => (
+                <RaceCard key={race.id} race={race} />
               ))}
             </div>
-          ) : races.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <Trophy className="mb-4 h-12 w-12 text-muted-foreground/50" />
-              <h3 className="text-lg font-semibold">
-                Nenhuma corrida encontrada
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Tente ajustar os filtros ou a busca.
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {races.map((race) => (
-                  <RaceCard key={race.id} race={race} />
-                ))}
-              </div>
 
-              {/* Infinite scroll sentinel */}
-              {hasMore && (
-                <div ref={sentinelRef} className="py-8">
-                  {isLoadingMore && (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      {Array.from({ length: 3 }).map((_, i) => (
-                        <RaceCardSkeleton key={i} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
+            {/* Infinite scroll sentinel */}
+            {hasMore && (
+              <div ref={sentinelRef} className="py-8">
+                {isLoadingMore && (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <RaceCardSkeleton key={i} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

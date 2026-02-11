@@ -7,18 +7,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { DISTANCES, REGION_CITIES, RADIUS_OPTIONS } from "@/lib/constants";
+import { DISTANCES, REGION_CITIES } from "@/lib/constants";
 import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { RaceFilters as Filters } from "@/types/race";
 
 interface RaceFiltersProps {
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
   isLoggedIn: boolean;
+}
+
+function ToggleChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+        active
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
+      )}
+    >
+      {label}
+    </button>
+  );
 }
 
 export function RaceFiltersDesktop({
@@ -34,41 +59,43 @@ export function RaceFiltersDesktop({
     (filters.prizeType && filters.prizeType.length > 0) ||
     filters.radius;
 
-  const clearFilters = () => {
-    onFiltersChange({});
+  const toggleDistance = (d: string) => {
+    const current = filters.distances ?? [];
+    const next = current.includes(d)
+      ? current.filter((x) => x !== d)
+      : [...current, d];
+    onFiltersChange({
+      ...filters,
+      distances: next.length > 0 ? next : undefined,
+    });
+  };
+
+  const togglePrize = (type: "money" | "trophy") => {
+    const current = filters.prizeType ?? [];
+    const next = current.includes(type)
+      ? current.filter((x) => x !== type)
+      : [...current, type];
+    onFiltersChange({
+      ...filters,
+      prizeType: next.length > 0 ? next : undefined,
+    });
   };
 
   return (
-    <div className="hidden space-y-4 rounded-lg border p-4 md:block">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Filtros</h3>
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearFilters}
-            className="h-auto p-0 text-xs text-muted-foreground"
-          >
-            <X className="mr-1 h-3 w-3" />
-            Limpar
-          </Button>
-        )}
-      </div>
-
-      {/* City */}
-      <div className="space-y-2">
-        <Label className="text-xs">Cidade</Label>
+    <div className="hidden md:block">
+      <div className="flex items-center gap-3 rounded-lg border bg-muted/30 px-4 py-3">
+        {/* City */}
         <Select
           value={filters.city ?? "all"}
           onValueChange={(v) =>
             onFiltersChange({ ...filters, city: v === "all" ? undefined : v })
           }
         >
-          <SelectTrigger className="h-9 text-sm">
-            <SelectValue placeholder="Todas" />
+          <SelectTrigger className="h-8 w-40 bg-background text-sm">
+            <SelectValue placeholder="Todas as cidades" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todas</SelectItem>
+            <SelectItem value="all">Todas as cidades</SelectItem>
             {REGION_CITIES.map((c) => (
               <SelectItem key={c.name} value={c.name}>
                 {c.name}
@@ -76,15 +103,16 @@ export function RaceFiltersDesktop({
             ))}
           </SelectContent>
         </Select>
-      </div>
 
-      {/* Date Range */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="space-y-1">
-          <Label className="text-xs">De</Label>
+        {/* Separator */}
+        <div className="h-6 w-px bg-border" />
+
+        {/* Date From */}
+        <div className="flex items-center gap-1.5">
+          <Label className="text-xs text-muted-foreground whitespace-nowrap">De</Label>
           <input
             type="date"
-            className="flex h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+            className="flex h-8 w-34 rounded-md border border-input bg-background px-2 text-xs"
             value={filters.dateFrom ?? ""}
             onChange={(e) =>
               onFiltersChange({
@@ -94,11 +122,12 @@ export function RaceFiltersDesktop({
             }
           />
         </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Até</Label>
+
+        <div className="flex items-center gap-1.5">
+          <Label className="text-xs text-muted-foreground whitespace-nowrap">Até</Label>
           <input
             type="date"
-            className="flex h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+            className="flex h-8 w-34 rounded-md border border-input bg-background px-2 text-xs"
             value={filters.dateTo ?? ""}
             onChange={(e) =>
               onFiltersChange({
@@ -108,82 +137,80 @@ export function RaceFiltersDesktop({
             }
           />
         </div>
-      </div>
 
-      {/* Distances */}
-      <div className="space-y-2">
-        <Label className="text-xs">Distâncias</Label>
-        <div className="flex flex-wrap gap-3">
+        {/* Separator */}
+        <div className="h-6 w-px bg-border" />
+
+        {/* Distances as toggle chips */}
+        <div className="flex items-center gap-1.5">
           {DISTANCES.map((d) => (
-            <label key={d} className="flex items-center gap-1.5 text-sm">
-              <Checkbox
-                checked={filters.distances?.includes(d) ?? false}
-                onCheckedChange={(checked) => {
-                  const current = filters.distances ?? [];
-                  const next = checked
-                    ? [...current, d]
-                    : current.filter((x) => x !== d);
-                  onFiltersChange({
-                    ...filters,
-                    distances: next.length > 0 ? next : undefined,
-                  });
-                }}
-              />
-              {d.toUpperCase()}
-            </label>
+            <ToggleChip
+              key={d}
+              label={d.toUpperCase()}
+              active={filters.distances?.includes(d) ?? false}
+              onClick={() => toggleDistance(d)}
+            />
           ))}
         </div>
-      </div>
 
-      {/* Prize Type */}
-      <div className="space-y-2">
-        <Label className="text-xs">Premiação</Label>
-        <div className="flex flex-wrap gap-3">
-          {(["money", "trophy"] as const).map((type) => (
-            <label key={type} className="flex items-center gap-1.5 text-sm">
-              <Checkbox
-                checked={filters.prizeType?.includes(type) ?? false}
-                onCheckedChange={(checked) => {
-                  const current = filters.prizeType ?? [];
-                  const next = checked
-                    ? [...current, type]
-                    : current.filter((x) => x !== type);
-                  onFiltersChange({
-                    ...filters,
-                    prizeType: next.length > 0 ? next : undefined,
-                  });
-                }}
-              />
-              {type === "money" ? "Dinheiro" : "Troféu"}
-            </label>
-          ))}
-        </div>
-      </div>
+        {/* Separator */}
+        <div className="h-6 w-px bg-border" />
 
-      {/* Radius */}
-      {isLoggedIn && (
-        <div className="space-y-2">
-          <Label className="text-xs">
-            Raio: {filters.radius ?? "—"} km
-          </Label>
-          <Slider
-            value={[filters.radius ?? 0]}
-            onValueChange={([v]) =>
-              onFiltersChange({
-                ...filters,
-                radius: v === 0 ? undefined : v,
-              })
-            }
-            max={100}
-            step={10}
-            className="py-2"
+        {/* Prize Type as toggle chips */}
+        <div className="flex items-center gap-1.5">
+          <ToggleChip
+            label="Dinheiro"
+            active={filters.prizeType?.includes("money") ?? false}
+            onClick={() => togglePrize("money")}
           />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Sem limite</span>
-            <span>100 km</span>
-          </div>
+          <ToggleChip
+            label="Troféu"
+            active={filters.prizeType?.includes("trophy") ?? false}
+            onClick={() => togglePrize("trophy")}
+          />
         </div>
-      )}
+
+        {/* Radius */}
+        {isLoggedIn && (
+          <>
+            <div className="h-6 w-px bg-border" />
+            <div className="flex items-center gap-2">
+              <Label className="text-xs text-muted-foreground whitespace-nowrap">
+                Raio: {filters.radius ? `${filters.radius}km` : "—"}
+              </Label>
+              <div className="w-24">
+                <Slider
+                  value={[filters.radius ?? 0]}
+                  onValueChange={([v]) =>
+                    onFiltersChange({
+                      ...filters,
+                      radius: v === 0 ? undefined : v,
+                    })
+                  }
+                  max={100}
+                  step={10}
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Spacer + Clear */}
+        {hasActiveFilters && (
+          <>
+            <div className="flex-1" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onFiltersChange({})}
+              className="h-7 px-2 text-xs text-muted-foreground"
+            >
+              <X className="mr-1 h-3 w-3" />
+              Limpar
+            </Button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
