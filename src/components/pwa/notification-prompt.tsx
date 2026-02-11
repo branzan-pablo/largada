@@ -23,12 +23,7 @@ export function NotificationPrompt() {
 
     registeredRef.current = true;
 
-    // Register service worker
-    navigator.serviceWorker
-      .register("/firebase-messaging-sw.js")
-      .catch(() => {});
-
-    // Register FCM token
+    // Register FCM token (getFCMToken handles SW registration internally)
     (async () => {
       try {
         const { getFCMToken } = await import("@/lib/firebase/client");

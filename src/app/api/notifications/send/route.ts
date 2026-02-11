@@ -25,10 +25,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Corrida não encontrada" }, { status: 404 });
     }
 
-    // Get FCM tokens for users in the same city with notifications enabled
+    // Get FCM tokens for users with notifications enabled
     const { data: tokens } = await supabase
       .from("fcm_tokens")
-      .select("token, profiles:user_id(city, notifications_enabled)")
+      .select("token, profiles:user_id(notifications_enabled)")
       .not("token", "is", null);
 
     if (!tokens || tokens.length === 0) {
@@ -37,8 +37,8 @@ export async function POST(request: Request) {
 
     const targetTokens = tokens
       .filter((t) => {
-        const profile = t.profiles as unknown as { city: string | null; notifications_enabled: boolean } | null;
-        return profile?.notifications_enabled && profile?.city === race.city;
+        const profile = t.profiles as unknown as { notifications_enabled: boolean } | null;
+        return profile?.notifications_enabled;
       })
       .map((t) => t.token);
 

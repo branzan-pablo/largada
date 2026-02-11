@@ -22,9 +22,17 @@ export async function getFCMToken(): Promise<string | null> {
     const supported = await isSupported();
     if (!supported) return null;
 
+    // Register the service worker and wait for it to be ready
+    // before requesting the FCM token — Firebase needs an active SW
+    const swRegistration = await navigator.serviceWorker.register(
+      "/firebase-messaging-sw.js"
+    );
+    await navigator.serviceWorker.ready;
+
     const messaging = getMessaging(app);
     const token = await getToken(messaging, {
       vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: swRegistration,
     });
 
     return token || null;
