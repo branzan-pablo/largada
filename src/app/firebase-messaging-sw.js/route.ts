@@ -10,8 +10,8 @@ export async function GET() {
   };
 
   const js = `
-importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/12.9.0/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/12.9.0/firebase-messaging-compat.js");
 
 const firebaseConfig = ${JSON.stringify(firebaseConfig)};
 
@@ -20,12 +20,16 @@ if (firebaseConfig.projectId) {
 
   const messaging = firebase.messaging();
 
+  // We only receive data-only messages (no "notification" key)
+  // so onBackgroundMessage always fires and we control the display.
   messaging.onBackgroundMessage((payload) => {
-    const { title, body, icon } = payload.notification ?? {};
+    const title = payload.data?.title ?? "Largada";
+    const body  = payload.data?.body  ?? "";
+    const icon  = payload.data?.icon  ?? "/icons/icon.svg";
 
-    self.registration.showNotification(title ?? "Largada", {
-      body: body ?? "",
-      icon: icon ?? "/icons/icon.svg",
+    self.registration.showNotification(title, {
+      body,
+      icon,
       data: payload.data,
     });
   });

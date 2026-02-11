@@ -18,10 +18,31 @@ async function sendToTokens({ title, body, url, tokens }: SendNotificationOption
     const messaging = getAdminMessaging();
     const result = await messaging.sendEachForMulticast({
       tokens,
-      notification: { title, body },
-      data: { url: absoluteUrl },
+      data: { title, body, url: absoluteUrl },
       webpush: { fcmOptions: { link: absoluteUrl } },
     });
+
+    // Log individual failures and collect invalid tokens for cleanup
+    const invalidTokens: string[] = [];
+    result.responses.forEach((resp, idx) => {
+      if (!resp.success) {
+        console.error(`[notifications] token[${idx}] failed:`, resp.error?.code, resp.error?.message);
+        if (
+          resp.error?.code === "messaging/registration-token-not-registered" ||
+          resp.error?.code === "messaging/invalid-registration-token"
+        ) {
+          invalidTokens.push(tokens[idx]);
+        }
+      }
+    });
+
+    // Remove stale tokens from DB
+    if (invalidTokens.length > 0) {
+      const supabase = createAdminClient();
+      await supabase.from("fcm_tokens").delete().in("token", invalidTokens);
+      console.log(`[notifications] cleaned up ${invalidTokens.length} invalid tokens`);
+    }
+
     return { sent: result.successCount, failed: result.failureCount };
   } catch (error) {
     console.error("[notifications] sendToTokens failed:", error);

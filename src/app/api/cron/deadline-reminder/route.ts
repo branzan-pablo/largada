@@ -67,11 +67,9 @@ export async function GET(request: Request) {
       const messaging = getAdminMessaging();
       const result = await messaging.sendEachForMulticast({
         tokens: targetTokens,
-        notification: {
+        data: {
           title: "Inscrição expirando!",
           body: `Faltam 3 dias para o prazo de inscrição: ${race.name}. Não perca!`,
-        },
-        data: {
           url: raceUrl,
         },
         webpush: {
@@ -79,6 +77,13 @@ export async function GET(request: Request) {
             link: raceUrl,
           },
         },
+      });
+
+      // Log individual failures
+      result.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          console.error(`[deadline-reminder] token[${idx}] failed:`, resp.error?.code, resp.error?.message);
+        }
       });
 
       totalSent += result.successCount;

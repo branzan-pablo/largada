@@ -53,11 +53,9 @@ export async function POST(request: Request) {
       const messaging = getAdminMessaging();
       const result = await messaging.sendEachForMulticast({
         tokens: targetTokens,
-        notification: {
+        data: {
           title: "Nova corrida na sua região!",
           body: `${race.name} em ${race.city}. Confira os detalhes.`,
-        },
-        data: {
           url: raceUrl,
         },
         webpush: {
@@ -65,6 +63,13 @@ export async function POST(request: Request) {
             link: raceUrl,
           },
         },
+      });
+
+      // Log individual failures
+      result.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          console.error(`[send] token[${idx}] failed:`, resp.error?.code, resp.error?.message);
+        }
       });
 
       return NextResponse.json({

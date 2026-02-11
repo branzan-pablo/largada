@@ -34,9 +34,12 @@ export function NotificationPrompt() {
         }
         if (permission !== "granted") return;
 
-        const { getFCMToken } = await import("@/lib/firebase/client");
+        const { getFCMToken, setupForegroundMessaging } = await import("@/lib/firebase/client");
         const token = await getFCMToken();
         if (!token) return;
+
+        // Listen for messages while the tab is in foreground
+        setupForegroundMessaging();
 
         await fetch("/api/notifications/register", {
           method: "POST",
