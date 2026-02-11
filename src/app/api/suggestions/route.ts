@@ -48,8 +48,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  // Notify admins about new suggestion (fire and forget)
-  notifyNewSuggestion(body.name, body.city).catch((err) => console.error("[notifications] notifyNewSuggestion failed:", err));
+  // Notify admins about new suggestion (await before response — Vercel kills runtime after)
+  try {
+    await notifyNewSuggestion(body.name, body.city);
+  } catch (err) {
+    console.error("[notifications] notifyNewSuggestion failed:", err);
+  }
 
   return NextResponse.json(data, { status: 201 });
 }

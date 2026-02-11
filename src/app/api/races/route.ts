@@ -176,8 +176,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  // Send push notifications (fire and forget)
-  notifyNewRace(data.id).catch((err) => console.error("[notifications] notifyNewRace failed:", err));
+  // Send push notifications before returning (Vercel kills the runtime after response)
+  try {
+    await notifyNewRace(data.id);
+  } catch (err) {
+    console.error("[notifications] notifyNewRace failed:", err);
+  }
 
   return NextResponse.json(data, { status: 201 });
 }
