@@ -12,7 +12,8 @@ export function NotificationPrompt() {
       !user ||
       !profile?.notifications_enabled ||
       typeof window === "undefined" ||
-      !("serviceWorker" in navigator)
+      !("serviceWorker" in navigator) ||
+      !process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
     ) {
       return;
     }
