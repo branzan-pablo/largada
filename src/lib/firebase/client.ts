@@ -31,8 +31,10 @@ export function setupForegroundMessaging() {
     if (!supported) return;
     const messaging = getMessaging(app);
     onMessage(messaging, (payload) => {
-      const title = payload.data?.title ?? "Largada";
-      const body = payload.data?.body ?? "";
+      const title =
+        payload.notification?.title ?? payload.data?.title ?? "Largada";
+      const body =
+        payload.notification?.body ?? payload.data?.body ?? "";
 
       if (Notification.permission === "granted") {
         new Notification(title, {

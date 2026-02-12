@@ -13,13 +13,26 @@ async function sendToTokens({ title, body, url, tokens }: SendNotificationOption
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const absoluteUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
+  const iconUrl = `${baseUrl}/icons/icon.svg`;
 
   try {
     const messaging = getAdminMessaging();
     const result = await messaging.sendEachForMulticast({
       tokens,
-      data: { title, body, url: absoluteUrl },
-      webpush: { fcmOptions: { link: absoluteUrl } },
+      notification: { title, body },
+      data: { url: absoluteUrl },
+      webpush: {
+        notification: { title, body, icon: iconUrl },
+        fcmOptions: { link: absoluteUrl },
+      },
+      android: {
+        priority: "high" as const,
+        notification: { title, body, icon: "ic_notification", clickAction: absoluteUrl },
+      },
+      apns: {
+        headers: { "apns-priority": "10" },
+        payload: { aps: { alert: { title, body }, sound: "default" } },
+      },
     });
 
     // Log individual failures and collect invalid tokens for cleanup

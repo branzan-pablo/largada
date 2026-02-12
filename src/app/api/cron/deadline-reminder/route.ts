@@ -62,20 +62,28 @@ export async function GET(request: Request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const raceUrl = `${baseUrl}/corrida/${race.slug}`;
+    const iconUrl = `${baseUrl}/icons/icon.svg`;
+
+    const title = "Inscrição expirando!";
+    const body = `Faltam 3 dias para o prazo de inscrição: ${race.name}. Não perca!`;
 
     try {
       const messaging = getAdminMessaging();
       const result = await messaging.sendEachForMulticast({
         tokens: targetTokens,
-        data: {
-          title: "Inscrição expirando!",
-          body: `Faltam 3 dias para o prazo de inscrição: ${race.name}. Não perca!`,
-          url: raceUrl,
-        },
+        notification: { title, body },
+        data: { url: raceUrl },
         webpush: {
-          fcmOptions: {
-            link: raceUrl,
-          },
+          notification: { title, body, icon: iconUrl },
+          fcmOptions: { link: raceUrl },
+        },
+        android: {
+          priority: "high" as const,
+          notification: { title, body, icon: "ic_notification", clickAction: raceUrl },
+        },
+        apns: {
+          headers: { "apns-priority": "10" },
+          payload: { aps: { alert: { title, body }, sound: "default" } },
         },
       });
 

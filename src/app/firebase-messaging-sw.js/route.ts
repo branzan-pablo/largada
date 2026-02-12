@@ -20,9 +20,13 @@ if (firebaseConfig.projectId) {
 
   const messaging = firebase.messaging();
 
-  // We only receive data-only messages (no "notification" key)
-  // so onBackgroundMessage always fires and we control the display.
+  // Fallback for data-only messages (messages with "notification" key
+  // are displayed automatically by the browser and skip this handler).
   messaging.onBackgroundMessage((payload) => {
+    // If the message already has a notification key, the browser handles
+    // display — avoid showing a duplicate.
+    if (payload.notification) return;
+
     const title = payload.data?.title ?? "Largada";
     const body  = payload.data?.body  ?? "";
     const icon  = payload.data?.icon  ?? "/icons/icon.svg";
