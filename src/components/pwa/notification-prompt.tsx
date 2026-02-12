@@ -36,18 +36,24 @@ export function NotificationPrompt() {
 
         const { getFCMToken, setupForegroundMessaging } = await import("@/lib/firebase/client");
         const token = await getFCMToken();
-        if (!token) return;
+        if (!token) {
+          console.warn("[NotificationPrompt] No FCM token returned");
+          return;
+        }
 
         // Listen for messages while the tab is in foreground
         setupForegroundMessaging();
 
-        await fetch("/api/notifications/register", {
+        const res = await fetch("/api/notifications/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
         });
-      } catch {
-        // Silent fail
+        if (!res.ok) {
+          console.error("[NotificationPrompt] Token register failed:", await res.text());
+        }
+      } catch (error) {
+        console.error("[NotificationPrompt] Failed:", error);
       }
     })();
   }, [user, profile?.notifications_enabled]);

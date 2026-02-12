@@ -51,10 +51,16 @@ export function setupForegroundMessaging() {
 export async function getFCMToken(): Promise<string | null> {
   try {
     const app = getFirebaseApp();
-    if (!app) return null;
+    if (!app) {
+      console.warn("[FCM] Firebase app not initialized");
+      return null;
+    }
 
     const supported = await isSupported();
-    if (!supported) return null;
+    if (!supported) {
+      console.warn("[FCM] Messaging not supported in this browser");
+      return null;
+    }
 
     // Register the service worker and wait for it to be ready
     // before requesting the FCM token — Firebase needs an active SW
@@ -69,8 +75,13 @@ export async function getFCMToken(): Promise<string | null> {
       serviceWorkerRegistration: swRegistration,
     });
 
+    if (!token) {
+      console.warn("[FCM] getToken returned empty");
+    }
+
     return token || null;
-  } catch {
+  } catch (error) {
+    console.error("[FCM] getFCMToken failed:", error);
     return null;
   }
 }
