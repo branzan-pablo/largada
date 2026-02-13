@@ -5,44 +5,62 @@ export async function GET() {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "",
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "",
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "",
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "",
+    messagingSenderId:
+      process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "",
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? "",
   };
 
   const js = `
-importScripts("https://www.gstatic.com/firebasejs/12.9.0/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/12.9.0/firebase-messaging-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
+importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js");
 
 const firebaseConfig = ${JSON.stringify(firebaseConfig)};
 
-if (firebaseConfig.projectId) {
-  firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
-  const messaging = firebase.messaging();
+const messaging = firebase.messaging();
 
-  // Fallback for data-only messages (messages with "notification" key
-  // are displayed automatically by the browser and skip this handler).
-  messaging.onBackgroundMessage((payload) => {
-    // If the message already has a notification key, the browser handles
-    // display — avoid showing a duplicate.
-    if (payload.notification) return;
+messaging.onBackgroundMessage((payload) => {
+  console.log("[firebase-messaging-sw.js] Received background message ", payload);
 
-    const title = payload.data?.title ?? "Largada";
-    const body  = payload.data?.body  ?? "";
-    const icon  = payload.data?.icon  ?? "/icons/icon.svg";
+  // payload.fcmOptions?.link comes from our backend API route
+  // payload.data.link or payload.data.url comes from the data payload
+  const link = payload.fcmOptions?.link || payload.data?.link || payload.data?.url;
 
-    self.registration.showNotification(title, {
-      body,
-      icon,
-      data: payload.data,
-    });
-  });
-}
+  const notificationTitle = payload.notification?.title || payload.data?.title || "Largada";
+  const notificationOptions = {
+    body: payload.notification?.body || payload.data?.body || "",
+    icon: "/icons/icon.svg",
+    data: { url: link },
+  };
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});
 
-self.addEventListener("notificationclick", (event) => {
+self.addEventListener("notificationclick", function (event) {
+  console.log("[firebase-messaging-sw.js] Notification click received.");
+
   event.notification.close();
-  const url = event.notification.data?.url ?? "/corridas";
-  event.waitUntil(clients.openWindow(url));
+
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then(function (clientList) {
+        const url = event.notification.data?.url;
+
+        if (!url) return;
+
+        for (const client of clientList) {
+          if (client.url === url && "focus" in client) {
+            return client.focus();
+          }
+        }
+
+        if (clients.openWindow) {
+          return clients.openWindow(url);
+        }
+      })
+  );
 });
 `.trim();
 

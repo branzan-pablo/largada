@@ -1,87 +1,74 @@
-import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
-import { getMessaging, getToken, isSupported, onMessage } from "firebase/messaging";
+import { getApp, getApps, initializeApp } from "firebase/app";
+import {
+  getMessaging,
+  getToken,
+  isSupported,
+  onMessage,
+} from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-function getFirebaseApp(): FirebaseApp | null {
-  if (!firebaseConfig.projectId) return null;
-  return getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+
+const messaging = async () => {
+  const supported = await isSupported();
+  return supported ? getMessaging(app) : null;
+};
+
+export const fetchToken = async () => {
+  try {
+    const fcmMessaging = await messaging();
+    if (fcmMessaging) {
+      const token = await getToken(fcmMessaging, {
+        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+      });
+      return token;
+    }
+    return null;
+  } catch (err) {
+    console.error("An error occurred while fetching the token:", err);
+    return null;
+  }
+};
+
+export { app, messaging };
+
+// Legacy exports for backward compatibility with existing code
+export async function getFCMToken(): Promise<string | null> {
+  return fetchToken();
 }
 
 let foregroundListenerRegistered = false;
 
-/**
- * Set up foreground message listener.
- * When the tab is active, FCM delivers messages via onMessage instead of the SW.
- * We use the Notification API directly so the user still sees a popup.
- */
 export function setupForegroundMessaging() {
   if (foregroundListenerRegistered) return;
 
-  const app = getFirebaseApp();
-  if (!app) return;
-
-  isSupported().then((supported) => {
-    if (!supported) return;
-    const messaging = getMessaging(app);
-    onMessage(messaging, (payload) => {
+  messaging().then((m) => {
+    if (!m) return;
+    onMessage(m, (payload) => {
       const title =
         payload.notification?.title ?? payload.data?.title ?? "Largada";
-      const body =
-        payload.notification?.body ?? payload.data?.body ?? "";
+      const body = payload.notification?.body ?? payload.data?.body ?? "";
 
       if (Notification.permission === "granted") {
+        // Show native notification for foreground messages
+        const link =
+          payload.fcmOptions?.link || payload.data?.link || payload.data?.url;
         new Notification(title, {
           body,
           icon: "/icons/icon.svg",
-          data: payload.data,
+          data: link ? { url: link } : undefined,
         });
       }
     });
     foregroundListenerRegistered = true;
   });
-}
-
-export async function getFCMToken(): Promise<string | null> {
-  try {
-    const app = getFirebaseApp();
-    if (!app) {
-      console.warn("[FCM] Firebase app not initialized");
-      return null;
-    }
-
-    const supported = await isSupported();
-    if (!supported) {
-      console.warn("[FCM] Messaging not supported in this browser");
-      return null;
-    }
-
-    // Register the service worker and wait for it to be ready
-    // before requesting the FCM token — Firebase needs an active SW
-    const swRegistration = await navigator.serviceWorker.register(
-      "/firebase-messaging-sw.js"
-    );
-    await navigator.serviceWorker.ready;
-
-    const messaging = getMessaging(app);
-    const token = await getToken(messaging, {
-      vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-      serviceWorkerRegistration: swRegistration,
-    });
-
-    if (!token) {
-      console.warn("[FCM] getToken returned empty");
-    }
-
-    return token || null;
-  } catch (error) {
-    console.error("[FCM] getFCMToken failed:", error);
-    return null;
-  }
 }

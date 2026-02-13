@@ -5,7 +5,8 @@ import { useAuth } from "@/contexts/auth-context";
 
 export function useNotifications() {
   const { user, profile } = useAuth();
-  const [permission, setPermission] = useState<NotificationPermission>("default");
+  const [permission, setPermission] =
+    useState<NotificationPermission>("default");
   const [isRegistering, setIsRegistering] = useState(false);
   const registeredRef = useRef(false);
 
@@ -32,8 +33,8 @@ export function useNotifications() {
 
   const registerToken = useCallback(async () => {
     try {
-      const { getFCMToken } = await import("@/lib/firebase/client");
-      const token = await getFCMToken();
+      const { fetchToken } = await import("@/lib/firebase/client");
+      const token = await fetchToken();
       if (!token) return;
 
       await fetch("/api/notifications/register", {
