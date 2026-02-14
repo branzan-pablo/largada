@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Trophy, Heart, MessageSquarePlus, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
+import { useLoginModal } from "@/contexts/login-modal-context";
 
 const navItems = [
   { href: "/corridas", icon: Trophy, label: "Corridas" },
@@ -16,21 +17,22 @@ const navItems = [
 export function BottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { openLogin } = useLoginModal();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-zinc-800 bg-[#0a0a0a]/95 backdrop-blur-md md:hidden">
       <div className="flex justify-around py-2">
         {navItems.map((item) => {
           if (item.requiresAuth && !user) {
             return (
-              <Link
+              <button
                 key={item.href}
-                href="/login"
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-xs text-muted-foreground"
+                onClick={openLogin}
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-xs text-zinc-500"
               >
                 <item.icon className="h-5 w-5" />
                 {item.label}
-              </Link>
+              </button>
             );
           }
 
@@ -43,11 +45,11 @@ export function BottomNav() {
               className={cn(
                 "flex flex-col items-center gap-0.5 px-3 py-1 text-xs",
                 isActive
-                  ? "text-primary"
-                  : "text-muted-foreground"
+                  ? "text-white"
+                  : "text-zinc-500"
               )}
             >
-              <item.icon className={cn("h-5 w-5", isActive && "fill-primary/10")} />
+              <item.icon className={cn("h-5 w-5", isActive && "text-white")} />
               {item.label}
             </Link>
           );

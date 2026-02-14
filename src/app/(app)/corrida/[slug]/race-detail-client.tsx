@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { useRouter } from "next/navigation";
+import { useLoginModal } from "@/contexts/login-modal-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, Check } from "lucide-react";
@@ -45,7 +45,7 @@ export function RsvpProvider({
   children,
 }: RsvpProviderProps) {
   const { user, profile } = useAuth();
-  const router = useRouter();
+  const { openLogin } = useLoginModal();
   const [rsvped, setRsvped] = useState(initialRsvped);
   const [count, setCount] = useState(initialCount);
   const [participants, setParticipants] = useState(initialParticipants);
@@ -55,7 +55,7 @@ export function RsvpProvider({
     if (isToggling) return;
 
     if (!user) {
-      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      openLogin();
       return;
     }
 
@@ -97,7 +97,7 @@ export function RsvpProvider({
     } finally {
       setIsToggling(false);
     }
-  }, [raceId, rsvped, count, participants, isToggling, user, profile, router]);
+  }, [raceId, rsvped, count, participants, isToggling, user, profile, openLogin]);
 
   return (
     <RsvpContext.Provider value={{ rsvped, count, participants, isToggling, toggle }}>
@@ -141,8 +141,8 @@ export function RsvpCard() {
   const { rsvped, count, isToggling, toggle } = useRsvpContext();
 
   return (
-    <div className="rounded-lg border p-4 space-y-3">
-      <h3 className="font-semibold">Vou nessa!</h3>
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 space-y-3">
+      <h3 className="font-semibold text-white">Vou nessa!</h3>
       <p className="text-sm text-muted-foreground">
         {count} {count === 1 ? "pessoa confirmou" : "pessoas confirmaram"}
       </p>

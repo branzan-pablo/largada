@@ -8,8 +8,8 @@ export const metadata = {
 
 export default function SuggestionPage() {
   return (
-    <div className="mx-auto max-w-screen-sm px-4 py-6">
-      <h1 className="mb-2 text-2xl font-bold">Sugerir Corrida</h1>
+    <div className="mx-auto max-w-screen-sm px-4 py-8 md:py-12">
+      <h1 className="mb-2 text-2xl font-medium text-white tracking-tight">Sugerir Corrida</h1>
       <p className="mb-6 text-sm text-muted-foreground">
         Conhece uma corrida que não está no Largada? Envie uma sugestão e nossa
         equipe vai analisar.

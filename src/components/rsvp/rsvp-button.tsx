@@ -1,10 +1,10 @@
 "use client";
 
 import { useAuth } from "@/contexts/auth-context";
+import { useLoginModal } from "@/contexts/login-modal-context";
 import { useRsvp } from "@/hooks/use-rsvp";
 import { Button } from "@/components/ui/button";
 import { Users, Check } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface RsvpButtonProps {
@@ -21,7 +21,7 @@ export function RsvpButton({
   variant = "default",
 }: RsvpButtonProps) {
   const { user } = useAuth();
-  const router = useRouter();
+  const { openLogin } = useLoginModal();
   const { rsvped, count, isToggling, toggle } = useRsvp({
     raceId,
     initialRsvped,
@@ -33,7 +33,7 @@ export function RsvpButton({
     e.stopPropagation();
 
     if (!user) {
-      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      openLogin();
       return;
     }
 

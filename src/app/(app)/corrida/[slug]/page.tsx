@@ -131,20 +131,20 @@ export default async function RaceDetailPage({ params }: PageProps) {
   };
 
   return (
-    <div className="mx-auto max-w-screen-lg px-4 py-6">
+    <div className="mx-auto max-w-screen-lg px-4 py-8 md:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {/* Header */}
-      <div className="mb-6 space-y-3">
+      <div className="mb-8 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           {typedRace.status !== "confirmed" && (
             <RaceStatusBadge status={typedRace.status} />
           )}
           <RacePrizeBadge prizeType={typedRace.prize_type} />
         </div>
-        <h1 className="text-2xl font-bold md:text-3xl">{typedRace.name}</h1>
+        <h1 className="text-2xl font-medium text-white md:text-3xl tracking-tight">{typedRace.name}</h1>
         <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <CalendarDays className="h-4 w-4" />
@@ -252,8 +252,8 @@ export default async function RaceDetailPage({ params }: PageProps) {
           {/* Sidebar */}
           <aside className="space-y-4">
             {/* Registration Card */}
-            <div className="rounded-lg border p-4 space-y-4">
-              <h3 className="font-semibold">Inscrição</h3>
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 space-y-4">
+              <h3 className="font-semibold text-white">Inscrição</h3>
               <div className="space-y-2 text-sm">
                 <p>
                   <span className="text-muted-foreground">Valor:</span>{" "}
@@ -263,7 +263,7 @@ export default async function RaceDetailPage({ params }: PageProps) {
                   <span className="text-muted-foreground">Prazo:</span>{" "}
                   {formatDateFull(typedRace.registration_deadline)}
                   {deadlineSoon && (
-                    <Badge variant="outline" className="ml-1 bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
+                    <Badge variant="outline" className="ml-1 bg-yellow-900/30 text-yellow-400 border-yellow-800/50 text-xs">
                       Expirando!
                     </Badge>
                   )}

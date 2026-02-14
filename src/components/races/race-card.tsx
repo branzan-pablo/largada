@@ -1,62 +1,60 @@
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { RaceDistanceBadges } from "./race-distance-badges";
 import { RacePrizeBadge } from "./race-prize-badge";
-import { RaceStatusBadge } from "./race-status-badge";
-import { RsvpButton } from "@/components/rsvp/rsvp-button";
-import { CalendarDays, MapPin } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { MapPin, Users, ArrowRight, Bookmark, Route } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import type { Race } from "@/types/race";
 
 export function RaceCard({ race }: { race: Race }) {
-  const isUpcoming = new Date(race.date) >= new Date();
-  const showStatusBadge = race.status !== "confirmed";
+  const raceDate = new Date(race.date);
+  const dateLabel = format(raceDate, "dd MMM", { locale: ptBR }).toUpperCase();
 
   return (
-    <Link href={`/corrida/${race.slug}`}>
-      <Card className="h-full transition-shadow hover:shadow-sm">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2">
-            <CardTitle className="line-clamp-2 text-base font-semibold leading-tight">
-              {race.name}
-            </CardTitle>
-            {showStatusBadge && <RaceStatusBadge status={race.status} />}
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <CalendarDays className="h-3.5 w-3.5" />
-              {formatDate(race.date)}
-            </span>
-            <span className="flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5" />
-              {race.city}
-            </span>
+    <Link href={`/corrida/${race.slug}`} className="block">
+      <div className="border border-zinc-800 rounded-xl bg-zinc-900/30 p-5 hover:border-zinc-600 transition-colors h-full flex flex-col justify-between">
+        <div>
+          {/* Top row: date badge + prize badge + bookmark */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 rounded-md bg-zinc-800 text-[11px] font-semibold text-zinc-300 tracking-wide">
+                {dateLabel}
+              </span>
+              <RacePrizeBadge prizeType={race.prize_type} />
+            </div>
+            <Bookmark className="w-5 h-5 text-zinc-600" />
           </div>
 
-          <RaceDistanceBadges distances={race.distances} />
+          {/* Race name */}
+          <h3 className="text-base font-semibold text-white line-clamp-2 mb-3">
+            {race.name}
+          </h3>
 
-          <div className="flex items-center justify-between">
-            <RacePrizeBadge prizeType={race.prize_type} />
-            <RsvpButton
-              raceId={race.id}
-              initialRsvped={false}
-              initialCount={race.rsvp_count}
-              variant="compact"
-            />
+          {/* City */}
+          <div className="flex items-center gap-2 mb-3">
+            <MapPin className="w-4 h-4 text-zinc-600 shrink-0" />
+            <span className="text-sm text-zinc-400">{race.city}, SP</span>
           </div>
 
-          {!isUpcoming && (
-            <p className="text-xs text-muted-foreground">Corrida já realizada</p>
-          )}
-        </CardContent>
-      </Card>
+          {/* Distances */}
+          <div className="flex items-center gap-2">
+            <Route className="w-4 h-4 text-zinc-600 shrink-0" />
+            <RaceDistanceBadges distances={race.distances} />
+          </div>
+        </div>
+
+        {/* Bottom row: RSVP count + link */}
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-zinc-800/50">
+          <span className="flex items-center gap-1.5 text-xs text-zinc-500">
+            <Users className="w-3.5 h-3.5" />
+            {race.rsvp_count} confirmados
+          </span>
+          <span className="flex items-center gap-1 text-sm font-medium text-zinc-300 hover:text-white transition-colors">
+            Detalhes
+            <ArrowRight className="w-4 h-4" />
+          </span>
+        </div>
+      </div>
     </Link>
   );
 }

@@ -8,8 +8,8 @@ export const metadata = {
 
 export default function ProfilePage() {
   return (
-    <div className="mx-auto max-w-screen-sm px-4 py-6">
-      <h1 className="mb-6 text-2xl font-bold">Perfil</h1>
+    <div className="mx-auto max-w-screen-sm px-4 py-8 md:py-12">
+      <h1 className="mb-6 text-2xl font-medium text-white tracking-tight">Perfil</h1>
       <Suspense
         fallback={
           <div className="space-y-4">
