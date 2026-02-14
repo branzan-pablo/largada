@@ -126,3 +126,41 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ============================================
+   LANDING PAGE - Dark Theme Additions
+   Add these styles to your existing globals.css
+   ============================================ */
+
+/* Grid background pattern for the landing hero area */
+.landing-bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: linear-gradient(to bottom, white 0%, transparent 100%);
+  mask-image: linear-gradient(to bottom, white 0%, transparent 100%);
+}
+
+/* Dark mode overrides scoped to the landing page wrapper */
+.dark {
+  --background: 0 0% 0%;
+  --foreground: 240 5% 84%;
+  --card: 240 6% 10%;
+  --card-foreground: 240 5% 84%;
+  --popover: 240 6% 10%;
+  --popover-foreground: 240 5% 84%;
+  --primary: 0 0% 100%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 240 5% 15%;
+  --secondary-foreground: 240 5% 84%;
+  --muted: 240 5% 15%;
+  --muted-foreground: 240 5% 50%;
+  --accent: 240 5% 15%;
+  --accent-foreground: 240 5% 84%;
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 4% 16%;
+  --input: 240 4% 16%;
+  --ring: 240 5% 50%;
+}
