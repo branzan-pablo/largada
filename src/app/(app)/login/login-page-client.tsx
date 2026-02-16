@@ -59,7 +59,7 @@ export function LoginPageClient() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <OAuthButtons />
+        <OAuthButtons redirectTo={redirect || undefined} />
 
         <div className="relative my-6">
           <Separator />
@@ -74,7 +74,7 @@ export function LoginPageClient() {
             <TabsTrigger value="register">Criar conta</TabsTrigger>
           </TabsList>
           <TabsContent value="login" className="mt-4">
-            <LoginForm />
+            <LoginForm redirectTo={redirect || undefined} />
           </TabsContent>
           <TabsContent value="register" className="mt-4">
             <RegisterForm />

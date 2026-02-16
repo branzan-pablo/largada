@@ -30,7 +30,23 @@ export async function middleware(request: NextRequest) {
   );
 
   // Refresh session if expired
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Server-side route protection
+  const protectedPaths = ["/perfil", "/sugerir", "/admin"];
+  const pathname = request.nextUrl.pathname;
+  const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
+
+  if (isProtected && !user) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Redirect authenticated users away from login page
+  if (pathname === "/login" && user) {
+    return NextResponse.redirect(new URL("/corridas", request.url));
+  }
 
   return supabaseResponse;
 }

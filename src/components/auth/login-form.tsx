@@ -8,7 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-export function LoginForm() {
+interface LoginFormProps {
+  redirectTo?: string;
+  onSuccess?: () => void;
+}
+
+export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -36,8 +41,12 @@ export function LoginForm() {
     }
 
     toast.success("Login realizado com sucesso!");
-    router.push("/corridas");
-    router.refresh();
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      router.push(redirectTo || "/corridas");
+      router.refresh();
+    }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {

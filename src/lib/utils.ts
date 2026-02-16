@@ -7,16 +7,23 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Parse date string safely: "2026-03-15" → local midnight (not UTC)
+function parseDate(date: string | Date): Date {
+  if (date instanceof Date) return date;
+  // Append T00:00:00 to prevent UTC midnight interpretation in Brazilian timezone (UTC-3)
+  return new Date(date.includes("T") ? date : date + "T00:00:00");
+}
+
 export function formatDate(date: string | Date): string {
-  return format(new Date(date), "d 'de' MMMM", { locale: ptBR });
+  return format(parseDate(date), "d 'de' MMMM", { locale: ptBR });
 }
 
 export function formatDateFull(date: string | Date): string {
-  return format(new Date(date), "d 'de' MMMM 'de' yyyy", { locale: ptBR });
+  return format(parseDate(date), "d 'de' MMMM 'de' yyyy", { locale: ptBR });
 }
 
 export function formatDateShort(date: string | Date): string {
-  return format(new Date(date), "dd/MM/yyyy", { locale: ptBR });
+  return format(parseDate(date), "dd/MM/yyyy", { locale: ptBR });
 }
 
 export function formatTime(time: string): string {

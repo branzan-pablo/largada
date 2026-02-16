@@ -4,19 +4,29 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
-export function OAuthButtons() {
+interface OAuthButtonsProps {
+  redirectTo?: string;
+}
+
+export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
   const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
   const [isLoadingStrava, setIsLoadingStrava] = useState(false);
+  const isAnyLoading = isLoadingGoogle || isLoadingStrava;
   const supabase = createClient();
+
+  const nextParam = redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : "";
 
   const handleGoogleLogin = async () => {
     setIsLoadingGoogle(true);
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback${nextParam}`,
       },
     });
+    if (error) {
+      setIsLoadingGoogle(false);
+    }
   };
 
   const handleStravaLogin = () => {
@@ -33,7 +43,7 @@ export function OAuthButtons() {
         variant="outline"
         className="w-full"
         onClick={handleGoogleLogin}
-        disabled={isLoadingGoogle}
+        disabled={isAnyLoading}
       >
         {isLoadingGoogle ? (
           <span className="flex items-center gap-2">
@@ -52,7 +62,7 @@ export function OAuthButtons() {
         variant="outline"
         className="w-full"
         onClick={handleStravaLogin}
-        disabled={isLoadingStrava}
+        disabled={isAnyLoading}
       >
         {isLoadingStrava ? (
           <span className="flex items-center gap-2">

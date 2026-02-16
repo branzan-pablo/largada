@@ -64,7 +64,7 @@ export function LoginModal() {
               <TabsTrigger value="register">Criar conta</TabsTrigger>
             </TabsList>
             <TabsContent value="login" className="mt-4">
-              <LoginForm />
+              <LoginForm onSuccess={() => { close(); router.refresh(); }} />
             </TabsContent>
             <TabsContent value="register" className="mt-4">
               <RegisterForm />

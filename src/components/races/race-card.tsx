@@ -1,28 +1,31 @@
 import Link from "next/link";
 import { RaceDistanceBadges } from "./race-distance-badges";
 import { RacePrizeBadge } from "./race-prize-badge";
-import { MapPin, Users, ArrowRight, Bookmark, Route } from "lucide-react";
+import { RaceStatusBadge } from "./race-status-badge";
+import { MapPin, Users, ArrowRight, Route } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Race } from "@/types/race";
 
 export function RaceCard({ race }: { race: Race }) {
-  const raceDate = new Date(race.date);
+  const raceDate = new Date(race.date + "T00:00:00");
   const dateLabel = format(raceDate, "dd MMM", { locale: ptBR }).toUpperCase();
 
   return (
     <Link href={`/corrida/${race.slug}`} className="block">
       <div className="border border-zinc-800 rounded-xl bg-zinc-900/30 p-5 hover:border-zinc-600 transition-colors h-full flex flex-col justify-between">
         <div>
-          {/* Top row: date badge + prize badge + bookmark */}
+          {/* Top row: date badge + prize badge + status badge */}
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="px-2.5 py-1 rounded-md bg-zinc-800 text-[11px] font-semibold text-zinc-300 tracking-wide">
                 {dateLabel}
               </span>
               <RacePrizeBadge prizeType={race.prize_type} />
             </div>
-            <Bookmark className="w-5 h-5 text-zinc-600" />
+            {race.status !== "confirmed" && (
+              <RaceStatusBadge status={race.status} />
+            )}
           </div>
 
           {/* Race name */}
