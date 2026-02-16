@@ -52,9 +52,36 @@ export async function GET(request: NextRequest) {
 
     const supabaseAdmin = createAdminClient();
 
-    // 2. Check if user already exists
-    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-    const existingUser = existingUsers?.users?.find((u) => u.email === email);
+    // 2. Check if user already exists by querying directly by email
+    const { data: userList } = await supabaseAdmin
+      .from("auth.users")
+      .select("id, email")
+      .eq("email", email)
+      .limit(1);
+
+    // Fallback: use admin API with filter if direct query fails
+    let existingUser = userList?.[0] ?? null;
+    if (!existingUser) {
+      // Use paginated listUsers as fallback — search all pages
+      let page = 1;
+      const perPage = 50;
+      let found = false;
+      while (!found) {
+        const { data: pageData } = await supabaseAdmin.auth.admin.listUsers({
+          page,
+          perPage,
+        });
+        const users = pageData?.users ?? [];
+        if (users.length === 0) break;
+        const match = users.find((u) => u.email === email);
+        if (match) {
+          existingUser = { id: match.id, email: match.email! };
+          found = true;
+        }
+        if (users.length < perPage) break;
+        page++;
+      }
+    }
 
     let userId: string;
 
@@ -112,10 +139,12 @@ export async function GET(request: NextRequest) {
     }
 
     // 5. Extract token from the link and verify it to establish session
-    const linkUrl = new URL(linkData.properties.action_link);
-    const token_hash = linkUrl.searchParams.get("token") ?? linkUrl.hash?.replace("#", "");
+    const hashed_token = linkData.properties.hashed_token;
 
-    // Create a Supabase server client with cookie access to set the session
+    // Create a redirect response first, then set cookies on it
+    const redirectResponse = NextResponse.redirect(`${origin}/corridas`);
+
+    // Create a Supabase server client that writes cookies to the redirect response
     const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -127,15 +156,16 @@ export async function GET(request: NextRequest) {
           },
           setAll(cookiesToSet) {
             for (const { name, value, options } of cookiesToSet) {
+              // Set cookies on both the cookieStore AND the redirect response
               cookieStore.set(name, value, options);
+              redirectResponse.cookies.set(name, value, options);
             }
           },
         },
       }
     );
 
-    // Verify the OTP to establish the session (sets cookies automatically)
-    const hashed_token = linkData.properties.hashed_token;
+    // Verify the OTP to establish the session (sets cookies via setAll)
     const { error: verifyError } = await supabase.auth.verifyOtp({
       type: "magiclink",
       token_hash: hashed_token,
@@ -145,8 +175,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}/login?error=auth`);
     }
 
-    // 6. Redirect to the app
-    return NextResponse.redirect(`${origin}/corridas`);
+    // 6. Redirect to the app with session cookies attached
+    return redirectResponse;
   } catch {
     return NextResponse.redirect(`${origin}/login?error=auth`);
   }

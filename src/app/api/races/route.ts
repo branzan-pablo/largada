@@ -47,6 +47,13 @@ export async function GET(request: Request) {
 
   if (prizeType) {
     const types = prizeType.split(",");
+    // Include "both" when filtering by "money" or "trophy" individually
+    if (types.includes("money") && !types.includes("both")) {
+      types.push("both");
+    }
+    if (types.includes("trophy") && !types.includes("both")) {
+      types.push("both");
+    }
     query = query.in("prize_type", types);
   }
 
@@ -92,12 +99,21 @@ export async function GET(request: Request) {
     );
   }
 
+  // When client-side filters (distances/radius) are active, the DB count is unreliable
+  const hasClientFilters = !!distances || (!!lat && !!lng && !!radius);
+  const filteredCount = hasClientFilters ? null : count;
+  // If client-side filters are active, we can only know there are more pages
+  // if the DB returned a full page (meaning there might be more to fetch)
+  const hasMore = hasClientFilters
+    ? (data?.length ?? 0) >= limit
+    : count ? from + limit < count : false;
+
   return NextResponse.json({
     data: filteredData,
-    count,
+    count: filteredCount,
     page,
     limit,
-    hasMore: count ? from + limit < count : false,
+    hasMore,
   });
 }
 

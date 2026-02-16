@@ -37,6 +37,12 @@ export function RegisterForm() {
       options: {
         data: {
           full_name: fullName,
+          ...(selectedCity && {
+            city: selectedCity.name,
+            state: selectedCity.state,
+            latitude: selectedCity.lat,
+            longitude: selectedCity.lng,
+          }),
         },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
@@ -46,24 +52,6 @@ export function RegisterForm() {
       toast.error(error.message);
       setIsLoading(false);
       return;
-    }
-
-    // Update profile with city info
-    if (selectedCity) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from("profiles")
-          .update({
-            city: selectedCity.name,
-            state: selectedCity.state,
-            latitude: selectedCity.lat,
-            longitude: selectedCity.lng,
-          })
-          .eq("id", user.id);
-      }
     }
 
     toast.success(
