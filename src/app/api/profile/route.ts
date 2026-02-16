@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { REGION_CITIES } from "@/lib/constants";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function PATCH(request: Request) {
   const supabase = await createClient();
@@ -11,6 +12,13 @@ export async function PATCH(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  if (rateLimit(`profile:${user.id}`, { max: 5, windowMs: 60_000 }).limited) {
+    return NextResponse.json(
+      { error: "Muitas requisições. Aguarde um momento." },
+      { status: 429 }
+    );
   }
 
   const body = await request.json();

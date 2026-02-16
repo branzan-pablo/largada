@@ -34,7 +34,9 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
     const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
     const redirectUri = `${window.location.origin}/auth/strava/callback`;
     const scope = "read,profile:read_all";
-    window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&approval_prompt=auto`;
+    const state = crypto.randomUUID();
+    sessionStorage.setItem("strava_oauth_state", state);
+    window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&approval_prompt=auto&state=${state}`;
   };
 
   return (

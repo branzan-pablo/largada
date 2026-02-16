@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -10,6 +11,13 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  if (rateLimit(`rsvp:${user.id}`, { max: 10, windowMs: 60_000 }).limited) {
+    return NextResponse.json(
+      { error: "Muitas requisições. Aguarde um momento." },
+      { status: 429 }
+    );
   }
 
   const { raceId } = await request.json();

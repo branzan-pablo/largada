@@ -20,9 +20,10 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const error = searchParams.get("error");
+  const state = searchParams.get("state");
   const origin = request.nextUrl.origin;
 
-  if (error || !code) {
+  if (error || !code || !state) {
     return NextResponse.redirect(`${origin}/login?error=auth`);
   }
 
@@ -52,35 +53,24 @@ export async function GET(request: NextRequest) {
 
     const supabaseAdmin = createAdminClient();
 
-    // 2. Check if user already exists by querying directly by email
-    const { data: userList } = await supabaseAdmin
-      .from("auth.users")
-      .select("id, email")
-      .eq("email", email)
-      .limit(1);
-
-    // Fallback: use admin API with filter if direct query fails
-    let existingUser = userList?.[0] ?? null;
-    if (!existingUser) {
-      // Use paginated listUsers as fallback — search all pages
-      let page = 1;
-      const perPage = 50;
-      let found = false;
-      while (!found) {
-        const { data: pageData } = await supabaseAdmin.auth.admin.listUsers({
-          page,
-          perPage,
-        });
-        const users = pageData?.users ?? [];
-        if (users.length === 0) break;
-        const match = users.find((u) => u.email === email);
-        if (match) {
-          existingUser = { id: match.id, email: match.email! };
-          found = true;
-        }
-        if (users.length < perPage) break;
-        page++;
+    // 2. Check if user already exists — paginate through admin API
+    let existingUser: { id: string; email: string } | null = null;
+    let page = 1;
+    const perPage = 50;
+    while (true) {
+      const { data: pageData } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage,
+      });
+      const users = pageData?.users ?? [];
+      if (users.length === 0) break;
+      const match = users.find((u) => u.email === email);
+      if (match) {
+        existingUser = { id: match.id, email: match.email! };
+        break;
       }
+      if (users.length < perPage) break;
+      page++;
     }
 
     let userId: string;
