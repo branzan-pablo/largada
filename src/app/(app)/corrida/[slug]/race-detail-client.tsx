@@ -6,6 +6,7 @@ import { useLoginModal } from "@/contexts/login-modal-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, Check } from "lucide-react";
+import { toast } from "sonner";
 
 interface Participant {
   id: string;
@@ -89,11 +90,13 @@ export function RsvpProvider({
         setRsvped(prevRsvped);
         setCount(prevCount);
         setParticipants(prevParticipants);
+        toast.error("Erro ao atualizar confirmação. Tente novamente.");
       }
     } catch {
       setRsvped(prevRsvped);
       setCount(prevCount);
       setParticipants(prevParticipants);
+      toast.error("Erro ao atualizar confirmação. Tente novamente.");
     } finally {
       setIsToggling(false);
     }

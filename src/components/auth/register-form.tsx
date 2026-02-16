@@ -27,6 +27,12 @@ export function RegisterForm() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!city) {
+      toast.error("Selecione sua cidade para continuar.");
+      return;
+    }
+
     setIsLoading(true);
 
     const selectedCity = REGION_CITIES.find((c) => c.name === city);
@@ -57,6 +63,7 @@ export function RegisterForm() {
     toast.success(
       "Conta criada! Verifique seu email para confirmar o cadastro."
     );
+    setIsLoading(false);
     router.push("/corridas");
     router.refresh();
   };

@@ -41,6 +41,7 @@ export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
     }
 
     toast.success("Login realizado com sucesso!");
+    setIsLoading(false);
     if (onSuccess) {
       onSuccess();
     } else {
