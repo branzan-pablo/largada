@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/landing-header";
-import { FloatingNotificationBar } from "@/components/landing/floating-notification-bar";
 import { CtaButtons } from "@/components/landing/cta-buttons";
 import {
   Filter,
@@ -14,15 +13,18 @@ import {
   Moon,
   Search,
   CheckCircle,
-  PersonStanding,
-  PlusCircle,
   Instagram,
   Award,
+  AlertCircle,
+  Clock,
+  UserPlus,
+  Zap,
+  ArrowRight,
 } from "lucide-react";
 
 export default function LandingPage() {
   return (
-    <main className="text-zinc-300 antialiased overflow-x-hidden min-h-screen">
+    <main className="text-zinc-300 antialiased overflow-x-hidden min-h-screen scroll-smooth">
       <LandingHeader />
 
       {/* ==================== Hero Section ==================== */}
@@ -33,7 +35,7 @@ export default function LandingPage() {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-zinc-800/20 blur-[120px] rounded-full opacity-50 mix-blend-screen" />
         </div>
 
-        <div className="relative z-10 max-w-4xl mx-auto px-6 flex flex-col items-center text-center">
+        <div className="relative z-10 max-w-5xl mx-auto px-6 flex flex-col items-center text-center">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm mb-8">
             <span className="relative flex h-2 w-2">
@@ -46,7 +48,7 @@ export default function LandingPage() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-5xl md:text-7xl font-medium text-white tracking-tight mb-6 leading-[1.1]">
+          <h1 className="text-5xl md:text-6xl font-bold text-white tracking-tight mb-6 leading-[1.1]">
             Encontre seu ritmo.
             <br />
             <span className="text-zinc-400">Descubra sua próxima prova.</span>
@@ -60,220 +62,189 @@ export default function LandingPage() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            <Link
-              href="/corridas"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-black px-6 py-3 rounded-full font-medium hover:bg-zinc-200 transition-colors"
-            >
-              <PersonStanding className="w-5 h-5" />
-              Explorar Corridas
-            </Link>
-            <Link
-              href="/sugerir"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-zinc-900/50 border border-zinc-800 text-white px-6 py-3 rounded-full font-medium hover:bg-zinc-800 transition-colors"
-            >
-              <PlusCircle className="w-5 h-5" />
-              Sugerir Evento
-            </Link>
+            <CtaButtons />
           </div>
         </div>
       </section>
 
-      {/* Section Separator */}
       <div className="h-px bg-zinc-800" />
 
-      {/* ==================== Dashboard Preview ==================== */}
+      {/* ==================== Problem Section ==================== */}
       <section className="relative bg-[#111111] py-20 overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-medium text-white tracking-tight mb-3">
-              Tudo em um único lugar
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
+              O problema que todo corredor conhece
             </h2>
-            <p className="text-lg text-zinc-500">
-              Do amador ao elite, filtros poderosos para encontrar a prova
-              ideal.
+            <p className="text-lg text-zinc-500 max-w-2xl mx-auto">
+              Informação espalhada, descoberta tardia e falta de conexão com outros atletas.
             </p>
           </div>
 
-          {/* Dashboard Container */}
-          <div className="border border-zinc-800 rounded-2xl bg-zinc-900/10 overflow-hidden relative">
-            {/* Dashboard Header */}
-            <div className="flex flex-col lg:flex-row justify-between gap-4 p-3 md:p-4">
-              {/* Search */}
-              <div className="relative w-full lg:w-96 group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-zinc-300" />
-                <input
-                  type="text"
-                  placeholder="Buscar corridas..."
-                  readOnly
-                  className="w-full bg-black/40 border border-zinc-800 text-sm text-white rounded-lg pl-10 pr-4 py-2.5 focus:outline-none placeholder:text-zinc-600 cursor-default"
-                />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="border border-zinc-800 rounded-lg bg-zinc-900/20 p-6 hover:border-zinc-700 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-red-900/20 border border-red-900/30 flex items-center justify-center mb-4">
+                <AlertCircle className="w-5 h-5 text-red-400" />
               </div>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Informação espalhada
+              </h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">
+                Corridas divulgadas em dezenas de grupos de WhatsApp, perfis do Instagram e
+                sites diferentes. Você nunca sabe se está vendo tudo.
+              </p>
+            </div>
 
-              {/* Filter Pills */}
-              <div className="flex flex-wrap gap-2">
-                <span className="flex items-center gap-2 px-3 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-xs font-medium text-white">
-                  <MapPin className="w-3.5 h-3.5 text-zinc-400" />
-                  Rio Preto + 50km
-                </span>
-                <span className="flex items-center gap-2 px-3 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-xs font-medium text-white">
-                  <CalendarDays className="w-3.5 h-3.5 text-zinc-400" />
-                  Este Mês
-                </span>
-                <span className="flex items-center gap-2 px-3 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-xs font-medium text-white">
-                  <Trophy className="w-3.5 h-3.5 text-zinc-400" />
-                  Premiação em $
-                </span>
+            <div className="border border-zinc-800 rounded-lg bg-zinc-900/20 p-6 hover:border-zinc-700 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-yellow-900/20 border border-yellow-900/30 flex items-center justify-center mb-4">
+                <Clock className="w-5 h-5 text-yellow-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Descoberta tardia
+              </h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">
+                Quando você fica sabendo de uma corrida, as inscrições já encerraram
+                ou o valor subiu para o último lote.
+              </p>
+            </div>
+
+            <div className="border border-zinc-800 rounded-lg bg-zinc-900/20 p-6 hover:border-zinc-700 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-blue-900/20 border border-blue-900/30 flex items-center justify-center mb-4">
+                <Users className="w-5 h-5 text-blue-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Sem saber quem vai
+              </h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">
+                Quer participar com amigos? Não tem como saber quem vai sem perguntar
+                em cada grupo separadamente.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="h-px bg-zinc-800" />
+
+      {/* ==================== Solution Section ==================== */}
+      <section className="relative bg-[#0a0a0a] py-20 overflow-hidden">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
+              Uma solução para cada problema
+            </h2>
+            <p className="text-lg text-zinc-500 max-w-2xl mx-auto">
+              O Largada resolve os três maiores desafios dos corredores do interior paulista.
+            </p>
+          </div>
+
+          <div className="space-y-12">
+            {/* Solution 1 */}
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E85D2A]/10 border border-[#E85D2A]/20 mb-4">
+                  <Filter className="w-3.5 h-3.5 text-[#E85D2A]" />
+                  <span className="text-xs font-medium text-[#E85D2A]">Calendário centralizado</span>
+                </div>
+                <h3 className="text-2xl font-semibold text-white mb-3">
+                  Todas as corridas em um só lugar
+                </h3>
+                <p className="text-zinc-500 leading-relaxed">
+                  Chega de vasculhar grupos e perfis. Filtre por cidade, distância, raio em km,
+                  tipo de premiação e data. Encontre a prova ideal em segundos.
+                </p>
+              </div>
+              <div className="flex-1 w-full border border-zinc-800 rounded-lg bg-zinc-900/20 p-5">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-md text-xs font-medium text-white">
+                    <MapPin className="w-3 h-3 text-zinc-400" /> Rio Preto + 50km
+                  </span>
+                  <span className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-md text-xs font-medium text-white">
+                    <Trophy className="w-3 h-3 text-zinc-400" /> Premiação em $
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {["Corrida da Virada — Rio Preto", "Meia de Votuporanga", "Night Run Araçatuba"].map((name) => (
+                    <div key={name} className="flex items-center justify-between p-2.5 rounded-md bg-black/30 border border-zinc-800/50">
+                      <span className="text-sm text-zinc-300">{name}</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-zinc-600" />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Border separator */}
-            <div className="h-px bg-zinc-800" />
-
-            {/* Race Cards Grid - flush, no gaps, shared borders */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 divide-x divide-zinc-800">
-              {/* Card 1 */}
-              <div className="bg-black/50 p-5 group cursor-pointer flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="text-[10px] font-semibold text-emerald-500 uppercase tracking-wider">
-                      Confirmada
-                    </span>
-                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white group-hover:border-zinc-600 transition-colors">
-                      <CalendarDays className="w-4 h-4" />
-                    </div>
-                  </div>
-                  <h3 className="text-lg font-medium text-white mb-4">
-                    Corrida da Virada
-                  </h3>
-                  <div className="space-y-2.5 mb-6">
-                    <div className="flex items-center gap-2.5">
-                      <MapPin className="w-4 h-4 text-zinc-600" />
-                      <span className="text-sm text-zinc-400">
-                        São José do Rio Preto, SP
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <Ruler className="w-4 h-4 text-zinc-600" />
-                      <span className="text-sm text-zinc-400">
-                        5km &bull; 10km &bull; 15km
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <Coins className="w-4 h-4 text-yellow-600/80" />
-                      <span className="text-sm text-yellow-500/90 font-medium">
-                        Premiação R$ 5.000,00
-                      </span>
-                    </div>
-                  </div>
+            {/* Solution 2 */}
+            <div className="flex flex-col md:flex-row-reverse items-center gap-8">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E85D2A]/10 border border-[#E85D2A]/20 mb-4">
+                  <Bell className="w-3.5 h-3.5 text-[#E85D2A]" />
+                  <span className="text-xs font-medium text-[#E85D2A]">Notificações push</span>
                 </div>
-                <div className="flex items-center justify-between border-t border-zinc-900 pt-4 mt-2">
-                  <div className="flex -space-x-2">
-                    <div className="w-6 h-6 rounded-full bg-zinc-700 border border-black flex items-center justify-center text-[9px] text-white font-medium">
-                      R
+                <h3 className="text-2xl font-semibold text-white mb-3">
+                  Nunca mais perca um prazo
+                </h3>
+                <p className="text-zinc-500 leading-relaxed">
+                  Receba alertas de novas corridas na sua região e lembretes 3 dias antes do
+                  encerramento das inscrições das provas que você marcou.
+                </p>
+              </div>
+              <div className="flex-1 w-full border border-zinc-800 rounded-lg bg-zinc-900/20 p-5">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 rounded-md bg-black/30 border border-zinc-800/50">
+                    <div className="w-8 h-8 rounded-md bg-[#E85D2A]/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <Zap className="w-4 h-4 text-[#E85D2A]" />
                     </div>
-                    <div className="w-6 h-6 rounded-full bg-zinc-600 border border-black flex items-center justify-center text-[9px] text-white font-medium">
-                      M
-                    </div>
-                    <div className="w-6 h-6 rounded-full bg-zinc-800 border border-black flex items-center justify-center text-[9px] text-zinc-400 font-medium">
-                      +12
+                    <div>
+                      <p className="text-sm font-medium text-white">Nova corrida na sua região!</p>
+                      <p className="text-xs text-zinc-500">Night Run Araçatuba — 3km e 5km</p>
                     </div>
                   </div>
-                  <span className="text-xs bg-zinc-800 text-white px-3 py-1.5 rounded-md font-medium">
-                    Vou nessa
-                  </span>
+                  <div className="flex items-start gap-3 p-3 rounded-md bg-black/30 border border-zinc-800/50">
+                    <div className="w-8 h-8 rounded-md bg-yellow-900/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <Clock className="w-4 h-4 text-yellow-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white">Inscrição encerrando!</p>
+                      <p className="text-xs text-zinc-500">Corrida da Virada — faltam 3 dias</p>
+                    </div>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              {/* Card 2 */}
-              <div className="bg-black/50 p-5 group cursor-pointer flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="text-[10px] font-semibold text-emerald-500 uppercase tracking-wider">
-                      Confirmada
-                    </span>
-                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white group-hover:border-zinc-600 transition-colors">
-                      <CalendarDays className="w-4 h-4" />
-                    </div>
-                  </div>
-                  <h3 className="text-lg font-medium text-white mb-4">
-                    Meia de Votuporanga
-                  </h3>
-                  <div className="space-y-2.5 mb-6">
-                    <div className="flex items-center gap-2.5">
-                      <MapPin className="w-4 h-4 text-zinc-600" />
-                      <span className="text-sm text-zinc-400">
-                        Votuporanga, SP
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <Ruler className="w-4 h-4 text-zinc-600" />
-                      <span className="text-sm text-zinc-400">
-                        5km &bull; 21km
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <Trophy className="w-4 h-4 text-zinc-600" />
-                      <span className="text-sm text-zinc-500">
-                        Troféus p/ categoria
-                      </span>
-                    </div>
-                  </div>
+            {/* Solution 3 */}
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E85D2A]/10 border border-[#E85D2A]/20 mb-4">
+                  <Users className="w-3.5 h-3.5 text-[#E85D2A]" />
+                  <span className="text-xs font-medium text-[#E85D2A]">Vou Nessa</span>
                 </div>
-                <div className="flex items-center justify-between border-t border-zinc-900 pt-4 mt-2">
-                  <div className="flex -space-x-2">
-                    <div className="w-6 h-6 rounded-full bg-zinc-700 border border-black flex items-center justify-center text-[9px] text-white font-medium">
-                      A
-                    </div>
-                  </div>
+                <h3 className="text-2xl font-semibold text-white mb-3">
+                  Saiba quem vai correr com você
+                </h3>
+                <p className="text-zinc-500 leading-relaxed">
+                  Marque &ldquo;Vou Nessa&rdquo; e veja quais atletas da região já confirmaram presença.
+                  Organize caronas e motive seu grupo de treino.
+                </p>
+              </div>
+              <div className="flex-1 w-full border border-zinc-800 rounded-lg bg-zinc-900/20 p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-medium text-white">14 confirmados</span>
                   <span className="flex items-center gap-1.5 text-xs bg-emerald-900/20 text-emerald-400 border border-emerald-900/50 px-3 py-1.5 rounded-md font-medium">
                     <CheckCircle className="w-3 h-3" />
                     Eu vou
                   </span>
                 </div>
-              </div>
-
-              {/* Card 3 */}
-              <div className="bg-black/50 p-5 group cursor-pointer flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="text-[10px] font-semibold text-orange-500 uppercase tracking-wider">
-                      Últimos dias
-                    </span>
-                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white group-hover:border-zinc-600 transition-colors">
-                      <CalendarDays className="w-4 h-4" />
+                <div className="flex -space-x-2">
+                  {["R", "M", "A", "C", "L"].map((initial, i) => (
+                    <div key={i} className="w-8 h-8 rounded-full bg-zinc-700 border-2 border-[#0a0a0a] flex items-center justify-center text-[10px] text-white font-medium">
+                      {initial}
                     </div>
+                  ))}
+                  <div className="w-8 h-8 rounded-full bg-zinc-800 border-2 border-[#0a0a0a] flex items-center justify-center text-[10px] text-zinc-400 font-medium">
+                    +9
                   </div>
-                  <h3 className="text-lg font-medium text-white mb-4">
-                    Night Run Araçatuba
-                  </h3>
-                  <div className="space-y-2.5 mb-6">
-                    <div className="flex items-center gap-2.5">
-                      <MapPin className="w-4 h-4 text-zinc-600" />
-                      <span className="text-sm text-zinc-400">
-                        Araçatuba, SP
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <Ruler className="w-4 h-4 text-zinc-600" />
-                      <span className="text-sm text-zinc-400">
-                        3km &bull; 5km
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <Moon className="w-4 h-4 text-zinc-600" />
-                      <span className="text-sm text-zinc-500">
-                        Largada 19:30
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between border-t border-zinc-900 pt-4 mt-2">
-                  <span className="text-[10px] text-orange-500 font-medium">
-                    Inscrições encerram hoje
-                  </span>
-                  <span className="text-xs bg-zinc-800 text-white px-3 py-1.5 rounded-md font-medium">
-                    Vou nessa
-                  </span>
                 </div>
               </div>
             </div>
@@ -281,107 +252,138 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Section Separator */}
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== Features ==================== */}
-      <section id="features" className="relative bg-[#0a0a0a] py-20 overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="mb-12">
-            <h2 className="text-3xl md:text-4xl font-medium text-white tracking-tight mb-3">
-              Feito para quem corre.
+      <section id="features" className="relative bg-[#111111] py-20 overflow-hidden">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
+              Feito para quem corre
             </h2>
-            <p className="text-lg text-zinc-500 max-w-xl">
-              Detalhes que fazem a diferença na hora de planejar sua temporada
-              competitiva ou de lazer.
+            <p className="text-lg text-zinc-500 max-w-xl mx-auto">
+              Detalhes que fazem a diferença na hora de planejar sua temporada.
             </p>
           </div>
 
-          {/* Row 1: Filtros (wider) + Quem vai? */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-            <div className="md:col-span-3 border border-zinc-800 rounded-2xl bg-zinc-900/20 p-6 md:p-8 hover:border-zinc-700 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-5">
-                <Filter className="w-5 h-5 text-zinc-300" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { icon: Filter, title: "Filtros Inteligentes", desc: "Raio em km, tipo de premiação, distância e data." },
+              { icon: Trophy, title: "Filtro de Premiação", desc: "Encontre corridas com dinheiro, troféu ou ambos." },
+              { icon: Search, title: "Busca por Texto", desc: "Pesquise por nome da corrida, cidade ou organizador." },
+              { icon: CalendarDays, title: "Info Completa", desc: "Categorias, valores, percurso e local de largada." },
+              { icon: Bell, title: "Push Notifications", desc: "Novas corridas e lembretes de prazo no celular." },
+              { icon: Award, title: "PWA Instalável", desc: "Instale como app direto do navegador, sem loja." },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="border border-zinc-800 rounded-lg bg-zinc-900/20 p-6 hover:border-zinc-700 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
+                  <Icon className="w-5 h-5 text-zinc-300" />
+                </div>
+                <h3 className="text-base font-semibold text-white mb-2">{title}</h3>
+                <p className="text-sm text-zinc-500 leading-relaxed">{desc}</p>
               </div>
-              <h3 className="text-xl font-medium text-white mb-3">
-                Filtros Inteligentes
-              </h3>
-              <p className="text-sm text-zinc-500 leading-relaxed mb-5">
-                Não perca tempo em grupos de WhatsApp. Filtre por raio de
-                distância da sua cidade, tipo de premiação (dinheiro/troféu) ou
-                distância da prova.
-              </p>
-              <div className="flex gap-2">
-                <span className="px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 text-xs text-zinc-400">
-                  5km
-                </span>
-                <span className="px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 text-xs text-zinc-400">
-                  21km
-                </span>
-                <span className="px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 text-xs text-zinc-400">
-                  Dinheiro
-                </span>
-              </div>
-            </div>
-
-            <div className="md:col-span-2 border border-zinc-800 rounded-2xl bg-zinc-900/20 p-6 md:p-8 hover:border-zinc-700 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-5">
-                <Users className="w-5 h-5 text-zinc-300" />
-              </div>
-              <h3 className="text-xl font-medium text-white mb-3">
-                Quem vai?
-              </h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">
-                Veja quais amigos e atletas da região marcaram presença.
-                Organize a carona e motive seu grupo de corrida.
-              </p>
-            </div>
-          </div>
-
-          {/* Row 2: Alertas + Detalhes (wider) */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="md:col-span-2 border border-zinc-800 rounded-2xl bg-zinc-900/20 p-6 md:p-8 hover:border-zinc-700 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-5">
-                <Bell className="w-5 h-5 text-zinc-300" />
-              </div>
-              <h3 className="text-xl font-medium text-white mb-3">
-                Alertas de Prazo
-              </h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">
-                Nunca mais pague o valor do último lote. Receba lembretes antes
-                da virada de lote ou encerramento das inscrições.
-              </p>
-            </div>
-
-            <div className="md:col-span-3 border border-zinc-800 rounded-2xl bg-zinc-900/20 p-6 md:p-8 hover:border-zinc-700 transition-colors relative overflow-hidden">
-              <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-5">
-                <CalendarDays className="w-5 h-5 text-zinc-300" />
-              </div>
-              <h3 className="text-xl font-medium text-white mb-3">
-                Detalhes que Importam
-              </h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">
-                Para a elite: categorias e valores de premiação detalhados. Para
-                iniciantes: percurso, kit e local de largada claros.
-              </p>
-              {/* Decorative trophy */}
-              <div className="absolute -bottom-4 -right-4 opacity-[0.06]">
-                <Award className="w-32 h-32 text-white" strokeWidth={1} />
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Section Separator */}
+      <div className="h-px bg-zinc-800" />
+
+      {/* ==================== How It Works ==================== */}
+      <section className="relative bg-[#0a0a0a] py-20 overflow-hidden">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
+              Simples assim
+            </h2>
+            <p className="text-lg text-zinc-500">
+              Três passos para nunca mais perder uma corrida.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { step: "1", icon: UserPlus, title: "Crie sua conta", desc: "Cadastro rápido com email, Google ou Strava. Selecione sua cidade." },
+              { step: "2", icon: Search, title: "Encontre corridas", desc: "Use os filtros para encontrar provas na sua região, com a distância e premiação ideais." },
+              { step: "3", icon: Bell, title: "Marque e receba alertas", desc: "Clique em 'Vou Nessa', veja quem mais vai e receba lembretes de prazo." },
+            ].map(({ step, icon: Icon, title, desc }) => (
+              <div key={step} className="text-center">
+                <div className="mx-auto w-12 h-12 rounded-full bg-[#E85D2A]/10 border border-[#E85D2A]/20 flex items-center justify-center mb-5">
+                  <Icon className="w-5 h-5 text-[#E85D2A]" />
+                </div>
+                <div className="text-xs font-bold text-[#E85D2A] uppercase tracking-wider mb-2">
+                  Passo {step}
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
+                <p className="text-sm text-zinc-500 leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="h-px bg-zinc-800" />
+
+      {/* ==================== Social Proof ==================== */}
+      <section className="relative bg-[#111111] py-20 overflow-hidden">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
+              Quem corre, aprova
+            </h2>
+            <p className="text-lg text-zinc-500">
+              O que dizem os corredores da região.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: "Rafael S.",
+                city: "São José do Rio Preto",
+                quote: "Finalmente consigo filtrar corridas com premiação em dinheiro na minha região. Antes perdia horas procurando em grupos.",
+                initials: "RS",
+              },
+              {
+                name: "Márcia L.",
+                city: "Votuporanga",
+                quote: "O alerta de prazo me salvou! Quase perdi a inscrição da meia maratona. Agora recebo tudo no celular.",
+                initials: "ML",
+              },
+              {
+                name: "Carlos O.",
+                city: "Araçatuba",
+                quote: "Comecei a correr há pouco tempo e achava difícil encontrar provas de 3km e 5km. Aqui é tudo organizado.",
+                initials: "CO",
+              },
+            ].map(({ name, city, quote, initials }) => (
+              <div key={name} className="border border-zinc-800 rounded-lg bg-zinc-900/20 p-6">
+                <p className="text-sm text-zinc-400 leading-relaxed mb-5 italic">
+                  &ldquo;{quote}&rdquo;
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-sm font-semibold text-zinc-300">
+                    {initials}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">{name}</p>
+                    <p className="text-xs text-zinc-500">{city}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== Cobertura Regional ==================== */}
-      <section id="cobertura" className="relative bg-[#111111] py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <p className="text-center text-xs font-semibold text-zinc-600 uppercase tracking-[0.2em] mb-10">
+      <section id="cobertura" className="relative bg-[#0a0a0a] py-16">
+        <div className="max-w-5xl mx-auto px-6">
+          <h2 className="text-center text-xs font-semibold text-zinc-500 uppercase tracking-[0.2em] mb-10">
             Cobertura Regional
-          </p>
+          </h2>
           <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 md:gap-x-16">
             {[
               "São José do Rio Preto",
@@ -401,22 +403,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Section Separator */}
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== CTA Final ==================== */}
-      <section className="relative bg-[#0a0a0a] py-24 md:py-32 overflow-hidden">
-        {/* Subtle glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-zinc-600 to-transparent" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-zinc-700/10 blur-[80px] rounded-full" />
+      <section className="relative py-24 md:py-32 overflow-hidden bg-gradient-to-b from-[#E85D2A]/10 via-[#0a0a0a] to-[#0a0a0a]">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#E85D2A]/5 blur-[100px] rounded-full" />
 
         <div className="relative max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-5xl font-medium text-white tracking-tight mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
             Pronto para a largada?
           </h2>
-          <p className="text-zinc-500 mb-10 max-w-md mx-auto">
-            Crie sua conta gratuitamente, marque suas provas e receba
-            notificações personalizadas.
+          <p className="text-zinc-400 mb-10 max-w-md mx-auto">
+            Gratuito. Sem pegadinhas. Crie sua conta e encontre sua próxima prova.
           </p>
           <CtaButtons />
         </div>
@@ -424,7 +422,7 @@ export default function LandingPage() {
 
       {/* ==================== Footer ==================== */}
       <footer className="relative border-t border-zinc-800 bg-[#0a0a0a] py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {/* Brand */}
             <div className="col-span-2 sm:col-span-1">
@@ -434,7 +432,7 @@ export default function LandingPage() {
                 </div>
                 <span className="text-white font-medium">Largada</span>
               </div>
-              <p className="text-sm text-zinc-600 max-w-xs">
+              <p className="text-sm text-zinc-500 max-w-xs">
                 O hub de corridas do interior paulista.
               </p>
             </div>
@@ -442,14 +440,14 @@ export default function LandingPage() {
             {/* Plataforma */}
             <div>
               <p className="text-sm font-semibold text-white mb-4">Plataforma</p>
-              <nav className="flex flex-col gap-2.5 text-sm text-zinc-600">
-                <Link href="/corridas" className="hover:text-zinc-400 transition-colors">
+              <nav className="flex flex-col gap-2.5 text-sm text-zinc-400">
+                <Link href="/corridas" className="hover:text-zinc-200 transition-colors">
                   Corridas
                 </Link>
-                <a href="#features" className="hover:text-zinc-400 transition-colors">
+                <a href="#features" className="hover:text-zinc-200 transition-colors">
                   Funcionalidades
                 </a>
-                <Link href="/sugerir" className="hover:text-zinc-400 transition-colors">
+                <Link href="/sugerir" className="hover:text-zinc-200 transition-colors">
                   Sugerir Evento
                 </Link>
               </nav>
@@ -458,14 +456,14 @@ export default function LandingPage() {
             {/* Legal */}
             <div>
               <p className="text-sm font-semibold text-white mb-4">Legal</p>
-              <nav className="flex flex-col gap-2.5 text-sm text-zinc-600">
-                <Link href="/termos" className="hover:text-zinc-400 transition-colors">
+              <nav className="flex flex-col gap-2.5 text-sm text-zinc-400">
+                <Link href="/termos" className="hover:text-zinc-200 transition-colors">
                   Termos de Uso
                 </Link>
-                <Link href="/privacidade" className="hover:text-zinc-400 transition-colors">
+                <Link href="/privacidade" className="hover:text-zinc-200 transition-colors">
                   Privacidade
                 </Link>
-                <Link href="/contato" className="hover:text-zinc-400 transition-colors">
+                <Link href="/contato" className="hover:text-zinc-200 transition-colors">
                   Contato
                 </Link>
               </nav>
@@ -489,18 +487,15 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-12 pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-zinc-700">
+            <p className="text-xs text-zinc-500">
               &copy; {new Date().getFullYear()} Largada. Todos os direitos reservados.
             </p>
-            <p className="text-xs text-zinc-700">
-              Feito para corredores &hearts;
+            <p className="text-xs text-zinc-500">
+              Feito para corredores do interior de SP
             </p>
           </div>
         </div>
       </footer>
-
-      {/* ==================== Floating Notification Bar ==================== */}
-      <FloatingNotificationBar />
     </main>
   );
 }

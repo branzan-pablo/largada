@@ -45,7 +45,7 @@ export function LandingHeader() {
               <Button
                 size="sm"
                 asChild
-                className="bg-white text-black text-sm font-medium px-4 py-2 rounded-full hover:bg-zinc-200 border-0"
+                className="bg-[#E85D2A] text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-[#d4522a] border-0"
               >
                 <Link href="/corridas">Ir para corridas</Link>
               </Button>
@@ -68,7 +68,7 @@ export function LandingHeader() {
               </button>
               <button
                 onClick={openRegister}
-                className="bg-white text-black text-sm font-medium px-4 py-2 rounded-full hover:bg-zinc-200 transition-colors"
+                className="bg-[#E85D2A] text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-[#d4522a] transition-colors"
               >
                 Criar conta
               </button>

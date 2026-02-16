@@ -1,24 +1,40 @@
 "use client";
 
+import Link from "next/link";
 import { useLoginModal } from "@/contexts/login-modal-context";
+import { useAuth } from "@/contexts/auth-context";
 
 export function CtaButtons() {
-  const { openRegister, openLogin } = useLoginModal();
+  const { openRegister } = useLoginModal();
+  const { user } = useAuth();
+
+  if (user) {
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <Link
+          href="/corridas"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#E85D2A] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d4522a] transition-colors"
+        >
+          Ver corridas
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
       <button
         onClick={openRegister}
-        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-black px-6 py-3 rounded-full font-medium hover:bg-zinc-200 transition-colors"
+        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#E85D2A] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d4522a] transition-colors"
       >
         Criar conta grátis
       </button>
-      <button
-        onClick={openLogin}
-        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-zinc-800/50 border border-zinc-700 text-white px-6 py-3 rounded-full font-medium hover:bg-zinc-700 transition-colors"
+      <Link
+        href="/corridas"
+        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-zinc-900/50 border border-zinc-700 text-white px-6 py-3 rounded-full font-medium hover:bg-zinc-800 transition-colors"
       >
-        Entrar com Strava
-      </button>
+        Explorar corridas
+      </Link>
     </div>
   );
 }
