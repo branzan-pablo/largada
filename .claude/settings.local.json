@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:\\\\Users\\\\pablo\\\\Development\\\\MVP\" log --oneline -10)",
+      "Bash(pnpm create next-app@latest:*)",
+      "Bash(npx create-next-app:*)",
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm dlx:*)",
+      "Bash(pnpm build:*)",
+      "Bash(git remote add:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: initial project setup \\(Phases 1-3\\)\n\n- Next.js 16 + Supabase + shadcn/ui + Firebase scaffolding\n- Design system with Largada color palette \\(#E85D2A\\)\n- Database migrations \\(profiles, races, rsvps, suggestions, fcm_tokens\\)\n- RLS policies, triggers, and seed data \\(12 sample races\\)\n- Authentication: email/password, Google OAuth, Strava OAuth\n- Login/register page, OAuth callbacks, auth guard components\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(taskkill:*)",
+      "WebFetch(domain:largadaoficial.vercel.app)",
+      "Bash(curl:*)",
+      "Bash(npx next build:*)",
+      "Bash(git rm:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node -e:*)",
+      "WebFetch(domain:firebase.google.com)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run dev:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(git -C \"C:\\\\Users\\\\pablo\\\\Development\\\\MVP\" log --all --oneline --grep=\"security\\\\|RLS\\\\|policy\" --ignore-case)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}

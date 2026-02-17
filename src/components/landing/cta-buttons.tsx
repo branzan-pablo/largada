@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useLoginModal } from "@/contexts/login-modal-context";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -10,7 +9,6 @@ import { Footprints, CirclePlus } from "lucide-react";
 export function CtaButtons() {
   const { openRegister } = useLoginModal();
   const { user } = useAuth();
-  const router = useRouter();
 
   if (user) {
     return (

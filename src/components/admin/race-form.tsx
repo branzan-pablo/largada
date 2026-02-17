@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DISTANCES, REGION_CITIES } from "@/lib/constants";
+import { normalizeUrl } from "@/lib/validations";
 import { toast } from "sonner";
 import type { Race } from "@/types/race";
 
@@ -26,13 +27,6 @@ interface RaceFormProps {
     date?: string;
     suggestionId?: string;
   };
-}
-
-function normalizeUrl(url: string): string {
-  const trimmed = url.trim();
-  if (!trimmed) return trimmed;
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  return `https://${trimmed}`;
 }
 
 export function RaceForm({ race, suggestionData }: RaceFormProps) {

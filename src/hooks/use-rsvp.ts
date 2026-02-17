@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { toast } from "sonner";
 
 interface UseRsvpOptions {
   raceId: string;
@@ -34,11 +35,13 @@ export function useRsvp({ raceId, initialRsvped, initialCount }: UseRsvpOptions)
         // Rollback
         setRsvped(prevRsvped);
         setCount(prevCount);
+        toast.error("Erro ao atualizar presença. Tente novamente.");
       }
     } catch {
       // Rollback
       setRsvped(prevRsvped);
       setCount(prevCount);
+      toast.error("Erro ao atualizar presença. Tente novamente.");
     } finally {
       setIsToggling(false);
     }

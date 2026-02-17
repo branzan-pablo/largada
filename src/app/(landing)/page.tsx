@@ -330,58 +330,6 @@ export default function LandingPage() {
 
       <div className="h-px bg-zinc-800" />
 
-      {/* ==================== Social Proof ==================== */}
-      {/* <section className="relative bg-[#111111] py-20 overflow-hidden">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
-              Quem corre, aprova
-            </h2>
-            <p className="text-lg text-zinc-500">
-              O que dizem os corredores da região.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Rafael S.",
-                city: "São José do Rio Preto",
-                quote: "Finalmente consigo filtrar corridas com premiação em dinheiro na minha região. Antes perdia horas procurando em grupos.",
-                initials: "RS",
-              },
-              {
-                name: "Márcia L.",
-                city: "Votuporanga",
-                quote: "O alerta de prazo me salvou! Quase perdi a inscrição da meia maratona. Agora recebo tudo no celular.",
-                initials: "ML",
-              },
-              {
-                name: "Carlos O.",
-                city: "Araçatuba",
-                quote: "Comecei a correr há pouco tempo e achava difícil encontrar provas de 3km e 5km. Aqui é tudo organizado.",
-                initials: "CO",
-              },
-            ].map(({ name, city, quote, initials }) => (
-              <div key={name} className="border border-zinc-800 rounded-lg bg-zinc-900/20 p-6">
-                <p className="text-sm text-zinc-400 leading-relaxed mb-5 italic">
-                  &ldquo;{quote}&rdquo;
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-sm font-semibold text-zinc-300">
-                    {initials}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">{name}</p>
-                    <p className="text-xs text-zinc-500">{city}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section> */}
-
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== Cobertura Regional ==================== */}
@@ -470,16 +418,10 @@ export default function LandingPage() {
             {/* Legal */}
             <div>
               <p className="text-sm font-semibold text-white mb-4">Legal</p>
-              <nav className="flex flex-col gap-2.5 text-sm text-zinc-400">
-                <Link href="/termos" className="hover:text-zinc-200 transition-colors">
-                  Termos de Uso
-                </Link>
-                <Link href="/privacidade" className="hover:text-zinc-200 transition-colors">
-                  Privacidade
-                </Link>
-                <Link href="/contato" className="hover:text-zinc-200 transition-colors">
-                  Contato
-                </Link>
+              <nav className="flex flex-col gap-2.5 text-sm text-zinc-500">
+                <span>Termos de Uso</span>
+                <span>Privacidade</span>
+                <span>Contato</span>
               </nav>
             </div>
 

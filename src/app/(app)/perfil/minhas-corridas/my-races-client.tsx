@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RaceCard } from "@/components/races/race-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, CalendarDays } from "lucide-react";
+import { toast } from "sonner";
 import type { Race } from "@/types/race";
 
 export function MyRacesClient() {
@@ -60,6 +61,7 @@ export function MyRacesClient() {
       setUpcoming((upcomingRes.data as Race[]) ?? []);
       setPast((pastRes.data as Race[]) ?? []);
     } catch {
+      toast.error("Erro ao carregar suas corridas.");
     } finally {
       setIsLoading(false);
     }

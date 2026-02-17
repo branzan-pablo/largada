@@ -12,7 +12,7 @@ import { Trophy, ChevronDown, Search } from "lucide-react";
 import type { RaceFilters } from "@/types/race";
 
 export function RaceList() {
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<RaceFilters>({});
   const debouncedSearch = useDebounce(search, 300);
@@ -70,7 +70,6 @@ export function RaceList() {
         <RaceFiltersMobile
           filters={filters}
           onFiltersChange={setFilters}
-          isLoggedIn={true} // TODO: Check auth
           search={search}
           onSearchChange={setSearch}
         />
@@ -80,7 +79,6 @@ export function RaceList() {
       <RaceFiltersDesktop
         filters={filters}
         onFiltersChange={setFilters}
-        isLoggedIn={!!user}
         search={search}
         onSearchChange={setSearch}
       />

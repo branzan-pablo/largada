@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 
-function normalizeUrl(val: string): string {
+export function normalizeUrl(val: string): string {
   const trimmed = val.trim();
   if (!trimmed) return trimmed;
   if (/^https?:\/\//i.test(trimmed)) return trimmed;

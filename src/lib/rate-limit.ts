@@ -12,6 +12,14 @@ export function rateLimit(
   { max, windowMs }: { max: number; windowMs: number }
 ): { limited: boolean } {
   const now = Date.now();
+
+  // Cleanup expired entries periodically (every 100 calls) to prevent memory leak
+  if (rateMap.size > 100) {
+    for (const [k, v] of rateMap) {
+      if (now > v.resetAt) rateMap.delete(k);
+    }
+  }
+
   const entry = rateMap.get(key);
 
   if (!entry || now > entry.resetAt) {

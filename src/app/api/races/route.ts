@@ -5,6 +5,7 @@ import { slugify } from "@/lib/utils";
 import { haversineDistance } from "@/lib/geo";
 import { ITEMS_PER_PAGE } from "@/lib/constants";
 import { notifyNewRace } from "@/lib/notifications";
+import { raceSchema } from "@/lib/validations";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -58,8 +59,10 @@ export async function GET(request: Request) {
   }
 
   if (search) {
+    // Sanitize search input — escape Postgres LIKE wildcards
+    const sanitized = search.replace(/[%_\\]/g, "\\$&");
     query = query.or(
-      `name.ilike.%${search}%,city.ilike.%${search}%,organizer.ilike.%${search}%`
+      `name.ilike.%${sanitized}%,city.ilike.%${sanitized}%,organizer.ilike.%${sanitized}%`
     );
   }
 
@@ -139,7 +142,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 
-  const body = await request.json();
+  const raw = await request.json();
+  const parsed = raceSchema.safeParse(raw);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Dados inválidos", details: parsed.error.issues },
+      { status: 400 }
+    );
+  }
+
+  const body = parsed.data;
 
   // Generate slug
   let slug = slugify(`${body.name}-${body.city}`);
@@ -179,7 +192,7 @@ export async function POST(request: Request) {
     description: body.description ?? null,
     status: body.status ?? "confirmed",
     created_by: user.id,
-    origin: body.origin ?? "admin",
+    origin: raw.origin === "approved_suggestion" ? "approved_suggestion" : "admin",
   };
 
   const { data, error } = await supabase

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { raceSchema } from "@/lib/validations";
 
 export async function PATCH(
   request: Request,
@@ -26,7 +27,20 @@ export async function PATCH(
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 
-  const body = await request.json();
+  const raw = await request.json();
+
+  // Validate with partial schema (PATCH allows partial updates)
+  const partialSchema = raceSchema.partial();
+  const parsed = partialSchema.safeParse(raw);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Dados inválidos", details: parsed.error.issues },
+      { status: 400 }
+    );
+  }
+
+  const body = parsed.data as Record<string, unknown>;
 
   const updateData: Record<string, unknown> = {
     updated_at: new Date().toISOString(),

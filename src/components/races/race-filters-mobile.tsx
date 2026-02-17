@@ -19,87 +19,22 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { ToggleChip } from "@/components/ui/toggle-chip";
 import { SlidersHorizontal, Search, CalendarDays } from "lucide-react";
 import { DISTANCES, REGION_CITIES } from "@/lib/constants";
-import { cn } from "@/lib/utils";
 import type { RaceFilters as Filters } from "@/types/race";
-
-// Helper functions for date logic (duplicated from desktop for now, could be shared util)
-function getDateRange(value: string): { dateFrom?: string; dateTo?: string } {
-  const today = new Date();
-  const fmt = (d: Date) => d.toISOString().split("T")[0];
-
-  switch (value) {
-    case "this_week": {
-      const end = new Date(today);
-      end.setDate(today.getDate() + (7 - today.getDay()));
-      return { dateFrom: fmt(today), dateTo: fmt(end) };
-    }
-    case "this_month": {
-      const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-      return { dateFrom: fmt(today), dateTo: fmt(end) };
-    }
-    case "next_month": {
-      const start = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-      const end = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-      return { dateFrom: fmt(start), dateTo: fmt(end) };
-    }
-    case "next_3_months": {
-      const end = new Date(today);
-      end.setMonth(today.getMonth() + 3);
-      return { dateFrom: fmt(today), dateTo: fmt(end) };
-    }
-    default:
-      return {};
-  }
-}
-
-function getDatePreset(filters: Filters): string {
-  if (!filters.dateFrom) return "any";
-  for (const preset of ["this_week", "this_month", "next_month", "next_3_months"]) {
-    const range = getDateRange(preset);
-    if (range.dateFrom === filters.dateFrom && range.dateTo === filters.dateTo) return preset;
-  }
-  return "any";
-}
+import { getDateRange, getDatePreset } from "@/lib/filter-utils";
 
 interface RaceFiltersMobileProps {
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
-  isLoggedIn: boolean;
   search: string;
   onSearchChange: (value: string) => void;
-}
-
-function ToggleChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "rounded-md border px-3 py-1.5 text-xs font-semibold transition-all",
-        active
-          ? "border-white bg-white text-black"
-          : "border-zinc-800 bg-zinc-900/50 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
-      )}
-    >
-      {label}
-    </button>
-  );
 }
 
 export function RaceFiltersMobile({
   filters,
   onFiltersChange,
-  isLoggedIn,
   search,
   onSearchChange,
 }: RaceFiltersMobileProps) {
