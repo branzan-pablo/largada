@@ -131,13 +131,18 @@ export function SuggestionFormClient() {
         <Label htmlFor="link">Link (site ou rede social)</Label>
         <Input
           id="link"
-          type="url"
+          type="text"
           value={link}
           onChange={(e) => setLink(e.target.value)}
-          placeholder="https://..."
+          placeholder="Ex: www.corridaxyz.com.br ou https://..."
+          className={errors.link ? "border-destructive" : ""}
         />
-        {errors.link && (
-          <p className="text-sm text-destructive">{errors.link}</p>
+        {errors.link ? (
+          <p className="text-xs text-destructive">{errors.link}</p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Aceita links com ou sem https://
+          </p>
         )}
       </div>
 

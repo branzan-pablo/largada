@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,64 +70,81 @@ export function MySuggestionsClient() {
   if (suggestions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <MessageSquarePlus className="mb-4 h-12 w-12 text-muted-foreground/50" />
-        <p className="text-sm text-muted-foreground">
-          Você ainda não enviou nenhuma sugestão de corrida.
+        <div className="mb-4 rounded-full bg-muted p-4">
+          <MessageSquarePlus className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h3 className="mb-2 text-lg font-semibold">Nenhuma sugestão enviada</h3>
+        <p className="mb-6 max-w-sm text-sm text-muted-foreground">
+          Você ainda não enviou nenhuma sugestão de corrida. Ajude a comunidade a crescer!
         </p>
+        <Button asChild>
+          <Link href="/sugerir">Sugerir Corrida</Link>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      {suggestions.map((s) => {
-        const status = STATUS_MAP[s.status as keyof typeof STATUS_MAP];
-        return (
-          <div
-            key={s.id}
-            className="flex items-start justify-between gap-3 rounded-lg border p-4"
-          >
-            <div className="space-y-1">
-              <p className="font-medium">{s.name}</p>
-              <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                {s.date && (
-                  <span className="flex items-center gap-1">
-                    <CalendarDays className="h-3.5 w-3.5" />
-                    {formatDate(s.date)}
-                  </span>
-                )}
-                {s.city && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {s.city}
-                  </span>
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button size="sm" variant="outline" asChild>
+          <Link href="/sugerir">
+            <MessageSquarePlus className="mr-2 h-4 w-4" />
+            Nova Sugestão
+          </Link>
+        </Button>
+      </div>
+
+      <div className="space-y-3">
+        {suggestions.map((s) => {
+          const status = STATUS_MAP[s.status as keyof typeof STATUS_MAP];
+          return (
+            <div
+              key={s.id}
+              className="flex items-start justify-between gap-3 rounded-lg border p-4"
+            >
+              <div className="space-y-1">
+                <p className="font-medium">{s.name}</p>
+                <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                  {s.date && (
+                    <span className="flex items-center gap-1">
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      {formatDate(s.date)}
+                    </span>
+                  )}
+                  {s.city && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-3.5 w-3.5" />
+                      {s.city}
+                    </span>
+                  )}
+                </div>
+                {s.notes && (
+                  <p className="text-sm text-muted-foreground">{s.notes}</p>
                 )}
               </div>
-              {s.notes && (
-                <p className="text-sm text-muted-foreground">{s.notes}</p>
-              )}
+              <div className="flex items-center gap-2">
+                <Badge variant={status.variant}>{status.label}</Badge>
+                {s.status === "pending" && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive cursor-pointer"
+                    disabled={deletingId === s.id}
+                    onClick={() => handleDelete(s.id)}
+                  >
+                    {deletingId === s.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant={status.variant}>{status.label}</Badge>
-              {s.status === "pending" && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive hover:text-destructive"
-                  disabled={deletingId === s.id}
-                  onClick={() => handleDelete(s.id)}
-                >
-                  {deletingId === s.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                </Button>
-              )}
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

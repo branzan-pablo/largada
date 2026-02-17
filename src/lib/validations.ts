@@ -1,5 +1,12 @@
 import { z } from "zod/v4";
 
+function normalizeUrl(val: string): string {
+  const trimmed = val.trim();
+  if (!trimmed) return trimmed;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 export const loginSchema = z.object({
   email: z.email("Email inválido"),
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
@@ -29,7 +36,7 @@ export const raceSchema = z.object({
   longitude: z.number().min(-180).max(180),
   distances: z.array(z.string()).min(1, "Selecione pelo menos uma distância"),
   registrationPrice: z.string().min(1, "Valor da inscrição é obrigatório"),
-  registrationLink: z.url("Link de inscrição inválido"),
+  registrationLink: z.string().min(1, "Link de inscrição é obrigatório").transform(normalizeUrl).pipe(z.url("Link de inscrição inválido")),
   registrationDeadline: z.string().min(1, "Prazo de inscrição é obrigatório"),
   prizeType: z.enum(["money", "trophy", "both", "none"]),
   prizeDetails: z.string().optional(),
@@ -44,7 +51,7 @@ export const suggestionSchema = z.object({
   name: z.string().min(3, "Nome da corrida deve ter pelo menos 3 caracteres"),
   date: z.string().optional(),
   city: z.string().min(1, "Cidade é obrigatória"),
-  link: z.union([z.url("Link inválido"), z.literal("")]).optional(),
+  link: z.union([z.string().transform(normalizeUrl).pipe(z.url("Link inválido")), z.literal("")]).optional(),
   notes: z.string().optional(),
 });
 
