@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   // Get FCM tokens for users with notifications enabled
   const { data: tokens } = await supabase
     .from("fcm_tokens")
-    .select("token, profiles:user_id(notifications_enabled)")
+    .select("token, profiles!fcm_tokens_user_id_fkey(notifications_enabled)")
     .not("token", "is", null);
 
   if (!tokens || tokens.length === 0) {
@@ -38,10 +38,7 @@ export async function POST(request: Request) {
   }
 
   const targetTokens = tokens
-    .filter((t) => {
-      const profile = t.profiles as unknown as { notifications_enabled: boolean } | null;
-      return profile?.notifications_enabled;
-    })
+    .filter((t) => t.profiles?.notifications_enabled)
     .map((t) => t.token);
 
   if (targetTokens.length === 0) {

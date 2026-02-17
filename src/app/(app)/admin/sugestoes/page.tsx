@@ -20,7 +20,7 @@ export default async function AdminSuggestionsPage() {
 
   const { data: suggestions } = await supabase
     .from("race_suggestions")
-    .select("*, profiles:user_id(full_name)")
+    .select("*, profiles!race_suggestions_user_id_fkey(full_name)")
     .order("created_at", { ascending: false });
 
   const pending = suggestions?.filter((s) => s.status === "pending") ?? [];
@@ -64,8 +64,7 @@ export default async function AdminSuggestionsPage() {
                   )}
                   <p className="text-xs text-muted-foreground">
                     Por:{" "}
-                    {(suggestion.profiles as { full_name: string | null })
-                      ?.full_name ?? "Anônimo"}{" "}
+                    {suggestion.profiles?.full_name ?? "Anônimo"}{" "}
                     — {formatDateShort(suggestion.created_at)}
                   </p>
                   <SuggestionActions suggestion={suggestion} />

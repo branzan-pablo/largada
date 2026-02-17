@@ -87,18 +87,15 @@ export default async function RaceDetailPage({ params }: PageProps) {
   // Fetch RSVP participants
   const { data: rsvps } = await supabase
     .from("rsvps")
-    .select("profiles:user_id(id, full_name, avatar_url)")
+    .select("profiles!rsvps_user_id_fkey(id, full_name, avatar_url)")
     .eq("race_id", typedRace.id)
     .limit(10);
 
-  const participants = (rsvps ?? []).map((r) => {
-    const p = r.profiles as unknown as { id: string; full_name: string | null; avatar_url: string | null } | null;
-    return {
-      id: p?.id ?? "",
-      full_name: p?.full_name ?? null,
-      avatar_url: p?.avatar_url ?? null,
-    };
-  });
+  const participants = (rsvps ?? []).map((r) => ({
+    id: r.profiles?.id ?? "",
+    full_name: r.profiles?.full_name ?? null,
+    avatar_url: r.profiles?.avatar_url ?? null,
+  }));
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const jsonLd = {

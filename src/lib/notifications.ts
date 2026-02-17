@@ -79,18 +79,14 @@ export async function notifyNewRace(raceId: string) {
 
   const { data: tokens } = await supabase
     .from("fcm_tokens")
-    .select("token, profiles:user_id(notifications_enabled, city)")
+    .select("token, profiles!fcm_tokens_user_id_fkey(notifications_enabled, city)")
     .not("token", "is", null);
 
   if (!tokens || tokens.length === 0) return;
 
   const targetTokens = tokens
     .filter((t) => {
-      const profile = t.profiles as unknown as {
-        notifications_enabled: boolean;
-        city: string | null;
-      } | null;
-      return profile?.notifications_enabled && profile?.city === race.city;
+      return t.profiles?.notifications_enabled && t.profiles?.city === race.city;
     })
     .map((t) => t.token);
 

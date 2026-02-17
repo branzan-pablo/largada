@@ -41,18 +41,13 @@ export async function GET(request: Request) {
     // Get FCM tokens for these users (with notification preference check via join)
     const { data: tokens } = await supabase
       .from("fcm_tokens")
-      .select("token, profiles:user_id(notifications_enabled)")
+      .select("token, profiles!fcm_tokens_user_id_fkey(notifications_enabled)")
       .in("user_id", userIds);
 
     if (!tokens || tokens.length === 0) continue;
 
     const targetTokens = tokens
-      .filter((t) => {
-        const profile = t.profiles as unknown as {
-          notifications_enabled: boolean;
-        } | null;
-        return profile?.notifications_enabled;
-      })
+      .filter((t) => t.profiles?.notifications_enabled)
       .map((t) => t.token);
 
     if (targetTokens.length === 0) continue;
