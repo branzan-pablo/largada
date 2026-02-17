@@ -20,7 +20,7 @@ export function BottomNav() {
   const { openLogin } = useLoginModal();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-zinc-800 bg-[#0a0a0a]/95 backdrop-blur-md md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-zinc-800 bg-black/95 backdrop-blur-md md:hidden">
       <div className="flex justify-around py-2">
         {navItems.map((item) => {
           if (item.requiresAuth && !user) {

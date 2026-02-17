@@ -29,7 +29,7 @@ export function RaceList() {
     useInfiniteRaces(enrichedFilters, debouncedSearch);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
+    <div className="mx-auto max-w-7xl px-4 py-8 md:py-12 bg-grid">
       {/* Page Header */}
       <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">

@@ -9,13 +9,13 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="dark min-h-screen bg-[#0a0a0a] text-zinc-300 flex flex-col">
+    <div className="dark min-h-screen bg-background text-zinc-300 flex flex-col">
       <Header />
       <div className="flex-1 pb-16 md:pb-0 pt-16">{children}</div>
       <BottomNav />
 
       {/* Footer */}
-      <footer className="hidden md:block border-t border-zinc-800 bg-[#0a0a0a] py-8">
+      <footer className="hidden md:block border-t border-zinc-800 bg-background py-8">
         <div className="max-w-screen-xl mx-auto px-6 flex items-center justify-center">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-zinc-800 rounded flex items-center justify-center">

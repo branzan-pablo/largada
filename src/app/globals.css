@@ -127,16 +127,19 @@
   }
 }
 
-/* ============================================
-   LANDING PAGE - Dark Theme Additions
-   Add these styles to your existing globals.css
-   ============================================ */
+/* Grid background utility — apply with class="bg-grid" */
+.bg-grid {
+  position: relative;
+}
 
-/* Grid background pattern for the landing hero area */
-.landing-bg-grid {
+.bg-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 48px 48px;
   -webkit-mask-image: linear-gradient(to bottom, white 0%, transparent 100%);
   mask-image: linear-gradient(to bottom, white 0%, transparent 100%);
@@ -144,7 +147,7 @@
 
 /* Dark mode overrides */
 .dark {
-  --background: oklch(0.05 0 0);
+  --background: oklch(0 0 0);
   --foreground: oklch(0.84 0.01 265);
   --card: oklch(0.13 0.005 265);
   --card-foreground: oklch(0.84 0.01 265);

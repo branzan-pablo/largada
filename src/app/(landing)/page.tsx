@@ -25,13 +25,8 @@ export default function LandingPage() {
       <LandingHeader />
 
       {/* ==================== Hero Section ==================== */}
-      <section className="relative bg-[#0a0a0a] pt-40 pb-20 overflow-hidden">
-        {/* Background Grid & Glow Effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 landing-bg-grid h-[800px]" />
-        </div>
-
-        <div className="relative z-10 max-w-5xl mx-auto px-6 flex flex-col items-center text-center">
+      <section className="relative bg-black bg-grid pt-40 pb-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm mb-8">
             <span className="relative flex h-2 w-2">
@@ -66,8 +61,8 @@ export default function LandingPage() {
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== Problem Section ==================== */}
-      <section className="relative bg-[#111111] py-20 overflow-hidden">
-        <div className="max-w-5xl mx-auto px-6">
+      <section className="relative bg-zinc-950 py-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
               O problema que todo corredor conhece
@@ -123,13 +118,8 @@ export default function LandingPage() {
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== Solution Section ==================== */}
-      <section className="relative bg-[#0a0a0a] py-20 overflow-hidden">
-        {/* Background Grid & Glow Effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 landing-bg-grid h-[800px]" />
-        </div>
-
-        <div className="max-w-5xl mx-auto px-6">
+      <section className="relative bg-black bg-grid py-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
               Uma solução para cada problema
@@ -239,11 +229,11 @@ export default function LandingPage() {
                 </div>
                 <div className="flex -space-x-2">
                   {["R", "M", "A", "C", "L"].map((initial, i) => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-zinc-700 border-2 border-[#0a0a0a] flex items-center justify-center text-[10px] text-white font-medium">
+                    <div key={i} className="w-8 h-8 rounded-full bg-zinc-700 border-2 border-black flex items-center justify-center text-[10px] text-white font-medium">
                       {initial}
                     </div>
                   ))}
-                  <div className="w-8 h-8 rounded-full bg-zinc-800 border-2 border-[#0a0a0a] flex items-center justify-center text-[10px] text-zinc-400 font-medium">
+                  <div className="w-8 h-8 rounded-full bg-zinc-800 border-2 border-black flex items-center justify-center text-[10px] text-zinc-400 font-medium">
                     +9
                   </div>
                 </div>
@@ -256,8 +246,8 @@ export default function LandingPage() {
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== Features ==================== */}
-      <section id="features" className="relative bg-[#111111] py-20 overflow-hidden">
-        <div className="max-w-5xl mx-auto px-6">
+      <section id="features" className="relative bg-zinc-950 py-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
               Feito para quem corre
@@ -291,13 +281,8 @@ export default function LandingPage() {
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== How It Works ==================== */}
-      <section className="relative bg-[#0a0a0a] py-20 overflow-hidden">
-        {/* Background Grid & Glow Effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 landing-bg-grid h-[800px]" />
-        </div>
-
-        <div className="max-w-5xl mx-auto px-6">
+      <section className="relative bg-black bg-grid py-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
               Simples assim
@@ -333,8 +318,8 @@ export default function LandingPage() {
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== Cobertura Regional ==================== */}
-      <section id="cobertura" className="relative bg-[#111111] py-16">
-        <div className="max-w-5xl mx-auto px-6">
+      <section id="cobertura" className="relative bg-zinc-950 py-16">
+        <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-center text-xs font-semibold text-zinc-500 uppercase tracking-[0.2em] mb-10">
             Cobertura Regional
           </h2>
@@ -360,17 +345,8 @@ export default function LandingPage() {
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== CTA Final ==================== */}
-      <section className="relative bg-[#0a0a0a] py-24 md:py-32 overflow-hidden">
-        {/* Background Grid & Glow Effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 landing-bg-grid h-[800px]" />
-        </div>
-
-        {/* Subtle glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-zinc-600 to-transparent" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-zinc-700/10 blur-[80px] rounded-full" />
-
-        <div className="relative max-w-4xl mx-auto px-6 text-center">
+      <section className="relative bg-black bg-grid py-24 md:py-32 overflow-hidden">
+        <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-5xl font-medium text-white tracking-tight mb-4">
             Pronto para a largada?
           </h2>
@@ -383,8 +359,8 @@ export default function LandingPage() {
       </section>
 
       {/* ==================== Footer ==================== */}
-      <footer className="relative border-t border-zinc-800 bg-[#0a0a0a] py-12 md:py-16">
-        <div className="max-w-5xl mx-auto px-6">
+      <footer className="relative border-t border-zinc-800 bg-black py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {/* Brand */}
             <div className="col-span-2 sm:col-span-1">

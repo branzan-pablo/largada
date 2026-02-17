@@ -5,7 +5,6 @@ import { MapPin, Users, ArrowRight, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Race } from "@/types/race";
-import { cn } from "@/lib/utils";
 
 export function RaceCard({ race }: { race: Race }) {
   const raceDate = new Date(race.date + "T00:00:00");
@@ -14,7 +13,8 @@ export function RaceCard({ race }: { race: Race }) {
 
   return (
     <Link href={`/corrida/${race.slug}`} className="block group">
-      <div className="relative border border-zinc-800 rounded-xl bg-zinc-950/30 p-5 hover:border-zinc-700 hover:bg-zinc-900/30 transition-all duration-300 h-full flex flex-col">
+      <div className="relative border border-zinc-800 rounded-xl bg-zinc-950/30 p-5 hover:border-zinc-700 transition-all duration-300 h-full flex flex-col">
+
         {/* Header: Date + Badges + Bookmark */}
         <div className="flex items-start gap-2 mb-4">
           <div className="flex flex-col items-center justify-center bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 min-w-14">
@@ -28,7 +28,7 @@ export function RaceCard({ race }: { race: Race }) {
 
         {/* Info */}
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-white mb-2 group-hover:text-[#E85D2A] transition-colors line-clamp-2">
+          <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">
             {race.name}
           </h3>
 
