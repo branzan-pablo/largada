@@ -20,41 +20,49 @@ export function MyRacesClient() {
   const fetchedRef = useRef(false);
 
   const fetchRaces = useCallback(async (userId: string) => {
+    setIsLoading(true);
     const supabase = supabaseRef.current;
     const today = new Date().toISOString().split("T")[0];
 
-    const { data: rsvps } = await supabase
-      .from("rsvps")
-      .select("race_id")
-      .eq("user_id", userId);
+    try {
+      const { data: rsvps, error: rsvpsError } = await supabase
+        .from("rsvps")
+        .select("race_id")
+        .eq("user_id", userId);
 
-    if (!rsvps || rsvps.length === 0) {
-      setUpcoming([]);
-      setPast([]);
+      if (rsvpsError) {
+        throw rsvpsError;
+      }
+
+      if (!rsvps || rsvps.length === 0) {
+        setUpcoming([]);
+        setPast([]);
+        return;
+      }
+
+      const raceIds = rsvps.map((r) => r.race_id);
+
+      const [upcomingRes, pastRes] = await Promise.all([
+        supabase
+          .from("races")
+          .select("*")
+          .in("id", raceIds)
+          .gte("date", today)
+          .order("date", { ascending: true }),
+        supabase
+          .from("races")
+          .select("*")
+          .in("id", raceIds)
+          .lt("date", today)
+          .order("date", { ascending: false }),
+      ]);
+
+      setUpcoming((upcomingRes.data as Race[]) ?? []);
+      setPast((pastRes.data as Race[]) ?? []);
+    } catch {
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    const raceIds = rsvps.map((r) => r.race_id);
-
-    const [{ data: upcomingData }, { data: pastData }] = await Promise.all([
-      supabase
-        .from("races")
-        .select("*")
-        .in("id", raceIds)
-        .gte("date", today)
-        .order("date", { ascending: true }),
-      supabase
-        .from("races")
-        .select("*")
-        .in("id", raceIds)
-        .lt("date", today)
-        .order("date", { ascending: false }),
-    ]);
-
-    setUpcoming((upcomingData as Race[]) ?? []);
-    setPast((pastData as Race[]) ?? []);
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {
