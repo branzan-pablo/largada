@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LandingHeader } from "@/components/landing/landing-header";
+import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { NotificationPrompt } from "@/components/pwa/notification-prompt";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
@@ -11,7 +11,7 @@ export default function AppLayout({
 }) {
   return (
     <div className="dark min-h-screen bg-[#0a0a0a] text-zinc-300 flex flex-col">
-      <LandingHeader />
+      <Header />
       <div className="flex-1 pb-16 md:pb-0 pt-16">{children}</div>
       <BottomNav />
 

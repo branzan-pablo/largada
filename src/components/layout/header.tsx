@@ -61,7 +61,9 @@ export function Header() {
               <PopoverTrigger asChild>
                 <button className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={profile?.avatar_url ?? undefined} />
+                    {profile?.avatar_url && (
+                      <AvatarImage src={profile.avatar_url} />
+                    )}
                     <AvatarFallback>
                       {profile?.full_name?.charAt(0)?.toUpperCase() ?? "U"}
                     </AvatarFallback>

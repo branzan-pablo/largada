@@ -48,7 +48,9 @@ export function LandingHeader() {
               </Button>
               <Link href="/perfil">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={profile?.avatar_url ?? undefined} />
+                  {profile?.avatar_url && (
+                    <AvatarImage src={profile.avatar_url} />
+                  )}
                   <AvatarFallback className="bg-zinc-800 text-zinc-300">
                     {profile?.full_name?.charAt(0)?.toUpperCase() ?? "U"}
                   </AvatarFallback>

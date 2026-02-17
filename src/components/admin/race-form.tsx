@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -27,11 +28,19 @@ interface RaceFormProps {
   };
 }
 
+function normalizeUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) return trimmed;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 export function RaceForm({ race, suggestionData }: RaceFormProps) {
   const router = useRouter();
   const isEditing = !!race;
 
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [name, setName] = useState(race?.name ?? suggestionData?.name ?? "");
   const [date, setDate] = useState(race?.date ?? suggestionData?.date ?? "");
   const [startTime, setStartTime] = useState(race?.start_time?.slice(0, 5) ?? "07:00");
@@ -58,18 +67,38 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     );
   };
 
+  const validate = (): Record<string, string> => {
+    const errs: Record<string, string> = {};
+
+    if (!name || name.trim().length < 3) errs.name = "Nome deve ter pelo menos 3 caracteres";
+    if (!date) errs.date = "Data é obrigatória";
+    if (!startTime) errs.startTime = "Horário é obrigatório";
+    if (!city || !selectedCity) errs.city = "Selecione uma cidade";
+    if (!address || !address.trim()) errs.address = "Endereço é obrigatório";
+    if (distances.length === 0) errs.distances = "Selecione pelo menos uma distância";
+    if (!registrationPrice || !registrationPrice.trim()) errs.registrationPrice = "Valor é obrigatório";
+    if (!registrationLink || !registrationLink.trim()) errs.registrationLink = "Link é obrigatório";
+    if (!registrationDeadline) errs.registrationDeadline = "Prazo é obrigatório";
+
+    if (date && registrationDeadline && registrationDeadline >= date) {
+      errs.registrationDeadline = "Prazo deve ser anterior à data da corrida";
+    }
+
+    return errs;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (distances.length === 0) {
-      toast.error("Selecione pelo menos uma distância");
+    const validationErrors = validate();
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
+      toast.error("Corrija os campos destacados antes de salvar");
       return;
     }
 
-    if (!selectedCity) {
-      toast.error("Selecione uma cidade válida");
-      return;
-    }
+    const normalizedLink = normalizeUrl(registrationLink);
 
     setIsLoading(true);
 
@@ -77,14 +106,14 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       name,
       date,
       startTime,
-      city: selectedCity.name,
-      state: selectedCity.state,
+      city: selectedCity!.name,
+      state: selectedCity!.state,
       address,
-      latitude: selectedCity.lat,
-      longitude: selectedCity.lng,
+      latitude: selectedCity!.lat,
+      longitude: selectedCity!.lng,
       distances,
       registrationPrice,
-      registrationLink,
+      registrationLink: normalizedLink,
       registrationDeadline,
       prizeType,
       prizeDetails: prizeDetails || undefined,
@@ -133,29 +162,31 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
+    <form onSubmit={handleSubmit} className="max-w-3xl space-y-6" noValidate>
       {suggestionData?.suggestionId && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
           Criando corrida a partir de uma sugestão. Os campos nome, cidade e data
           foram pré-preenchidos. Ao salvar, a sugestão será marcada como aprovada.
         </div>
       )}
+
       {/* Basic Info */}
-      <section className="space-y-4">
+      <section className="space-y-4 rounded-lg border border-zinc-800 p-5">
         <h2 className="text-lg font-semibold">Informações Básicas</h2>
 
-        <div className="space-y-2">
-          <Label htmlFor="name">Nome da corrida *</Label>
-          <Input
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            minLength={3}
-          />
-        </div>
-
         <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="name">Nome da corrida *</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ex: Corrida Noturna de São José"
+              className={errors.name ? "border-destructive" : ""}
+            />
+            {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="date">Data *</Label>
             <Input
@@ -163,8 +194,9 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              required
+              className={errors.date ? "border-destructive" : ""}
             />
+            {errors.date && <p className="text-xs text-destructive">{errors.date}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="startTime">Horário de largada *</Label>
@@ -173,16 +205,15 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
               type="time"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
-              required
+              className={errors.startTime ? "border-destructive" : ""}
             />
+            {errors.startTime && <p className="text-xs text-destructive">{errors.startTime}</p>}
           </div>
-        </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="city">Cidade *</Label>
             <Select value={city} onValueChange={setCity}>
-              <SelectTrigger>
+              <SelectTrigger className={errors.city ? "border-destructive" : ""}>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
@@ -193,6 +224,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                 ))}
               </SelectContent>
             </Select>
+            {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="status">Status *</Label>
@@ -207,150 +239,170 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
               </SelectContent>
             </Select>
           </div>
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="address">Endereço / local de largada *</Label>
-          <Input
-            id="address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="organizer">Organizador</Label>
-          <Input
-            id="organizer"
-            value={organizer}
-            onChange={(e) => setOrganizer(e.target.value)}
-          />
-        </div>
-      </section>
-
-      {/* Distances */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold">Distâncias *</h2>
-        <div className="flex flex-wrap gap-4">
-          {DISTANCES.map((d) => (
-            <label
-              key={d}
-              className="flex items-center gap-2 text-sm"
-            >
-              <Checkbox
-                checked={distances.includes(d)}
-                onCheckedChange={() => handleDistanceToggle(d)}
-              />
-              {d.toUpperCase()}
-            </label>
-          ))}
-        </div>
-      </section>
-
-      {/* Registration */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold">Inscrição</h2>
-
-        <div className="space-y-2">
-          <Label htmlFor="registrationPrice">Valor da inscrição *</Label>
-          <Input
-            id="registrationPrice"
-            value={registrationPrice}
-            onChange={(e) => setRegistrationPrice(e.target.value)}
-            placeholder="Ex: 1º lote R$80, 2º lote R$100"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="registrationLink">Link de inscrição *</Label>
-          <Input
-            id="registrationLink"
-            type="url"
-            value={registrationLink}
-            onChange={(e) => setRegistrationLink(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="registrationDeadline">Prazo final de inscrição *</Label>
-          <Input
-            id="registrationDeadline"
-            type="date"
-            value={registrationDeadline}
-            onChange={(e) => setRegistrationDeadline(e.target.value)}
-            required
-          />
-        </div>
-      </section>
-
-      {/* Prize */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold">Premiação</h2>
-
-        <div className="space-y-2">
-          <Label htmlFor="prizeType">Tipo de premiação *</Label>
-          <Select value={prizeType} onValueChange={setPrizeType}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Sem premiação</SelectItem>
-              <SelectItem value="money">Dinheiro</SelectItem>
-              <SelectItem value="trophy">Troféu</SelectItem>
-              <SelectItem value="both">Dinheiro e Troféu</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {prizeType !== "none" && (
           <div className="space-y-2">
-            <Label htmlFor="prizeDetails">Detalhes da premiação</Label>
-            <textarea
-              id="prizeDetails"
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              value={prizeDetails}
-              onChange={(e) => setPrizeDetails(e.target.value)}
-              placeholder="Ex: R$1.000 (1º), R$500 (2º), R$300 (3º)"
+            <Label htmlFor="address">Endereço / local de largada *</Label>
+            <Input
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Ex: Praça Rui Barbosa, Centro"
+              className={errors.address ? "border-destructive" : ""}
+            />
+            {errors.address && <p className="text-xs text-destructive">{errors.address}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="organizer">Organizador</Label>
+            <Input
+              id="organizer"
+              value={organizer}
+              onChange={(e) => setOrganizer(e.target.value)}
+              placeholder="Ex: Assessoria XYZ"
             />
           </div>
-        )}
+        </div>
+      </section>
+
+      {/* Distances + Prize side by side */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Distances */}
+        <section className="space-y-4 rounded-lg border border-zinc-800 p-5">
+          <h2 className="text-lg font-semibold">Distâncias *</h2>
+          <div className="flex flex-wrap gap-4">
+            {DISTANCES.map((d) => (
+              <label
+                key={d}
+                className="flex items-center gap-2 text-sm"
+              >
+                <Checkbox
+                  checked={distances.includes(d)}
+                  onCheckedChange={() => handleDistanceToggle(d)}
+                />
+                {d.toUpperCase()}
+              </label>
+            ))}
+          </div>
+          {errors.distances && <p className="text-xs text-destructive">{errors.distances}</p>}
+        </section>
+
+        {/* Prize */}
+        <section className="space-y-4 rounded-lg border border-zinc-800 p-5">
+          <h2 className="text-lg font-semibold">Premiação</h2>
+
+          <div className="space-y-2">
+            <Label htmlFor="prizeType">Tipo de premiação *</Label>
+            <Select value={prizeType} onValueChange={setPrizeType}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sem premiação</SelectItem>
+                <SelectItem value="money">Dinheiro</SelectItem>
+                <SelectItem value="trophy">Troféu</SelectItem>
+                <SelectItem value="both">Dinheiro e Troféu</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {prizeType !== "none" && (
+            <div className="space-y-2">
+              <Label htmlFor="prizeDetails">Detalhes da premiação</Label>
+              <Textarea
+                id="prizeDetails"
+                value={prizeDetails}
+                onChange={(e) => setPrizeDetails(e.target.value)}
+                placeholder="Ex: R$1.000 (1º), R$500 (2º), R$300 (3º)"
+                className="min-h-[60px]"
+              />
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* Registration */}
+      <section className="space-y-4 rounded-lg border border-zinc-800 p-5">
+        <h2 className="text-lg font-semibold">Inscrição</h2>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="registrationPrice">Valor da inscrição *</Label>
+            <Input
+              id="registrationPrice"
+              value={registrationPrice}
+              onChange={(e) => setRegistrationPrice(e.target.value)}
+              placeholder="Ex: 1º lote R$80, 2º lote R$100"
+              className={errors.registrationPrice ? "border-destructive" : ""}
+            />
+            {errors.registrationPrice && <p className="text-xs text-destructive">{errors.registrationPrice}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="registrationDeadline">Prazo final *</Label>
+            <Input
+              id="registrationDeadline"
+              type="date"
+              value={registrationDeadline}
+              onChange={(e) => setRegistrationDeadline(e.target.value)}
+              className={errors.registrationDeadline ? "border-destructive" : ""}
+            />
+            {errors.registrationDeadline && <p className="text-xs text-destructive">{errors.registrationDeadline}</p>}
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="registrationLink">Link de inscrição *</Label>
+            <Input
+              id="registrationLink"
+              type="text"
+              value={registrationLink}
+              onChange={(e) => setRegistrationLink(e.target.value)}
+              placeholder="Ex: www.corridaxyz.com.br ou https://..."
+              className={errors.registrationLink ? "border-destructive" : ""}
+            />
+            {errors.registrationLink ? (
+              <p className="text-xs text-destructive">{errors.registrationLink}</p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Aceita links com ou sem https:// — o prefixo é adicionado automaticamente.
+              </p>
+            )}
+          </div>
+        </div>
       </section>
 
       {/* Route & Description */}
-      <section className="space-y-4">
+      <section className="space-y-4 rounded-lg border border-zinc-800 p-5">
         <h2 className="text-lg font-semibold">Percurso e Descrição</h2>
 
-        <div className="space-y-2">
-          <Label htmlFor="routeDescription">Descrição do percurso</Label>
-          <textarea
-            id="routeDescription"
-            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            value={routeDescription}
-            onChange={(e) => setRouteDescription(e.target.value)}
-          />
-        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="routeDescription">Descrição do percurso</Label>
+            <Textarea
+              id="routeDescription"
+              value={routeDescription}
+              onChange={(e) => setRouteDescription(e.target.value)}
+              placeholder="Ex: Percurso plano, com largada e chegada na praça central"
+              className="min-h-[80px]"
+            />
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="description">Descrição adicional</Label>
-          <textarea
-            id="description"
-            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição adicional</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Informações extras sobre a corrida"
+              className="min-h-[80px]"
+            />
+          </div>
         </div>
       </section>
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 pt-2">
         <Button type="submit" disabled={isLoading}>
           {isLoading
             ? "Salvando..."
             : isEditing
-            ? "Salvar alterações"
-            : "Criar corrida"}
+              ? "Salvar alterações"
+              : "Criar corrida"}
         </Button>
         <Button
           type="button"
