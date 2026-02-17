@@ -13,7 +13,7 @@ export function RaceCard({ race }: { race: Race }) {
 
   return (
     <Link href={`/corrida/${race.slug}`} className="block group">
-      <div className="relative border border-zinc-800 rounded-xl bg-zinc-950/30 p-5 hover:border-zinc-700 transition-all duration-300 h-full flex flex-col">
+      <div className="relative z-10 border border-zinc-800 rounded-xl bg-zinc-950 p-5 hover:border-zinc-700 transition-all duration-300 h-full flex flex-col">
 
         {/* Header: Date + Badges + Bookmark */}
         <div className="flex items-start gap-2 mb-4">

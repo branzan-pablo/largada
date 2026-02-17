@@ -9,6 +9,9 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+const primaryClass =
+  "w-full flex items-center justify-center gap-2 bg-[#e53300] text-white text-sm px-6 py-3 mt-3 rounded-full font-semibold hover:bg-[#c42d00] transition-colors";
+
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
@@ -64,7 +67,7 @@ export function InstallPrompt() {
             <X className="h-4 w-4" />
           </button>
         </div>
-        <Button onClick={handleInstall} size="sm" className="mt-3 w-full">
+        <Button onClick={handleInstall} className={primaryClass}>
           <Download className="mr-2 h-4 w-4" />
           Instalar
         </Button>

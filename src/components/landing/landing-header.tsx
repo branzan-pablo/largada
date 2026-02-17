@@ -6,6 +6,9 @@ import { useLoginModal } from "@/contexts/login-modal-context";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+const primaryClass =
+  "w-full sm:w-auto flex items-center justify-center gap-2 bg-[#e53300] text-white text-sm px-6 py-3 rounded-full font-semibold hover:bg-[#c42d00] transition-colors";
+
 export function LandingHeader() {
   const { user, profile, isLoading } = useAuth();
   const { openLogin, openRegister } = useLoginModal();
@@ -42,7 +45,7 @@ export function LandingHeader() {
               <Button
                 size="sm"
                 asChild
-                className="bg-[#E85D2A] text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-[#d4522a] border-0"
+                className="bg-[#e53300] text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-[#c42d00] border-0"
               >
                 <Link href="/corridas">Ir para corridas</Link>
               </Button>
@@ -67,7 +70,7 @@ export function LandingHeader() {
               </button>
               <button
                 onClick={openRegister}
-                className="bg-[#E85D2A] text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-[#d4522a] transition-colors"
+                className={primaryClass}
               >
                 Criar conta
               </button>

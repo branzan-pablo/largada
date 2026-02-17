@@ -6,7 +6,7 @@
   "display": "standalone",
   "gcm_sender_id": "103953800507",
   "background_color": "#FFFFFF",
-  "theme_color": "#E85D2A",
+  "theme_color": "#e53300",
   "orientation": "portrait",
   "categories": ["sports"],
   "icons": [

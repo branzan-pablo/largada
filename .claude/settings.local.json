@@ -29,7 +29,15 @@
       "Bash(find:*)",
       "Bash(ls:*)",
       "Bash(git -C \"C:\\\\Users\\\\pablo\\\\Development\\\\MVP\" log --all --oneline --grep=\"security\\\\|RLS\\\\|policy\" --ignore-case)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm audit:*)",
+      "Bash(git status:*)",
+      "Bash(npx supabase:*)",
+      "Bash(./node_modules/.bin/supabase:*)",
+      "Bash(pnpm exec supabase:*)",
+      "Bash(node scripts/postinstall.js:*)",
+      "Bash(\"C:\\\\Users\\\\pablo\\\\Development\\\\MVP\\\\node_modules\\\\supabase\\\\bin\\\\supabase.exe\" --version)"
     ]
   }
 }

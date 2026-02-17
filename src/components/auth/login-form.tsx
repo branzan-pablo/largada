@@ -14,6 +14,9 @@ interface LoginFormProps {
   onSuccess?: () => void;
 }
 
+const primaryClass =
+  "w-full flex items-center justify-center gap-2 bg-[#e53300] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#c42d00] transition-colors";
+
 export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -99,7 +102,7 @@ export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
             required
           />
         </div>
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button type="submit" className={primaryClass} disabled={isLoading}>
           {isLoading ? "Enviando..." : "Enviar email de recuperação"}
         </Button>
         <button
@@ -137,7 +140,7 @@ export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
         />
         {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
       </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
+      <Button type="submit" className={primaryClass} disabled={isLoading}>
         {isLoading ? "Entrando..." : "Entrar"}
       </Button>
       <button

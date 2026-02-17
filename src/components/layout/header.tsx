@@ -14,6 +14,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+const primaryClass =
+  "w-full sm:w-auto flex items-center justify-center gap-2 bg-[#e53300] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#c42d00] transition-colors";
+
 export function Header() {
   const { user, profile, isLoading, signOut } = useAuth();
   const { openLogin } = useLoginModal();
@@ -30,9 +33,15 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-14 max-w-screen-xl items-center justify-between px-4">
-        <Link href="/" className="text-xl font-extrabold uppercase tracking-wider text-primary">
-          Largada
-        </Link>
+        {/* Logo */}
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+            <span className="text-black font-semibold text-lg">L</span>
+          </div>
+          <Link href="/" className="text-white font-medium text-lg tracking-tight">
+            Largada
+          </Link>
+        </div>
 
         <nav className="hidden items-center gap-6 md:flex">
           {user && (
@@ -109,7 +118,7 @@ export function Header() {
               </PopoverContent>
             </Popover>
           ) : (
-            <Button size="sm" onClick={openLogin}>
+            <Button size="sm" onClick={openLogin} className={primaryClass}>
               Entrar
             </Button>
           )}

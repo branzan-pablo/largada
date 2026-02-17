@@ -17,6 +17,9 @@ import { REGION_CITIES } from "@/lib/constants";
 import { registerSchema } from "@/lib/validations";
 import { toast } from "sonner";
 
+const primaryClass =
+  "w-full flex items-center justify-center gap-2 bg-[#e53300] text-white text-sm px-6 py-3 rounded-full font-semibold hover:bg-[#c42d00] transition-colors";
+
 export function RegisterForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -128,7 +131,7 @@ export function RegisterForm() {
         </Select>
         {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
       </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
+      <Button type="submit" className={primaryClass} disabled={isLoading}>
         {isLoading ? "Criando conta..." : "Criar conta"}
       </Button>
     </form>

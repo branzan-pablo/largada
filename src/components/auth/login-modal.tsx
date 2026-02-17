@@ -41,7 +41,15 @@ export function LoginModal() {
       <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden dark text-foreground">
         <DialogHeader className="p-6 pb-0 text-center">
           <DialogTitle className="text-2xl font-extrabold uppercase tracking-wider text-primary">
-            Largada
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                <span className="text-black font-semibold text-lg">L</span>
+              </div>
+              <div className="text-white font-medium text-lg tracking-tight">
+                Largada
+              </div>
+            </div>
           </DialogTitle>
           <DialogDescription>
             Acesse sua conta ou crie uma nova para encontrar corridas na sua região
