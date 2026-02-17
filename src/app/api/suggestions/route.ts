@@ -1,20 +1,14 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { SUGGESTION_DAILY_LIMIT } from "@/lib/constants";
 import { notifyNewSuggestion } from "@/lib/notifications";
 import { suggestionSchema } from "@/lib/validations";
+import { requireAuth, requireAdmin } from "@/lib/auth";
 import { z } from "zod/v4";
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-  }
+  const authResult = await requireAuth();
+  if (authResult instanceof NextResponse) return authResult;
+  const { user, supabase } = authResult;
 
   // Rate limiting: max 5 suggestions per day
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -71,26 +65,9 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-  }
-
-  // Check admin role
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "admin") {
-    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-  }
+  const authResult = await requireAdmin();
+  if (authResult instanceof NextResponse) return authResult;
+  const { user, supabase } = authResult;
 
   const body = await request.json();
 
@@ -128,15 +105,9 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-  }
+  const authResult = await requireAuth();
+  if (authResult instanceof NextResponse) return authResult;
+  const { user, supabase } = authResult;
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");

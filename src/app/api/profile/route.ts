@@ -1,18 +1,12 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { REGION_CITIES } from "@/lib/constants";
 import { rateLimit } from "@/lib/rate-limit";
+import { requireAuth } from "@/lib/auth";
 
 export async function PATCH(request: Request) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-  }
+  const authResult = await requireAuth();
+  if (authResult instanceof NextResponse) return authResult;
+  const { user, supabase } = authResult;
 
   if (rateLimit(`profile:${user.id}`, { max: 5, windowMs: 60_000 }).limited) {
     return NextResponse.json(

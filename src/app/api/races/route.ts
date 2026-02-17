@@ -6,6 +6,7 @@ import { haversineDistance } from "@/lib/geo";
 import { ITEMS_PER_PAGE } from "@/lib/constants";
 import { notifyNewRace } from "@/lib/notifications";
 import { raceSchema } from "@/lib/validations";
+import { requireAdmin } from "@/lib/auth";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -121,26 +122,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-  }
-
-  // Check admin role
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "admin") {
-    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-  }
+  const authResult = await requireAdmin();
+  if (authResult instanceof NextResponse) return authResult;
+  const { user, supabase } = authResult;
 
   const raw = await request.json();
   const parsed = raceSchema.safeParse(raw);
