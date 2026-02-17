@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { LogOut, Loader2, Mail, MapPin, Bell, Heart, MessageSquarePlus, ChevronRight } from "lucide-react";
 
 export function ProfilePageClient() {
-  const { user, profile, isLoading, signOut, refetchProfile } = useAuth();
+  const { user, profile, isLoading, signOut, updateProfile } = useAuth();
   const { openLogin } = useLoginModal();
   const router = useRouter();
   const { permission, isSupported, requestPermission } = useNotifications();
@@ -36,13 +36,13 @@ export function ProfilePageClient() {
   );
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync state when profile loads
-  const [syncedProfileId, setSyncedProfileId] = useState<string | null>(null);
-  if (profile && profile.id !== syncedProfileId) {
+  // Sync state when profile loads or updates
+  const [syncedProfileUpdatedAt, setSyncedProfileUpdatedAt] = useState<string | null>(null);
+  if (profile && profile.updated_at !== syncedProfileUpdatedAt) {
     setFullName(profile.full_name ?? "");
     setCity(profile.city ?? "");
     setNotificationsEnabled(profile.notifications_enabled);
-    setSyncedProfileId(profile.id);
+    setSyncedProfileUpdatedAt(profile.updated_at);
   }
 
   useEffect(() => {
@@ -71,7 +71,8 @@ export function ProfilePageClient() {
         return;
       }
 
-      await refetchProfile(user.id);
+      const updatedProfile = await res.json();
+      updateProfile(updatedProfile);
       toast.success("Perfil atualizado!");
     } catch {
       toast.error("Erro ao salvar perfil.");
