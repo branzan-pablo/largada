@@ -1,4 +1,4 @@
--- Create profiles table (extends auth.users)
+-- Profiles table (extends auth.users)
 CREATE TABLE public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT,
@@ -13,15 +13,30 @@ CREATE TABLE public.profiles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Auto-create profile on user signup
+-- Indexes
+CREATE INDEX idx_profiles_city ON public.profiles(city);
+
+-- Auto-create profile on user signup (with safe coordinate casting)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, avatar_url)
+  INSERT INTO public.profiles (id, full_name, avatar_url, city, state, latitude, longitude)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', ''),
-    COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture', '')
+    COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture', ''),
+    NEW.raw_user_meta_data->>'city',
+    COALESCE(NEW.raw_user_meta_data->>'state', 'SP'),
+    CASE
+      WHEN NEW.raw_user_meta_data->>'latitude' ~ '^-?[0-9]+\.?[0-9]*$'
+      THEN (NEW.raw_user_meta_data->>'latitude')::DOUBLE PRECISION
+      ELSE NULL
+    END,
+    CASE
+      WHEN NEW.raw_user_meta_data->>'longitude' ~ '^-?[0-9]+\.?[0-9]*$'
+      THEN (NEW.raw_user_meta_data->>'longitude')::DOUBLE PRECISION
+      ELSE NULL
+    END
   );
   RETURN NEW;
 END;

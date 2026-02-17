@@ -1,4 +1,4 @@
--- Create FCM tokens table
+-- FCM tokens table (push notifications)
 CREATE TABLE public.fcm_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,

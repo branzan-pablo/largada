@@ -1,4 +1,4 @@
--- Create race suggestions table
+-- Race suggestions table
 CREATE TABLE public.race_suggestions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
