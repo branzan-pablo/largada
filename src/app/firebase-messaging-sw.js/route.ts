@@ -12,8 +12,18 @@ export async function GET() {
   };
 
   const js = `
+// Firebase SDK 8 (compat) is required here because Service Workers
+// do not support ES modules — importScripts is the only option.
 importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
 importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js");
+
+const SW_VERSION = "1.0.0";
+
+// Lifecycle: activate immediately on install, claim all clients on activate
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", (event) => {
+  event.waitUntil(clients.claim());
+});
 
 const firebaseConfig = ${JSON.stringify(firebaseConfig)};
 
@@ -22,33 +32,27 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  console.log("[firebase-messaging-sw.js] Received background message ", payload);
+  console.log("[SW v" + SW_VERSION + "] Background message received:", payload);
 
-  // payload.fcmOptions?.link comes from our backend API route
-  // payload.data.link or payload.data.url comes from the data payload
   const link = payload.fcmOptions?.link || payload.data?.link || payload.data?.url;
 
   const notificationTitle = payload.notification?.title || payload.data?.title || "Largada";
   const notificationOptions = {
     body: payload.notification?.body || payload.data?.body || "",
     icon: "/icons/icon.svg",
-    data: { url: link },
+    data: { url: link || "/corridas" },
   };
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 self.addEventListener("notificationclick", function (event) {
-  console.log("[firebase-messaging-sw.js] Notification click received.");
-
   event.notification.close();
 
   event.waitUntil(
     clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then(function (clientList) {
-        const url = event.notification.data?.url;
-
-        if (!url) return;
+        const url = event.notification.data?.url || "/corridas";
 
         for (const client of clientList) {
           if (client.url === url && "focus" in client) {
@@ -67,7 +71,7 @@ self.addEventListener("notificationclick", function (event) {
   return new NextResponse(js, {
     headers: {
       "Content-Type": "application/javascript",
-      "Cache-Control": "public, max-age=3600, s-maxage=86400",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
       "Service-Worker-Allowed": "/",
     },
   });

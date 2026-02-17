@@ -7,9 +7,50 @@ import { onMessage, type Unsubscribe } from "firebase/messaging";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+async function ensureServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  if (!("serviceWorker" in navigator)) return null;
+
+  try {
+    // Register (or update) the SW
+    await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
+      scope: "/",
+    });
+    // Wait until a SW controls this page
+    const registration = await navigator.serviceWorker.ready;
+    return registration;
+  } catch (error) {
+    console.error("[NotificationPrompt] SW registration failed:", error);
+    return null;
+  }
+}
+
+function isIOSWithoutStandalone(): boolean {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (!isIOS) return false;
+
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    ("standalone" in navigator && (navigator as unknown as { standalone: boolean }).standalone);
+
+  return !isStandalone;
+}
+
 async function getNotificationPermissionAndToken() {
   if (!("Notification" in window)) {
     console.info("This browser does not support desktop notification");
+    return null;
+  }
+
+  // iOS Safari only supports Web Push when installed as PWA (iOS 16.4+)
+  if (isIOSWithoutStandalone()) {
+    console.info("[NotificationPrompt] iOS detected without standalone mode — push not available");
+    return null;
+  }
+
+  // Ensure SW is registered and controlling the page before requesting token
+  const registration = await ensureServiceWorker();
+  if (!registration) {
+    console.error("[NotificationPrompt] No active SW registration — cannot get FCM token");
     return null;
   }
 
@@ -34,7 +75,6 @@ export function NotificationPrompt() {
   const [token, setToken] = useState<string | null>(null);
   const retryLoadToken = useRef(0);
   const isLoading = useRef(false);
-  const registeredRef = useRef(false);
 
   const loadToken = async () => {
     if (isLoading.current) return;
@@ -58,6 +98,8 @@ export function NotificationPrompt() {
       retryLoadToken.current += 1;
       console.error("An error occurred while retrieving token. Retrying...");
       isLoading.current = false;
+      // Delay before retry to allow recovery
+      await new Promise((r) => setTimeout(r, 2000));
       await loadToken();
       return;
     }
@@ -83,7 +125,10 @@ export function NotificationPrompt() {
 
   // Register token with backend when token is available
   useEffect(() => {
-    if (!token || !user || registeredRef.current) return;
+    if (!token || !user) return;
+
+    // Skip if already registered this session
+    if (sessionStorage.getItem("fcm_registered") === token) return;
 
     (async () => {
       try {
@@ -96,7 +141,7 @@ export function NotificationPrompt() {
           console.error("[NotificationPrompt] Token register failed:", await res.text());
           return;
         }
-        registeredRef.current = true;
+        sessionStorage.setItem("fcm_registered", token);
       } catch (error) {
         console.error("[NotificationPrompt] Token register error:", error);
       }
@@ -138,24 +183,6 @@ export function NotificationPrompt() {
             `${payload.notification?.title}: ${payload.notification?.body}`
           );
         }
-
-        // Also show native notification
-        const n = new Notification(
-          payload.notification?.title || "Largada",
-          {
-            body: payload.notification?.body || "",
-            icon: "/icons/icon.svg",
-            data: link ? { url: link } : undefined,
-          }
-        );
-
-        n.onclick = (event) => {
-          event.preventDefault();
-          const clickUrl = (event.target as unknown as { data?: { url?: string } })?.data?.url;
-          if (clickUrl) {
-            router.push(clickUrl);
-          }
-        };
       });
     };
 
