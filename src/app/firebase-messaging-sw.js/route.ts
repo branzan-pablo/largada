@@ -53,9 +53,12 @@ self.addEventListener("notificationclick", function (event) {
       .matchAll({ type: "window", includeUncontrolled: true })
       .then(function (clientList) {
         const url = event.notification.data?.url || "/corridas";
+        const targetPath = new URL(url, self.location.origin).pathname;
 
         for (const client of clientList) {
-          if (client.url === url && "focus" in client) {
+          const clientPath = new URL(client.url).pathname;
+          if (clientPath === targetPath && "focus" in client) {
+            client.navigate(url);
             return client.focus();
           }
         }

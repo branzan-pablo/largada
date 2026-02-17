@@ -22,12 +22,15 @@ const messaging = async () => {
   return supported ? getMessaging(app) : null;
 };
 
-export const fetchToken = async () => {
+export const fetchToken = async (
+  swRegistration?: ServiceWorkerRegistration
+) => {
   try {
     const fcmMessaging = await messaging();
     if (fcmMessaging) {
       const token = await getToken(fcmMessaging, {
         vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+        serviceWorkerRegistration: swRegistration,
       });
       return token;
     }

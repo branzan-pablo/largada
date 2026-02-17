@@ -55,13 +55,13 @@ async function getNotificationPermissionAndToken() {
   }
 
   if (Notification.permission === "granted") {
-    return await fetchToken();
+    return await fetchToken(registration);
   }
 
   if (Notification.permission !== "denied") {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
-      return await fetchToken();
+      return await fetchToken(registration);
     }
   }
 
@@ -132,6 +132,16 @@ export function NotificationPrompt() {
 
     (async () => {
       try {
+        // Delete previous token from this device to prevent duplicate notifications
+        const previousToken = localStorage.getItem("fcm_token");
+        if (previousToken && previousToken !== token) {
+          await fetch("/api/notifications/register", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: previousToken }),
+          }).catch(() => {});
+        }
+
         const res = await fetch("/api/notifications/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -141,6 +151,7 @@ export function NotificationPrompt() {
           console.error("[NotificationPrompt] Token register failed:", await res.text());
           return;
         }
+        localStorage.setItem("fcm_token", token);
         sessionStorage.setItem("fcm_registered", token);
       } catch (error) {
         console.error("[NotificationPrompt] Token register error:", error);
