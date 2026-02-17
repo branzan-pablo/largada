@@ -29,31 +29,30 @@ export function RaceList() {
     useInfiniteRaces(enrichedFilters, debouncedSearch);
 
   return (
-    <div className="mx-auto max-w-screen-xl px-4 py-8 md:py-12">
+    <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
       {/* Page Header */}
-      <div className="mb-8">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-medium text-white tracking-tight mb-2">
-              Calendário de Corridas
-            </h1>
-            <p className="text-zinc-500 max-w-lg">
-              Encontre e inscreva-se nas principais provas de rua da região. Filtre por
-              distância, cidade ou premiação.
-            </p>
-          </div>
-          {!isLoading && races.length > 0 && (
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              <span className="text-xs font-medium text-zinc-300">
-                {races.length} provas abertas
-              </span>
-            </div>
-          )}
+      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <h1 className="text-3xl md:text-4xl font-semibold text-white tracking-tight">
+            Calendário de Corridas
+          </h1>
+          <p className="text-zinc-500 max-w-xl text-lg">
+            Encontre e inscreva-se nas principais provas de rua da região. Filtre por
+            distância, cidade ou premiação.
+          </p>
         </div>
+
+        {!isLoading && races.length > 0 && (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 shrink-0 self-start md:self-center">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span className="text-xs font-medium text-zinc-400">
+              {races.length} provas abertas
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Mobile: search + filter button */}
@@ -71,7 +70,9 @@ export function RaceList() {
         <RaceFiltersMobile
           filters={filters}
           onFiltersChange={setFilters}
-          isLoggedIn={!!user}
+          isLoggedIn={true} // TODO: Check auth
+          search={search}
+          onSearchChange={setSearch}
         />
       </div>
 
@@ -93,7 +94,7 @@ export function RaceList() {
             ))}
           </div>
         ) : races.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="flex flex-col items-center justify-center py-16 text-center rounded-lg border border-zinc-800 bg-zinc-900/50">
             <Trophy className="mb-4 h-12 w-12 text-zinc-700" />
             <h3 className="text-lg font-semibold text-white">
               Nenhuma corrida encontrada
