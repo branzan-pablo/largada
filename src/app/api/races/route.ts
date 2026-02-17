@@ -59,6 +59,11 @@ export async function GET(request: Request) {
     query = query.in("prize_type", types);
   }
 
+  if (distances) {
+    const distanceList = distances.split(",");
+    query = query.overlaps("distances", distanceList);
+  }
+
   if (search) {
     // Sanitize search input — escape Postgres LIKE wildcards
     const sanitized = search.replace(/[%_\\]/g, "\\$&");
@@ -83,15 +88,7 @@ export async function GET(request: Request) {
 
   let filteredData = data ?? [];
 
-  // Distance filter (array overlap — show races that have at least one of the selected distances)
-  if (distances) {
-    const distanceList = distances.split(",");
-    filteredData = filteredData.filter((race) =>
-      race.distances.some((d: string) => distanceList.includes(d))
-    );
-  }
-
-  // Radius filter (Haversine)
+  // Radius filter (Haversine — kept client-side, PostGIS would be needed to move server-side)
   if (lat && lng && radius) {
     const userLat = parseFloat(lat);
     const userLng = parseFloat(lng);
@@ -103,8 +100,8 @@ export async function GET(request: Request) {
     );
   }
 
-  // When client-side filters (distances/radius) are active, the DB count is unreliable
-  const hasClientFilters = !!distances || (!!lat && !!lng && !!radius);
+  // When client-side filters (radius) are active, the DB count is unreliable
+  const hasClientFilters = !!lat && !!lng && !!radius;
   const filteredCount = hasClientFilters ? null : count;
   // If client-side filters are active, we can only know there are more pages
   // if the DB returned a full page (meaning there might be more to fetch)

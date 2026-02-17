@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DISTANCES, REGION_CITIES } from "@/lib/constants";
-import { normalizeUrl } from "@/lib/validations";
+import { raceSchema } from "@/lib/validations";
 import { toast } from "sonner";
 import type { Race } from "@/types/race";
 
@@ -61,53 +61,22 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     );
   };
 
-  const validate = (): Record<string, string> => {
-    const errs: Record<string, string> = {};
-
-    if (!name || name.trim().length < 3) errs.name = "Nome deve ter pelo menos 3 caracteres";
-    if (!date) errs.date = "Data é obrigatória";
-    if (!startTime) errs.startTime = "Horário é obrigatório";
-    if (!city || !selectedCity) errs.city = "Selecione uma cidade";
-    if (!address || !address.trim()) errs.address = "Endereço é obrigatório";
-    if (distances.length === 0) errs.distances = "Selecione pelo menos uma distância";
-    if (!registrationPrice || !registrationPrice.trim()) errs.registrationPrice = "Valor é obrigatório";
-    if (!registrationLink || !registrationLink.trim()) errs.registrationLink = "Link é obrigatório";
-    if (!registrationDeadline) errs.registrationDeadline = "Prazo é obrigatório";
-
-    if (date && registrationDeadline && registrationDeadline >= date) {
-      errs.registrationDeadline = "Prazo deve ser anterior à data da corrida";
-    }
-
-    return errs;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
 
-    const validationErrors = validate();
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length > 0) {
-      toast.error("Corrija os campos destacados antes de salvar");
-      return;
-    }
-
-    const normalizedLink = normalizeUrl(registrationLink);
-
-    setIsLoading(true);
-
-    const payload = {
+    const parsed = raceSchema.safeParse({
       name,
       date,
       startTime,
-      city: selectedCity!.name,
-      state: selectedCity!.state,
+      city: selectedCity?.name ?? city,
+      state: selectedCity?.state ?? "SP",
       address,
-      latitude: selectedCity!.lat,
-      longitude: selectedCity!.lng,
+      latitude: selectedCity?.lat ?? 0,
+      longitude: selectedCity?.lng ?? 0,
       distances,
       registrationPrice,
-      registrationLink: normalizedLink,
+      registrationLink,
       registrationDeadline,
       prizeType,
       prizeDetails: prizeDetails || undefined,
@@ -115,6 +84,24 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       organizer: organizer || undefined,
       description: description || undefined,
       status,
+    });
+
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0]?.toString();
+        if (field) fieldErrors[field] = issue.message;
+      }
+      if (!selectedCity) fieldErrors.city = "Selecione uma cidade";
+      setErrors(fieldErrors);
+      toast.error("Corrija os campos destacados antes de salvar");
+      return;
+    }
+
+    setIsLoading(true);
+
+    const payload = {
+      ...parsed.data,
       origin: suggestionData?.suggestionId ? "approved_suggestion" : "admin",
     };
 

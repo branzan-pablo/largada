@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { raceSchema } from "@/lib/validations";
+import { raceSchemaBase } from "@/lib/validations";
 import { requireAdmin } from "@/lib/auth";
 
 export async function PATCH(
@@ -14,7 +14,7 @@ export async function PATCH(
   const raw = await request.json();
 
   // Validate with partial schema (PATCH allows partial updates)
-  const partialSchema = raceSchema.partial();
+  const partialSchema = raceSchemaBase.partial();
   const parsed = partialSchema.safeParse(raw);
 
   if (!parsed.success) {

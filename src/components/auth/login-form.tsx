@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { loginSchema } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,11 +19,25 @@ export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showReset, setShowReset] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
   const supabase = createClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    const parsed = loginSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0]?.toString();
+        if (field) fieldErrors[field] = issue.message;
+      }
+      setErrors(fieldErrors);
+      return;
+    }
+
     setIsLoading(true);
 
     const { error } = await supabase.auth.signInWithPassword({
@@ -99,7 +114,7 @@ export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
   }
 
   return (
-    <form onSubmit={handleLogin} className="space-y-4">
+    <form onSubmit={handleLogin} className="space-y-4" noValidate>
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -108,8 +123,8 @@ export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
           placeholder="seu@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
         />
+        {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Senha</Label>
@@ -119,9 +134,8 @@ export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
           placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={6}
         />
+        {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
       </div>
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? "Entrando..." : "Entrar"}

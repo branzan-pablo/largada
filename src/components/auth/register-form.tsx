@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { REGION_CITIES } from "@/lib/constants";
+import { registerSchema } from "@/lib/validations";
 import { toast } from "sonner";
 
 export function RegisterForm() {
@@ -22,14 +23,22 @@ export function RegisterForm() {
   const [password, setPassword] = useState("");
   const [city, setCity] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
   const supabase = createClient();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
 
-    if (!city) {
-      toast.error("Selecione sua cidade para continuar.");
+    const parsed = registerSchema.safeParse({ fullName, email, password, city });
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0]?.toString();
+        if (field) fieldErrors[field] = issue.message;
+      }
+      setErrors(fieldErrors);
       return;
     }
 
@@ -69,7 +78,7 @@ export function RegisterForm() {
   };
 
   return (
-    <form onSubmit={handleRegister} className="space-y-4">
+    <form onSubmit={handleRegister} className="space-y-4" noValidate>
       <div className="space-y-2">
         <Label htmlFor="fullName">Nome completo</Label>
         <Input
@@ -78,9 +87,8 @@ export function RegisterForm() {
           placeholder="Seu nome"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          required
-          minLength={2}
         />
+        {errors.fullName && <p className="text-xs text-destructive">{errors.fullName}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="reg-email">Email</Label>
@@ -90,8 +98,8 @@ export function RegisterForm() {
           placeholder="seu@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
         />
+        {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="reg-password">Senha</Label>
@@ -101,9 +109,8 @@ export function RegisterForm() {
           placeholder="Mínimo 6 caracteres"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={6}
         />
+        {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="city">Sua cidade</Label>
@@ -119,6 +126,7 @@ export function RegisterForm() {
             ))}
           </SelectContent>
         </Select>
+        {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
       </div>
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? "Criando conta..." : "Criar conta"}

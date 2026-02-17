@@ -25,7 +25,7 @@ export const profileUpdateSchema = z.object({
   notificationsEnabled: z.boolean(),
 });
 
-export const raceSchema = z.object({
+export const raceSchemaBase = z.object({
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
   date: z.string().min(1, "Data é obrigatória"),
   startTime: z.string().min(1, "Horário é obrigatório"),
@@ -46,6 +46,11 @@ export const raceSchema = z.object({
   description: z.string().optional(),
   status: z.enum(["confirmed", "postponed", "cancelled"]).default("confirmed"),
 });
+
+export const raceSchema = raceSchemaBase.refine(
+  (data) => !data.registrationDeadline || !data.date || data.registrationDeadline < data.date,
+  { message: "Prazo deve ser anterior à data da corrida", path: ["registrationDeadline"] }
+);
 
 export const suggestionSchema = z.object({
   name: z.string().min(3, "Nome da corrida deve ter pelo menos 3 caracteres"),
