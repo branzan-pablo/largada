@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { toast } from "sonner";
 
 interface LoginModalContextValue {
   isOpen: boolean;
@@ -15,6 +23,33 @@ const LoginModalContext = createContext<LoginModalContextValue | null>(null);
 export function LoginModalProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [defaultTab, setDefaultTab] = useState<"login" | "register">("login");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Auto-open modal and show toasts based on URL params
+  useEffect(() => {
+    const login = searchParams.get("login");
+    const error = searchParams.get("error");
+
+    if (error === "auth") {
+      toast.error("Erro na autenticação. Tente novamente.");
+    } else if (error === "confirmation") {
+      toast.error("Erro ao confirmar email. Tente novamente.");
+    }
+
+    if (login === "true" || error) {
+      setDefaultTab("login");
+      setIsOpen(true);
+
+      // Clean URL params
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("login");
+      params.delete("error");
+      const remaining = params.toString();
+      router.replace(remaining ? `${pathname}?${remaining}` : pathname);
+    }
+  }, [searchParams, router, pathname]);
 
   const openLogin = useCallback(() => {
     setDefaultTab("login");

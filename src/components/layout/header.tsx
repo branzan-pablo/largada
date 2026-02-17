@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { useLoginModal } from "@/contexts/login-modal-context";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, LogOut, Shield, Heart } from "lucide-react";
@@ -15,6 +16,7 @@ import {
 
 export function Header() {
   const { user, profile, isLoading, signOut } = useAuth();
+  const { openLogin } = useLoginModal();
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -105,8 +107,8 @@ export function Header() {
               </PopoverContent>
             </Popover>
           ) : (
-            <Button size="sm" asChild>
-              <Link href="/login">Entrar</Link>
+            <Button size="sm" onClick={openLogin}>
+              Entrar
             </Button>
           )}
         </div>

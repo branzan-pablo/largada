@@ -25,5 +25,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=confirmation`);
+  return NextResponse.redirect(`${origin}/corridas?error=confirmation`);
 }

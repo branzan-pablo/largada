@@ -7,7 +7,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, changeFrequency: "weekly", priority: 1.0 },
     { url: `${baseUrl}/corridas`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/login`, changeFrequency: "monthly", priority: 0.3 },
   ];
 
   // Dynamic race pages

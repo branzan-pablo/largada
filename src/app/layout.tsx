@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/contexts/auth-context";
@@ -45,10 +46,12 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${inter.variable} font-sans antialiased`}>
         <AuthProvider>
-          <LoginModalProvider>
-            {children}
-            <LoginModal />
-          </LoginModalProvider>
+          <Suspense>
+            <LoginModalProvider>
+              {children}
+              <LoginModal />
+            </LoginModalProvider>
+          </Suspense>
         </AuthProvider>
         <Toaster position="bottom-center" richColors />
       </body>

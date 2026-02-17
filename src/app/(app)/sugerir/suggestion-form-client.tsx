@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { useLoginModal } from "@/contexts/login-modal-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ import { Loader2, Send } from "lucide-react";
 
 export function SuggestionFormClient() {
   const { user, isLoading: authLoading } = useAuth();
+  const { openLogin } = useLoginModal();
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -34,7 +36,7 @@ export function SuggestionFormClient() {
   if (authLoading) return null;
 
   if (!user) {
-    router.replace(`/login?redirect=${encodeURIComponent("/sugerir")}`);
+    openLogin();
     return null;
   }
 

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
+import { useLoginModal } from "@/contexts/login-modal-context";
 import { Lock } from "lucide-react";
 
 export function ResetPasswordClient() {
@@ -18,6 +19,7 @@ export function ResetPasswordClient() {
   const router = useRouter();
   const supabase = createClient();
   const { user } = useAuth();
+  const { openLogin } = useLoginModal();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,19 +36,23 @@ export function ResetPasswordClient() {
 
     setIsLoading(true);
 
-    const { error } = await supabase.auth.updateUser({
-      password,
-    });
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password,
+      });
 
-    if (error) {
-      toast.error(error.message);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      toast.success("Senha atualizada com sucesso!");
+      router.push("/corridas");
+    } catch {
+      toast.error("Erro ao atualizar senha. Tente novamente.");
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    toast.success("Senha atualizada com sucesso!");
-    setIsLoading(false);
-    router.push("/corridas");
   };
 
   if (!user) {
@@ -59,7 +65,7 @@ export function ResetPasswordClient() {
           <Button
             variant="outline"
             className="mt-4"
-            onClick={() => router.push("/login")}
+            onClick={openLogin}
           >
             Ir para login
           </Button>

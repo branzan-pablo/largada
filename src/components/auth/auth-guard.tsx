@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
+import { useLoginModal } from "@/contexts/login-modal-context";
 import {
   Dialog,
   DialogContent,
@@ -10,8 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -37,7 +36,7 @@ interface AuthDialogProps {
 }
 
 export function AuthDialog({ children }: AuthDialogProps) {
-  const pathname = usePathname();
+  const { openLogin } = useLoginModal();
   const [open, setOpen] = useState(false);
 
   return (
@@ -53,13 +52,13 @@ export function AuthDialog({ children }: AuthDialogProps) {
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3 pt-4">
-          <Button asChild>
-            <Link
-              href={`/login?redirect=${encodeURIComponent(pathname)}`}
-              onClick={() => setOpen(false)}
-            >
-              Entrar ou criar conta
-            </Link>
+          <Button
+            onClick={() => {
+              setOpen(false);
+              openLogin();
+            }}
+          >
+            Entrar ou criar conta
           </Button>
         </div>
       </DialogContent>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { useLoginModal } from "@/contexts/login-modal-context";
 import { createClient } from "@/lib/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RaceCard } from "@/components/races/race-card";
@@ -12,7 +12,7 @@ import type { Race } from "@/types/race";
 
 export function MyRacesClient() {
   const { user, isLoading: authLoading } = useAuth();
-  const router = useRouter();
+  const { openLogin } = useLoginModal();
   const [upcoming, setUpcoming] = useState<Race[]>([]);
   const [past, setPast] = useState<Race[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,7 +61,7 @@ export function MyRacesClient() {
     if (authLoading) return;
 
     if (!user) {
-      router.replace("/login?redirect=/perfil/minhas-corridas");
+      openLogin();
       return;
     }
 
@@ -69,7 +69,7 @@ export function MyRacesClient() {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
     fetchRaces(user.id);
-  }, [user, authLoading, router, fetchRaces]);
+  }, [user, authLoading, openLogin, fetchRaces]);
 
   if (authLoading || isLoading) {
     return (

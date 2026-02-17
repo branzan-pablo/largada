@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { useLoginModal } from "@/contexts/login-modal-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +25,7 @@ import { LogOut, Loader2, Mail, MapPin, Bell, Heart, MessageSquarePlus, ChevronR
 
 export function ProfilePageClient() {
   const { user, profile, isLoading, signOut, refetchProfile } = useAuth();
+  const { openLogin } = useLoginModal();
   const router = useRouter();
   const { permission, isSupported, requestPermission } = useNotifications();
 
@@ -46,7 +48,7 @@ export function ProfilePageClient() {
   if (isLoading) return null;
 
   if (!user || !profile) {
-    router.replace("/login");
+    openLogin();
     return null;
   }
 

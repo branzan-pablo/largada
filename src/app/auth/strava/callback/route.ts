@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   const origin = request.nextUrl.origin;
 
   if (error || !code || !state) {
-    return NextResponse.redirect(`${origin}/login?error=auth`);
+    return NextResponse.redirect(`${origin}/corridas?error=auth`);
   }
 
   try {
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!tokenRes.ok) {
-      return NextResponse.redirect(`${origin}/login?error=auth`);
+      return NextResponse.redirect(`${origin}/corridas?error=auth`);
     }
 
     const tokenData: StravaTokenResponse = await tokenRes.json();
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
         });
 
       if (createError || !newUser.user) {
-        return NextResponse.redirect(`${origin}/login?error=auth`);
+        return NextResponse.redirect(`${origin}/corridas?error=auth`);
       }
 
       userId = newUser.user.id;
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
       });
 
     if (linkError || !linkData) {
-      return NextResponse.redirect(`${origin}/login?error=auth`);
+      return NextResponse.redirect(`${origin}/corridas?error=auth`);
     }
 
     // 5. Extract token from the link and verify it to establish session
@@ -162,12 +162,12 @@ export async function GET(request: NextRequest) {
     });
 
     if (verifyError) {
-      return NextResponse.redirect(`${origin}/login?error=auth`);
+      return NextResponse.redirect(`${origin}/corridas?error=auth`);
     }
 
     // 6. Redirect to the app with session cookies attached
     return redirectResponse;
   } catch {
-    return NextResponse.redirect(`${origin}/login?error=auth`);
+    return NextResponse.redirect(`${origin}/corridas?error=auth`);
   }
 }

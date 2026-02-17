@@ -38,14 +38,9 @@ export async function middleware(request: NextRequest) {
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
 
   if (isProtected && !user) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // Redirect authenticated users away from login page
-  if (pathname === "/login" && user) {
-    return NextResponse.redirect(new URL("/corridas", request.url));
+    const url = new URL("/corridas", request.url);
+    url.searchParams.set("login", "true");
+    return NextResponse.redirect(url);
   }
 
   return supabaseResponse;

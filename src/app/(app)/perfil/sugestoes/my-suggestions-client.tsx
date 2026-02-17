@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { useLoginModal } from "@/contexts/login-modal-context";
 import { createClient } from "@/lib/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ const STATUS_MAP = {
 
 export function MySuggestionsClient() {
   const { user, isLoading: authLoading } = useAuth();
-  const router = useRouter();
+  const { openLogin } = useLoginModal();
   const [suggestions, setSuggestions] = useState<RaceSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const supabaseRef = useRef(createClient());
@@ -38,11 +38,11 @@ export function MySuggestionsClient() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.replace("/login");
+      openLogin();
       return;
     }
     fetchSuggestions(user.id);
-  }, [user, authLoading, router, fetchSuggestions]);
+  }, [user, authLoading, openLogin, fetchSuggestions]);
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
