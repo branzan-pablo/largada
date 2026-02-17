@@ -11,12 +11,25 @@ async function ensureServiceWorker(): Promise<ServiceWorkerRegistration | null> 
   if (!("serviceWorker" in navigator)) return null;
 
   try {
-    // Register (or update) the SW
     await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
       scope: "/",
     });
-    // Wait until a SW controls this page
     const registration = await navigator.serviceWorker.ready;
+
+    // On first visit the SW is active but may not yet control this page
+    // (clients.claim() in the SW's activate handler may still be propagating)
+    if (!navigator.serviceWorker.controller) {
+      await new Promise<void>((resolve) => {
+        const onController = () => resolve();
+        navigator.serviceWorker.addEventListener("controllerchange", onController, { once: true });
+        // Safety timeout: if claim() already happened before we started listening
+        setTimeout(() => {
+          navigator.serviceWorker.removeEventListener("controllerchange", onController);
+          resolve();
+        }, 3000);
+      });
+    }
+
     return registration;
   } catch (error) {
     console.error("[NotificationPrompt] SW registration failed:", error);
@@ -73,39 +86,37 @@ export function NotificationPrompt() {
   const { user, profile } = useAuth();
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
-  const retryLoadToken = useRef(0);
   const isLoading = useRef(false);
 
   const loadToken = async () => {
     if (isLoading.current) return;
-
     isLoading.current = true;
-    const fcmToken = await getNotificationPermissionAndToken();
 
-    if (Notification.permission === "denied") {
-      console.info("Push Notifications permission denied");
-      isLoading.current = false;
-      return;
-    }
+    try {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (attempt > 0) {
+          await new Promise((r) => setTimeout(r, 2000 * attempt));
+        }
 
-    if (!fcmToken) {
-      if (retryLoadToken.current >= 3) {
-        console.info("Unable to load FCM token after 3 retries");
-        isLoading.current = false;
-        return;
+        const fcmToken = await getNotificationPermissionAndToken();
+
+        if (Notification.permission === "denied") {
+          console.info("[NotificationPrompt] Permission denied");
+          return;
+        }
+
+        if (fcmToken) {
+          setToken(fcmToken);
+          return;
+        }
+
+        console.warn(`[NotificationPrompt] Token attempt ${attempt + 1}/3 failed`);
       }
 
-      retryLoadToken.current += 1;
-      console.error("An error occurred while retrieving token. Retrying...");
+      console.info("[NotificationPrompt] Unable to load FCM token after 3 attempts");
+    } finally {
       isLoading.current = false;
-      // Delay before retry to allow recovery
-      await new Promise((r) => setTimeout(r, 2000));
-      await loadToken();
-      return;
     }
-
-    setToken(fcmToken);
-    isLoading.current = false;
   };
 
   // Load token when user is logged in and has notifications enabled
