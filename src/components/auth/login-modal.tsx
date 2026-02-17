@@ -38,7 +38,7 @@ export function LoginModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
-      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden">
+      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden dark text-foreground">
         <DialogHeader className="p-6 pb-0 text-center">
           <DialogTitle className="text-2xl font-extrabold uppercase tracking-wider text-primary">
             Largada
