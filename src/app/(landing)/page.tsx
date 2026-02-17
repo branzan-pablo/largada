@@ -7,10 +7,7 @@ import {
   Bell,
   CalendarDays,
   MapPin,
-  Ruler,
-  Coins,
   Trophy,
-  Moon,
   Search,
   CheckCircle,
   Instagram,
@@ -32,7 +29,6 @@ export default function LandingPage() {
         {/* Background Grid & Glow Effects */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 landing-bg-grid h-[800px]" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-zinc-800/20 blur-[120px] rounded-full opacity-50 mix-blend-screen" />
         </div>
 
         <div className="relative z-10 max-w-5xl mx-auto px-6 flex flex-col items-center text-center">
@@ -128,6 +124,11 @@ export default function LandingPage() {
 
       {/* ==================== Solution Section ==================== */}
       <section className="relative bg-[#0a0a0a] py-20 overflow-hidden">
+        {/* Background Grid & Glow Effects */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 landing-bg-grid h-[800px]" />
+        </div>
+
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
@@ -291,6 +292,11 @@ export default function LandingPage() {
 
       {/* ==================== How It Works ==================== */}
       <section className="relative bg-[#0a0a0a] py-20 overflow-hidden">
+        {/* Background Grid & Glow Effects */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 landing-bg-grid h-[800px]" />
+        </div>
+
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
@@ -325,7 +331,7 @@ export default function LandingPage() {
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== Social Proof ==================== */}
-      <section className="relative bg-[#111111] py-20 overflow-hidden">
+      {/* <section className="relative bg-[#111111] py-20 overflow-hidden">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
@@ -374,12 +380,12 @@ export default function LandingPage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== Cobertura Regional ==================== */}
-      <section id="cobertura" className="relative bg-[#0a0a0a] py-16">
+      <section id="cobertura" className="relative bg-[#111111] py-16">
         <div className="max-w-5xl mx-auto px-6">
           <h2 className="text-center text-xs font-semibold text-zinc-500 uppercase tracking-[0.2em] mb-10">
             Cobertura Regional
@@ -406,15 +412,23 @@ export default function LandingPage() {
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== CTA Final ==================== */}
-      <section className="relative py-24 md:py-32 overflow-hidden bg-gradient-to-b from-[#E85D2A]/10 via-[#0a0a0a] to-[#0a0a0a]">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#E85D2A]/5 blur-[100px] rounded-full" />
+      <section className="relative bg-[#0a0a0a] py-24 md:py-32 overflow-hidden">
+        {/* Background Grid & Glow Effects */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 landing-bg-grid h-[800px]" />
+        </div>
+
+        {/* Subtle glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-zinc-600 to-transparent" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-zinc-700/10 blur-[80px] rounded-full" />
 
         <div className="relative max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
+          <h2 className="text-3xl md:text-5xl font-medium text-white tracking-tight mb-4">
             Pronto para a largada?
           </h2>
-          <p className="text-zinc-400 mb-10 max-w-md mx-auto">
-            Gratuito. Sem pegadinhas. Crie sua conta e encontre sua próxima prova.
+          <p className="text-zinc-500 mb-10 max-w-md mx-auto">
+            Crie sua conta gratuitamente, marque suas provas e receba
+            notificações personalizadas.
           </p>
           <CtaButtons />
         </div>

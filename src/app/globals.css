@@ -137,7 +137,7 @@
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 64px 64px;
+  background-size: 48px 48px;
   -webkit-mask-image: linear-gradient(to bottom, white 0%, transparent 100%);
   mask-image: linear-gradient(to bottom, white 0%, transparent 100%);
 }

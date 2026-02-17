@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
@@ -45,12 +45,13 @@ export function ProfilePageClient() {
     setSyncedProfileId(profile.id);
   }
 
-  if (isLoading) return null;
+  useEffect(() => {
+    if (!isLoading && !user) {
+      openLogin();
+    }
+  }, [isLoading, user, openLogin]);
 
-  if (!user || !profile) {
-    openLogin();
-    return null;
-  }
+  if (isLoading || !user || !profile) return null;
 
   const handleSave = async () => {
     setIsSaving(true);

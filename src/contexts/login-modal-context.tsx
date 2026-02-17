@@ -23,33 +23,6 @@ const LoginModalContext = createContext<LoginModalContextValue | null>(null);
 export function LoginModalProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [defaultTab, setDefaultTab] = useState<"login" | "register">("login");
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  // Auto-open modal and show toasts based on URL params
-  useEffect(() => {
-    const login = searchParams.get("login");
-    const error = searchParams.get("error");
-
-    if (error === "auth") {
-      toast.error("Erro na autenticação. Tente novamente.");
-    } else if (error === "confirmation") {
-      toast.error("Erro ao confirmar email. Tente novamente.");
-    }
-
-    if (login === "true" || error) {
-      setDefaultTab("login");
-      setIsOpen(true);
-
-      // Clean URL params
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("login");
-      params.delete("error");
-      const remaining = params.toString();
-      router.replace(remaining ? `${pathname}?${remaining}` : pathname);
-    }
-  }, [searchParams, router, pathname]);
 
   const openLogin = useCallback(() => {
     setDefaultTab("login");
@@ -70,6 +43,41 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
       {children}
     </LoginModalContext.Provider>
   );
+}
+
+/**
+ * Watches URL params (?login=true, ?error=auth|confirmation) and auto-opens the login modal.
+ * Must be rendered inside LoginModalProvider and wrapped in Suspense.
+ */
+export function LoginModalUrlHandler() {
+  const { openLogin } = useLoginModal();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const login = searchParams.get("login");
+    const error = searchParams.get("error");
+
+    if (error === "auth") {
+      toast.error("Erro na autenticação. Tente novamente.");
+    } else if (error === "confirmation") {
+      toast.error("Erro ao confirmar email. Tente novamente.");
+    }
+
+    if (login === "true" || error) {
+      openLogin();
+
+      // Clean URL params
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("login");
+      params.delete("error");
+      const remaining = params.toString();
+      router.replace(remaining ? `${pathname}?${remaining}` : pathname);
+    }
+  }, [searchParams, router, pathname, openLogin]);
+
+  return null;
 }
 
 export function useLoginModal() {

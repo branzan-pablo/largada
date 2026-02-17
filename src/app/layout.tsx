@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/contexts/auth-context";
-import { LoginModalProvider } from "@/contexts/login-modal-context";
+import { LoginModalProvider, LoginModalUrlHandler } from "@/contexts/login-modal-context";
 import { LoginModal } from "@/components/auth/login-modal";
 import "./globals.css";
 
@@ -46,12 +46,13 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${inter.variable} font-sans antialiased`}>
         <AuthProvider>
-          <Suspense>
-            <LoginModalProvider>
-              {children}
-              <LoginModal />
-            </LoginModalProvider>
-          </Suspense>
+          <LoginModalProvider>
+            <Suspense>
+              <LoginModalUrlHandler />
+            </Suspense>
+            {children}
+            <LoginModal />
+          </LoginModalProvider>
         </AuthProvider>
         <Toaster position="bottom-center" richColors />
       </body>

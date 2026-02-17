@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
@@ -33,12 +33,13 @@ export function SuggestionFormClient() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (authLoading) return null;
+  useEffect(() => {
+    if (!authLoading && !user) {
+      openLogin();
+    }
+  }, [authLoading, user, openLogin]);
 
-  if (!user) {
-    openLogin();
-    return null;
-  }
+  if (authLoading || !user) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

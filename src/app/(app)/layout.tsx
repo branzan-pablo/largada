@@ -27,13 +27,13 @@ export default function AppLayout({
             </span>
           </div>
           <nav className="flex items-center gap-6 text-xs text-zinc-600">
-            <Link href="/termos" className="hover:text-zinc-400 transition-colors">
+            <Link href="#" className="hover:text-zinc-400 transition-colors">
               Termos
             </Link>
-            <Link href="/privacidade" className="hover:text-zinc-400 transition-colors">
+            <Link href="#" className="hover:text-zinc-400 transition-colors">
               Privacidade
             </Link>
-            <Link href="/contato" className="hover:text-zinc-400 transition-colors">
+            <Link href="#" className="hover:text-zinc-400 transition-colors">
               Contato
             </Link>
           </nav>

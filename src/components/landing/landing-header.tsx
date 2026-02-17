@@ -31,9 +31,6 @@ export function LandingHeader() {
           <Link href="/corridas" className="text-sm text-zinc-400 hover:text-white transition-colors">
             Corridas
           </Link>
-          <a href="#cobertura" className="text-sm text-zinc-400 hover:text-white transition-colors">
-            Sobre
-          </a>
         </nav>
 
         {/* Auth area */}
