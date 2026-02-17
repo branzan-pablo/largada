@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { NotificationPrompt } from "@/components/pwa/notification-prompt";
@@ -17,7 +16,7 @@ export default function AppLayout({
 
       {/* Footer */}
       <footer className="hidden md:block border-t border-zinc-800 bg-[#0a0a0a] py-8">
-        <div className="max-w-screen-xl mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-screen-xl mx-auto px-6 flex items-center justify-center">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-zinc-800 rounded flex items-center justify-center">
               <span className="text-zinc-400 font-semibold text-xs">L</span>
@@ -26,17 +25,6 @@ export default function AppLayout({
               &copy; {new Date().getFullYear()} Largada
             </span>
           </div>
-          <nav className="flex items-center gap-6 text-xs text-zinc-600">
-            <Link href="#" className="hover:text-zinc-400 transition-colors">
-              Termos
-            </Link>
-            <Link href="#" className="hover:text-zinc-400 transition-colors">
-              Privacidade
-            </Link>
-            <Link href="#" className="hover:text-zinc-400 transition-colors">
-              Contato
-            </Link>
-          </nav>
         </div>
       </footer>
 

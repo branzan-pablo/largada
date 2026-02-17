@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { RaceDistanceBadges } from "./race-distance-badges";
 import { RacePrizeBadge } from "./race-prize-badge";
-import { MapPin, Users, ArrowRight, Bookmark, Tag } from "lucide-react";
+import { MapPin, Users, ArrowRight, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Race } from "@/types/race";
@@ -16,23 +16,14 @@ export function RaceCard({ race }: { race: Race }) {
     <Link href={`/corrida/${race.slug}`} className="block group">
       <div className="relative border border-zinc-800 rounded-xl bg-zinc-950/30 p-5 hover:border-zinc-700 hover:bg-zinc-900/30 transition-all duration-300 h-full flex flex-col">
         {/* Header: Date + Badges + Bookmark */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="flex flex-col items-center justify-center bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 min-w-14">
-              <span className="text-xs font-bold text-zinc-300 leading-none mb-0.5">{day}</span>
-              <span className="text-[10px] font-semibold text-zinc-500 leading-none">{month}</span>
-            </div>
-            {race.prize_type !== "none" && (
-              <RacePrizeBadge prizeType={race.prize_type} />
-            )}
+        <div className="flex items-start gap-2 mb-4">
+          <div className="flex flex-col items-center justify-center bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 min-w-14">
+            <span className="text-xs font-bold text-zinc-300 leading-none mb-0.5">{day}</span>
+            <span className="text-[10px] font-semibold text-zinc-500 leading-none">{month}</span>
           </div>
-          <button
-            type="button"
-            className="text-zinc-600 hover:text-zinc-300 transition-colors p-1 -mr-1"
-            aria-label="Salvar corrida"
-          >
-            <Bookmark className="w-5 h-5" />
-          </button>
+          {race.prize_type !== "none" && (
+            <RacePrizeBadge prizeType={race.prize_type} />
+          )}
         </div>
 
         {/* Info */}

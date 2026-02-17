@@ -8,7 +8,7 @@ interface SendNotificationOptions {
   tokens: string[];
 }
 
-async function sendToTokens({ title, body, url, tokens }: SendNotificationOptions) {
+export async function sendToTokens({ title, body, url, tokens }: SendNotificationOptions) {
   if (tokens.length === 0) return { sent: 0, failed: 0 };
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -79,7 +79,7 @@ export async function notifyNewRace(raceId: string) {
 
   const { data: tokens } = await supabase
     .from("fcm_tokens")
-    .select("token, profiles:user_id(notifications_enabled)")
+    .select("token, profiles:user_id(notifications_enabled, city)")
     .not("token", "is", null);
 
   if (!tokens || tokens.length === 0) return;
@@ -88,8 +88,9 @@ export async function notifyNewRace(raceId: string) {
     .filter((t) => {
       const profile = t.profiles as unknown as {
         notifications_enabled: boolean;
+        city: string | null;
       } | null;
-      return profile?.notifications_enabled;
+      return profile?.notifications_enabled && profile?.city === race.city;
     })
     .map((t) => t.token);
 

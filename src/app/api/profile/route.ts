@@ -25,13 +25,14 @@ export async function PATCH(request: Request) {
   }
 
   if (city !== undefined) {
-    updateData.city = city;
     const selectedCity = REGION_CITIES.find((c) => c.name === city);
-    if (selectedCity) {
-      updateData.state = selectedCity.state;
-      updateData.latitude = selectedCity.lat;
-      updateData.longitude = selectedCity.lng;
+    if (!selectedCity) {
+      return NextResponse.json({ error: "Cidade inválida" }, { status: 400 });
     }
+    updateData.city = city;
+    updateData.state = selectedCity.state;
+    updateData.latitude = selectedCity.lat;
+    updateData.longitude = selectedCity.lng;
   }
 
   if (notificationsEnabled !== undefined) {

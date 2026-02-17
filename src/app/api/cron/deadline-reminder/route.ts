@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAdminMessaging } from "@/lib/firebase/admin";
+import { sendToTokens } from "@/lib/notifications";
 
 // Cron: send reminders for races with registration deadline in 3 days
 export async function GET(request: Request) {
@@ -38,65 +38,36 @@ export async function GET(request: Request) {
 
     const userIds = rsvps.map((r) => r.user_id);
 
-    // Get FCM tokens for these users
+    // Get FCM tokens for these users (with notification preference check via join)
     const { data: tokens } = await supabase
       .from("fcm_tokens")
-      .select("token, user_id")
+      .select("token, profiles:user_id(notifications_enabled)")
       .in("user_id", userIds);
 
     if (!tokens || tokens.length === 0) continue;
 
-    // Filter users with notifications enabled
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, notifications_enabled")
-      .in("id", userIds)
-      .eq("notifications_enabled", true);
-
-    const enabledUserIds = new Set(profiles?.map((p) => p.id) ?? []);
     const targetTokens = tokens
-      .filter((t) => enabledUserIds.has(t.user_id))
+      .filter((t) => {
+        const profile = t.profiles as unknown as {
+          notifications_enabled: boolean;
+        } | null;
+        return profile?.notifications_enabled;
+      })
       .map((t) => t.token);
 
     if (targetTokens.length === 0) continue;
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const raceUrl = `${baseUrl}/corrida/${race.slug}`;
-    const iconUrl = `${baseUrl}/icons/icon.svg`;
-
-    const title = "Inscrição expirando!";
-    const body = `Faltam 3 dias para o prazo de inscrição: ${race.name}. Não perca!`;
-
     try {
-      const messaging = getAdminMessaging();
-      const result = await messaging.sendEachForMulticast({
+      const result = await sendToTokens({
+        title: "Inscrição expirando!",
+        body: `Faltam 3 dias para o prazo de inscrição: ${race.name}. Não perca!`,
+        url: `/corrida/${race.slug}`,
         tokens: targetTokens,
-        notification: { title, body },
-        data: { url: raceUrl },
-        webpush: {
-          notification: { title, body, icon: iconUrl },
-          fcmOptions: { link: raceUrl },
-        },
-        android: {
-          priority: "high" as const,
-          notification: { title, body, icon: "ic_notification", clickAction: raceUrl },
-        },
-        apns: {
-          headers: { "apns-priority": "10" },
-          payload: { aps: { alert: { title, body }, sound: "default" } },
-        },
       });
 
-      // Log individual failures
-      result.responses.forEach((resp, idx) => {
-        if (!resp.success) {
-          console.error(`[deadline-reminder] token[${idx}] failed:`, resp.error?.code, resp.error?.message);
-        }
-      });
-
-      totalSent += result.successCount;
+      totalSent += result.sent;
     } catch (error) {
-      console.error("[notifications] deadline reminder failed for race:", race.id, error);
+      console.error("[deadline-reminder] failed for race:", race.id, error);
     }
   }
 

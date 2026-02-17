@@ -9,12 +9,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/corridas`, changeFrequency: "daily", priority: 0.9 },
   ];
 
-  // Dynamic race pages
+  // Dynamic race pages (limited to most recent 1000 for performance)
   const supabase = createAdminClient();
   const { data: races } = await supabase
     .from("races")
     .select("slug, date")
-    .order("date", { ascending: false });
+    .order("date", { ascending: false })
+    .limit(1000);
 
   const racePages: MetadataRoute.Sitemap = (races ?? []).map((race) => ({
     url: `${baseUrl}/corrida/${race.slug}`,

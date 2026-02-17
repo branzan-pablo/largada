@@ -58,11 +58,15 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Token é obrigatório" }, { status: 400 });
   }
 
-  await supabase
+  const { error } = await supabase
     .from("fcm_tokens")
     .delete()
     .eq("user_id", user.id)
     .eq("token", token);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
 
   return NextResponse.json({ success: true });
 }

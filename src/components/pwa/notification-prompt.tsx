@@ -85,8 +85,6 @@ export function NotificationPrompt() {
   useEffect(() => {
     if (!token || !user || registeredRef.current) return;
 
-    registeredRef.current = true;
-
     (async () => {
       try {
         const res = await fetch("/api/notifications/register", {
@@ -96,7 +94,9 @@ export function NotificationPrompt() {
         });
         if (!res.ok) {
           console.error("[NotificationPrompt] Token register failed:", await res.text());
+          return;
         }
+        registeredRef.current = true;
       } catch (error) {
         console.error("[NotificationPrompt] Token register error:", error);
       }

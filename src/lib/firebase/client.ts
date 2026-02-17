@@ -3,7 +3,6 @@ import {
   getMessaging,
   getToken,
   isSupported,
-  onMessage,
 } from "firebase/messaging";
 
 const firebaseConfig = {
@@ -40,35 +39,3 @@ export const fetchToken = async () => {
 };
 
 export { app, messaging };
-
-// Legacy exports for backward compatibility with existing code
-export async function getFCMToken(): Promise<string | null> {
-  return fetchToken();
-}
-
-let foregroundListenerRegistered = false;
-
-export function setupForegroundMessaging() {
-  if (foregroundListenerRegistered) return;
-
-  messaging().then((m) => {
-    if (!m) return;
-    onMessage(m, (payload) => {
-      const title =
-        payload.notification?.title ?? payload.data?.title ?? "Largada";
-      const body = payload.notification?.body ?? payload.data?.body ?? "";
-
-      if (Notification.permission === "granted") {
-        // Show native notification for foreground messages
-        const link =
-          payload.fcmOptions?.link || payload.data?.link || payload.data?.url;
-        new Notification(title, {
-          body,
-          icon: "/icons/icon.svg",
-          data: link ? { url: link } : undefined,
-        });
-      }
-    });
-    foregroundListenerRegistered = true;
-  });
-}
