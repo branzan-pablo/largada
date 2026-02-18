@@ -16,7 +16,14 @@ export async function PATCH(request: Request) {
   }
 
   const body = await request.json();
-  const { fullName, city, notificationsEnabled } = body;
+  const {
+    fullName,
+    city,
+    cityId,
+    notificationsEnabled,
+    notificationRadiusKm,
+    onboardingCompleted,
+  } = body;
 
   const updateData: Record<string, unknown> = {};
 
@@ -24,7 +31,25 @@ export async function PATCH(request: Request) {
     updateData.full_name = fullName;
   }
 
-  if (city !== undefined) {
+  // New path: cityId (from cities table)
+  if (cityId !== undefined) {
+    const { data: cityRow } = await supabase
+      .from("cities")
+      .select("id, name, state_code, latitude, longitude")
+      .eq("id", cityId)
+      .single();
+
+    if (!cityRow) {
+      return NextResponse.json({ error: "Cidade inválida" }, { status: 400 });
+    }
+
+    updateData.city_id = cityRow.id;
+    updateData.city = cityRow.name;
+    updateData.state = cityRow.state_code;
+    updateData.latitude = cityRow.latitude;
+    updateData.longitude = cityRow.longitude;
+  } else if (city !== undefined) {
+    // Legacy path: city by name string (from REGION_CITIES)
     const selectedCity = REGION_CITIES.find((c) => c.name === city);
     if (!selectedCity) {
       return NextResponse.json({ error: "Cidade inválida" }, { status: 400 });
@@ -37,6 +62,17 @@ export async function PATCH(request: Request) {
 
   if (notificationsEnabled !== undefined) {
     updateData.notifications_enabled = notificationsEnabled;
+  }
+
+  if (notificationRadiusKm !== undefined) {
+    const radius = parseInt(notificationRadiusKm);
+    if (!isNaN(radius) && radius >= 10 && radius <= 500) {
+      updateData.notification_radius_km = radius;
+    }
+  }
+
+  if (onboardingCompleted !== undefined) {
+    updateData.onboarding_completed = onboardingCompleted;
   }
 
   updateData.updated_at = new Date().toISOString();

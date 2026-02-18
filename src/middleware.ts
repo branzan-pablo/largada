@@ -43,16 +43,30 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Admin role check for /admin routes
-  if (user && pathname.startsWith("/admin")) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+  // Profile checks (admin + onboarding) for authenticated users on app routes
+  if (user && !pathname.startsWith("/api/") && !pathname.startsWith("/auth/")) {
+    const needsAdminCheck = pathname.startsWith("/admin");
+    const needsOnboardingCheck = !pathname.startsWith("/onboarding");
 
-    if (profile?.role !== "admin") {
-      return NextResponse.redirect(new URL("/corridas", request.url));
+    if (needsAdminCheck || needsOnboardingCheck) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, city_id, onboarding_completed")
+        .eq("id", user.id)
+        .single();
+
+      if (needsAdminCheck && profile?.role !== "admin") {
+        return NextResponse.redirect(new URL("/corridas", request.url));
+      }
+
+      if (
+        needsOnboardingCheck &&
+        profile &&
+        !profile.onboarding_completed &&
+        profile.city_id === null
+      ) {
+        return NextResponse.redirect(new URL("/onboarding", request.url));
+      }
     }
   }
 

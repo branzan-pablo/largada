@@ -151,12 +151,20 @@ export async function POST(request: Request) {
     slug = `${slug}-${randomSuffix}`;
   }
 
+  // Resolve city_id from cities table
+  const { data: cityRow } = await adminClient
+    .from("cities")
+    .select("id")
+    .ilike("name", body.city)
+    .single();
+
   const raceData = {
     name: body.name,
     slug,
     date: body.date,
     start_time: body.startTime,
     city: body.city,
+    city_id: cityRow?.id ?? null,
     state: body.state ?? "SP",
     address: body.address,
     latitude: body.latitude,

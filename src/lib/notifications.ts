@@ -85,43 +85,79 @@ export async function sendToSubscriptions({
 }
 
 /**
- * Notify users in the same city when a new race is created
+ * Notify users when a new race is created.
+ * Uses radius-based matching via PostGIS if race has city_id,
+ * falls back to exact city string match otherwise.
  */
 export async function notifyNewRace(raceId: string) {
   const supabase = createAdminClient();
 
   const { data: race } = await supabase
     .from("races")
-    .select("name, city, slug")
+    .select("name, city, city_id, slug")
     .eq("id", raceId)
     .single();
 
   if (!race) return;
 
-  const { data: rows } = await supabase
-    .from("push_subscriptions")
-    .select(
-      "endpoint, p256dh, auth, profiles!push_subscriptions_user_id_fkey(notifications_enabled, city)"
-    )
-    .not("endpoint", "is", null);
+  if (race.city_id) {
+    // Radius-based matching via PostGIS
+    const { data: recipients } = await supabase.rpc(
+      "get_race_notification_recipients",
+      { p_race_city_id: race.city_id }
+    );
 
-  if (!rows || rows.length === 0) return;
+    if (!recipients || recipients.length === 0) return;
 
-  const targetSubs = rows
-    .filter(
-      (r) => {
-        const profile = r.profiles as unknown as { notifications_enabled: boolean; city: string } | null;
-        return profile?.notifications_enabled && profile?.city === race.city;
-      }
-    )
-    .map((r) => ({ endpoint: r.endpoint, p256dh: r.p256dh, auth: r.auth }));
+    const userIds = (recipients as { user_id: string; distance_km: number }[]).map(
+      (r) => r.user_id
+    );
 
-  await sendToSubscriptions({
-    title: "Nova corrida na sua região!",
-    body: `${race.name} em ${race.city}. Confira os detalhes.`,
-    url: `/corrida/${race.slug}`,
-    subscriptions: targetSubs,
-  });
+    const { data: subs } = await supabase
+      .from("push_subscriptions")
+      .select("endpoint, p256dh, auth")
+      .in("user_id", userIds);
+
+    if (!subs || subs.length === 0) return;
+
+    await sendToSubscriptions({
+      title: "Nova corrida na sua região!",
+      body: `${race.name} em ${race.city}. Confira os detalhes.`,
+      url: `/corrida/${race.slug}`,
+      subscriptions: subs,
+    });
+  } else {
+    // Fallback: exact city string match
+    const { data: rows } = await supabase
+      .from("push_subscriptions")
+      .select(
+        "endpoint, p256dh, auth, profiles!push_subscriptions_user_id_fkey(notifications_enabled, city)"
+      )
+      .not("endpoint", "is", null);
+
+    if (!rows || rows.length === 0) return;
+
+    const targetSubs = rows
+      .filter((r) => {
+        const profile = r.profiles as unknown as {
+          notifications_enabled: boolean;
+          city: string;
+        } | null;
+        return (
+          profile?.notifications_enabled &&
+          profile?.city != null &&
+          profile.city === race.city
+        );
+      })
+      .map((r) => ({ endpoint: r.endpoint, p256dh: r.p256dh, auth: r.auth }));
+
+    await sendToSubscriptions({
+      title: "Nova corrida na sua região!",
+      body: `${race.name} em ${race.city}. Confira os detalhes.`,
+      url: `/corrida/${race.slug}`,
+      subscriptions: targetSubs,
+    });
+  }
 }
 
 /**

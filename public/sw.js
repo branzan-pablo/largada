@@ -12,9 +12,9 @@ self.addEventListener("push", function (event) {
   let data;
   try {
     data = event.data.json();
-  } catch (e) {
-    console.error("[SW] Failed to parse push payload:", e);
-    return;
+  } catch (_) {
+    // Fallback for plain-text payloads (e.g. DevTools test push)
+    data = { title: "Largada", body: event.data.text() };
   }
 
   const options = {

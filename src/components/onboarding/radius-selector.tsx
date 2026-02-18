@@ -1,0 +1,38 @@
+"use client";
+
+import { ToggleChip } from "@/components/ui/toggle-chip";
+
+const RADIUS_OPTIONS = [50, 100, 150, 200] as const;
+
+interface RadiusSelectorProps {
+  value: number;
+  onChange: (radius: number) => void;
+  cityName?: string;
+}
+
+export function RadiusSelector({
+  value,
+  onChange,
+  cityName,
+}: RadiusSelectorProps) {
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
+        {RADIUS_OPTIONS.map((km) => (
+          <ToggleChip
+            key={km}
+            label={`${km}km`}
+            active={value === km}
+            onClick={() => onChange(km)}
+          />
+        ))}
+      </div>
+      {cityName && (
+        <p className="text-sm text-zinc-500">
+          Corridas em até <span className="font-medium text-zinc-300">{value}km</span> de{" "}
+          {cityName}
+        </p>
+      )}
+    </div>
+  );
+}

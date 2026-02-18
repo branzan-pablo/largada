@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      cities: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          state_code: string
+          latitude: number
+          longitude: number
+          active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          state_code: string
+          latitude: number
+          longitude: number
+          active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          state_code?: string
+          latitude?: number
+          longitude?: number
+          active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           id: string
@@ -56,12 +89,15 @@ export type Database = {
         Row: {
           avatar_url: string | null
           city: string | null
+          city_id: string | null
           created_at: string
           full_name: string | null
           id: string
           latitude: number | null
           longitude: number | null
+          notification_radius_km: number
           notifications_enabled: boolean | null
+          onboarding_completed: boolean
           role: string
           state: string | null
           updated_at: string
@@ -69,12 +105,15 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           city?: string | null
+          city_id?: string | null
           created_at?: string
           full_name?: string | null
           id: string
           latitude?: number | null
           longitude?: number | null
+          notification_radius_km?: number
           notifications_enabled?: boolean | null
+          onboarding_completed?: boolean
           role?: string
           state?: string | null
           updated_at?: string
@@ -82,17 +121,28 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           city?: string | null
+          city_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           latitude?: number | null
           longitude?: number | null
+          notification_radius_km?: number
           notifications_enabled?: boolean | null
+          onboarding_completed?: boolean
           role?: string
           state?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       race_suggestions: {
         Row: {
@@ -155,6 +205,7 @@ export type Database = {
         Row: {
           address: string
           city: string
+          city_id: string | null
           created_at: string
           created_by: string | null
           date: string
@@ -183,6 +234,7 @@ export type Database = {
         Insert: {
           address: string
           city: string
+          city_id?: string | null
           created_at?: string
           created_by?: string | null
           date: string
@@ -211,6 +263,7 @@ export type Database = {
         Update: {
           address?: string
           city?: string
+          city_id?: string | null
           created_at?: string
           created_by?: string | null
           date?: string
@@ -237,6 +290,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "races_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "races_created_by_fkey"
             columns: ["created_by"]
@@ -287,7 +347,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_race_notification_recipients: {
+        Args: { p_race_city_id: string }
+        Returns: { user_id: string; distance_km: number }[]
+      }
+      search_cities: {
+        Args: { p_query: string; p_limit?: number }
+        Returns: { id: string; name: string; state_code: string; slug: string }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -8,17 +8,11 @@ import { useLoginModal } from "@/contexts/login-modal-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { REGION_CITIES } from "@/lib/constants";
+import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
+import { RadiusSelector } from "@/components/onboarding/radius-selector";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { toast } from "sonner";
 import { LogOut, Loader2, Mail, MapPin, Bell, Heart, MessageSquarePlus, ChevronRight } from "lucide-react";
@@ -30,7 +24,9 @@ export function ProfilePageClient() {
   const { permission, isSupported, requestPermission } = usePushNotifications();
 
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
-  const [city, setCity] = useState(profile?.city ?? "");
+  const [cityId, setCityId] = useState(profile?.city_id ?? "");
+  const [cityName, setCityName] = useState(profile?.city ?? "");
+  const [radius, setRadius] = useState(profile?.notification_radius_km ?? 150);
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     profile?.notifications_enabled ?? false
   );
@@ -40,7 +36,9 @@ export function ProfilePageClient() {
   const [syncedProfileUpdatedAt, setSyncedProfileUpdatedAt] = useState<string | null>(null);
   if (profile && profile.updated_at !== syncedProfileUpdatedAt) {
     setFullName(profile.full_name ?? "");
-    setCity(profile.city ?? "");
+    setCityId(profile.city_id ?? "");
+    setCityName(profile.city ?? "");
+    setRadius(profile.notification_radius_km ?? 150);
     setNotificationsEnabled(profile.notifications_enabled);
     setSyncedProfileUpdatedAt(profile.updated_at);
   }
@@ -61,7 +59,8 @@ export function ProfilePageClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fullName,
-          city: city || undefined,
+          cityId: cityId || undefined,
+          notificationRadiusKm: radius,
           notificationsEnabled,
         }),
       });
@@ -126,20 +125,26 @@ export function ProfilePageClient() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="city">Cidade</Label>
-          <Select value={city} onValueChange={setCity}>
-            <SelectTrigger id="city">
-              <SelectValue placeholder="Selecione sua cidade" />
-            </SelectTrigger>
-            <SelectContent>
-              {REGION_CITIES.map((c) => (
-                <SelectItem key={c.name} value={c.name}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label>Cidade</Label>
+          <CityAutocomplete
+            onSelect={(c) => {
+              setCityId(c.id);
+              setCityName(c.name);
+            }}
+            initialCity={cityName ? `${cityName} — ${profile?.state ?? "SP"}` : undefined}
+          />
         </div>
+
+        {cityId && (
+          <div className="space-y-2">
+            <Label>Raio de notificação</Label>
+            <RadiusSelector
+              value={radius}
+              onChange={setRadius}
+              cityName={cityName}
+            />
+          </div>
+        )}
 
         <div className="flex items-center justify-between rounded-lg border p-4">
           <div className="space-y-0.5">
