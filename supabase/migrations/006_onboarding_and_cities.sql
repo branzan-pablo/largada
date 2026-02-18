@@ -89,22 +89,37 @@ WHERE city_id IS NOT NULL;
 UPDATE profiles SET notifications_enabled = false WHERE notifications_enabled IS NULL;
 ALTER TABLE public.profiles ALTER COLUMN notifications_enabled SET NOT NULL;
 
--- 8. Atualizar trigger handle_new_user (notifications_enabled = false por padrão)
+-- 8. Atualizar trigger handle_new_user (resolve city_id automaticamente)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+  _city_id UUID;
 BEGIN
-  INSERT INTO public.profiles (id, full_name, avatar_url, city, state, latitude, longitude, notifications_enabled)
-  VALUES (
+  -- Resolver city_id pelo nome da cidade na tabela cities
+  IF NEW.raw_user_meta_data->>'city' IS NOT NULL THEN
+    SELECT id INTO _city_id FROM public.cities
+    WHERE LOWER(name) = LOWER(NEW.raw_user_meta_data->>'city')
+    LIMIT 1;
+  END IF;
+
+  INSERT INTO public.profiles (
+    id, full_name, avatar_url, city, city_id, state,
+    latitude, longitude, notifications_enabled,
+    onboarding_completed, notification_radius_km
+  ) VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', ''),
     COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture', ''),
     NEW.raw_user_meta_data->>'city',
+    _city_id,
     COALESCE(NEW.raw_user_meta_data->>'state', 'SP'),
     CASE WHEN NEW.raw_user_meta_data->>'latitude' ~ '^-?[0-9]+\.?[0-9]*$'
       THEN (NEW.raw_user_meta_data->>'latitude')::DOUBLE PRECISION ELSE NULL END,
     CASE WHEN NEW.raw_user_meta_data->>'longitude' ~ '^-?[0-9]+\.?[0-9]*$'
       THEN (NEW.raw_user_meta_data->>'longitude')::DOUBLE PRECISION ELSE NULL END,
-    false
+    false,
+    (_city_id IS NOT NULL),
+    150
   );
   RETURN NEW;
 END;
