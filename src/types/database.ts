@@ -96,7 +96,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           notification_radius_km: number
-          notifications_enabled: boolean | null
+          notifications_enabled: boolean
           onboarding_completed: boolean
           role: string
           state: string | null
@@ -112,7 +112,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           notification_radius_km?: number
-          notifications_enabled?: boolean | null
+          notifications_enabled?: boolean
           onboarding_completed?: boolean
           role?: string
           state?: string | null
@@ -128,7 +128,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           notification_radius_km?: number
-          notifications_enabled?: boolean | null
+          notifications_enabled?: boolean
           onboarding_completed?: boolean
           role?: string
           state?: string | null
@@ -353,7 +353,7 @@ export type Database = {
       }
       search_cities: {
         Args: { p_query: string; p_limit?: number }
-        Returns: { id: string; name: string; state_code: string; slug: string }[]
+        Returns: { id: string; name: string; state_code: string; slug: string; latitude: number; longitude: number }[]
       }
     }
     Enums: {

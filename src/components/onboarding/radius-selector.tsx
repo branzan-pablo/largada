@@ -1,8 +1,7 @@
 "use client";
 
 import { ToggleChip } from "@/components/ui/toggle-chip";
-
-const RADIUS_OPTIONS = [50, 100, 150, 200] as const;
+import { RADIUS_OPTIONS } from "@/lib/constants";
 
 interface RadiusSelectorProps {
   value: number;

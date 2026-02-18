@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
 import { RadiusSelector } from "@/components/onboarding/radius-selector";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 
 interface SelectedCity {
@@ -13,11 +15,14 @@ interface SelectedCity {
   name: string;
   state_code: string;
   slug: string;
+  latitude: number;
+  longitude: number;
 }
 
 export default function OnboardingPage() {
   const { user, updateProfile, profile } = useAuth();
   const router = useRouter();
+  const { isSupported, subscribe } = usePushNotifications();
 
   const [selectedCity, setSelectedCity] = useState<SelectedCity | null>(null);
   const [radius, setRadius] = useState(150);
@@ -28,6 +33,11 @@ export default function OnboardingPage() {
     setIsLoading(true);
 
     try {
+      // Request push permission and create subscription before saving profile
+      if (isSupported) {
+        await subscribe();
+      }
+
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -43,7 +53,11 @@ export default function OnboardingPage() {
         const updatedProfile = await res.json();
         updateProfile(updatedProfile);
         router.push("/corridas");
+      } else {
+        toast.error("Erro ao salvar. Tente novamente.");
       }
+    } catch {
+      toast.error("Erro ao salvar. Tente novamente.");
     } finally {
       setIsLoading(false);
     }

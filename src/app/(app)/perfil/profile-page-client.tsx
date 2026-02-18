@@ -131,6 +131,10 @@ export function ProfilePageClient() {
               setCityId(c.id);
               setCityName(c.name);
             }}
+            onClear={() => {
+              setCityId("");
+              setCityName("");
+            }}
             initialCity={cityName ? `${cityName} — ${profile?.state ?? "SP"}` : undefined}
           />
         </div>

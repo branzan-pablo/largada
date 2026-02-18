@@ -14,7 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DISTANCES, REGION_CITIES } from "@/lib/constants";
+import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
+import { DISTANCES } from "@/lib/constants";
 import { raceSchema } from "@/lib/validations";
 import { toast } from "sonner";
 import type { Race } from "@/types/race";
@@ -38,7 +39,16 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   const [name, setName] = useState(race?.name ?? suggestionData?.name ?? "");
   const [date, setDate] = useState(race?.date ?? suggestionData?.date ?? "");
   const [startTime, setStartTime] = useState(race?.start_time?.slice(0, 5) ?? "07:00");
-  const [city, setCity] = useState(race?.city ?? suggestionData?.city ?? "");
+  const [selectedCity, setSelectedCity] = useState<{
+    name: string;
+    state_code: string;
+    latitude: number;
+    longitude: number;
+  } | null>(
+    race
+      ? { name: race.city, state_code: race.state, latitude: race.latitude, longitude: race.longitude }
+      : null
+  );
   const [address, setAddress] = useState(race?.address ?? "");
   const [distances, setDistances] = useState<string[]>(race?.distances ?? []);
   const [registrationPrice, setRegistrationPrice] = useState(race?.registration_price ?? "");
@@ -50,8 +60,6 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   const [organizer, setOrganizer] = useState(race?.organizer ?? "");
   const [description, setDescription] = useState(race?.description ?? "");
   const [status, setStatus] = useState<string>(race?.status ?? "confirmed");
-
-  const selectedCity = REGION_CITIES.find((c) => c.name === city);
 
   const handleDistanceToggle = (distance: string) => {
     setDistances((prev) =>
@@ -65,15 +73,21 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     e.preventDefault();
     setErrors({});
 
+    if (!selectedCity) {
+      setErrors((prev) => ({ ...prev, city: "Selecione uma cidade" }));
+      toast.error("Corrija os campos destacados antes de salvar");
+      return;
+    }
+
     const parsed = raceSchema.safeParse({
       name,
       date,
       startTime,
-      city: selectedCity?.name ?? city,
-      state: selectedCity?.state ?? "SP",
+      city: selectedCity.name,
+      state: selectedCity.state_code,
       address,
-      latitude: selectedCity?.lat ?? 0,
-      longitude: selectedCity?.lng ?? 0,
+      latitude: selectedCity.latitude,
+      longitude: selectedCity.longitude,
       distances,
       registrationPrice,
       registrationLink,
@@ -92,7 +106,6 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
         const field = issue.path[0]?.toString();
         if (field) fieldErrors[field] = issue.message;
       }
-      if (!selectedCity) fieldErrors.city = "Selecione uma cidade";
       setErrors(fieldErrors);
       toast.error("Corrija os campos destacados antes de salvar");
       return;
@@ -192,19 +205,23 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="city">Cidade *</Label>
-            <Select value={city} onValueChange={setCity}>
-              <SelectTrigger className={errors.city ? "border-destructive" : ""}>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {REGION_CITIES.map((c) => (
-                  <SelectItem key={c.name} value={c.name}>
-                    {c.name}/{c.state}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Cidade *</Label>
+            <CityAutocomplete
+              onSelect={(c) => setSelectedCity({
+                name: c.name,
+                state_code: c.state_code,
+                latitude: c.latitude,
+                longitude: c.longitude,
+              })}
+              onClear={() => setSelectedCity(null)}
+              initialCity={
+                race
+                  ? `${race.city} — ${race.state}`
+                  : suggestionData?.city
+                    ? `${suggestionData.city}`
+                    : undefined
+              }
+            />
             {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
           </div>
           <div className="space-y-2">

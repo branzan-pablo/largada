@@ -85,6 +85,10 @@ WHERE p.city_id IS NULL
 UPDATE profiles SET onboarding_completed = true
 WHERE city_id IS NOT NULL;
 
+-- 7b. Garantir NOT NULL em notifications_enabled
+UPDATE profiles SET notifications_enabled = false WHERE notifications_enabled IS NULL;
+ALTER TABLE public.profiles ALTER COLUMN notifications_enabled SET NOT NULL;
+
 -- 8. Atualizar trigger handle_new_user (notifications_enabled = false por padrão)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -128,8 +132,8 @@ $$ LANGUAGE sql STABLE;
 
 -- 10. Função: autocomplete de cidades
 CREATE OR REPLACE FUNCTION search_cities(p_query TEXT, p_limit INT DEFAULT 10)
-RETURNS TABLE(id UUID, name VARCHAR, state_code CHAR(2), slug VARCHAR) AS $$
-  SELECT c.id, c.name, c.state_code, c.slug
+RETURNS TABLE(id UUID, name VARCHAR, state_code CHAR(2), slug VARCHAR, latitude DECIMAL, longitude DECIMAL) AS $$
+  SELECT c.id, c.name, c.state_code, c.slug, c.latitude, c.longitude
   FROM public.cities c
   WHERE c.active = true
     AND (c.name ILIKE '%' || p_query || '%'
@@ -139,3 +143,6 @@ RETURNS TABLE(id UUID, name VARCHAR, state_code CHAR(2), slug VARCHAR) AS $$
     c.name
   LIMIT p_limit;
 $$ LANGUAGE sql STABLE;
+
+-- 11. Recarregar schema cache do PostgREST (necessário para novas colunas)
+NOTIFY pgrst, 'reload schema';

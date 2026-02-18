@@ -10,16 +10,20 @@ interface City {
   name: string;
   state_code: string;
   slug: string;
+  latitude: number;
+  longitude: number;
 }
 
 interface CityAutocompleteProps {
   onSelect: (city: City) => void;
+  onClear?: () => void;
   initialCity?: string | null;
   placeholder?: string;
 }
 
 export function CityAutocomplete({
   onSelect,
+  onClear,
   initialCity,
   placeholder = "Digite sua cidade...",
 }: CityAutocompleteProps) {
@@ -56,7 +60,10 @@ export function CityAutocomplete({
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     setQuery(value);
-    setSelectedId(null);
+    if (selectedId) {
+      setSelectedId(null);
+      onClear?.();
+    }
 
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => search(value), 300);

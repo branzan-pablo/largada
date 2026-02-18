@@ -16,7 +16,7 @@ export const RACE_STATUSES = {
 } as const;
 export type RaceStatus = keyof typeof RACE_STATUSES;
 
-export const RADIUS_OPTIONS = [10, 25, 50, 100] as const;
+export const RADIUS_OPTIONS = [50, 100, 150, 200] as const;
 
 export const REGION_CITIES = [
   { name: "São José do Rio Preto", state: "SP", lat: -20.8113, lng: -49.3758 },

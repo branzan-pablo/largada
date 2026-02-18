@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { raceSchemaBase } from "@/lib/validations";
 import { requireAdmin } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function PATCH(
   request: Request,
@@ -56,6 +57,17 @@ export async function PATCH(
     if (body[camel] !== undefined) {
       updateData[snake] = body[camel];
     }
+  }
+
+  // Resolve city_id when city changes
+  if (updateData.city) {
+    const adminClient = createAdminClient();
+    const { data: cityRow } = await adminClient
+      .from("cities")
+      .select("id")
+      .ilike("name", updateData.city as string)
+      .single();
+    updateData.city_id = cityRow?.id ?? null;
   }
 
   const { data, error } = await supabase
