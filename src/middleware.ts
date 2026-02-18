@@ -46,7 +46,7 @@ export async function middleware(request: NextRequest) {
   // Profile checks (admin + onboarding) for authenticated users on app routes
   if (user && !pathname.startsWith("/api/") && !pathname.startsWith("/auth/")) {
     const needsAdminCheck = pathname.startsWith("/admin");
-    const needsOnboardingCheck = isProtected && !pathname.startsWith("/onboarding");
+    const needsOnboardingCheck = !pathname.startsWith("/onboarding");
 
     if (needsAdminCheck || needsOnboardingCheck) {
       const { data: profile } = await supabase

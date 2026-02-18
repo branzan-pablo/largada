@@ -37,7 +37,11 @@
       "Bash(./node_modules/.bin/supabase:*)",
       "Bash(pnpm exec supabase:*)",
       "Bash(node scripts/postinstall.js:*)",
-      "Bash(\"C:\\\\Users\\\\pablo\\\\Development\\\\MVP\\\\node_modules\\\\supabase\\\\bin\\\\supabase.exe\" --version)"
+      "Bash(\"C:\\\\Users\\\\pablo\\\\Development\\\\MVP\\\\node_modules\\\\supabase\\\\bin\\\\supabase.exe\" --version)",
+      "Bash(grep:*)",
+      "Bash(npm ls:*)",
+      "Bash(dir:*)",
+      "Bash(echo:*)"
     ]
   }
 }
