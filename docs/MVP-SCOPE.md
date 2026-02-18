@@ -15,7 +15,7 @@
 | **Cadastro manual de corridas (admin)** | Fonte primária de dados no MVP. Sem dados, sem produto. |
 | **Formulário de sugestão de corrida** | Escala o cadastro de dados com a comunidade. Reduz dependência do admin. |
 | **Painel admin** (CRUD corridas + fila de sugestões + dashboard básico) | Operação mínima para manter o produto funcionando. |
-| **Push notifications via Firebase** (nova corrida + lembrete de prazo) | Resolve a dor nº 1 de forma proativa — corredor não precisa lembrar de checar o app. |
+| **Push notifications via Web Push (VAPID)** (nova corrida + lembrete de prazo) | Resolve a dor nº 1 de forma proativa — corredor não precisa lembrar de checar o app. |
 | **PWA** (manifest + service worker + prompt de instalação) | Experiência de app nativo no celular sem app store. Necessário para push funcionar. |
 | **100% responsivo (mobile-first)** | Corredor acessa pelo celular. Se não funcionar bem no mobile, o produto falha. |
 | **SEO e Open Graph** | Corridas serão compartilhadas via WhatsApp. O preview precisa ser bonito e informativo. |
@@ -86,7 +86,7 @@
 |---|---|---|
 | Corridas cadastradas | 30+ provas | Supabase database |
 | Taxa de RSVP | 20% dos ativos marcam pelo menos 1 prova | Query no banco |
-| Push opt-in rate | 50% dos cadastrados | Firebase console |
+| Push opt-in rate | 50% dos cadastrados | Supabase (push_subscriptions) |
 | Sugestões recebidas | 15+ no total | Supabase database |
 | Bounce rate da landing page | < 60% | Analytics |
 | Tempo médio na listagem | > 2 minutos | Analytics |

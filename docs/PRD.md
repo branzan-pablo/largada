@@ -4,7 +4,7 @@
 
 Largada é uma aplicação web progressiva (PWA) que centraliza informações de corridas de rua regionais em um único lugar, permitindo que corredores do interior de São Paulo encontrem provas, vejam detalhes completos e sinalizem participação.
 
-**Stack técnico:** Next.js + Supabase + shadcn/ui + Firebase Cloud Messaging
+**Stack técnico:** Next.js + Supabase + shadcn/ui + Web Push (VAPID)
 
 **Região inicial:** São José do Rio Preto/SP, Votuporanga/SP, Araçatuba/SP e cidades do entorno.
 
@@ -189,17 +189,18 @@ Cada corrida contém:
 - Lista de usuários que marcaram (nome + avatar) visível na página de detalhe.
 - Seção "Minhas Corridas" no perfil do usuário com todas as provas marcadas, divididas em "Próximas" e "Passadas".
 
-### 4.5 Push Notifications (Firebase Cloud Messaging)
+### 4.5 Push Notifications (Web Push / VAPID)
 
 **Triggers:**
-- Nova corrida cadastrada na região do usuário (baseado na cidade ou raio configurado).
+- Nova corrida cadastrada na região do usuário (baseado no raio geográfico configurado via PostGIS).
 - Lembrete de prazo de inscrição: 3 dias antes do prazo expirar, para corridas marcadas com "vou nessa".
 
 **Implementação:**
 - Service Worker para receber push em PWA.
-- Solicitar permissão de notificação no primeiro login (com explicação do valor).
-- Token FCM salvo no Supabase, vinculado ao usuário.
-- Configuração on/off no perfil do usuário.
+- Solicitar permissão de notificação no onboarding/perfil (com explicação do valor).
+- Push subscription (endpoint + keys VAPID) salva no Supabase (`push_subscriptions`), vinculada ao usuário.
+- Envio via `web-push` (server-side) usando protocolo VAPID — sem dependência de Firebase/FCM.
+- Configuração on/off no perfil do usuário + raio de notificação configurável.
 
 ### 4.6 Sugestão de Corrida
 
@@ -259,7 +260,7 @@ Cada corrida contém:
 | Strava OAuth | Login social | Apenas autenticação, sem sync de dados |
 | Supabase Database | Banco de dados | PostgreSQL com RLS |
 | Supabase Storage | Armazenamento | Imagens de percurso e avatares |
-| Firebase Cloud Messaging | Push notifications | Via Service Worker (PWA) |
+| Web Push (VAPID / web-push) | Push notifications | Via Service Worker (PWA), sem dependência de Firebase |
 | Google Geocoding API | Coordenadas | Converter endereço em lat/lng para filtro de raio (ou geocoding manual no admin) |
 
 ---

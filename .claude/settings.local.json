@@ -41,7 +41,9 @@
       "Bash(grep:*)",
       "Bash(npm ls:*)",
       "Bash(dir:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(git -C \"C:\\\\Users\\\\pablo\\\\Development\\\\MVP\" ls-files \"*.md\")",
+      "Bash(git mv:*)"
     ]
   }
 }

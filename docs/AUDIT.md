@@ -9,7 +9,7 @@
 
 ## Sumário Executivo
 
-O **Largada** é uma plataforma de descoberta e gestão de corridas de rua focada no interior do Estado de São Paulo. É uma Progressive Web App (PWA) full-stack construída sobre Next.js 16 + React 19, com Supabase como BaaS e Firebase Cloud Messaging para notificações push.
+O **Largada** é uma plataforma de descoberta e gestão de corridas de rua focada no interior do Estado de São Paulo. É uma Progressive Web App (PWA) full-stack construída sobre Next.js 16 + React 19, com Supabase como BaaS e Web Push (VAPID) para notificações push.
 
 O projeto está em estágio MVP com arquitetura sólida e bem organizada para o escopo proposto. Há pontos de atenção principalmente nas áreas de **segurança operacional** (rate limiting em memória, exposição de erros de BD), **escalabilidade** (filtros client-side, sem cache de API) e **qualidade de código** (ausência de testes, sem CI/CD formal). Nenhuma vulnerabilidade crítica foi encontrada, mas há achados de severidade média que devem ser endereçados antes de um lançamento em produção de maior escala.
 
@@ -65,8 +65,7 @@ Corredores amadores e semi-profissionais do interior paulista.
 | Componentes UI | shadcn/ui + Radix UI | 3.8.4 / 1.4.3 | Atual |
 | Banco de Dados | Supabase (PostgreSQL) | 2.95.3 (client) | Estável |
 | Autenticação | Supabase Auth | — | Estável |
-| Notificações Push | Firebase Cloud Messaging | 12.9.0 | Atual |
-| Firebase Admin | firebase-admin | 13.6.1 | Atual |
+| Notificações Push | web-push (VAPID) | 3.6.7 | Estável |
 | Validação | Zod | 4.3.6 | Atual |
 | Data/Hora | date-fns | 4.1.0 | Atual |
 | Ícones | Lucide React | 0.563.0 | Atual |
@@ -78,7 +77,7 @@ Corredores amadores e semi-profissionais do interior paulista.
 - **React 19.2.3**: React 19 ainda é relativamente novo no ecossistema; algumas bibliotecas de terceiros podem ter incompatibilidades.
 - **Tailwind CSS v4**: Versão ainda em estágio de maturidade, com API diferente da v3. Mudança para abordagem PostCSS ao invés do arquivo `tailwind.config.js` tradicional. Não há arquivo `tailwind.config.ts` no projeto — configuração embutida no CSS global via `@import "tailwindcss"`.
 - **Zod 4.3.6**: Zod v4 tem algumas mudanças de API em relação ao v3 (o código já usa `zod/v4` no import de validations.ts).
-- **Firebase 12.9.0**: Versão muito recente. A v12 introduziu mudanças significativas na modular API.
+- **web-push 3.6.7**: Biblioteca leve para envio de Web Push via protocolo VAPID. Sem dependência de serviços externos (Firebase/FCM).
 
 ---
 
@@ -148,7 +147,7 @@ Usuário → Supabase Auth (Email/Google/Strava)
 |---------|--------------|---------|
 | Monolito Next.js (frontend + API) | Simplicidade para MVP | Acoplamento, mas aceitável no escopo |
 | Supabase como BaaS | Reduz infraestrutura | Dependência de vendor, mas justificada |
-| Firebase para push | Infraestrutura Google madura | Adiciona complexidade com 2 BaaS |
+| Web Push VAPID | Padrão aberto, sem vendor lock-in | Leve e integrado ao Supabase |
 | Filtro geográfico client-side | Evita PostGIS | Limitação de escala (documentada no código) |
 | Rate limiting in-memory | Simplicidade MVP | Não funciona em múltiplas instâncias |
 | Context API para estado | Zero dependência externa | Suficiente para o escopo |
@@ -266,7 +265,7 @@ A condição `size > 100` pode deixar entradas expiradas acumulando por muito te
 
 #### ✅ Pontos Positivos
 - `.env.local.example` documenta todas as variáveis necessárias
-- Chaves privadas (service role, Firebase admin, Strava secret) não são expostas como `NEXT_PUBLIC_`
+- Chaves privadas (service role, VAPID private key, Strava secret) não são expostas como `NEXT_PUBLIC_`
 - `CRON_SECRET` para proteger o endpoint de cron
 
 #### ⚠️ Achados de Atenção
@@ -286,8 +285,8 @@ O `.env.local.example` documenta `CRON_SECRET`, mas a verificação desta variá
 | POST /api/rsvp | ✅ requireAuth | — | ✅ 10/min |
 | POST /api/suggestions | ✅ requireAuth | — | ✅ 5/dia |
 | PATCH /api/suggestions | ✅ requireAdmin | ✅ admin | Nenhum |
-| POST /api/notifications/register | ✅ requireAuth | — | ✅ 10/hora |
-| DELETE /api/notifications/register | ✅ requireAuth | — | Nenhum |
+| POST /api/push/subscribe | ✅ requireAuth | — | ✅ 10/hora |
+| POST /api/push/unsubscribe | ✅ requireAuth | — | Nenhum |
 | PATCH /api/profile | ✅ requireAuth | — | Nenhum |
 
 **[BAIXA] GET /api/races sem autenticação nem rate limiting:** Pode ser abusado para scraping massivo. Para MVP com baixo tráfego é aceitável, mas monitorar.
@@ -338,8 +337,7 @@ O comentário no código aponta o problema: a resposta ao admin espera o envio d
 
 ### 5.2 Bundle Size
 
-- Firebase SDK (`firebase@12.9.0`) é um pacote pesado. A versão modular já está sendo usada (`getMessaging`, `getToken` etc.), o que é positivo.
-- `firebase-admin` é server-side apenas — não afeta o bundle do cliente.
+- `web-push` é server-side apenas — zero impacto no bundle do cliente (ao contrário do antigo Firebase SDK).
 - shadcn/ui com tree-shaking adequado.
 
 ---
@@ -408,11 +406,9 @@ if (authResult instanceof NextResponse) return authResult;
 origin: raw.origin === "approved_suggestion" ? "approved_suggestion" : "admin",
 // Deveria estar no raceSchema
 
-// notifications.ts:80-83 — busca todos os tokens de uma vez (sem paginação)
-const { data: tokens } = await supabase
-  .from("fcm_tokens")
-  .select("token, profiles!...") // Sem .limit() — pode retornar milhares de tokens
-  .not("token", "is", null);
+// notifications.ts — envio síncrono bloqueia resposta ao admin
+await notifyNewRace(data.id);
+// Deveria ser assíncrono via queue ou background job
 ```
 
 ---
@@ -427,8 +423,7 @@ const { data: tokens } = await supabase
 | `react` / `react-dom` | 19.2.3 | Atual | Baixo |
 | `@supabase/supabase-js` | 2.95.3 | Atual | Baixo |
 | `@supabase/ssr` | 0.8.0 | Atual | Baixo |
-| `firebase` | 12.9.0 | Atual | Baixo |
-| `firebase-admin` | 13.6.1 | Atual | Baixo |
+| `web-push` | 3.6.7 | Estável | Baixo |
 | `zod` | 4.3.6 | Atual | Baixo |
 | `date-fns` | 4.1.0 | Atual | Baixo |
 | `radix-ui` | 1.4.3 | Atual | Baixo |
@@ -463,12 +458,11 @@ const { data: tokens } = await supabase
 
 ### 7.4 Observações sobre Dependências
 
-**Dois BaaS em paralelo (Supabase + Firebase):** A escolha de usar Supabase para dados/auth e Firebase apenas para FCM é válida no contexto (Supabase não tem push notifications nativas), mas aumenta a complexidade operacional:
-- 2 consoles separados para gerenciar
-- 2 conjuntos de credenciais para manter
-- Potencial para substituição futura por soluções de push nativas do Supabase ou alternativas como OneSignal/Novu
-
-**`firebase@12.9.0` no bundle do cliente:** Firebase é um pacote grande (~100KB+ gzipped mesmo modular). Vale monitorar o impacto no LCP (Largest Contentful Paint) para usuários mobile em conexões lentas.
+**BaaS unificado (Supabase) + web-push:** A migração de Firebase Cloud Messaging para Web Push (VAPID) via `web-push` simplificou a arquitetura:
+- Apenas 1 BaaS (Supabase) para gerenciar — dados, auth e subscriptions de push
+- `web-push` é uma biblioteca leve (~20KB) usada apenas server-side — zero impacto no bundle do cliente
+- Protocolo VAPID é padrão aberto — sem vendor lock-in com Google/Firebase
+- Subscriptions armazenadas na tabela `push_subscriptions` no próprio Supabase
 
 ---
 
@@ -484,55 +478,41 @@ const { data: tokens } = await supabase
 | Service Worker | ✅ | Servido dinamicamente via route handler |
 | Ícones PWA | ✅ | SVG + PNG, incluindo variante maskable |
 | Prompt de instalação | ✅ | Com tratamento especial para iOS |
-| Offline support | ⚠️ Parcial | SW gerencia apenas notificações, sem cache de conteúdo |
+| Offline support | ⚠️ Parcial | SW gerencia apenas notificações push, sem cache de conteúdo |
 | Theme color | ✅ | `#e53300` consistente com a marca |
 
 **[MÉDIA] Sem estratégia de cache offline para conteúdo**
 
-O Service Worker atual gerencia apenas notificações Firebase em background. Não há estratégia de caching (Workbox ou similar) para assets, páginas ou dados. O app não funciona offline além das notificações.
+O Service Worker atual gerencia apenas notificações push em background. Não há estratégia de caching (Workbox ou similar) para assets, páginas ou dados. O app não funciona offline além das notificações.
 
-### 8.2 Firebase Cloud Messaging
+### 8.2 Web Push (VAPID)
 
 **Fluxo completo e bem implementado:**
 
 ```
 Usuário habilita notificações
-  → Permission API
+  → Permission API (Notification.requestPermission)
   → Service Worker registrado
-  → FCM token gerado
-  → Token salvo no Supabase (fcm_tokens)
+  → PushSubscription criada via PushManager.subscribe (chave pública VAPID)
+  → Subscription salva no Supabase (push_subscriptions: endpoint, p256dh, auth)
   → Admin cria corrida
-  → notifyNewRace() busca tokens por cidade
-  → FCM multicast envia push
+  → notifyNewRace() busca subscriptions por raio geográfico (PostGIS)
+  → web-push envia via protocolo VAPID direto ao push service
   → SW exibe notificação (background)
-  → onMessage() exibe toast (foreground)
 ```
 
 **Pontos positivos:**
-- Limpeza automática de tokens inválidos após falha de envio
-- Suporte a Web Push, Android (APNs) e iOS
+- Protocolo VAPID padrão aberto — sem dependência de Firebase/Google
+- `web-push` é server-side only — zero impacto no bundle do cliente
+- Limpeza automática de subscriptions expiradas (HTTP 404/410) após falha de envio
+- Matching por raio geográfico via PostGIS (`get_race_notification_recipients`)
+- Fallback para match exato de cidade quando `city_id` está ausente
+- Apenas 1 BaaS (Supabase) — sem complexidade de gerenciar Firebase em paralelo
 - Tratamento especial para iOS (requer PWA instalada)
-- Prevenção de tokens duplicados com upsert
 
-**[MÉDIA] Busca de tokens sem paginação**
+**[BAIXA] Sem deduplicação por usuário na busca de subscriptions**
 
-```typescript
-// notifications.ts:80-83
-const { data: tokens } = await supabase
-  .from("fcm_tokens")
-  .select("token, profiles!...")
-  .not("token", "is", null);
-  // Sem .limit() — retorna TODOS os tokens
-```
-
-Com crescimento da base de usuários, isso pode:
-1. Causar timeout da query
-2. Retornar payload muito grande
-3. Exceder limites do FCM sendEachForMulticast (500 tokens por chamada)
-
-**[BAIXA] Sem deduplicação por usuário na busca de tokens**
-
-Um usuário com múltiplos dispositivos terá múltiplos tokens. A query não agrupa por `user_id`, então o mesmo usuário pode receber N notificações.
+Um usuário com múltiplos dispositivos terá múltiplas subscriptions. A query não agrupa por `user_id`, então o mesmo usuário pode receber N notificações em N dispositivos. Isso é comportamento esperado na maioria dos casos, mas vale avaliar se desejável.
 
 ---
 
@@ -548,14 +528,15 @@ Um usuário com múltiplos dispositivos terá múltiplos tokens. A query não ag
 | `races` | Corridas cadastradas | ⚠️ Verificar |
 | `rsvps` | Confirmações de presença | ⚠️ Verificar |
 | `race_suggestions` | Sugestões da comunidade | ⚠️ Verificar |
-| `fcm_tokens` | Tokens de push notification | ⚠️ Verificar |
+| `push_subscriptions` | Subscriptions de Web Push (VAPID) | ⚠️ Verificar |
+| `cities` | Cidades da região com coordenadas (PostGIS) | ✅ (leitura pública) |
 
 **[MÉDIA] RLS não verificável nas tabelas não-profiles**
 
 A auditoria não teve acesso ao schema SQL do Supabase para verificar as políticas RLS nas demais tabelas. É crítico garantir que:
 - `rsvps`: usuário só pode ler/criar/deletar os próprios RSVPs
 - `race_suggestions`: usuário só pode ler/deletar as próprias sugestões
-- `fcm_tokens`: usuário só pode gerenciar os próprios tokens
+- `push_subscriptions`: usuário só pode gerenciar as próprias subscriptions
 - `races`: leitura pública, escrita apenas por admins
 
 ### 9.2 Design das API Routes
@@ -597,7 +578,7 @@ A integração com Strava está presente (`/auth/strava/callback`), mas não foi
 |-----------|-------------|-------------------|
 | Rate limiting | In-memory (single-instance) | Upstash Redis |
 | Filtro geográfico | Client-side após query paginada | PostGIS / pg_sphere |
-| Notificações push | Busca todos os tokens sem paginação | Batching + queue (BullMQ/Inngest) |
+| Notificações push | Envio síncrono na criação de corrida | Queue assíncrona (Inngest/Vercel Cron) |
 | Cache de API | Nenhum | Redis / CDN cache headers |
 | Logs e erros | console.log / console.error | Sentry + estruturado |
 
@@ -635,7 +616,7 @@ Esta seção destaca o que foi bem feito no projeto.
 
 - **Validação completa** com Zod em todas as entradas de API
 - **Sanitização** do input de busca (escape de wildcards SQL LIKE)
-- **Limpeza automática** de tokens FCM inválidos
+- **Limpeza automática** de push subscriptions expiradas (HTTP 404/410)
 - **Secrets separados** entre cliente (NEXT_PUBLIC_) e servidor
 - **Nenhuma injeção SQL** encontrada — queries todas via Supabase client tipado
 
@@ -650,7 +631,7 @@ Esta seção destaca o que foi bem feito no projeto.
 ### 11.4 UX / PWA
 
 - **PWA completa** com instalação, ícones e manifest
-- **Notificações push** com fallback para iOS (requer PWA instalada)
+- **Web Push VAPID** com matching por raio geográfico (PostGIS) e fallback para iOS (requer PWA instalada)
 - **Infinite scroll** para lista de corridas
 - **Filtros mobile** com sheet drawer separado
 - **Feedback visual** consistente via sonner toasts
@@ -664,7 +645,7 @@ Esta seção destaca o que foi bem feito no projeto.
 | # | Problema | Solução | Esforço |
 |---|---------|---------|---------|
 | 1 | Rate limiting in-memory não funciona em serverless multi-instância | Migrar para `@upstash/ratelimit` + Redis | Médio |
-| 2 | Busca de todos tokens FCM sem paginação/batching | Paginar query + batches de 500 tokens | Médio |
+| 2 | Notificações push síncronas na criação de corrida | Usar queue/background job para envio assíncrono | Médio |
 | 3 | Sem testes automatizados | Começar com testes unitários de `lib/` + testes de API routes críticas | Alto |
 
 ### 🟡 Média Prioridade
@@ -710,13 +691,14 @@ src/app/
 ├── api/races/[id]/route.ts     # PATCH (editar) + DELETE
 ├── api/rsvp/route.ts           # POST (toggle RSVP)
 ├── api/suggestions/route.ts    # POST + PATCH + DELETE
-├── api/notifications/register/route.ts  # POST + DELETE FCM token
+├── api/push/subscribe/route.ts    # POST push subscription (VAPID)
+├── api/push/unsubscribe/route.ts  # POST remove push subscription
 ├── api/profile/route.ts        # PATCH perfil
 ├── api/cron/deadline-reminder/route.ts  # GET (cron job)
 ├── auth/callback/route.ts      # OAuth Supabase callback
 ├── auth/confirm/route.ts       # Confirmação de email
 ├── auth/strava/callback/route.ts  # Strava OAuth
-├── firebase-messaging-sw.js/route.ts  # Service Worker dinâmico
+├── sw.js/route.ts                  # Service Worker (push + PWA)
 ├── layout.tsx                  # Root layout
 ├── globals.css
 ├── error.tsx
