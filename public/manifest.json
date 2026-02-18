@@ -4,7 +4,6 @@
   "description": "Encontre todas as corridas de rua da sua região em um só lugar.",
   "start_url": "/corridas",
   "display": "standalone",
-  "gcm_sender_id": "103953800507",
   "background_color": "#FFFFFF",
   "theme_color": "#e53300",
   "orientation": "portrait",

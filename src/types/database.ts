@@ -14,31 +14,37 @@ export type Database = {
   }
   public: {
     Tables: {
-      fcm_tokens: {
+      push_subscriptions: {
         Row: {
-          created_at: string
           id: string
-          token: string
-          updated_at: string
           user_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          created_at?: string
           id?: string
-          token: string
-          updated_at?: string
           user_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          created_at?: string
+          updated_at?: string
         }
         Update: {
-          created_at?: string
           id?: string
-          token?: string
-          updated_at?: string
           user_id?: string
+          endpoint?: string
+          p256dh?: string
+          auth?: string
+          created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "fcm_tokens_user_id_fkey"
+            foreignKeyName: "push_subscriptions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"

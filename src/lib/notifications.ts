@@ -1,66 +1,87 @@
+import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAdminMessaging } from "@/lib/firebase/admin";
+
+let vapidConfigured = false;
+
+function ensureVapid() {
+  if (vapidConfigured) return;
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT!,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  );
+  vapidConfigured = true;
+}
+
+interface PushSubscriptionRecord {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+}
 
 interface SendNotificationOptions {
   title: string;
   body: string;
   url: string;
-  tokens: string[];
+  subscriptions: PushSubscriptionRecord[];
 }
 
-export async function sendToTokens({ title, body, url, tokens }: SendNotificationOptions) {
-  if (tokens.length === 0) return { sent: 0, failed: 0 };
+export async function sendToSubscriptions({
+  title,
+  body,
+  url,
+  subscriptions,
+}: SendNotificationOptions) {
+  if (subscriptions.length === 0) return { sent: 0, failed: 0 };
+
+  ensureVapid();
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const absoluteUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
-  const iconUrl = `${baseUrl}/icons/icon.svg`;
 
-  try {
-    const messaging = getAdminMessaging();
-    const result = await messaging.sendEachForMulticast({
-      tokens,
-      notification: { title, body },
-      data: { url: absoluteUrl },
-      webpush: {
-        notification: { title, body, icon: iconUrl },
-        fcmOptions: { link: absoluteUrl },
-      },
-      android: {
-        priority: "high" as const,
-        notification: { title, body, icon: "ic_notification", clickAction: absoluteUrl },
-      },
-      apns: {
-        headers: { "apns-priority": "10" },
-        payload: { aps: { alert: { title, body }, sound: "default" } },
-      },
-    });
+  const payload = JSON.stringify({ title, body, url: absoluteUrl });
 
-    // Log individual failures and collect invalid tokens for cleanup
-    const invalidTokens: string[] = [];
-    result.responses.forEach((resp, idx) => {
-      if (!resp.success) {
-        console.error(`[notifications] token[${idx}] failed:`, resp.error?.code, resp.error?.message);
-        if (
-          resp.error?.code === "messaging/registration-token-not-registered" ||
-          resp.error?.code === "messaging/invalid-registration-token"
-        ) {
-          invalidTokens.push(tokens[idx]);
-        }
+  const results = await Promise.allSettled(
+    subscriptions.map((sub) =>
+      webpush.sendNotification(
+        {
+          endpoint: sub.endpoint,
+          keys: { p256dh: sub.p256dh, auth: sub.auth },
+        },
+        payload
+      )
+    )
+  );
+
+  // Clean up expired subscriptions (HTTP 404/410)
+  const expiredEndpoints: string[] = [];
+  results.forEach((result, idx) => {
+    if (result.status === "rejected") {
+      const err = result.reason as { statusCode?: number };
+      console.error(
+        `[notifications] subscription[${idx}] failed:`,
+        err?.statusCode,
+        err
+      );
+      if (err?.statusCode === 404 || err?.statusCode === 410) {
+        expiredEndpoints.push(subscriptions[idx].endpoint);
       }
-    });
-
-    // Remove stale tokens from DB
-    if (invalidTokens.length > 0) {
-      const supabase = createAdminClient();
-      await supabase.from("fcm_tokens").delete().in("token", invalidTokens);
-      console.log(`[notifications] cleaned up ${invalidTokens.length} invalid tokens`);
     }
+  });
 
-    return { sent: result.successCount, failed: result.failureCount };
-  } catch (error) {
-    console.error("[notifications] sendToTokens failed:", error);
-    return { sent: 0, failed: 0 };
+  if (expiredEndpoints.length > 0) {
+    const supabase = createAdminClient();
+    await supabase
+      .from("push_subscriptions")
+      .delete()
+      .in("endpoint", expiredEndpoints);
+    console.log(
+      `[notifications] cleaned up ${expiredEndpoints.length} expired subscriptions`
+    );
   }
+
+  const sent = results.filter((r) => r.status === "fulfilled").length;
+  return { sent, failed: results.length - sent };
 }
 
 /**
@@ -77,24 +98,29 @@ export async function notifyNewRace(raceId: string) {
 
   if (!race) return;
 
-  const { data: tokens } = await supabase
-    .from("fcm_tokens")
-    .select("token, profiles!fcm_tokens_user_id_fkey(notifications_enabled, city)")
-    .not("token", "is", null);
+  const { data: rows } = await supabase
+    .from("push_subscriptions")
+    .select(
+      "endpoint, p256dh, auth, profiles!push_subscriptions_user_id_fkey(notifications_enabled, city)"
+    )
+    .not("endpoint", "is", null);
 
-  if (!tokens || tokens.length === 0) return;
+  if (!rows || rows.length === 0) return;
 
-  const targetTokens = tokens
-    .filter((t) => {
-      return t.profiles?.notifications_enabled && t.profiles?.city === race.city;
-    })
-    .map((t) => t.token);
+  const targetSubs = rows
+    .filter(
+      (r) => {
+        const profile = r.profiles as unknown as { notifications_enabled: boolean; city: string } | null;
+        return profile?.notifications_enabled && profile?.city === race.city;
+      }
+    )
+    .map((r) => ({ endpoint: r.endpoint, p256dh: r.p256dh, auth: r.auth }));
 
-  await sendToTokens({
+  await sendToSubscriptions({
     title: "Nova corrida na sua região!",
     body: `${race.name} em ${race.city}. Confira os detalhes.`,
     url: `/corrida/${race.slug}`,
-    tokens: targetTokens,
+    subscriptions: targetSubs,
   });
 }
 
@@ -104,7 +130,6 @@ export async function notifyNewRace(raceId: string) {
 export async function notifyNewSuggestion(suggestionName: string, city: string) {
   const supabase = createAdminClient();
 
-  // Get all admin user IDs
   const { data: admins } = await supabase
     .from("profiles")
     .select("id")
@@ -115,18 +140,17 @@ export async function notifyNewSuggestion(suggestionName: string, city: string) 
 
   const adminIds = admins.map((a) => a.id);
 
-  // Get FCM tokens for those admins
-  const { data: tokens } = await supabase
-    .from("fcm_tokens")
-    .select("token")
+  const { data: rows } = await supabase
+    .from("push_subscriptions")
+    .select("endpoint, p256dh, auth")
     .in("user_id", adminIds);
 
-  if (!tokens || tokens.length === 0) return;
+  if (!rows || rows.length === 0) return;
 
-  await sendToTokens({
+  await sendToSubscriptions({
     title: "Nova sugestão de corrida",
     body: `"${suggestionName}" em ${city}. Revise no painel admin.`,
     url: "/admin/sugestoes",
-    tokens: tokens.map((t) => t.token),
+    subscriptions: rows,
   });
 }

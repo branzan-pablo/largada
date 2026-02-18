@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendToTokens } from "@/lib/notifications";
+import { sendToSubscriptions } from "@/lib/notifications";
 
 // Cron: send reminders for races with registration deadline in 3 days
 export async function GET(request: Request) {
@@ -38,26 +38,35 @@ export async function GET(request: Request) {
 
     const userIds = rsvps.map((r) => r.user_id);
 
-    // Get FCM tokens for these users (with notification preference check via join)
-    const { data: tokens } = await supabase
-      .from("fcm_tokens")
-      .select("token, profiles!fcm_tokens_user_id_fkey(notifications_enabled)")
+    // Get push subscriptions for these users (with notification preference check via join)
+    const { data: subs } = await supabase
+      .from("push_subscriptions")
+      .select(
+        "endpoint, p256dh, auth, profiles!push_subscriptions_user_id_fkey(notifications_enabled)"
+      )
       .in("user_id", userIds);
 
-    if (!tokens || tokens.length === 0) continue;
+    if (!subs || subs.length === 0) continue;
 
-    const targetTokens = tokens
-      .filter((t) => t.profiles?.notifications_enabled)
-      .map((t) => t.token);
+    const targetSubs = subs
+      .filter((s) => {
+        const profile = s.profiles as unknown as { notifications_enabled: boolean } | null;
+        return profile?.notifications_enabled;
+      })
+      .map((s) => ({
+        endpoint: s.endpoint,
+        p256dh: s.p256dh,
+        auth: s.auth,
+      }));
 
-    if (targetTokens.length === 0) continue;
+    if (targetSubs.length === 0) continue;
 
     try {
-      const result = await sendToTokens({
+      const result = await sendToSubscriptions({
         title: "Inscrição expirando!",
         body: `Faltam 3 dias para o prazo de inscrição: ${race.name}. Não perca!`,
         url: `/corrida/${race.slug}`,
-        tokens: targetTokens,
+        subscriptions: targetSubs,
       });
 
       totalSent += result.sent;

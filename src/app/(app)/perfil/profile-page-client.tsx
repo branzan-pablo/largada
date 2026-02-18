@@ -19,7 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { REGION_CITIES } from "@/lib/constants";
-import { useNotifications } from "@/hooks/use-notifications";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { toast } from "sonner";
 import { LogOut, Loader2, Mail, MapPin, Bell, Heart, MessageSquarePlus, ChevronRight } from "lucide-react";
 
@@ -27,7 +27,7 @@ export function ProfilePageClient() {
   const { user, profile, isLoading, signOut, updateProfile } = useAuth();
   const { openLogin } = useLoginModal();
   const router = useRouter();
-  const { permission, isSupported, requestPermission } = useNotifications();
+  const { permission, isSupported, requestPermission } = usePushNotifications();
 
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
   const [city, setCity] = useState(profile?.city ?? "");
