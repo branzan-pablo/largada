@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -8,7 +9,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleChip } from "@/components/ui/toggle-chip";
-import { DISTANCES, REGION_CITIES } from "@/lib/constants";
+import { DISTANCES } from "@/lib/constants";
+import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
 import { X, CalendarDays, Search } from "lucide-react";
 import type { RaceFilters as Filters } from "@/types/race";
 import { Switch } from "@/components/ui/switch";
@@ -27,6 +29,8 @@ export function RaceFiltersDesktop({
   search,
   onSearchChange,
 }: RaceFiltersProps) {
+  const [cityKey, setCityKey] = useState(0);
+
   const hasActiveFilters =
     filters.city ||
     filters.dateFrom ||
@@ -76,24 +80,16 @@ export function RaceFiltersDesktop({
           </div>
 
           {/* City */}
-          <Select
-            value={filters.city ?? "all"}
-            onValueChange={(v) =>
-              onFiltersChange({ ...filters, city: v === "all" ? undefined : v })
-            }
-          >
-            <SelectTrigger className="h-10 w-[200px] bg-zinc-900/50 border-zinc-800/50 text-sm text-zinc-300 px-3 focus:ring-0 focus:ring-offset-0 hover:bg-zinc-900 hover:border-zinc-700 transition-all rounded-lg">
-              <SelectValue placeholder="Todas as cidades" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as cidades</SelectItem>
-              {REGION_CITIES.map((c) => (
-                <SelectItem key={c.name} value={c.name}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="w-[200px]">
+            <CityAutocomplete
+              key={cityKey}
+              initialCity={filters.city}
+              onSelect={(c) => onFiltersChange({ ...filters, city: c.name })}
+              onClear={() => onFiltersChange({ ...filters, city: undefined })}
+              placeholder="Todas as cidades"
+              inputClassName="h-10 border-zinc-800/50 bg-zinc-900/50 text-zinc-300 placeholder:text-zinc-600 hover:border-zinc-700 focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+          </div>
 
           {/* Date */}
           <Select
@@ -176,6 +172,7 @@ export function RaceFiltersDesktop({
               onClick={() => {
                 onFiltersChange({});
                 onSearchChange("");
+                setCityKey((k) => k + 1);
               }}
               className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-300 transition-colors"
             >

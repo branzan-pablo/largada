@@ -6,16 +6,18 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { REGION_CITIES } from "@/lib/constants";
+import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
 import { registerSchema } from "@/lib/validations";
 import { toast } from "sonner";
+
+interface City {
+  id: string;
+  name: string;
+  state_code: string;
+  slug: string;
+  latitude: number;
+  longitude: number;
+}
 
 const primaryClass =
   "w-full flex items-center justify-center gap-2 bg-[#e53300] text-white text-sm px-6 py-3 rounded-full font-semibold hover:bg-[#c42d00] transition-colors";
@@ -24,7 +26,7 @@ export function RegisterForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [city, setCity] = useState("");
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
@@ -34,7 +36,12 @@ export function RegisterForm() {
     e.preventDefault();
     setErrors({});
 
-    const parsed = registerSchema.safeParse({ fullName, email, password, city });
+    const parsed = registerSchema.safeParse({
+      fullName,
+      email,
+      password,
+      city: selectedCity?.name ?? "",
+    });
     if (!parsed.success) {
       const fieldErrors: Record<string, string> = {};
       for (const issue of parsed.error.issues) {
@@ -47,8 +54,6 @@ export function RegisterForm() {
 
     setIsLoading(true);
 
-    const selectedCity = REGION_CITIES.find((c) => c.name === city);
-
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -57,9 +62,9 @@ export function RegisterForm() {
           full_name: fullName,
           ...(selectedCity && {
             city: selectedCity.name,
-            state: selectedCity.state,
-            latitude: selectedCity.lat,
-            longitude: selectedCity.lng,
+            state: selectedCity.state_code,
+            latitude: selectedCity.latitude,
+            longitude: selectedCity.longitude,
           }),
         },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
@@ -116,19 +121,12 @@ export function RegisterForm() {
         {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="city">Sua cidade</Label>
-        <Select value={city} onValueChange={setCity}>
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione sua cidade" />
-          </SelectTrigger>
-          <SelectContent>
-            {REGION_CITIES.map((c) => (
-              <SelectItem key={c.name} value={c.name}>
-                {c.name}/{c.state}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Label>Sua cidade</Label>
+        <CityAutocomplete
+          onSelect={setSelectedCity}
+          onClear={() => setSelectedCity(null)}
+          placeholder="Digite sua cidade..."
+        />
         {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
       </div>
       <Button type="submit" className={primaryClass} disabled={isLoading}>

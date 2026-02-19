@@ -8,14 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { REGION_CITIES } from "@/lib/constants";
+import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
 import { suggestionSchema } from "@/lib/validations";
 import { toast } from "sonner";
 import { Loader2, Send } from "lucide-react";
@@ -99,19 +92,12 @@ export function SuggestionFormClient() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="city">Cidade *</Label>
-        <Select value={city} onValueChange={setCity}>
-          <SelectTrigger id="city">
-            <SelectValue placeholder="Selecione a cidade" />
-          </SelectTrigger>
-          <SelectContent>
-            {REGION_CITIES.map((c) => (
-              <SelectItem key={c.name} value={c.name}>
-                {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Label>Cidade *</Label>
+        <CityAutocomplete
+          onSelect={(c) => setCity(c.name)}
+          onClear={() => setCity("")}
+          placeholder="Digite a cidade da corrida..."
+        />
         {errors.city && (
           <p className="text-sm text-destructive">{errors.city}</p>
         )}

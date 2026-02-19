@@ -43,7 +43,9 @@
       "Bash(dir:*)",
       "Bash(echo:*)",
       "Bash(git -C \"C:\\\\Users\\\\pablo\\\\Development\\\\MVP\" ls-files \"*.md\")",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(cat:*)",
+      "Bash(node scripts/generate-cities-migration.js:*)"
     ]
   }
 }

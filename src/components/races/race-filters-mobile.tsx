@@ -20,8 +20,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { ToggleChip } from "@/components/ui/toggle-chip";
+import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
 import { SlidersHorizontal, Search, CalendarDays } from "lucide-react";
-import { DISTANCES, REGION_CITIES } from "@/lib/constants";
+import { DISTANCES } from "@/lib/constants";
 import type { RaceFilters as Filters } from "@/types/race";
 import { getDateRange, getDatePreset } from "@/lib/filter-utils";
 
@@ -39,6 +40,7 @@ export function RaceFiltersMobile({
   onSearchChange,
 }: RaceFiltersMobileProps) {
   const [open, setOpen] = useState(false);
+  const [cityKey, setCityKey] = useState(0);
 
   const activeCount = [
     filters.city,
@@ -108,27 +110,14 @@ export function RaceFiltersMobile({
             {/* City */}
             <div className="space-y-3">
               <Label className="text-sm font-medium text-zinc-400">Cidade</Label>
-              <Select
-                value={filters.city ?? "all"}
-                onValueChange={(v) =>
-                  onFiltersChange({
-                    ...filters,
-                    city: v === "all" ? undefined : v,
-                  })
-                }
-              >
-                <SelectTrigger className="w-full bg-zinc-900/50 border-zinc-800 text-zinc-200 focus:ring-zinc-700">
-                  <SelectValue placeholder="Todas as cidades" />
-                </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
-                  <SelectItem value="all" className="focus:bg-zinc-800 focus:text-white">Todas as cidades</SelectItem>
-                  {REGION_CITIES.map((c) => (
-                    <SelectItem key={c.name} value={c.name} className="focus:bg-zinc-800 focus:text-white">
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CityAutocomplete
+                key={cityKey}
+                initialCity={filters.city}
+                onSelect={(c) => onFiltersChange({ ...filters, city: c.name })}
+                onClear={() => onFiltersChange({ ...filters, city: undefined })}
+                placeholder="Todas as cidades"
+                inputClassName="border-zinc-800 bg-zinc-900/50 text-zinc-200 placeholder:text-zinc-500 focus-visible:ring-zinc-700"
+              />
             </div>
 
             {/* Date Presets */}
@@ -210,6 +199,7 @@ export function RaceFiltersMobile({
               onClick={() => {
                 onFiltersChange({});
                 onSearchChange("");
+                setCityKey((k) => k + 1);
                 setOpen(false);
               }}
             >

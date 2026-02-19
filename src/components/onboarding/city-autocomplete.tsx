@@ -19,54 +19,104 @@ interface CityAutocompleteProps {
   onClear?: () => void;
   initialCity?: string | null;
   placeholder?: string;
+  /** Extra classes merged into the inner <Input> — use to match surrounding context. */
+  inputClassName?: string;
 }
+
+const DEBOUNCE_MS = 300;
+const MIN_QUERY_LEN = 2;
 
 export function CityAutocomplete({
   onSelect,
   onClear,
   initialCity,
   placeholder = "Digite sua cidade...",
+  inputClassName,
 }: CityAutocompleteProps) {
   const [query, setQuery] = useState(initialCity ?? "");
   const [results, setResults] = useState<City[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // Tracks the latest search invocation — stale responses are discarded.
+  const versionRef = useRef(0);
+  // Holds the AbortController of the in-flight request.
+  const abortRef = useRef<AbortController | null>(null);
+  // Session-level cache: avoids re-fetching identical queries.
+  const cacheRef = useRef<Map<string, City[]>>(new Map());
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const search = useCallback(async (q: string) => {
-    if (q.length < 2) {
+    if (q.length < MIN_QUERY_LEN) {
       setResults([]);
       setIsOpen(false);
       return;
     }
 
+    // Serve from cache immediately — no network, no loading state.
+    const cached = cacheRef.current.get(q);
+    if (cached) {
+      setResults(cached);
+      setIsOpen(cached.length > 0);
+      return;
+    }
+
+    // Cancel the previous in-flight request before starting a new one.
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+
+    // Stamp this invocation so older responses can be discarded.
+    const version = ++versionRef.current;
+
     setIsLoading(true);
     try {
       const res = await fetch(
-        `/api/cities/search?q=${encodeURIComponent(q)}&limit=8`
+        `/api/cities/search?q=${encodeURIComponent(q)}&limit=8`,
+        { signal: abortRef.current.signal }
       );
       const data = await res.json();
-      setResults(Array.isArray(data) ? data : []);
-      setIsOpen(true);
-    } catch {
-      setResults([]);
+      const cities: City[] = Array.isArray(data) ? data : [];
+
+      // Discard if a newer search has already been dispatched.
+      if (version !== versionRef.current) return;
+
+      cacheRef.current.set(q, cities);
+      setResults(cities);
+      setIsOpen(cities.length > 0);
+    } catch (err) {
+      // AbortError is expected — a newer request was started, ignore it.
+      if ((err as Error).name === "AbortError") return;
+      if (version === versionRef.current) setResults([]);
     } finally {
-      setIsLoading(false);
+      // Only clear the spinner for the request that is still current.
+      if (version === versionRef.current) setIsLoading(false);
     }
   }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     setQuery(value);
+
     if (selectedId) {
       setSelectedId(null);
       onClear?.();
     }
 
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => search(value), 300);
+    clearTimeout(timerRef.current);
+
+    if (value.length < MIN_QUERY_LEN) {
+      // Cancel in-flight request and reset UI immediately.
+      abortRef.current?.abort();
+      ++versionRef.current; // Discard any pending response.
+      setResults([]);
+      setIsOpen(false);
+      setIsLoading(false);
+      return;
+    }
+
+    timerRef.current = setTimeout(() => search(value), DEBOUNCE_MS);
   }
 
   function handleSelect(city: City) {
@@ -77,7 +127,7 @@ export function CityAutocomplete({
     onSelect(city);
   }
 
-  // Close dropdown on outside click
+  // Close dropdown on outside click.
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
@@ -86,6 +136,14 @@ export function CityAutocomplete({
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Cancel pending timer and in-flight request on unmount.
+  useEffect(() => {
+    return () => {
+      clearTimeout(timerRef.current);
+      abortRef.current?.abort();
+    };
   }, []);
 
   return (
@@ -99,7 +157,7 @@ export function CityAutocomplete({
             if (results.length > 0 && !selectedId) setIsOpen(true);
           }}
           placeholder={placeholder}
-          className="pl-9"
+          className={cn("pl-9", inputClassName)}
         />
         {isLoading && (
           <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-zinc-500" />
