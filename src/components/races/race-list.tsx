@@ -31,12 +31,12 @@ export function RaceList() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
       {/* Page Header */}
-      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
           <h1 className="text-3xl md:text-4xl font-semibold text-white tracking-tight">
             Calendário de Corridas
           </h1>
-          <p className="text-zinc-500 max-w-xl text-lg">
+          <p className="text-zinc-500 text-lg">
             Filtre por cidade, distância e premiação. Marque &quot;Vou Nessa&quot; e veja quem da sua rede vai correr.
           </p>
         </div>

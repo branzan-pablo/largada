@@ -96,7 +96,7 @@ export default async function LandingPage() {
       <section id="features" className="relative bg-black bg-grid py-24 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <p className="text-xs font-semibold text-emerald-500 uppercase tracking-[0.2em] mb-4">
+            <p className="text-center text-xs font-semibold text-zinc-500 uppercase tracking-[0.2em] mb-5">
               Funcionalidades
             </p>
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-4">
