@@ -27,17 +27,6 @@ export default async function LandingPage() {
       {/* ==================== Hero Section ==================== */}
       <section className="relative bg-black bg-grid pt-40 pb-20 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
-          {/* Badge */}
-          {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm mb-8">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span className="text-xs font-medium text-zinc-300">
-              Disponível em Rio Preto e região
-            </span>
-          </div> */}
-
           {/* Headline */}
           <h1 className="text-5xl md:text-6xl font-bold text-white tracking-tight mb-6 leading-[1.1]">
             Encontre seu ritmo.
@@ -282,8 +271,8 @@ export default async function LandingPage() {
             {/* Brand */}
             <div className="col-span-2 sm:col-span-1">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 bg-zinc-800 rounded flex items-center justify-center">
-                  <span className="text-zinc-400 font-semibold text-xs">L</span>
+                <div className="w-6 h-6 bg-white rounded flex items-center justify-center">
+                  <span className="text-black font-semibold text-xs">L</span>
                 </div>
                 <span className="text-white font-medium">Largada</span>
               </div>
