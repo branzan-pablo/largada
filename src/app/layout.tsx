@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#e53300",
+  themeColor: "#fc5200",
 };
 
 export const metadata: Metadata = {

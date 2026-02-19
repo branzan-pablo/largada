@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { Footprints, CirclePlus } from "lucide-react";
 
 const primaryClass =
-  "w-full sm:w-auto flex items-center justify-center gap-2 bg-[#e53300] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#c42d00] transition-colors";
+  "w-full sm:w-auto flex items-center justify-center gap-2 bg-[#fc5200] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#c94100] transition-colors";
 const secondaryClass =
   "w-full sm:w-auto flex items-center justify-center gap-2 bg-zinc-900/50 border border-zinc-700 text-white px-6 py-3 rounded-full font-medium hover:bg-zinc-800 transition-colors";
 

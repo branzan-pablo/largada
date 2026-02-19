@@ -37,7 +37,9 @@ O projeto está em estágio MVP com arquitetura sólida e bem organizada para o 
 ## 1. Visão Geral do Projeto
 
 ### Propósito
+
 Centralizar informações sobre corridas de rua no interior de São Paulo, permitindo:
+
 - Descoberta e filtragem de eventos por cidade, distância, premiação, data e raio geográfico
 - RSVP (confirmação de presença) em corridas
 - Sugestão de novas corridas pela comunidade
@@ -45,9 +47,11 @@ Centralizar informações sobre corridas de rua no interior de São Paulo, permi
 - Painel administrativo para gestão de eventos e moderação de sugestões
 
 ### Público-alvo
+
 Corredores amadores e semi-profissionais do interior paulista.
 
 ### Modelo de operação
+
 - MVP com equipe enxuta (provavelmente solo ou dupla)
 - Dados inseridos manualmente por admins ou via sugestões da comunidade
 - Monetização não evidenciada no código (sem integrações de pagamento)
@@ -56,20 +60,20 @@ Corredores amadores e semi-profissionais do interior paulista.
 
 ## 2. Stack Tecnológico
 
-| Camada | Tecnologia | Versão | Situação |
-|--------|-----------|--------|----------|
-| Framework Frontend | Next.js | 16.1.6 | Atual |
-| UI Library | React | 19.2.3 | Atual |
-| Linguagem | TypeScript | 5.x | Atual |
-| Estilização | Tailwind CSS | v4.x | Atual (beta/cutting-edge) |
-| Componentes UI | shadcn/ui + Radix UI | 3.8.4 / 1.4.3 | Atual |
-| Banco de Dados | Supabase (PostgreSQL) | 2.95.3 (client) | Estável |
-| Autenticação | Supabase Auth | — | Estável |
-| Notificações Push | web-push (VAPID) | 3.6.7 | Estável |
-| Validação | Zod | 4.3.6 | Atual |
-| Data/Hora | date-fns | 4.1.0 | Atual |
-| Ícones | Lucide React | 0.563.0 | Atual |
-| Toasts | Sonner | 2.0.7 | Atual |
+| Camada             | Tecnologia            | Versão          | Situação                  |
+| ------------------ | --------------------- | --------------- | ------------------------- |
+| Framework Frontend | Next.js               | 16.1.6          | Atual                     |
+| UI Library         | React                 | 19.2.3          | Atual                     |
+| Linguagem          | TypeScript            | 5.x             | Atual                     |
+| Estilização        | Tailwind CSS          | v4.x            | Atual (beta/cutting-edge) |
+| Componentes UI     | shadcn/ui + Radix UI  | 3.8.4 / 1.4.3   | Atual                     |
+| Banco de Dados     | Supabase (PostgreSQL) | 2.95.3 (client) | Estável                   |
+| Autenticação       | Supabase Auth         | —               | Estável                   |
+| Notificações Push  | web-push (VAPID)      | 3.6.7           | Estável                   |
+| Validação          | Zod                   | 4.3.6           | Atual                     |
+| Data/Hora          | date-fns              | 4.1.0           | Atual                     |
+| Ícones             | Lucide React          | 0.563.0         | Atual                     |
+| Toasts             | Sonner                | 2.0.7           | Atual                     |
 
 ### Observações sobre versões
 
@@ -121,12 +125,12 @@ src/
 
 ### 3.3 Gerenciamento de Estado
 
-| Tipo | Abordagem | Avaliação |
-|------|-----------|-----------|
-| Auth global | React Context (`auth-context.tsx`) | Adequado para MVP |
-| UI de Modal | React Context (`login-modal-context.tsx`) | Adequado |
-| Estado de formulários | `useState` local | Adequado |
-| Dados da API | `fetch` direto + hook `useInfiniteRaces` | Funcional, sem cache |
+| Tipo                  | Abordagem                                 | Avaliação            |
+| --------------------- | ----------------------------------------- | -------------------- |
+| Auth global           | React Context (`auth-context.tsx`)        | Adequado para MVP    |
+| UI de Modal           | React Context (`login-modal-context.tsx`) | Adequado             |
+| Estado de formulários | `useState` local                          | Adequado             |
+| Dados da API          | `fetch` direto + hook `useInfiniteRaces`  | Funcional, sem cache |
 
 **Ausência notável:** Nenhuma solução de cache de dados do servidor (sem React Query, SWR ou equivalente). Dados são refetchados a cada navegação.
 
@@ -143,14 +147,14 @@ Usuário → Supabase Auth (Email/Google/Strava)
 
 ### 3.5 Decisões Arquiteturais Notáveis
 
-| Decisão | Justificativa | Impacto |
-|---------|--------------|---------|
-| Monolito Next.js (frontend + API) | Simplicidade para MVP | Acoplamento, mas aceitável no escopo |
-| Supabase como BaaS | Reduz infraestrutura | Dependência de vendor, mas justificada |
-| Web Push VAPID | Padrão aberto, sem vendor lock-in | Leve e integrado ao Supabase |
-| Filtro geográfico client-side | Evita PostGIS | Limitação de escala (documentada no código) |
-| Rate limiting in-memory | Simplicidade MVP | Não funciona em múltiplas instâncias |
-| Context API para estado | Zero dependência externa | Suficiente para o escopo |
+| Decisão                           | Justificativa                     | Impacto                                     |
+| --------------------------------- | --------------------------------- | ------------------------------------------- |
+| Monolito Next.js (frontend + API) | Simplicidade para MVP             | Acoplamento, mas aceitável no escopo        |
+| Supabase como BaaS                | Reduz infraestrutura              | Dependência de vendor, mas justificada      |
+| Web Push VAPID                    | Padrão aberto, sem vendor lock-in | Leve e integrado ao Supabase                |
+| Filtro geográfico client-side     | Evita PostGIS                     | Limitação de escala (documentada no código) |
+| Rate limiting in-memory           | Simplicidade MVP                  | Não funciona em múltiplas instâncias        |
+| Context API para estado           | Zero dependência externa          | Suficiente para o escopo                    |
 
 ---
 
@@ -159,6 +163,7 @@ Usuário → Supabase Auth (Email/Google/Strava)
 ### 4.1 Autenticação e Autorização
 
 #### ✅ Pontos Positivos
+
 - Supabase Auth com suporte a JWT e refresh automático de sessão
 - Middleware protege rotas no nível do servidor (não apenas client-side)
 - Verificação de role admin em `/admin` tanto no middleware quanto na API
@@ -200,6 +205,7 @@ As API routes utilizam `fetch` sem tokens CSRF. Next.js mitiga parcialmente com 
 ### 4.2 Validação de Dados
 
 #### ✅ Pontos Positivos
+
 - Zod validando **todos** os inputs de API (login, registro, criação de corrida, sugestões)
 - Sanitização de input de busca (escape de wildcards LIKE do Postgres):
   ```typescript
@@ -245,6 +251,7 @@ const rateMap = new Map<string, { count: number; resetAt: number }>();
 ```
 
 **Problemas:**
+
 1. Em ambientes serverless (Vercel), cada função é uma instância separada — o estado não é compartilhado entre invocações
 2. O estado é perdido a cada cold start / redeploy
 3. Um usuário pode contornar o limite simplesmente sendo roteado para outra instância
@@ -264,6 +271,7 @@ A condição `size > 100` pode deixar entradas expiradas acumulando por muito te
 ### 4.4 Segurança de Chaves e Secrets
 
 #### ✅ Pontos Positivos
+
 - `.env.local.example` documenta todas as variáveis necessárias
 - Chaves privadas (service role, VAPID private key, Strava secret) não são expostas como `NEXT_PUBLIC_`
 - `CRON_SECRET` para proteger o endpoint de cron
@@ -276,18 +284,18 @@ O `.env.local.example` documenta `CRON_SECRET`, mas a verificação desta variá
 
 ### 4.5 Proteção de Rotas de API Públicas
 
-| Endpoint | Autenticação | Autorização | Rate Limit |
-|----------|-------------|-------------|-----------|
-| GET /api/races | Nenhuma | Nenhuma | Nenhum |
-| POST /api/races | ✅ requireAdmin | ✅ admin | Nenhum |
-| PATCH /api/races/[id] | ✅ requireAdmin | ✅ admin | Nenhum |
-| DELETE /api/races/[id] | ✅ requireAdmin | ✅ admin | Nenhum |
-| POST /api/rsvp | ✅ requireAuth | — | ✅ 10/min |
-| POST /api/suggestions | ✅ requireAuth | — | ✅ 5/dia |
-| PATCH /api/suggestions | ✅ requireAdmin | ✅ admin | Nenhum |
-| POST /api/push/subscribe | ✅ requireAuth | — | ✅ 10/hora |
-| POST /api/push/unsubscribe | ✅ requireAuth | — | Nenhum |
-| PATCH /api/profile | ✅ requireAuth | — | Nenhum |
+| Endpoint                   | Autenticação    | Autorização | Rate Limit |
+| -------------------------- | --------------- | ----------- | ---------- |
+| GET /api/races             | Nenhuma         | Nenhuma     | Nenhum     |
+| POST /api/races            | ✅ requireAdmin | ✅ admin    | Nenhum     |
+| PATCH /api/races/[id]      | ✅ requireAdmin | ✅ admin    | Nenhum     |
+| DELETE /api/races/[id]     | ✅ requireAdmin | ✅ admin    | Nenhum     |
+| POST /api/rsvp             | ✅ requireAuth  | —           | ✅ 10/min  |
+| POST /api/suggestions      | ✅ requireAuth  | —           | ✅ 5/dia   |
+| PATCH /api/suggestions     | ✅ requireAdmin | ✅ admin    | Nenhum     |
+| POST /api/push/subscribe   | ✅ requireAuth  | —           | ✅ 10/hora |
+| POST /api/push/unsubscribe | ✅ requireAuth  | —           | Nenhum     |
+| PATCH /api/profile         | ✅ requireAuth  | —           | Nenhum     |
 
 **[BAIXA] GET /api/races sem autenticação nem rate limiting:** Pode ser abusado para scraping massivo. Para MVP com baixo tráfego é aceitável, mas monitorar.
 
@@ -298,6 +306,7 @@ O `.env.local.example` documenta `CRON_SECRET`, mas a verificação desta variá
 ### 5.1 Carregamento de Página
 
 #### ✅ Boas Práticas
+
 - Server Components reduzem o JavaScript enviado ao cliente
 - Imagens configuradas com `next/image` e domínios remotos permitidos
 - Lazy loading implícito por padrão no Next.js
@@ -368,6 +377,7 @@ O comentário no código aponta o problema: a resposta ao admin espera o envio d
 **Pontuação: 0/10 (ausência total)**
 
 **[CRÍTICO para escala] Nenhum teste automatizado encontrado:**
+
 - Sem testes unitários
 - Sem testes de integração
 - Sem testes end-to-end (Playwright, Cypress)
@@ -385,11 +395,12 @@ Para um MVP isso é comum, mas representa risco crescente à medida que o projet
 ### 6.5 Padrões de Código Específicos
 
 #### Padrões bem aplicados:
+
 ```typescript
 // validations.ts — Zod com transform para URLs
 registrationLink: z.string()
   .transform(normalizeUrl)
-  .pipe(z.url("Link inválido"))
+  .pipe(z.url("Link inválido"));
 
 // api/races/route.ts — verificação dupla admin (middleware + API)
 const authResult = await requireAdmin();
@@ -401,13 +412,14 @@ if (authResult instanceof NextResponse) return authResult;
 ```
 
 #### Padrões a melhorar:
+
 ```typescript
 // api/races/route.ts:176 — raw lido fora do schema validado
-origin: raw.origin === "approved_suggestion" ? "approved_suggestion" : "admin",
-// Deveria estar no raceSchema
+origin: (raw.origin === "approved_suggestion" ? "approved_suggestion" : "admin",
+  // Deveria estar no raceSchema
 
-// notifications.ts — envio síncrono bloqueia resposta ao admin
-await notifyNewRace(data.id);
+  // notifications.ts — envio síncrono bloqueia resposta ao admin
+  await notifyNewRace(data.id));
 // Deveria ser assíncrono via queue ou background job
 ```
 
@@ -417,48 +429,49 @@ await notifyNewRace(data.id);
 
 ### 7.1 Dependências de Produção
 
-| Pacote | Versão | Avaliação | Risco |
-|--------|--------|-----------|-------|
-| `next` | 16.1.6 | Atual | Baixo |
-| `react` / `react-dom` | 19.2.3 | Atual | Baixo |
-| `@supabase/supabase-js` | 2.95.3 | Atual | Baixo |
-| `@supabase/ssr` | 0.8.0 | Atual | Baixo |
-| `web-push` | 3.6.7 | Estável | Baixo |
-| `zod` | 4.3.6 | Atual | Baixo |
-| `date-fns` | 4.1.0 | Atual | Baixo |
-| `radix-ui` | 1.4.3 | Atual | Baixo |
-| `lucide-react` | 0.563.0 | Atual | Baixo |
-| `sonner` | 2.0.7 | Atual | Baixo |
-| `tailwind-merge` | 3.4.0 | Atual | Baixo |
-| `class-variance-authority` | 0.7.1 | Estável | Baixo |
-| `clsx` | 2.1.1 | Estável | Baixo |
+| Pacote                     | Versão  | Avaliação | Risco |
+| -------------------------- | ------- | --------- | ----- |
+| `next`                     | 16.1.6  | Atual     | Baixo |
+| `react` / `react-dom`      | 19.2.3  | Atual     | Baixo |
+| `@supabase/supabase-js`    | 2.95.3  | Atual     | Baixo |
+| `@supabase/ssr`            | 0.8.0   | Atual     | Baixo |
+| `web-push`                 | 3.6.7   | Estável   | Baixo |
+| `zod`                      | 4.3.6   | Atual     | Baixo |
+| `date-fns`                 | 4.1.0   | Atual     | Baixo |
+| `radix-ui`                 | 1.4.3   | Atual     | Baixo |
+| `lucide-react`             | 0.563.0 | Atual     | Baixo |
+| `sonner`                   | 2.0.7   | Atual     | Baixo |
+| `tailwind-merge`           | 3.4.0   | Atual     | Baixo |
+| `class-variance-authority` | 0.7.1   | Estável   | Baixo |
+| `clsx`                     | 2.1.1   | Estável   | Baixo |
 
 ### 7.2 Dependências de Desenvolvimento
 
-| Pacote | Versão | Avaliação |
-|--------|--------|-----------|
-| `typescript` | 5.x | Atual |
-| `tailwindcss` | v4.x | Atual (cutting-edge) |
-| `@tailwindcss/postcss` | v4.x | Atual |
-| `eslint` | 9.x | Atual |
-| `shadcn` | 3.8.4 | Atual |
-| `supabase` (CLI) | 2.76.9 | Atual |
-| `tw-animate-css` | 1.4.0 | Atual |
+| Pacote                 | Versão | Avaliação            |
+| ---------------------- | ------ | -------------------- |
+| `typescript`           | 5.x    | Atual                |
+| `tailwindcss`          | v4.x   | Atual (cutting-edge) |
+| `@tailwindcss/postcss` | v4.x   | Atual                |
+| `eslint`               | 9.x    | Atual                |
+| `shadcn`               | 3.8.4  | Atual                |
+| `supabase` (CLI)       | 2.76.9 | Atual                |
+| `tw-animate-css`       | 1.4.0  | Atual                |
 
 ### 7.3 Dependências Ausentes
 
-| Dependência Recomendada | Uso | Prioridade |
-|------------------------|-----|-----------|
-| `@upstash/ratelimit` + `@upstash/redis` | Rate limiting distribuído | Alta |
-| `@sentry/nextjs` | Monitoramento de erros em produção | Média |
-| Framework de testes (`vitest` ou `jest`) | Testes unitários | Média |
-| `playwright` ou `cypress` | Testes E2E | Baixa |
-| `prettier` | Formatação consistente | Baixa |
-| `husky` + `lint-staged` | Validação pré-commit | Baixa |
+| Dependência Recomendada                  | Uso                                | Prioridade |
+| ---------------------------------------- | ---------------------------------- | ---------- |
+| `@upstash/ratelimit` + `@upstash/redis`  | Rate limiting distribuído          | Alta       |
+| `@sentry/nextjs`                         | Monitoramento de erros em produção | Média      |
+| Framework de testes (`vitest` ou `jest`) | Testes unitários                   | Média      |
+| `playwright` ou `cypress`                | Testes E2E                         | Baixa      |
+| `prettier`                               | Formatação consistente             | Baixa      |
+| `husky` + `lint-staged`                  | Validação pré-commit               | Baixa      |
 
 ### 7.4 Observações sobre Dependências
 
 **BaaS unificado (Supabase) + web-push:** A migração de Firebase Cloud Messaging para Web Push (VAPID) via `web-push` simplificou a arquitetura:
+
 - Apenas 1 BaaS (Supabase) para gerenciar — dados, auth e subscriptions de push
 - `web-push` é uma biblioteca leve (~20KB) usada apenas server-side — zero impacto no bundle do cliente
 - Protocolo VAPID é padrão aberto — sem vendor lock-in com Google/Firebase
@@ -472,14 +485,14 @@ await notifyNewRace(data.id);
 
 **Status:** Bem implementado para o propósito
 
-| Feature | Status | Observação |
-|---------|--------|-----------|
-| `manifest.json` | ✅ | Completo com ícones, tema, display |
-| Service Worker | ✅ | Servido dinamicamente via route handler |
-| Ícones PWA | ✅ | SVG + PNG, incluindo variante maskable |
-| Prompt de instalação | ✅ | Com tratamento especial para iOS |
-| Offline support | ⚠️ Parcial | SW gerencia apenas notificações push, sem cache de conteúdo |
-| Theme color | ✅ | `#e53300` consistente com a marca |
+| Feature              | Status     | Observação                                                  |
+| -------------------- | ---------- | ----------------------------------------------------------- |
+| `manifest.json`      | ✅         | Completo com ícones, tema, display                          |
+| Service Worker       | ✅         | Servido dinamicamente via route handler                     |
+| Ícones PWA           | ✅         | SVG + PNG, incluindo variante maskable                      |
+| Prompt de instalação | ✅         | Com tratamento especial para iOS                            |
+| Offline support      | ⚠️ Parcial | SW gerencia apenas notificações push, sem cache de conteúdo |
+| Theme color          | ✅         | `#fc5200` consistente com a marca                           |
 
 **[MÉDIA] Sem estratégia de cache offline para conteúdo**
 
@@ -502,6 +515,7 @@ Usuário habilita notificações
 ```
 
 **Pontos positivos:**
+
 - Protocolo VAPID padrão aberto — sem dependência de Firebase/Google
 - `web-push` é server-side only — zero impacto no bundle do cliente
 - Limpeza automática de subscriptions expiradas (HTTP 404/410) após falha de envio
@@ -522,18 +536,19 @@ Um usuário com múltiplos dispositivos terá múltiplas subscriptions. A query 
 
 **Tabelas identificadas:**
 
-| Tabela | Finalidade | RLS |
-|--------|-----------|-----|
-| `profiles` | Perfis de usuário | ✅ (usuário só acessa o próprio) |
-| `races` | Corridas cadastradas | ⚠️ Verificar |
-| `rsvps` | Confirmações de presença | ⚠️ Verificar |
-| `race_suggestions` | Sugestões da comunidade | ⚠️ Verificar |
-| `push_subscriptions` | Subscriptions de Web Push (VAPID) | ⚠️ Verificar |
-| `cities` | Cidades da região com coordenadas (PostGIS) | ✅ (leitura pública) |
+| Tabela               | Finalidade                                  | RLS                              |
+| -------------------- | ------------------------------------------- | -------------------------------- |
+| `profiles`           | Perfis de usuário                           | ✅ (usuário só acessa o próprio) |
+| `races`              | Corridas cadastradas                        | ⚠️ Verificar                     |
+| `rsvps`              | Confirmações de presença                    | ⚠️ Verificar                     |
+| `race_suggestions`   | Sugestões da comunidade                     | ⚠️ Verificar                     |
+| `push_subscriptions` | Subscriptions de Web Push (VAPID)           | ⚠️ Verificar                     |
+| `cities`             | Cidades da região com coordenadas (PostGIS) | ✅ (leitura pública)             |
 
 **[MÉDIA] RLS não verificável nas tabelas não-profiles**
 
 A auditoria não teve acesso ao schema SQL do Supabase para verificar as políticas RLS nas demais tabelas. É crítico garantir que:
+
 - `rsvps`: usuário só pode ler/criar/deletar os próprios RSVPs
 - `race_suggestions`: usuário só pode ler/deletar as próprias sugestões
 - `push_subscriptions`: usuário só pode gerenciar as próprias subscriptions
@@ -544,6 +559,7 @@ A auditoria não teve acesso ao schema SQL do Supabase para verificar as políti
 **Avaliação geral: 7.5/10**
 
 #### Boas práticas encontradas:
+
 - Validação com Zod em todas as rotas de escrita
 - `requireAuth()` / `requireAdmin()` aplicados consistentemente
 - Rate limiting nas rotas sensíveis
@@ -574,13 +590,13 @@ A integração com Strava está presente (`/auth/strava/callback`), mas não foi
 
 ### 10.1 Limites Atuais Identificados
 
-| Componente | Limite Atual | Solução para Escala |
-|-----------|-------------|-------------------|
-| Rate limiting | In-memory (single-instance) | Upstash Redis |
-| Filtro geográfico | Client-side após query paginada | PostGIS / pg_sphere |
+| Componente        | Limite Atual                         | Solução para Escala                    |
+| ----------------- | ------------------------------------ | -------------------------------------- |
+| Rate limiting     | In-memory (single-instance)          | Upstash Redis                          |
+| Filtro geográfico | Client-side após query paginada      | PostGIS / pg_sphere                    |
 | Notificações push | Envio síncrono na criação de corrida | Queue assíncrona (Inngest/Vercel Cron) |
-| Cache de API | Nenhum | Redis / CDN cache headers |
-| Logs e erros | console.log / console.error | Sentry + estruturado |
+| Cache de API      | Nenhum                               | Redis / CDN cache headers              |
+| Logs e erros      | console.log / console.error          | Sentry + estruturado                   |
 
 ### 10.2 Arquitetura para Crescimento
 
@@ -593,6 +609,7 @@ O projeto está bem posicionado para crescer incrementalmente:
 ### 10.3 Dependência do Supabase Free Tier
 
 Sem informação de tier do Supabase, mas para MVP pode haver limitações de:
+
 - Conexões simultâneas de banco
 - Requests de API mensais
 - Storage para imagens de percurso
@@ -617,7 +634,7 @@ Esta seção destaca o que foi bem feito no projeto.
 - **Validação completa** com Zod em todas as entradas de API
 - **Sanitização** do input de busca (escape de wildcards SQL LIKE)
 - **Limpeza automática** de push subscriptions expiradas (HTTP 404/410)
-- **Secrets separados** entre cliente (NEXT_PUBLIC_) e servidor
+- **Secrets separados** entre cliente (NEXT*PUBLIC*) e servidor
 - **Nenhuma injeção SQL** encontrada — queries todas via Supabase client tipado
 
 ### 11.3 Developer Experience
@@ -642,33 +659,33 @@ Esta seção destaca o que foi bem feito no projeto.
 
 ### 🔴 Crítico / Alta Prioridade
 
-| # | Problema | Solução | Esforço |
-|---|---------|---------|---------|
-| 1 | Rate limiting in-memory não funciona em serverless multi-instância | Migrar para `@upstash/ratelimit` + Redis | Médio |
-| 2 | Notificações push síncronas na criação de corrida | Usar queue/background job para envio assíncrono | Médio |
-| 3 | Sem testes automatizados | Começar com testes unitários de `lib/` + testes de API routes críticas | Alto |
+| #   | Problema                                                           | Solução                                                                | Esforço |
+| --- | ------------------------------------------------------------------ | ---------------------------------------------------------------------- | ------- |
+| 1   | Rate limiting in-memory não funciona em serverless multi-instância | Migrar para `@upstash/ratelimit` + Redis                               | Médio   |
+| 2   | Notificações push síncronas na criação de corrida                  | Usar queue/background job para envio assíncrono                        | Médio   |
+| 3   | Sem testes automatizados                                           | Começar com testes unitários de `lib/` + testes de API routes críticas | Alto    |
 
 ### 🟡 Média Prioridade
 
-| # | Problema | Solução | Esforço |
-|---|---------|---------|---------|
-| 4 | Erros de banco expostos ao cliente | Criar helper de resposta de erro com mensagens genéricas | Baixo |
-| 5 | Role admin baseado em tabela de banco | Migrar para `app_metadata` do Supabase Auth (JWT) | Médio |
-| 6 | Sem monitoramento de erros em produção | Integrar Sentry (`@sentry/nextjs`) | Baixo |
-| 7 | Sem cache de API (dados de corridas) | Adicionar `Cache-Control` headers ou ISR no Next.js | Baixo |
-| 8 | Campos de texto opcionais sem `maxLength` no schema | Adicionar `.max()` nos campos de texto livres | Baixo |
-| 9 | Filtro geográfico impreciso na paginação | Adicionar PostGIS ao Supabase ou reestruturar a query | Alto |
+| #   | Problema                                            | Solução                                                  | Esforço |
+| --- | --------------------------------------------------- | -------------------------------------------------------- | ------- |
+| 4   | Erros de banco expostos ao cliente                  | Criar helper de resposta de erro com mensagens genéricas | Baixo   |
+| 5   | Role admin baseado em tabela de banco               | Migrar para `app_metadata` do Supabase Auth (JWT)        | Médio   |
+| 6   | Sem monitoramento de erros em produção              | Integrar Sentry (`@sentry/nextjs`)                       | Baixo   |
+| 7   | Sem cache de API (dados de corridas)                | Adicionar `Cache-Control` headers ou ISR no Next.js      | Baixo   |
+| 8   | Campos de texto opcionais sem `maxLength` no schema | Adicionar `.max()` nos campos de texto livres            | Baixo   |
+| 9   | Filtro geográfico impreciso na paginação            | Adicionar PostGIS ao Supabase ou reestruturar a query    | Alto    |
 
 ### 🟢 Baixa Prioridade / Nice to Have
 
-| # | Problema | Solução | Esforço |
-|---|---------|---------|---------|
-| 10 | Sem cache offline para conteúdo | Adicionar Workbox ao Service Worker | Médio |
-| 11 | Sem Prettier | Configurar Prettier + lint-staged + Husky | Baixo |
-| 12 | API sem versionamento | Reorganizar em `/api/v1/` | Médio |
-| 13 | `origin` fora do schema Zod | Mover campo `origin` para dentro do `raceSchema` | Baixo |
-| 14 | Notificações síncronas na criação de corrida | Usar Vercel Cron ou queue para processamento assíncrono | Médio |
-| 15 | Cleanup do rate-limit map ineficiente | Usar `setInterval` para limpeza periódica (irrelevante se migrar para Redis) | Baixo |
+| #   | Problema                                     | Solução                                                                      | Esforço |
+| --- | -------------------------------------------- | ---------------------------------------------------------------------------- | ------- |
+| 10  | Sem cache offline para conteúdo              | Adicionar Workbox ao Service Worker                                          | Médio   |
+| 11  | Sem Prettier                                 | Configurar Prettier + lint-staged + Husky                                    | Baixo   |
+| 12  | API sem versionamento                        | Reorganizar em `/api/v1/`                                                    | Médio   |
+| 13  | `origin` fora do schema Zod                  | Mover campo `origin` para dentro do `raceSchema`                             | Baixo   |
+| 14  | Notificações síncronas na criação de corrida | Usar Vercel Cron ou queue para processamento assíncrono                      | Médio   |
+| 15  | Cleanup do rate-limit map ineficiente        | Usar `setInterval` para limpeza periódica (irrelevante se migrar para Redis) | Baixo   |
 
 ---
 
@@ -719,4 +736,4 @@ public/
 
 ---
 
-*Auditoria gerada em 17/02/2026. Para atualizar, re-executar análise após mudanças significativas na codebase.*
+_Auditoria gerada em 17/02/2026. Para atualizar, re-executar análise após mudanças significativas na codebase._

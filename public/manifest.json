@@ -5,7 +5,7 @@
   "start_url": "/corridas",
   "display": "standalone",
   "background_color": "#FFFFFF",
-  "theme_color": "#e53300",
+  "theme_color": "#fc5200",
   "orientation": "portrait",
   "categories": ["sports"],
   "icons": [

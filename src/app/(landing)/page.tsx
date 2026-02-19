@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { CtaButtons } from "@/components/landing/cta-buttons";
+import { createClient } from "@/lib/supabase/server";
 import {
   Filter,
   Users,
@@ -13,7 +14,12 @@ import {
   UserPlus,
 } from "lucide-react";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .rpc("get_random_cities", { p_limit: 60 });
+
+  const cities = (data ?? []).map((c: { name: string; state_code: string }) => `${c.name} - ${c.state_code}`);
   return (
     <main className="text-zinc-300 antialiased overflow-x-hidden min-h-screen scroll-smooth">
       <LandingHeader />
@@ -22,7 +28,7 @@ export default function LandingPage() {
       <section className="relative bg-black bg-grid pt-40 pb-20 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm mb-8">
+          {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm mb-8">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -30,7 +36,7 @@ export default function LandingPage() {
             <span className="text-xs font-medium text-zinc-300">
               Disponível em Rio Preto e região
             </span>
-          </div>
+          </div> */}
 
           {/* Headline */}
           <h1 className="text-5xl md:text-6xl font-bold text-white tracking-tight mb-6 leading-[1.1]">
@@ -99,10 +105,13 @@ export default function LandingPage() {
       <div className="h-px bg-zinc-800" />
 
       {/* ==================== Features ==================== */}
-      <section id="features" className="relative bg-black bg-grid py-20 overflow-hidden">
+      <section id="features" className="relative bg-black bg-grid py-24 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
+          <div className="text-center mb-16">
+            <p className="text-xs font-semibold text-emerald-500 uppercase tracking-[0.2em] mb-4">
+              Funcionalidades
+            </p>
+            <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-4">
               Feito para quem corre
             </h2>
             <p className="text-lg text-zinc-500 max-w-xl mx-auto">
@@ -110,23 +119,86 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { icon: Filter, title: "Filtros Inteligentes", desc: "Raio em km, tipo de premiação, distância e data." },
-              { icon: Trophy, title: "Filtro de Premiação", desc: "Encontre corridas com dinheiro, troféu ou ambos." },
-              { icon: Search, title: "Busca por Texto", desc: "Pesquise por nome da corrida, cidade ou organizador." },
-              { icon: CalendarDays, title: "Info Completa", desc: "Categorias, valores, percurso e local de largada." },
-              { icon: Bell, title: "Push Notifications", desc: "Novas corridas e lembretes de prazo no celular." },
-              { icon: Award, title: "PWA Instalável", desc: "Instale como app direto do navegador, sem loja." },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="border border-zinc-800 rounded-lg bg-black p-6 hover:border-zinc-700 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
-                  <Icon className="w-5 h-5 text-zinc-300" />
+          {/* Bento grid — row 1: large + 2 small | row 2: 2 small + large */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+            {/* 01 — large */}
+            <div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/30 p-8 flex flex-col hover:border-zinc-700 transition-colors relative overflow-hidden">
+              <div className="flex items-start justify-between mb-6">
+                <div className="w-12 h-12 rounded-xl bg-zinc-800 border border-zinc-700/50 flex items-center justify-center">
+                  <Filter className="w-6 h-6 text-zinc-300" />
                 </div>
-                <h3 className="text-base font-semibold text-white mb-2">{title}</h3>
-                <p className="text-sm text-zinc-500 leading-relaxed">{desc}</p>
+                <span className="text-xs font-mono font-bold text-zinc-700">01</span>
               </div>
-            ))}
+              <h3 className="text-xl font-semibold text-white mb-3">Filtros Inteligentes</h3>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                Filtre por raio em km a partir da sua cidade, tipo de premiação, distância e data. Encontre exatamente o que procura em segundos.
+              </p>
+            </div>
+
+            {/* 02 — small */}
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6 flex flex-col hover:border-zinc-700 transition-colors">
+              <div className="flex items-start justify-between mb-5">
+                <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700/50 flex items-center justify-center">
+                  <Trophy className="w-5 h-5 text-zinc-300" />
+                </div>
+                <span className="text-xs font-mono font-bold text-zinc-700">02</span>
+              </div>
+              <h3 className="text-base font-semibold text-white mb-2">Filtro de Premiação</h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">Encontre corridas com dinheiro, troféu ou ambos.</p>
+            </div>
+
+            {/* 03 — small */}
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6 flex flex-col hover:border-zinc-700 transition-colors">
+              <div className="flex items-start justify-between mb-5">
+                <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700/50 flex items-center justify-center">
+                  <Search className="w-5 h-5 text-zinc-300" />
+                </div>
+                <span className="text-xs font-mono font-bold text-zinc-700">03</span>
+              </div>
+              <h3 className="text-base font-semibold text-white mb-2">Busca por Texto</h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">Pesquise por nome da corrida, cidade ou organizador.</p>
+            </div>
+
+            {/* 04 — small */}
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6 flex flex-col hover:border-zinc-700 transition-colors">
+              <div className="flex items-start justify-between mb-5">
+                <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700/50 flex items-center justify-center">
+                  <CalendarDays className="w-5 h-5 text-zinc-300" />
+                </div>
+                <span className="text-xs font-mono font-bold text-zinc-700">04</span>
+              </div>
+              <h3 className="text-base font-semibold text-white mb-2">Info Completa</h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">Categorias, valores, percurso e local de largada.</p>
+            </div>
+
+            {/* 05 — small */}
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6 flex flex-col hover:border-zinc-700 transition-colors">
+              <div className="flex items-start justify-between mb-5">
+                <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700/50 flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-zinc-300" />
+                </div>
+                <span className="text-xs font-mono font-bold text-zinc-700">05</span>
+              </div>
+              <h3 className="text-base font-semibold text-white mb-2">Push Notifications</h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">Novas corridas e lembretes de prazo direto no celular.</p>
+            </div>
+
+            {/* 06 — large */}
+            <div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/30 p-8 flex flex-col hover:border-zinc-700 transition-colors relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-bl from-zinc-700/10 to-transparent pointer-events-none" />
+              <div className="flex items-start justify-between mb-6">
+                <div className="w-12 h-12 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                  <Award className="w-6 h-6 text-zinc-300" />
+                </div>
+                <span className="text-xs font-mono font-bold text-zinc-700">06</span>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">PWA Instalável</h3>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                Instale como app direto do navegador, sem precisar de loja. Acesso rápido e experiência nativa no celular.
+              </p>
+            </div>
+
           </div>
         </div>
       </section>
@@ -135,7 +207,7 @@ export default function LandingPage() {
 
       {/* ==================== How It Works ==================== */}
       <section className="relative bg-zinc-950 py-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
               Simples assim
@@ -152,11 +224,8 @@ export default function LandingPage() {
               { step: "3", icon: Bell, title: "Marque e receba alertas", desc: "Clique em 'Vou Nessa', veja quem mais vai e receba lembretes de prazo." },
             ].map(({ step, icon: Icon, title, desc }) => (
               <div key={step} className="text-center">
-                <div className="mx-auto w-12 h-12 rounded-full bg-[#e53300]/10 border border-[#e53300]/20 flex items-center justify-center mb-5">
-                  <Icon className="w-5 h-5 text-[#e53300]" />
-                </div>
-                <div className="text-xs font-bold text-[#e53300] uppercase tracking-wider mb-2">
-                  Passo {step}
+                <div className="mx-auto w-12 h-12 rounded-full bg-[#fc5200]/10 border border-[#fc5200]/20 flex items-center justify-center mb-5">
+                  <Icon className="w-5 h-5 text-[#fc5200]" />
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
                 <p className="text-sm text-zinc-500 leading-relaxed">{desc}</p>
@@ -168,27 +237,24 @@ export default function LandingPage() {
 
       <div className="h-px bg-zinc-800" />
 
-      {/* ==================== Cobertura Regional ==================== */}
-      <section id="cobertura" className="relative bg-black bg-grid py-16">
+      {/* ==================== Cobertura Nacional ==================== */}
+      <section id="cobertura" className="relative bg-black bg-grid py-16 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-center text-xs font-semibold text-zinc-500 uppercase tracking-[0.2em] mb-10">
-            Cobertura Regional
+            Cobertura Nacional
           </h2>
-          <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 md:gap-x-16">
-            {[
-              "São José do Rio Preto",
-              "Votuporanga",
-              "Araçatuba",
-              "Catanduva",
-              "Fernandópolis",
-            ].map((city) => (
-              <span
-                key={city}
-                className="text-lg md:text-xl font-medium text-zinc-300 hover:text-white transition-colors cursor-default"
-              >
-                {city}
-              </span>
-            ))}
+
+          <div className="ticker-mask">
+            <div className="ticker-track">
+              {[...cities, ...cities].map((city, i) => (
+                <span
+                  key={i}
+                  className="ticker-item text-lg md:text-xl font-medium text-zinc-300"
+                >
+                  {city}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </section>

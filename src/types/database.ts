@@ -355,6 +355,10 @@ export type Database = {
         Args: { p_query: string; p_limit?: number }
         Returns: { id: string; name: string; state_code: string; slug: string; latitude: number; longitude: number }[]
       }
+      get_random_cities: {
+        Args: { p_limit?: number }
+        Returns: { name: string; state_code: string }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/popover";
 
 const primaryClass =
-  "w-full sm:w-auto flex items-center justify-center gap-2 bg-[#e53300] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#c42d00] transition-colors";
+  "w-full sm:w-auto flex items-center justify-center gap-2 bg-[#fc5200] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#c94100] transition-colors";
 
 export function Header() {
   const { user, profile, isLoading, signOut } = useAuth();

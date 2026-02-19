@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const primaryClass =
-  "w-full sm:w-auto flex items-center justify-center gap-2 bg-[#e53300] text-white text-sm px-6 py-3 rounded-full font-semibold hover:bg-[#c42d00] transition-colors";
+  "w-full sm:w-auto flex items-center justify-center gap-2 bg-[#fc5200] text-white text-sm px-6 py-3 rounded-full font-semibold hover:bg-[#c94100] transition-colors";
 
 export function LandingHeader() {
   const { user, profile, isLoading } = useAuth();
@@ -45,7 +45,7 @@ export function LandingHeader() {
               <Button
                 size="sm"
                 asChild
-                className="bg-[#e53300] text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-[#c42d00] border-0"
+                className="bg-[#fc5200] text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-[#c94100] border-0"
               >
                 <Link href="/corridas">Ir para corridas</Link>
               </Button>
