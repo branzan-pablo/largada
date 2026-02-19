@@ -1,7 +1,7 @@
 {
   "name": "Largada — Corridas de rua",
   "short_name": "Largada",
-  "description": "Encontre todas as corridas de rua da sua região em um só lugar.",
+  "description": "Calendário de corridas de rua com filtros, alertas de prazo e participação confirmada.",
   "start_url": "/corridas",
   "display": "standalone",
   "background_color": "#FFFFFF",

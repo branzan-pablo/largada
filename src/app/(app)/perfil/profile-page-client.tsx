@@ -157,7 +157,7 @@ export function ProfilePageClient() {
               Notificações
             </Label>
             <p className="text-sm text-muted-foreground">
-              Receba alertas de novas corridas na sua região
+              Avisos de novas corridas e prazo de inscrição
             </p>
             {isSupported && permission === "denied" && (
               <p className="text-xs text-destructive">

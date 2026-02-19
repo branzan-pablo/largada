@@ -29,15 +29,14 @@ export default async function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
           {/* Headline */}
           <h1 className="text-5xl md:text-6xl font-bold text-white tracking-tight mb-6 leading-[1.1]">
-            Encontre seu ritmo.
+            Nunca mais perca uma corrida
             <br />
-            <span className="text-zinc-400">Descubra sua próxima prova.</span>
+            <span className="text-zinc-400">por falta de informação.</span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-zinc-500 max-w-2xl mb-10 font-normal leading-relaxed">
-            Centralizamos todas as corridas de rua do interior de SP. Filtre por
-            distância, premiação e data. Planeje seu calendário em um só lugar.
+            Largada reúne corridas de rua de todo o Brasil em um calendário só. Filtre por cidade, distância e premiação. Receba alertas antes que os prazos vençam.
           </p>
 
           {/* CTA Buttons */}
@@ -54,10 +53,10 @@ export default async function LandingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
-              O problema que todo corredor conhece
+              Por que o Largada existe
             </h2>
             <p className="text-lg text-zinc-500 max-w-2xl mx-auto">
-              Informação espalhada, descoberta tardia e falta de conexão com outros atletas.
+              Corridas espalhadas, inscrições encerradas, turma sem avisar. Soa familiar?
             </p>
           </div>
 
@@ -65,18 +64,18 @@ export default async function LandingPage() {
             {[
               {
                 icon: Search,
-                title: "Informação espalhada",
-                problem: "Corridas divulgadas em dezenas de grupos de WhatsApp, perfis do Instagram e sites diferentes. Você nunca sabe se está vendo tudo.",
+                title: "Corrida boa é aquela que você fica sabendo a tempo.",
+                problem: "Eventos divulgados em grupos de WhatsApp, perfis de Instagram e sites de organizadores. Você precisa acompanhar tudo e ainda assim perde prova.",
               },
               {
                 icon: Bell,
-                title: "Descoberta tardia",
-                problem: "Quando você fica sabendo de uma corrida, as inscrições já encerraram ou o valor subiu para o último lote.",
+                title: "Abriu inscrição. Você ficou sabendo 1 semana depois.",
+                problem: "Quando a corrida aparece no feed, o primeiro lote já fechou e o valor subiu. O Largada te avisa antes disso acontecer.",
               },
               {
                 icon: Users,
-                title: "Sem saber quem vai",
-                problem: "Quer participar com amigos? Não tem como saber quem vai sem perguntar em cada grupo separadamente.",
+                title: "Correr com a turma é diferente de correr sozinho.",
+                problem: "Antes de se inscrever, você quer saber se alguém do grupo vai. O Largada mostra quem confirmou participação sem precisar perguntar em cada grupo.",
               },
             ].map(({ icon: Icon, title, problem }) => (
               <div key={title} className="border border-zinc-800 rounded-lg bg-zinc-900/20 p-6 hover:border-zinc-700 transition-colors flex flex-col">
@@ -101,7 +100,7 @@ export default async function LandingPage() {
               Funcionalidades
             </p>
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-4">
-              Feito para quem corre
+              Tudo que você precisa para planejar sua temporada
             </h2>
             <p className="text-lg text-zinc-500 max-w-xl mx-auto">
               Detalhes que fazem a diferença na hora de planejar sua temporada.
@@ -119,9 +118,9 @@ export default async function LandingPage() {
                 </div>
                 <span className="text-xs font-mono font-bold text-zinc-700">01</span>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Filtros Inteligentes</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">Filtros na medida certa</h3>
               <p className="text-sm text-zinc-400 leading-relaxed">
-                Filtre por raio em km a partir da sua cidade, tipo de premiação, distância e data. Encontre exatamente o que procura em segundos.
+                Filtre por raio de km a partir da sua cidade, distância da prova, tipo de premiação e data. Encontre o que procura sem ver o que não importa.
               </p>
             </div>
 
@@ -133,8 +132,8 @@ export default async function LandingPage() {
                 </div>
                 <span className="text-xs font-mono font-bold text-zinc-700">02</span>
               </div>
-              <h3 className="text-base font-semibold text-white mb-2">Filtro de Premiação</h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">Encontre corridas com dinheiro, troféu ou ambos.</p>
+              <h3 className="text-base font-semibold text-white mb-2">Só corridas que valem</h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">Quer dinheiro, troféu ou os dois? Um toque filtra só as provas que fazem sentido pra você.</p>
             </div>
 
             {/* 03 — small */}
@@ -145,8 +144,8 @@ export default async function LandingPage() {
                 </div>
                 <span className="text-xs font-mono font-bold text-zinc-700">03</span>
               </div>
-              <h3 className="text-base font-semibold text-white mb-2">Busca por Texto</h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">Pesquise por nome da corrida, cidade ou organizador.</p>
+              <h3 className="text-base font-semibold text-white mb-2">Busca direta</h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">Pesquise pelo nome da corrida, cidade ou organizador. Resultado na hora.</p>
             </div>
 
             {/* 04 — small */}
@@ -157,8 +156,8 @@ export default async function LandingPage() {
                 </div>
                 <span className="text-xs font-mono font-bold text-zinc-700">04</span>
               </div>
-              <h3 className="text-base font-semibold text-white mb-2">Info Completa</h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">Categorias, valores, percurso e local de largada.</p>
+              <h3 className="text-base font-semibold text-white mb-2">Informação completa</h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">Categorias, local de largada, percurso, valores por lote e prazo de inscrição tudo na mesma tela.</p>
             </div>
 
             {/* 05 — small */}
@@ -169,8 +168,8 @@ export default async function LandingPage() {
                 </div>
                 <span className="text-xs font-mono font-bold text-zinc-700">05</span>
               </div>
-              <h3 className="text-base font-semibold text-white mb-2">Push Notifications</h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">Novas corridas e lembretes de prazo direto no celular.</p>
+              <h3 className="text-base font-semibold text-white mb-2">Aviso antes do prazo fechar</h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">Receba notificação quando surgir uma corrida nova na sua região e lembrete 3 dias antes do prazo de inscrição encerrar.</p>
             </div>
 
             {/* 06 — large */}
@@ -182,9 +181,9 @@ export default async function LandingPage() {
                 </div>
                 <span className="text-xs font-mono font-bold text-zinc-700">06</span>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">PWA Instalável</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">Instala como app, sem a loja</h3>
               <p className="text-sm text-zinc-400 leading-relaxed">
-                Instale como app direto do navegador, sem precisar de loja. Acesso rápido e experiência nativa no celular.
+                Adicione direto do navegador, sem App Store nem Google Play. Abre na tela inicial e funciona igual a um app nativo.
               </p>
             </div>
 
@@ -199,18 +198,18 @@ export default async function LandingPage() {
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3">
-              Simples assim
+              Três minutos. Uma conta. Nenhuma corrida perdida.
             </h2>
             <p className="text-lg text-zinc-500">
-              Três passos para nunca mais perder uma corrida.
+              Sem tutorial, sem configuração complicada.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { step: "1", icon: UserPlus, title: "Crie sua conta", desc: "Cadastro rápido com email, Google ou Strava. Selecione sua cidade." },
-              { step: "2", icon: Search, title: "Encontre corridas", desc: "Use os filtros para encontrar provas na sua região, com a distância e premiação ideais." },
-              { step: "3", icon: Bell, title: "Marque e receba alertas", desc: "Clique em 'Vou Nessa', veja quem mais vai e receba lembretes de prazo." },
+              { step: "1", icon: UserPlus, title: "Crie sua conta", desc: "Cadastro com email, Google ou Strava. Selecione sua cidade e o quanto você topa viajar para uma prova." },
+              { step: "2", icon: Search, title: "Encontre sua próxima prova", desc: "Use os filtros para achar provas na distância certa, com o nível de premiação que você quer sem rolar por dezenas de eventos irrelevantes." },
+              { step: "3", icon: Bell, title: "Marque e deixa com a gente", desc: "Clique em 'Vou Nessa', veja quem da sua rede também vai correr e deixa o Largada te avisar quando o prazo de inscrição estiver chegando." },
             ].map(({ step, icon: Icon, title, desc }) => (
               <div key={step} className="text-center">
                 <div className="mx-auto w-12 h-12 rounded-full bg-[#fc5200]/10 border border-[#fc5200]/20 flex items-center justify-center mb-5">
@@ -230,7 +229,7 @@ export default async function LandingPage() {
       <section id="cobertura" className="relative bg-black bg-grid py-16 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-center text-xs font-semibold text-zinc-500 uppercase tracking-[0.2em] mb-10">
-            Cobertura Nacional
+            Corridas de todo o Brasil
           </h2>
 
           <div className="ticker-mask">
@@ -257,8 +256,7 @@ export default async function LandingPage() {
             Pronto para a largada?
           </h2>
           <p className="text-zinc-500 mb-10 max-w-md mx-auto">
-            Crie sua conta gratuitamente, marque suas provas e receba
-            notificações personalizadas.
+            Crie sua conta em menos de 2 minutos. Gratuito. Sem cartão de crédito. Sem pegadinha.
           </p>
           <CtaButtons />
         </div>
@@ -277,7 +275,7 @@ export default async function LandingPage() {
                 <span className="text-white font-medium">Largada</span>
               </div>
               <p className="text-sm text-zinc-500 max-w-xs">
-                O hub de corridas do interior paulista.
+                O calendário de corridas de rua do Brasil.
               </p>
             </div>
 
@@ -329,7 +327,7 @@ export default async function LandingPage() {
               &copy; {new Date().getFullYear()} Largada. Todos os direitos reservados.
             </p>
             <p className="text-xs text-zinc-500">
-              Feito para corredores do interior de SP
+              Nasceu no interior de SP. Chegou ao Brasil.
             </p>
           </div>
         </div>

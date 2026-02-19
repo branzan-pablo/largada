@@ -18,18 +18,18 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Largada — Corridas de rua do interior de SP",
+    default: "Largada — Corridas de rua em todo o Brasil",
     template: "%s | Largada",
   },
   description:
-    "Encontre todas as corridas de rua da sua região em um só lugar. Calendário completo com filtros, detalhes de provas e notificações.",
+    "Calendário de corridas de rua com mais de 5.000 cidades. Filtre por distância, premiação e data. Receba alertas antes dos prazos fecharem.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
   ),
   openGraph: {
-    title: "Largada — Corridas de rua do interior de SP",
+    title: "Largada — Corridas de rua em todo o Brasil",
     description:
-      "Encontre todas as corridas de rua da sua região em um só lugar.",
+      "Calendário de corridas de rua com mais de 5.000 cidades. Filtre por distância, premiação e data.",
     siteName: "Largada",
     locale: "pt_BR",
     type: "website",

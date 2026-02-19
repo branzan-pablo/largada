@@ -46,9 +46,9 @@ export function AuthDialog({ children }: AuthDialogProps) {
       </div>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Faça login para continuar</DialogTitle>
+          <DialogTitle>Entre para continuar</DialogTitle>
           <DialogDescription>
-            Você precisa estar logado para realizar esta ação.
+            Crie sua conta ou faça login para marcar participação e receber avisos de corridas.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3 pt-4">

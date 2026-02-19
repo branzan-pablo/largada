@@ -37,8 +37,7 @@ export function RaceList() {
             Calendário de Corridas
           </h1>
           <p className="text-zinc-500 max-w-xl text-lg">
-            Encontre e inscreva-se nas principais provas de rua da região. Filtre por
-            distância, cidade ou premiação.
+            Filtre por cidade, distância e premiação. Marque &quot;Vou Nessa&quot; e veja quem da sua rede vai correr.
           </p>
         </div>
 
@@ -85,10 +84,16 @@ export function RaceList() {
           <div className="flex flex-col items-center justify-center py-16 text-center rounded-lg border border-zinc-800 bg-zinc-900/50">
             <Trophy className="mb-4 h-12 w-12 text-zinc-700" />
             <h3 className="text-lg font-semibold text-white">
-              Nenhuma corrida encontrada
+              Nenhuma corrida encontrada com esses filtros.
             </h3>
             <p className="mt-1 text-sm text-zinc-500">
-              Tente ajustar os filtros ou a busca.
+              Tente ampliar o raio de distância ou remover alguns filtros.
+            </p>
+            <p className="mt-3 text-sm text-zinc-500">
+              Conhece uma corrida que deveria aparecer aqui?{" "}
+              <a href="/sugerir" className="text-zinc-300 hover:text-white underline underline-offset-2 transition-colors">
+                Sugerir corrida
+              </a>
             </p>
           </div>
         ) : (

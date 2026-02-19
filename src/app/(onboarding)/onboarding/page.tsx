@@ -93,10 +93,10 @@ export default function OnboardingPage() {
           <MapPin className="h-6 w-6 text-zinc-400" />
         </div>
         <h1 className="text-2xl font-bold text-white">
-          De qual cidade você é?
+          De qual cidade você vai correr?
         </h1>
         <p className="text-sm text-zinc-500">
-          Vou te avisar das corridas mais perto de você.
+          A gente filtra o calendário para o que tá perto de você.
         </p>
       </div>
 
@@ -136,7 +136,7 @@ export default function OnboardingPage() {
             disabled={isLoading}
             className="w-full text-center text-sm text-zinc-600 hover:text-zinc-400 transition-colors"
           >
-            Pular por agora
+            Definir depois
           </button>
         </div>
       </div>
