@@ -15,7 +15,7 @@ export default async function AdminRacesPage() {
 
   const { data: races } = await supabase
     .from("races")
-    .select("id, name, city, date, status, distances, rsvp_count")
+    .select("id, name, city, state, date, status, distances, rsvp_count")
     .order("date", { ascending: false });
 
   return (
@@ -53,7 +53,7 @@ export default async function AdminRacesPage() {
               <tr key={race.id} className="border-b">
                 <td className="px-4 py-3 font-medium">{race.name}</td>
                 <td className="hidden px-4 py-3 sm:table-cell">
-                  {race.city}
+                  {`${race.city} — ${race.state}`}
                 </td>
                 <td className="hidden px-4 py-3 md:table-cell">
                   {formatDateShort(race.date)}

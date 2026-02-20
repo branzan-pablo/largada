@@ -34,34 +34,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const supabase = supabaseRef.current;
 
-    console.log("[auth] useEffect mounted, subscribing to onAuthStateChange");
-
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log("[auth] onAuthStateChange fired:", _event, "user:", session?.user?.id ?? null);
-      try {
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
-        if (currentUser) {
-          console.log("[auth] fetching profile for", currentUser.id);
-          await fetchProfile(currentUser.id);
-          console.log("[auth] fetchProfile completed");
-        } else {
-          setProfile(null);
-        }
-      } catch (err) {
-        console.error("[auth] error in onAuthStateChange callback:", err);
-      } finally {
-        console.log("[auth] setIsLoading(false)");
-        setIsLoading(false);
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        // setTimeout defers the fetch to after the auth lock is released,
+        // preventing a deadlock when querying Supabase inside onAuthStateChange.
+        setTimeout(() => fetchProfile(currentUser.id), 0);
+      } else {
+        setProfile(null);
       }
+      setIsLoading(false);
     });
 
-    return () => {
-      console.log("[auth] useEffect cleanup, unsubscribing");
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, [fetchProfile]);
 
   const signOut = useCallback(async () => {
