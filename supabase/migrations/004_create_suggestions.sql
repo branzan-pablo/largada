@@ -5,6 +5,7 @@ CREATE TABLE public.race_suggestions (
   name TEXT NOT NULL,
   date DATE,
   city TEXT NOT NULL,
+  state TEXT,
   link TEXT,
   notes TEXT,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
