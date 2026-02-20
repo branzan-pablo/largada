@@ -56,7 +56,7 @@ export const suggestionSchema = z.object({
   name: z.string().min(3, "Nome da corrida deve ter pelo menos 3 caracteres"),
   date: z.string().optional(),
   city: z.string().min(1, "Cidade é obrigatória"),
-  state: z.string().optional(),
+  state: z.string().min(1, "Estado é obrigatório"),
   link: z.union([z.string().transform(normalizeUrl).pipe(z.url("Link inválido")), z.literal("")]).optional(),
   notes: z.string().optional(),
 });
