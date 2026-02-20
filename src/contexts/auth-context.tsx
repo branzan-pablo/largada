@@ -34,25 +34,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const supabase = supabaseRef.current;
 
-    // onAuthStateChange emits INITIAL_SESSION on subscribe,
-    // so a separate getUser() call is unnecessary and would duplicate the fetch.
+    console.log("[auth] useEffect mounted, subscribing to onAuthStateChange");
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log("[auth] onAuthStateChange fired:", _event, "user:", session?.user?.id ?? null);
       try {
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         if (currentUser) {
+          console.log("[auth] fetching profile for", currentUser.id);
           await fetchProfile(currentUser.id);
+          console.log("[auth] fetchProfile completed");
         } else {
           setProfile(null);
         }
+      } catch (err) {
+        console.error("[auth] error in onAuthStateChange callback:", err);
       } finally {
+        console.log("[auth] setIsLoading(false)");
         setIsLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log("[auth] useEffect cleanup, unsubscribing");
+      subscription.unsubscribe();
+    };
   }, [fetchProfile]);
 
   const signOut = useCallback(async () => {
