@@ -12,7 +12,7 @@ interface SuggestionActionsProps {
     id: string;
     name: string;
     city: string;
-    state?: string | null;
+    state: string | null;
     date: string | null;
   };
 }
