@@ -2,6 +2,14 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  // Force canonical www domain in production to prevent OAuth state mismatch
+  const host = request.headers.get("host") || "";
+  if (host === "largadas.com.br") {
+    const url = request.nextUrl.clone();
+    url.host = "www.largadas.com.br";
+    return NextResponse.redirect(url, { status: 301 });
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
