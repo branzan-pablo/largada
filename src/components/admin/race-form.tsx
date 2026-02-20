@@ -27,7 +27,10 @@ interface RaceFormProps {
     city?: string;
     state?: string;
     date?: string;
+    link?: string;
+    notes?: string;
     suggestionId?: string;
+    cityData?: { name: string; state_code: string; latitude: number; longitude: number };
   };
 }
 
@@ -48,7 +51,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   } | null>(
     race
       ? { name: race.city, state_code: race.state, latitude: race.latitude, longitude: race.longitude }
-      : null
+      : suggestionData?.cityData ?? null
   );
   const [address, setAddress] = useState(race?.address ?? "");
   const [distances, setDistances] = useState<string[]>(race?.distances ?? []);
@@ -61,6 +64,8 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   const [organizer, setOrganizer] = useState(race?.organizer ?? "");
   const [description, setDescription] = useState(race?.description ?? "");
   const [status, setStatus] = useState<string>(race?.status ?? "confirmed");
+  const [notes, setNotes] = useState(race?.notes ?? suggestionData?.notes ?? "");
+  const [link, setLink] = useState(race?.link ?? suggestionData?.link ?? "");
 
   const handleDistanceToggle = (distance: string) => {
     setDistances((prev) =>
@@ -74,21 +79,15 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     e.preventDefault();
     setErrors({});
 
-    if (!selectedCity) {
-      setErrors((prev) => ({ ...prev, city: "Selecione uma cidade" }));
-      toast.error("Corrija os campos destacados antes de salvar");
-      return;
-    }
-
     const parsed = raceSchema.safeParse({
       name,
       date,
       startTime,
-      city: selectedCity.name,
-      state: selectedCity.state_code,
+      city: selectedCity?.name ?? "",
+      state: selectedCity?.state_code ?? "",
       address,
-      latitude: selectedCity.latitude,
-      longitude: selectedCity.longitude,
+      latitude: selectedCity?.latitude,
+      longitude: selectedCity?.longitude,
       distances,
       registrationPrice,
       registrationLink,
@@ -99,6 +98,8 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       organizer: organizer || undefined,
       description: description || undefined,
       status,
+      link: link || undefined,
+      notes: notes || undefined,
     });
 
     if (!parsed.success) {
@@ -160,7 +161,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     <form onSubmit={handleSubmit} className="max-w-3xl space-y-6" noValidate>
       {suggestionData?.suggestionId && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
-          Criando corrida a partir de uma sugestão. Os campos nome, cidade e data
+          Criando corrida a partir de uma sugestão. Os campos Nome, Cidade, Data, Link e Observações já
           foram pré-preenchidos. Ao salvar, a sugestão será marcada como aprovada.
         </div>
       )}
@@ -182,30 +183,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
             {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="date">Data *</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className={errors.date ? "border-destructive" : ""}
-            />
-            {errors.date && <p className="text-xs text-destructive">{errors.date}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="startTime">Horário de largada *</Label>
-            <Input
-              id="startTime"
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              className={errors.startTime ? "border-destructive" : ""}
-            />
-            {errors.startTime && <p className="text-xs text-destructive">{errors.startTime}</p>}
-          </div>
-
-          <div className="space-y-2">
+          <div className="space-y-2 sm:col-span-1">
             <Label>Cidade *</Label>
             <CityAutocomplete
               onSelect={(c) => setSelectedCity({
@@ -227,7 +205,54 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
             />
             {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
           </div>
+
+          <div className="space-y-2 sm:col-span-1">
+            <Label htmlFor="address">Endereço / local de largada *</Label>
+            <Input
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Ex: Praça Rui Barbosa, Centro"
+              className={errors.address ? "border-destructive" : ""}
+            />
+            {errors.address && <p className="text-xs text-destructive">{errors.address}</p>}
+          </div>
+
           <div className="space-y-2">
+            <Label htmlFor="date">Data *</Label>
+            <Input
+              id="date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={errors.date ? "border-destructive" : ""}
+            />
+            {errors.date && <p className="text-xs text-destructive">{errors.date}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="startTime">Horário de largada *</Label>
+            <Input
+              id="startTime"
+              type="time"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              className={errors.startTime ? "border-destructive" : ""}
+            />
+            {errors.startTime && <p className="text-xs text-destructive">{errors.startTime}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="organizer">Organizador</Label>
+            <Input
+              id="organizer"
+              value={organizer}
+              onChange={(e) => setOrganizer(e.target.value)}
+              placeholder="Ex: Assessoria XYZ"
+            />
+          </div>
+
+          <div className="space-y-2 sm:col-span-1">
             <Label htmlFor="status">Status *</Label>
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger>
@@ -242,23 +267,32 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address">Endereço / local de largada *</Label>
+            <Label htmlFor="link">Link (site ou rede social)</Label>
             <Input
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Ex: Praça Rui Barbosa, Centro"
-              className={errors.address ? "border-destructive" : ""}
+              id="link"
+              type="text"
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+              placeholder="Ex: www.corridaxyz.com.br ou https://..."
+              className={errors.link ? "border-destructive" : ""}
             />
-            {errors.address && <p className="text-xs text-destructive">{errors.address}</p>}
+            {errors.link ? (
+              <p className="text-xs text-destructive">{errors.link}</p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Aceita links com ou sem https://
+              </p>
+            )}
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="organizer">Organizador</Label>
-            <Input
-              id="organizer"
-              value={organizer}
-              onChange={(e) => setOrganizer(e.target.value)}
-              placeholder="Ex: Assessoria XYZ"
+            <Label htmlFor="notes">Observações</Label>
+            <Textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Informações adicionais sobre a corrida..."
+              rows={3}
             />
           </div>
         </div>

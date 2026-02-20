@@ -19,6 +19,8 @@ CREATE TABLE public.races (
   route_description TEXT,
   route_image_url TEXT,
   organizer TEXT,
+  link TEXT,
+  notes TEXT,
   description TEXT,
   status TEXT NOT NULL DEFAULT 'confirmed' CHECK (status IN ('confirmed', 'postponed', 'cancelled')),
   rsvp_count INTEGER NOT NULL DEFAULT 0,

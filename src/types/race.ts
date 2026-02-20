@@ -20,6 +20,8 @@ export interface Race {
   organizer: string | null;
   description: string | null;
   status: "confirmed" | "postponed" | "cancelled";
+  notes: string | null;
+  link: string | null;
   rsvp_count: number;
   created_by: string;
   origin: "admin" | "approved_suggestion";

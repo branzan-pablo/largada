@@ -155,7 +155,7 @@ export type Database = {
           notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
-          state: string
+          state: string | null
           status: string
           user_id: string
         }
@@ -169,7 +169,7 @@ export type Database = {
           notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
-          state: string
+          state?: string | null
           status?: string
           user_id: string
         }
@@ -226,6 +226,8 @@ export type Database = {
           registration_link: string
           registration_price: string
           route_description: string | null
+          link: string | null
+          notes: string | null
           route_image_url: string | null
           rsvp_count: number
           slug: string
@@ -245,8 +247,10 @@ export type Database = {
           distances: string[]
           id?: string
           latitude: number
+          link?: string | null
           longitude: number
           name: string
+          notes?: string | null
           organizer?: string | null
           origin?: string
           prize_details?: string | null
@@ -274,8 +278,10 @@ export type Database = {
           distances?: string[]
           id?: string
           latitude?: number
+          link?: string | null
           longitude?: number
           name?: string
+          notes?: string | null
           organizer?: string | null
           origin?: string
           prize_details?: string | null
