@@ -47,6 +47,7 @@ export interface RaceSuggestion {
   name: string;
   date: string | null;
   city: string;
+  state: string;
   link: string | null;
   notes: string | null;
   status: "pending" | "approved" | "rejected";

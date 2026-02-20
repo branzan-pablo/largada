@@ -115,7 +115,7 @@ export function MySuggestionsClient() {
                   {s.city && (
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" />
-                      {s.city}
+                      {`${s.city} — ${s.state}`}
                     </span>
                   )}
                 </div>
