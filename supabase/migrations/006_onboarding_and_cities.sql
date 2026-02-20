@@ -26,28 +26,7 @@ CREATE INDEX idx_cities_slug ON public.cities(slug);
 ALTER TABLE public.cities ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "cities_public_read" ON public.cities FOR SELECT USING (true);
 
--- 3. Seed: 20 cidades da região (de REGION_CITIES em constants.ts)
-INSERT INTO public.cities (name, slug, state_code, latitude, longitude) VALUES
-  ('São José do Rio Preto', 'sao-jose-do-rio-preto', 'SP', -20.8113, -49.3758),
-  ('Votuporanga',           'votuporanga',            'SP', -20.4218, -49.9729),
-  ('Araçatuba',             'aracatuba',              'SP', -21.2089, -50.4328),
-  ('Catanduva',             'catanduva',              'SP', -21.1378, -48.9726),
-  ('Fernandópolis',         'fernandopolis',          'SP', -20.2839, -50.2467),
-  ('Jales',                 'jales',                  'SP', -20.2690, -50.5460),
-  ('Mirassol',              'mirassol',               'SP', -20.8186, -49.5204),
-  ('Birigui',               'birigui',                'SP', -21.2883, -50.3400),
-  ('Penápolis',             'penapolis',              'SP', -21.4173, -50.0766),
-  ('Olímpia',               'olimpia',                'SP', -20.7368, -48.9163),
-  ('Novo Horizonte',        'novo-horizonte',         'SP', -21.4677, -49.2209),
-  ('Tanabi',                'tanabi',                 'SP', -20.6263, -49.6573),
-  ('Monte Aprazível',       'monte-aprazivel',        'SP', -20.7725, -49.7144),
-  ('José Bonifácio',        'jose-bonifacio',         'SP', -21.0529, -49.6884),
-  ('Bebedouro',             'bebedouro',              'SP', -20.9492, -48.4791),
-  ('Lins',                  'lins',                   'SP', -21.6786, -49.7425),
-  ('Barretos',              'barretos',               'SP', -20.5573, -48.5678),
-  ('Presidente Prudente',   'presidente-prudente',    'SP', -22.1207, -51.3882),
-  ('Marília',               'marilia',                'SP', -22.2139, -49.9461),
-  ('Araraquara',            'araraquara',             'SP', -21.7946, -48.1756);
+-- 3. Seed de cidades: ver migration 007_all_brazilian_cities.sql (5.571 municípios)
 
 -- 4. Novas colunas em profiles
 ALTER TABLE public.profiles
