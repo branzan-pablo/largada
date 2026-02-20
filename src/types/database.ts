@@ -155,7 +155,7 @@ export type Database = {
           notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
-          state: string
+          state: string | null
           status: string
           user_id: string
         }
@@ -169,7 +169,7 @@ export type Database = {
           notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
-          state: string
+          state?: string | null
           status?: string
           user_id: string
         }

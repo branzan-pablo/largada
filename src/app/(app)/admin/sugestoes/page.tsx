@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -41,9 +39,8 @@ export default async function AdminSuggestionsPage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">{suggestion.name}</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    {suggestion.city}
-                    {suggestion.date &&
-                      ` — ${formatDateShort(suggestion.date)}`}
+                    {`${suggestion.city} — ${suggestion.state}`}
+                    {suggestion.date && ` — ${formatDateShort(suggestion.date)}`}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-3">

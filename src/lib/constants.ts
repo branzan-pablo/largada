@@ -1,4 +1,4 @@
-export const DISTANCES = ["3k", "5k", "10k", "21k", "42k"] as const;
+export const DISTANCES = ["5k", "10k", "21k", "42k"] as const;
 export type Distance = (typeof DISTANCES)[number];
 
 export const PRIZE_TYPES = {
@@ -24,9 +24,9 @@ export const REGION_CITIES = [
   { name: "Araçatuba", state: "SP", lat: -21.2089, lng: -50.4328 },
   { name: "Catanduva", state: "SP", lat: -21.1378, lng: -48.9726 },
   { name: "Fernandópolis", state: "SP", lat: -20.2839, lng: -50.2467 },
-  { name: "Jales", state: "SP", lat: -20.2690, lng: -50.5460 },
+  { name: "Jales", state: "SP", lat: -20.269, lng: -50.546 },
   { name: "Mirassol", state: "SP", lat: -20.8186, lng: -49.5204 },
-  { name: "Birigui", state: "SP", lat: -21.2883, lng: -50.3400 },
+  { name: "Birigui", state: "SP", lat: -21.2883, lng: -50.34 },
   { name: "Penápolis", state: "SP", lat: -21.4173, lng: -50.0766 },
   { name: "Olímpia", state: "SP", lat: -20.7368, lng: -48.9163 },
   { name: "Novo Horizonte", state: "SP", lat: -21.4677, lng: -49.2209 },
