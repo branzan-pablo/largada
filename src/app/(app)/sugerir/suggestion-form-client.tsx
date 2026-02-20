@@ -21,6 +21,7 @@ export function SuggestionFormClient() {
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [city, setCity] = useState("");
+  const [state, setState] = useState("");
   const [link, setLink] = useState("");
   const [notes, setNotes] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -38,7 +39,7 @@ export function SuggestionFormClient() {
     e.preventDefault();
     setErrors({});
 
-    const parsed = suggestionSchema.safeParse({ name, date, city, link, notes });
+    const parsed = suggestionSchema.safeParse({ name, date, city, state, link, notes });
     if (!parsed.success) {
       const fieldErrors: Record<string, string> = {};
       for (const issue of parsed.error.issues) {
@@ -94,8 +95,8 @@ export function SuggestionFormClient() {
       <div className="space-y-2">
         <Label>Cidade *</Label>
         <CityAutocomplete
-          onSelect={(c) => setCity(c.name)}
-          onClear={() => setCity("")}
+          onSelect={(c) => { setCity(c.name); setState(c.state_code); }}
+          onClear={() => { setCity(""); setState(""); }}
           placeholder="Digite a cidade da corrida..."
         />
         {errors.city && (

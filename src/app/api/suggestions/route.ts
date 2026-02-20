@@ -44,6 +44,7 @@ export async function POST(request: Request) {
       name: body.name,
       date: body.date || null,
       city: body.city,
+      state: body.state || null,
       link: body.link || null,
       notes: body.notes || null,
     })

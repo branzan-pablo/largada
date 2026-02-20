@@ -12,6 +12,7 @@ interface SuggestionActionsProps {
     id: string;
     name: string;
     city: string;
+    state: string | null;
     date: string | null;
   };
 }
@@ -41,6 +42,7 @@ export function SuggestionActions({ suggestion }: SuggestionActionsProps) {
     suggestionId: suggestion.id,
     name: suggestion.name,
     city: suggestion.city,
+    ...(suggestion.state ? { state: suggestion.state } : {}),
     ...(suggestion.date ? { date: suggestion.date } : {}),
   });
 

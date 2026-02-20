@@ -15,6 +15,7 @@ export default async function NewRacePage({
     ? {
         name: params.name ?? "",
         city: params.city ?? "",
+        state: params.state ?? "",
         date: params.date ?? "",
         suggestionId: params.suggestionId,
       }

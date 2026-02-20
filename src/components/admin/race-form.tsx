@@ -25,6 +25,7 @@ interface RaceFormProps {
   suggestionData?: {
     name?: string;
     city?: string;
+    state?: string;
     date?: string;
     suggestionId?: string;
   };
@@ -217,9 +218,11 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
               initialCity={
                 race
                   ? `${race.city} — ${race.state}`
-                  : suggestionData?.city
-                    ? `${suggestionData.city}`
-                    : undefined
+                  : suggestionData?.city && suggestionData?.state
+                    ? `${suggestionData.city} — ${suggestionData.state}`
+                    : suggestionData?.city
+                      ? suggestionData.city
+                      : undefined
               }
             />
             {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
