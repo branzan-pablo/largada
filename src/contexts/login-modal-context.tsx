@@ -59,7 +59,9 @@ export function LoginModalUrlHandler() {
     const login = searchParams.get("login");
     const error = searchParams.get("error");
 
-    if (error === "auth") {
+    if (error === "strava_limit") {
+      toast.error("Login com Strava temporariamente indisponível. Use outra forma de login.", { duration: 6000 });
+    } else if (error === "auth") {
       toast.error("Erro na autenticação. Tente novamente.");
     } else if (error === "confirmation") {
       toast.error("Erro ao confirmar email. Tente novamente.");

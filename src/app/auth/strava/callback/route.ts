@@ -53,7 +53,8 @@ export async function GET(request: NextRequest) {
     });
 
     if (!tokenRes.ok) {
-      return NextResponse.redirect(`${origin}/corridas?error=auth`);
+      const errorParam = tokenRes.status === 403 ? "strava_limit" : "auth";
+      return NextResponse.redirect(`${origin}/corridas?error=${errorParam}`);
     }
 
     const tokenData: StravaTokenResponse = await tokenRes.json();
