@@ -24,21 +24,23 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
+            request.cookies.set(name, value),
           );
           supabaseResponse = NextResponse.next({
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options),
           );
         },
       },
-    }
+    },
   );
 
   // Refresh session if expired
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Server-side route protection
   const protectedPaths = ["/perfil", "/sugerir", "/admin"];
@@ -67,12 +69,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/corridas", request.url));
       }
 
-      if (
-        needsOnboardingCheck &&
-        profile &&
-        !profile.onboarding_completed &&
-        profile.city_id === null
-      ) {
+      if (needsOnboardingCheck && profile && !profile.onboarding_completed) {
         return NextResponse.redirect(new URL("/onboarding", request.url));
       }
     }

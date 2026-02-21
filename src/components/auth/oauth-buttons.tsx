@@ -39,7 +39,14 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
     const state = crypto.randomUUID();
     // Store state in cookie for server-side CSRF validation
     document.cookie = `strava_oauth_state=${state}; path=/; max-age=600; SameSite=Lax`;
-    window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&approval_prompt=auto&state=${state}`;
+    if (!clientId) {
+      console.error("Missing NEXT_PUBLIC_STRAVA_CLIENT_ID");
+      setIsLoadingStrava(false);
+      return;
+    }
+
+    const encodedRedirect = encodeURIComponent(redirectUri);
+    window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodedRedirect}&response_type=code&scope=${scope}&approval_prompt=auto&state=${state}`;
   };
 
   return (
