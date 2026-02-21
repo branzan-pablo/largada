@@ -72,21 +72,14 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
 
       <Button
         variant="outline"
-        className="w-full"
-        onClick={handleStravaLogin}
-        disabled={isAnyLoading}
+        className="w-full opacity-50 cursor-not-allowed"
+        disabled
+        title="Em breve"
       >
-        {isLoadingStrava ? (
-          <span className="flex items-center gap-2">
-            <LoadingSpinner />
-            Conectando...
-          </span>
-        ) : (
-          <span className="flex items-center gap-2">
-            <StravaIcon />
-            Continuar com Strava
-          </span>
-        )}
+        <span className="flex items-center gap-2">
+          <StravaIcon />
+          Continuar com Strava (em breve)
+        </span>
       </Button>
     </div>
   );
