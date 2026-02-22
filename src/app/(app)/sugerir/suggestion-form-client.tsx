@@ -78,8 +78,8 @@ export function SuggestionFormClient() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
+    <form onSubmit={handleSubmit} className="space-y-4 grid gap-4 sm:grid-cols-2">
+      <div className="space-y-2 sm:col-span-2">
         <Label htmlFor="name">Nome da corrida *</Label>
         <Input
           id="name"
@@ -92,7 +92,7 @@ export function SuggestionFormClient() {
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 sm:col-span-1">
         <Label>Cidade *</Label>
         <CityAutocomplete
           onSelect={(c) => { setCity(c.name); setState(c.state_code); }}
@@ -104,7 +104,7 @@ export function SuggestionFormClient() {
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 sm:col-span-1">
         <Label htmlFor="date">Data (se souber)</Label>
         <Input
           id="date"
@@ -114,7 +114,7 @@ export function SuggestionFormClient() {
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 sm:col-span-2">
         <Label htmlFor="link">Link (site ou rede social)</Label>
         <Input
           id="link"
@@ -133,7 +133,7 @@ export function SuggestionFormClient() {
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 sm:col-span-2">
         <Label htmlFor="notes">Observações</Label>
         <Textarea
           id="notes"
@@ -144,7 +144,7 @@ export function SuggestionFormClient() {
         />
       </div>
 
-      <Button type="submit" disabled={isSubmitting} className="w-full">
+      <Button type="submit" disabled={isSubmitting} className="sm:col-span-2">
         {isSubmitting ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         ) : (
