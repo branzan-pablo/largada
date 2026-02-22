@@ -1,8 +1,8 @@
 import { DollarSign, Trophy } from "lucide-react";
 
 const badgeStyles = {
-  trophy: "bg-orange-900/30 text-orange-400 border-orange-800/50",
-  money: "bg-emerald-900/30 text-emerald-400 border-emerald-800/50",
+  trophy: "bg-orange-50 text-orange-600 border-orange-200",
+  money: "bg-emerald-50 text-emerald-600 border-emerald-200",
 };
 
 function Badge({ type }: { type: "trophy" | "money" }) {

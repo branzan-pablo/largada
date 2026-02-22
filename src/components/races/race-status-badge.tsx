@@ -2,9 +2,9 @@ import { RACE_STATUSES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const statusStyles: Record<string, string> = {
-  confirmed: "bg-emerald-900/30 text-emerald-400 border-emerald-800/50",
-  postponed: "bg-yellow-900/30 text-yellow-400 border-yellow-800/50",
-  cancelled: "bg-red-900/30 text-red-400 border-red-800/50",
+  confirmed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  postponed: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  cancelled: "bg-red-50 text-red-700 border-red-200",
 };
 
 export function RaceStatusBadge({ status }: { status: string }) {

@@ -144,8 +144,8 @@ export function RsvpCard() {
   const { rsvped, count, isToggling, toggle } = useRsvpContext();
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 space-y-3">
-      <h3 className="font-semibold text-white">Vou nessa!</h3>
+    <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-3">
+      <h3 className="font-semibold text-[#0D1B2A]">Vou nessa!</h3>
       <p className="text-sm text-muted-foreground">
         {count} {count === 1 ? "pessoa confirmou" : "pessoas confirmaram"}
       </p>

@@ -20,7 +20,7 @@ export function BottomNav() {
   const { openLogin } = useLoginModal();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-zinc-800 bg-black/95 backdrop-blur-md md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white/95 backdrop-blur-md md:hidden">
       <div className="flex justify-around py-2">
         {navItems.map((item) => {
           if (item.requiresAuth && !user) {
@@ -28,7 +28,7 @@ export function BottomNav() {
               <button
                 key={item.href}
                 onClick={openLogin}
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-xs text-zinc-500"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-xs text-gray-400"
               >
                 <item.icon className="h-5 w-5" />
                 {item.label}
@@ -45,11 +45,11 @@ export function BottomNav() {
               className={cn(
                 "flex flex-col items-center gap-0.5 px-3 py-1 text-xs",
                 isActive
-                  ? "text-white"
-                  : "text-zinc-500"
+                  ? "text-[#FF4D00]"
+                  : "text-gray-400"
               )}
             >
-              <item.icon className={cn("h-5 w-5", isActive && "text-white")} />
+              <item.icon className={cn("h-5 w-5", isActive && "text-[#FF4D00]")} />
               {item.label}
             </Link>
           );

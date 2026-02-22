@@ -16,8 +16,8 @@ export function ToggleChip({
       className={cn(
         "rounded-md border px-3 py-1.5 text-xs font-semibold transition-all",
         active
-          ? "border-white bg-white text-black"
-          : "border-zinc-800 bg-zinc-900/50 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
+          ? "border-[#0D1B2A] bg-[#0D1B2A] text-white"
+          : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:text-gray-700"
       )}
     >
       {label}

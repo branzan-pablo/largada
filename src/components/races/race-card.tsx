@@ -13,17 +13,17 @@ export function RaceCard({ race }: { race: Race }) {
 
   return (
     <Link href={`/corrida/${race.slug}`} className="block group">
-      <div className="relative z-10 border border-zinc-800 rounded-xl bg-zinc-950 p-5 hover:border-zinc-700 transition-all duration-300 h-full flex flex-col">
+      <div className="relative z-10 border border-gray-200 rounded-xl bg-white p-5 hover:border-[#FF4D00]/30 transition-all duration-300 h-full flex flex-col">
 
         {/* Header: Date + Badges + Bookmark */}
         <div className="flex items-start gap-2 mb-4">
-          <div className="flex flex-col items-center justify-center bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 min-w-14">
-            <span className="text-xs font-bold text-zinc-300 leading-none mb-0.5">{day}</span>
-            <span className="text-[10px] font-semibold text-zinc-500 leading-none">{month}</span>
+          <div className="flex flex-col items-center justify-center bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 min-w-14">
+            <span className="text-xs font-bold text-[#0D1B2A] leading-none mb-0.5">{day}</span>
+            <span className="text-[10px] font-semibold text-gray-500 leading-none">{month}</span>
           </div>
           {race.is_promoted && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-yellow-900/50 border border-yellow-700/50 px-2 py-0.5 text-[10px] font-semibold text-yellow-400">
-              <Star className="w-3 h-3 fill-yellow-400" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-yellow-50 border border-yellow-200 px-2 py-0.5 text-[10px] font-semibold text-yellow-700">
+              <Star className="w-3 h-3 fill-yellow-500" />
               Destaque
             </span>
           )}
@@ -34,28 +34,28 @@ export function RaceCard({ race }: { race: Race }) {
 
         {/* Info */}
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">
+          <h3 className="text-lg font-bold text-[#0D1B2A] mb-2 line-clamp-2">
             {race.name}
           </h3>
 
           <div className="flex items-center gap-2 mb-4">
-            <MapPin className="w-4 h-4 text-zinc-600 shrink-0" />
-            <span className="text-sm text-zinc-400">{race.city}, {race.state}</span>
+            <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
+            <span className="text-sm text-[#6B7280]">{race.city}, {race.state}</span>
           </div>
 
           <div className="flex items-center gap-2 mb-5">
-            <Tag className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+            <Tag className="w-3.5 h-3.5 text-gray-400 shrink-0" />
             <RaceDistanceBadges distances={race.distances} />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-zinc-800/50">
-          <span className="flex items-center gap-2 text-xs text-zinc-500">
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <span className="flex items-center gap-2 text-xs text-gray-500">
             <Users className="w-3.5 h-3.5" />
-            <span className="font-medium text-zinc-400">{race.rsvp_count}</span> confirmados
+            <span className="font-medium text-[#6B7280]">{race.rsvp_count}</span> confirmados
           </span>
-          <span className="flex items-center gap-1 text-xs font-semibold text-white group-hover:translate-x-0.5 transition-transform">
+          <span className="flex items-center gap-1 text-xs font-semibold text-[#0D1B2A] group-hover:translate-x-0.5 transition-transform">
             Detalhes
             <ArrowRight className="w-3.5 h-3.5" />
           </span>

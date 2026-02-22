@@ -169,7 +169,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       )}
 
       {/* Basic Info */}
-      <section className="space-y-4 rounded-lg border border-zinc-800 p-5">
+      <section className="space-y-4 rounded-lg border border-gray-200 p-5">
         <h2 className="text-lg font-semibold">Informações Básicas</h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -314,7 +314,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       {/* Distances + Prize side by side */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Distances */}
-        <section className="space-y-4 rounded-lg border border-zinc-800 p-5">
+        <section className="space-y-4 rounded-lg border border-gray-200 p-5">
           <h2 className="text-lg font-semibold">Distâncias *</h2>
           <div className="flex flex-wrap gap-4">
             {DISTANCES.map((d) => (
@@ -334,7 +334,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
         </section>
 
         {/* Prize */}
-        <section className="space-y-4 rounded-lg border border-zinc-800 p-5">
+        <section className="space-y-4 rounded-lg border border-gray-200 p-5">
           <h2 className="text-lg font-semibold">Premiação</h2>
 
           <div className="space-y-2">
@@ -368,7 +368,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       </div>
 
       {/* Registration */}
-      <section className="space-y-4 rounded-lg border border-zinc-800 p-5">
+      <section className="space-y-4 rounded-lg border border-gray-200 p-5">
         <h2 className="text-lg font-semibold">Inscrição</h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -416,7 +416,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       </section>
 
       {/* Route & Description */}
-      <section className="space-y-4 rounded-lg border border-zinc-800 p-5">
+      <section className="space-y-4 rounded-lg border border-gray-200 p-5">
         <h2 className="text-lg font-semibold">Percurso e Descrição</h2>
 
         <div className="grid gap-4 sm:grid-cols-2">

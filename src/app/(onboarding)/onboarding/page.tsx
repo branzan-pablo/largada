@@ -89,13 +89,13 @@ export default function OnboardingPage() {
   return (
     <div className="w-full max-w-md space-y-8">
       <div className="space-y-2 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900">
-          <MapPin className="h-6 w-6 text-zinc-400" />
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-gray-50">
+          <MapPin className="h-6 w-6 text-[#FF4D00]" />
         </div>
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-[#0D1B2A]">
           De qual cidade você vai correr?
         </h1>
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-[#6B7280]">
           A gente filtra o calendário para o que tá perto de você.
         </p>
       </div>
@@ -110,7 +110,7 @@ export default function OnboardingPage() {
 
         {selectedCity && (
           <div className="space-y-2">
-            <p className="text-sm font-medium text-zinc-300">
+            <p className="text-sm font-medium text-gray-700">
               Até onde você topa viajar para uma corrida?
             </p>
             <RadiusSelector
@@ -134,7 +134,7 @@ export default function OnboardingPage() {
           <button
             onClick={handleSkip}
             disabled={isLoading}
-            className="w-full text-center text-sm text-zinc-600 hover:text-zinc-400 transition-colors"
+            className="w-full text-center text-sm text-gray-400 hover:text-gray-600 transition-colors"
           >
             Definir depois
           </button>

@@ -149,7 +149,7 @@ export function CityAutocomplete({
   return (
     <div ref={wrapperRef} className="relative">
       <div className="relative">
-        <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+        <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <Input
           value={query}
           onChange={handleChange}
@@ -160,23 +160,23 @@ export function CityAutocomplete({
           className={cn("pl-9", inputClassName)}
         />
         {isLoading && (
-          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-zinc-500" />
+          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400" />
         )}
       </div>
 
       {isOpen && results.length > 0 && (
-        <ul className="absolute z-50 mt-1 w-full rounded-md border border-zinc-800 bg-zinc-950 py-1 shadow-lg">
+        <ul className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white py-1 shadow-lg">
           {results.map((city) => (
             <li
               key={city.id}
               onClick={() => handleSelect(city)}
               className={cn(
-                "flex cursor-pointer items-center justify-between px-3 py-2 text-sm hover:bg-zinc-900",
-                selectedId === city.id && "bg-zinc-900"
+                "flex cursor-pointer items-center justify-between px-3 py-2 text-sm hover:bg-gray-50",
+                selectedId === city.id && "bg-gray-50"
               )}
             >
               <span>{city.name}</span>
-              <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs text-zinc-400">
+              <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">
                 {city.state_code}
               </span>
             </li>

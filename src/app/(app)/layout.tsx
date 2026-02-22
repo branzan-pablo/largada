@@ -10,7 +10,7 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="dark min-h-screen bg-black bg-grid text-zinc-300 flex flex-col">
+    <div className="min-h-screen bg-white bg-grid text-[#6B7280] flex flex-col">
       <Header />
       <div className="flex-1 pb-16 md:pb-0 pt-16">{children}</div>
       <BottomNav />

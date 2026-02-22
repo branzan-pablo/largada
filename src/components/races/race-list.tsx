@@ -33,21 +33,21 @@ export function RaceList() {
       {/* Page Header */}
       <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
-          <h1 className="text-3xl md:text-4xl font-semibold text-white tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-semibold text-[#0D1B2A] tracking-tight">
             Calendário de Corridas
           </h1>
-          <p className="text-zinc-500 text-lg">
+          <p className="text-[#6B7280] text-lg">
             Filtre por cidade, distância e premiação. Marque &quot;Vou Nessa&quot; e veja quem da sua rede vai correr.
           </p>
         </div>
 
         {!isLoading && races.length > 0 && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 shrink-0 self-start md:self-center">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 shrink-0 self-start md:self-center">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            <span className="text-xs font-medium text-zinc-400">
+            <span className="text-xs font-medium text-[#6B7280]">
               {races.length} provas abertas
             </span>
           </div>
@@ -81,17 +81,17 @@ export function RaceList() {
             ))}
           </div>
         ) : races.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center rounded-lg border border-zinc-800 bg-zinc-900/50">
-            <Trophy className="mb-4 h-12 w-12 text-zinc-700" />
-            <h3 className="text-lg font-semibold text-white">
+          <div className="flex flex-col items-center justify-center py-16 text-center rounded-lg border border-gray-200 bg-gray-50">
+            <Trophy className="mb-4 h-12 w-12 text-gray-300" />
+            <h3 className="text-lg font-semibold text-[#0D1B2A]">
               Nenhuma corrida encontrada com esses filtros.
             </h3>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-[#6B7280]">
               Tente ampliar o raio de distância ou remover alguns filtros.
             </p>
-            <p className="mt-3 text-sm text-zinc-500">
+            <p className="mt-3 text-sm text-[#6B7280]">
               Conhece uma corrida que deveria aparecer aqui?{" "}
-              <a href="/sugerir" className="text-zinc-300 hover:text-white underline underline-offset-2 transition-colors">
+              <a href="/sugerir" className="text-[#FF4D00] hover:text-[#E04400] underline underline-offset-2 transition-colors">
                 Sugerir corrida
               </a>
             </p>
@@ -110,11 +110,11 @@ export function RaceList() {
                 <button
                   onClick={loadMore}
                   disabled={isLoadingMore}
-                  className="flex items-center gap-2 px-6 py-3 rounded-full bg-zinc-800/80 border border-zinc-700 text-sm font-medium text-zinc-200 hover:bg-zinc-700 hover:text-white transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-[#0D1B2A] transition-colors disabled:opacity-50"
                 >
                   {isLoadingMore ? (
                     <>
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent" />
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
                       Carregando...
                     </>
                   ) : (
@@ -135,20 +135,20 @@ export function RaceList() {
 
 function RaceCardSkeleton() {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 space-y-3">
+    <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-3">
       <div className="flex gap-2">
-        <Skeleton className="h-6 w-16 rounded-md bg-zinc-800" />
-        <Skeleton className="h-6 w-16 rounded-md bg-zinc-800" />
+        <Skeleton className="h-6 w-16 rounded-md bg-gray-200" />
+        <Skeleton className="h-6 w-16 rounded-md bg-gray-200" />
       </div>
-      <Skeleton className="h-5 w-3/4 bg-zinc-800" />
-      <Skeleton className="h-4 w-1/2 bg-zinc-800" />
+      <Skeleton className="h-5 w-3/4 bg-gray-200" />
+      <Skeleton className="h-4 w-1/2 bg-gray-200" />
       <div className="flex gap-1.5">
-        <Skeleton className="h-5 w-10 rounded-md bg-zinc-800" />
-        <Skeleton className="h-5 w-10 rounded-md bg-zinc-800" />
+        <Skeleton className="h-5 w-10 rounded-md bg-gray-200" />
+        <Skeleton className="h-5 w-10 rounded-md bg-gray-200" />
       </div>
-      <div className="flex justify-between pt-3 border-t border-zinc-800/50">
-        <Skeleton className="h-4 w-24 bg-zinc-800" />
-        <Skeleton className="h-4 w-16 bg-zinc-800" />
+      <div className="flex justify-between pt-3 border-t border-gray-100">
+        <Skeleton className="h-4 w-24 bg-gray-200" />
+        <Skeleton className="h-4 w-16 bg-gray-200" />
       </div>
     </div>
   );

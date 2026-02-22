@@ -64,18 +64,18 @@ export function RaceFiltersDesktop({
 
   return (
     <div className="hidden md:block">
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 space-y-4 relative z-10">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 space-y-4 relative z-10">
         {/* Top Row: Search + Selects + Toggle */}
         <div className="flex items-center gap-3">
           {/* Search */}
           <div className="relative flex-[2] group">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 group-focus-within:text-zinc-300 transition-colors" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 group-focus-within:text-gray-600 transition-colors" />
             <input
               type="text"
               placeholder="Buscar por nome, cidade..."
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full h-10 bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-sm text-zinc-200 pl-9 pr-4 focus:outline-none focus:border-zinc-700 focus:bg-zinc-900 transition-all placeholder:text-zinc-600"
+              className="w-full h-10 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 pl-9 pr-4 focus:outline-none focus:border-gray-300 focus:bg-white transition-all placeholder:text-gray-400"
             />
           </div>
 
@@ -87,7 +87,7 @@ export function RaceFiltersDesktop({
               onSelect={(c) => onFiltersChange({ ...filters, city: c.name })}
               onClear={() => onFiltersChange({ ...filters, city: undefined })}
               placeholder="Todas as cidades"
-              inputClassName="h-10 border-zinc-800/50 bg-zinc-900/50 text-zinc-300 placeholder:text-zinc-600 hover:border-zinc-700 focus-visible:ring-0 focus-visible:ring-offset-0"
+              inputClassName="h-10 border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 hover:border-gray-300 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
 
@@ -103,9 +103,9 @@ export function RaceFiltersDesktop({
               });
             }}
           >
-            <SelectTrigger className="h-10 w-[200px] bg-zinc-900/50 border-zinc-800/50 text-sm text-zinc-300 px-3 focus:ring-0 focus:ring-offset-0 hover:bg-zinc-900 hover:border-zinc-700 transition-all rounded-lg">
+            <SelectTrigger className="h-10 w-[200px] bg-gray-50 border-gray-200 text-sm text-gray-800 px-3 focus:ring-0 focus:ring-offset-0 hover:bg-white hover:border-gray-300 transition-all rounded-lg">
               <div className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-zinc-500 shrink-0" />
+                <CalendarDays className="h-4 w-4 text-gray-400 shrink-0" />
                 <SelectValue placeholder="Qualquer data" />
               </div>
             </SelectTrigger>
@@ -119,7 +119,7 @@ export function RaceFiltersDesktop({
           </Select>
 
           {/* Divider */}
-          <div className="h-8 w-px bg-zinc-800 mx-1 shrink-0" />
+          <div className="h-8 w-px bg-gray-200 mx-1 shrink-0" />
 
           {/* Trophy toggle */}
           <div className="flex items-center gap-3 px-1 shrink-0">
@@ -137,19 +137,19 @@ export function RaceFiltersDesktop({
                 }
               }}
             />
-            <label htmlFor="trophy-filter" className="text-sm font-medium text-zinc-400 whitespace-nowrap cursor-pointer select-none">
+            <label htmlFor="trophy-filter" className="text-sm font-medium text-[#6B7280] whitespace-nowrap cursor-pointer select-none">
               Com troféu
             </label>
           </div>
         </div>
 
         {/* Horizontal Separator */}
-        <div className="h-px bg-zinc-800/50 w-full" />
+        <div className="h-px bg-gray-200 w-full" />
 
         {/* Bottom Row: Distances + Clear */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-[11px] uppercase tracking-wider text-zinc-500 font-bold">
+            <span className="text-[11px] uppercase tracking-wider text-gray-500 font-bold">
               DISTÂNCIA
             </span>
             <ToggleChip
@@ -174,7 +174,7 @@ export function RaceFiltersDesktop({
                 onSearchChange("");
                 setCityKey((k) => k + 1);
               }}
-              className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
             >
               <X className="h-3 w-3" />
               Limpar filtros

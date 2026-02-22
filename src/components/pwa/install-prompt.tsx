@@ -10,7 +10,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const primaryClass =
-  "w-full flex items-center justify-center gap-2 bg-[#fc5200] text-white text-sm px-6 py-3 mt-3 rounded-full font-semibold hover:bg-[#c94100] transition-colors";
+  "w-full flex items-center justify-center gap-2 bg-[#FF4D00] text-white text-sm px-6 py-3 mt-3 rounded-full font-semibold hover:bg-[#E04400] transition-colors";
 
 function getIsIOS(): boolean {
   if (typeof navigator === "undefined") return false;
@@ -101,7 +101,7 @@ export function InstallPrompt() {
         {showIOSPrompt ? (
           <div className="mt-3 space-y-2">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#fc5200] text-[10px] font-bold text-white">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FF4D00] text-[10px] font-bold text-white">
                 1
               </span>
               <span>
@@ -111,7 +111,7 @@ export function InstallPrompt() {
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#fc5200] text-[10px] font-bold text-white">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FF4D00] text-[10px] font-bold text-white">
                 2
               </span>
               <span>

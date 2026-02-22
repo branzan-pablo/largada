@@ -25,7 +25,7 @@ export default async function LandingPage() {
       <LandingHeader />
 
       {/* ==================== Hero Section ==================== */}
-      <section className="relative bg-white bg-grid-light pt-40 pb-20 overflow-hidden">
+      <section className="relative bg-white bg-grid pt-40 pb-20 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
           {/* Headline */}
           <h1 className="text-5xl md:text-6xl font-extrabold text-[#0D1B2A] tracking-tight mb-6 leading-[1.1]">
@@ -93,7 +93,7 @@ export default async function LandingPage() {
       <div className="h-px bg-gray-200" />
 
       {/* ==================== Features ==================== */}
-      <section id="features" className="relative bg-white bg-grid-light py-24 overflow-hidden">
+      <section id="features" className="relative bg-white bg-grid py-24 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <p className="text-center text-xs font-semibold text-[#6B7280] uppercase tracking-[0.2em] mb-5">
@@ -226,7 +226,7 @@ export default async function LandingPage() {
       <div className="h-px bg-gray-200" />
 
       {/* ==================== Cobertura Nacional ==================== */}
-      <section id="cobertura" className="relative bg-white bg-grid-light py-16 overflow-hidden">
+      <section id="cobertura" className="relative bg-white bg-grid py-16 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-center text-xs font-semibold text-[#6B7280] uppercase tracking-[0.2em] mb-10">
             Corridas de todo o Brasil

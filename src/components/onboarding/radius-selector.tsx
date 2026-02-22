@@ -27,8 +27,8 @@ export function RadiusSelector({
         ))}
       </div>
       {cityName && (
-        <p className="text-sm text-zinc-500">
-          Corridas em até <span className="font-medium text-zinc-300">{value}km</span> de{" "}
+        <p className="text-sm text-[#6B7280]">
+          Corridas em até <span className="font-medium text-[#0D1B2A]">{value}km</span> de{" "}
           {cityName}
         </p>
       )}

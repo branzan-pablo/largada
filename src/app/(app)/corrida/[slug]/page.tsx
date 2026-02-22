@@ -141,7 +141,7 @@ export default async function RaceDetailPage({ params }: PageProps) {
           )}
           <RacePrizeBadge prizeType={typedRace.prize_type} />
         </div>
-        <h1 className="text-2xl font-medium text-white md:text-3xl tracking-tight">{typedRace.name}</h1>
+        <h1 className="text-2xl font-medium text-[#0D1B2A] md:text-3xl tracking-tight">{typedRace.name}</h1>
         <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <CalendarDays className="h-4 w-4" />
@@ -249,8 +249,8 @@ export default async function RaceDetailPage({ params }: PageProps) {
           {/* Sidebar */}
           <aside className="space-y-4">
             {/* Registration Card */}
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 space-y-4">
-              <h3 className="font-semibold text-white">Inscrição</h3>
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-4">
+              <h3 className="font-semibold text-[#0D1B2A]">Inscrição</h3>
               <div className="space-y-2 text-sm">
                 <p>
                   <span className="text-muted-foreground">Valor:</span>{" "}
@@ -260,7 +260,7 @@ export default async function RaceDetailPage({ params }: PageProps) {
                   <span className="text-muted-foreground">Prazo:</span>{" "}
                   {formatDateFull(typedRace.registration_deadline)}
                   {deadlineSoon && (
-                    <Badge variant="outline" className="ml-1 bg-yellow-900/30 text-yellow-400 border-yellow-800/50 text-xs">
+                    <Badge variant="outline" className="ml-1 bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
                       Expirando!
                     </Badge>
                   )}

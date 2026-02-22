@@ -76,53 +76,53 @@ export function RaceFiltersMobile({
     <div className="md:hidden">
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2 bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white">
+          <Button variant="outline" size="sm" className="gap-2 bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-[#0D1B2A]">
             <SlidersHorizontal className="h-4 w-4" />
             Filtros
             {activeCount > 0 && (
-              <Badge className="ml-1 h-5 w-5 rounded-full p-0 text-xs bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20">
+              <Badge className="ml-1 h-5 w-5 rounded-full p-0 text-xs bg-[#FF4D00]/10 text-[#FF4D00] border-[#FF4D00]/20 hover:bg-[#FF4D00]/20">
                 {activeCount}
               </Badge>
             )}
           </Button>
         </SheetTrigger>
-        <SheetContent side="bottom" className="h-[85vh] flex flex-col px-5 pb-8 bg-zinc-950 border-t-zinc-800 text-zinc-200">
+        <SheetContent side="bottom" className="h-[85vh] flex flex-col px-5 pb-8 bg-white border-t-gray-200 text-gray-800">
           <SheetHeader className="text-left mb-6 shrink-0">
-            <SheetTitle className="text-xl font-semibold text-white">Filtros</SheetTitle>
+            <SheetTitle className="text-xl font-semibold text-[#0D1B2A]">Filtros</SheetTitle>
           </SheetHeader>
 
           <div className="flex-1 overflow-y-auto space-y-6 pr-2">
             {/* Search */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-zinc-400">Buscar</Label>
+              <Label className="text-sm font-medium text-[#6B7280]">Buscar</Label>
               <div className="relative group">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 group-focus-within:text-zinc-300 transition-colors" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 group-focus-within:text-gray-600 transition-colors" />
                 <input
                   type="text"
                   placeholder="Buscar por nome, cidade..."
                   value={search}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full h-10 bg-zinc-900/50 border border-zinc-800 rounded-md text-sm text-zinc-200 pl-9 pr-4 focus:outline-none focus:border-zinc-700 focus:bg-zinc-900 transition-all placeholder:text-zinc-600"
+                  className="w-full h-10 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-800 pl-9 pr-4 focus:outline-none focus:border-gray-300 focus:bg-white transition-all placeholder:text-gray-400"
                 />
               </div>
             </div>
 
             {/* City */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-zinc-400">Cidade</Label>
+              <Label className="text-sm font-medium text-[#6B7280]">Cidade</Label>
               <CityAutocomplete
                 key={cityKey}
                 initialCity={filters.city}
                 onSelect={(c) => onFiltersChange({ ...filters, city: c.name })}
                 onClear={() => onFiltersChange({ ...filters, city: undefined })}
                 placeholder="Todas as cidades"
-                inputClassName="border-zinc-800 bg-zinc-900/50 text-zinc-200 placeholder:text-zinc-500 focus-visible:ring-zinc-700"
+                inputClassName="border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 focus-visible:ring-gray-300"
               />
             </div>
 
             {/* Date Presets */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-zinc-400">Data</Label>
+              <Label className="text-sm font-medium text-[#6B7280]">Data</Label>
               <Select
                 value={getDatePreset(filters)}
                 onValueChange={(v) => {
@@ -134,18 +134,18 @@ export function RaceFiltersMobile({
                   });
                 }}
               >
-                <SelectTrigger className="w-full bg-zinc-900/50 border-zinc-800 text-zinc-200 focus:ring-zinc-700">
+                <SelectTrigger className="w-full bg-gray-50 border-gray-200 text-gray-800 focus:ring-gray-300">
                   <div className="flex items-center gap-2">
-                    <CalendarDays className="h-4 w-4 text-zinc-500 shrink-0" />
+                    <CalendarDays className="h-4 w-4 text-gray-400 shrink-0" />
                     <SelectValue placeholder="Qualquer data" />
                   </div>
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
-                  <SelectItem value="any" className="focus:bg-zinc-800 focus:text-white">Qualquer data</SelectItem>
-                  <SelectItem value="this_week" className="focus:bg-zinc-800 focus:text-white">Esta semana</SelectItem>
-                  <SelectItem value="this_month" className="focus:bg-zinc-800 focus:text-white">Este mês</SelectItem>
-                  <SelectItem value="next_month" className="focus:bg-zinc-800 focus:text-white">Próximo mês</SelectItem>
-                  <SelectItem value="next_3_months" className="focus:bg-zinc-800 focus:text-white">Próximos 3 meses</SelectItem>
+                <SelectContent>
+                  <SelectItem value="any">Qualquer data</SelectItem>
+                  <SelectItem value="this_week">Esta semana</SelectItem>
+                  <SelectItem value="this_month">Este mês</SelectItem>
+                  <SelectItem value="next_month">Próximo mês</SelectItem>
+                  <SelectItem value="next_3_months">Próximos 3 meses</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -153,7 +153,7 @@ export function RaceFiltersMobile({
             {/* Trophy Toggle */}
             <div className="space-y-3">
               <div className="flex items-center justify-between py-2">
-                <Label htmlFor="trophy-mobile" className="text-sm font-medium text-zinc-400">Com troféu</Label>
+                <Label htmlFor="trophy-mobile" className="text-sm font-medium text-[#6B7280]">Com troféu</Label>
                 <Switch
                   id="trophy-mobile"
                   checked={filters.prizeType?.includes("trophy") ?? false}
@@ -173,7 +173,7 @@ export function RaceFiltersMobile({
 
             {/* Distances */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-zinc-400">Distâncias</Label>
+              <Label className="text-sm font-medium text-[#6B7280]">Distâncias</Label>
               <div className="flex flex-wrap gap-2">
                 <ToggleChip
                   label="Todos"
@@ -192,10 +192,10 @@ export function RaceFiltersMobile({
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-zinc-800 mt-4 shrink-0">
+          <div className="flex gap-3 pt-4 border-t border-gray-200 mt-4 shrink-0">
             <Button
               variant="outline"
-              className="flex-1 bg-transparent border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:text-white"
+              className="flex-1 bg-transparent border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-[#0D1B2A]"
               onClick={() => {
                 onFiltersChange({});
                 onSearchChange("");
@@ -206,7 +206,7 @@ export function RaceFiltersMobile({
               Limpar
             </Button>
             <Button
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+              className="flex-1 bg-[#FF4D00] hover:bg-[#E04400] text-white border-0"
               onClick={() => setOpen(false)}
             >
               Ver resultados
