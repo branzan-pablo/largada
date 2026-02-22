@@ -7,9 +7,9 @@ import { useAuth } from "@/contexts/auth-context";
 import { Footprints, CirclePlus } from "lucide-react";
 
 const primaryClass =
-  "w-full sm:w-auto flex items-center justify-center gap-2 bg-[#fc5200] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#c94100] transition-colors";
+  "w-full sm:w-auto flex items-center justify-center gap-2 bg-[#FF4D00] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#E04400] transition-colors";
 const secondaryClass =
-  "w-full sm:w-auto flex items-center justify-center gap-2 bg-zinc-900/50 border border-zinc-700 text-white px-6 py-3 rounded-full font-medium hover:bg-zinc-800 transition-colors";
+  "w-full sm:w-auto flex items-center justify-center gap-2 bg-white border border-gray-300 text-[#0D1B2A] px-6 py-3 rounded-full font-medium hover:bg-gray-50 shadow-sm transition-colors";
 
 export function CtaButtons() {
   const { openRegister } = useLoginModal();

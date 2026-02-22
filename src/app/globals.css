@@ -179,6 +179,24 @@
   --sidebar-ring: oklch(0.52 0.24 30);
 }
 
+/* Light grid background utility */
+.bg-grid-light {
+  position: relative;
+}
+
+.bg-grid-light::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: linear-gradient(to bottom, white 0%, transparent 100%);
+  mask-image: linear-gradient(to bottom, white 0%, transparent 100%);
+}
+
 .ticker-mask {
   overflow: hidden;
   width: 100%;
