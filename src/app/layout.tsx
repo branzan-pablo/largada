@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthProvider } from "@/contexts/auth-context";
 import { LoginModalProvider, LoginModalUrlHandler } from "@/contexts/login-modal-context";
 import { LoginModal } from "@/components/auth/login-modal";
@@ -58,6 +59,7 @@ export default function RootLayout({
           </LoginModalProvider>
         </AuthProvider>
         <Toaster position="bottom-center" richColors />
+        <SpeedInsights />
       </body>
     </html>
   );
