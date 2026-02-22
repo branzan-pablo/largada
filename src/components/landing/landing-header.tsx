@@ -6,9 +6,6 @@ import { useLoginModal } from "@/contexts/login-modal-context";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const primaryClass =
-  "w-full sm:w-auto flex items-center justify-center gap-2 bg-[#fc5200] text-white text-sm px-6 py-3 rounded-full font-semibold hover:bg-[#c94100] transition-colors";
-
 export function LandingHeader() {
   const { user, profile, isLoading } = useAuth();
   const { openLogin, openRegister } = useLoginModal();
@@ -64,13 +61,13 @@ export function LandingHeader() {
             <>
               <button
                 onClick={openLogin}
-                className="hidden sm:block text-sm text-zinc-400 hover:text-white transition-colors"
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
               >
                 Entrar
               </button>
               <button
                 onClick={openRegister}
-                className={primaryClass}
+                className="hidden sm:inline-flex items-center justify-center gap-2 bg-[#fc5200] text-white text-sm px-6 py-3 rounded-full font-semibold hover:bg-[#c94100] transition-colors"
               >
                 Criar conta
               </button>
