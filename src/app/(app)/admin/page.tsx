@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Trophy, Users, MessageSquarePlus, CalendarDays } from "lucide-react";
+import { Trophy, Users, MessageSquarePlus, CalendarDays, MousePointerClick } from "lucide-react";
 
 export const metadata = {
   title: "Admin Dashboard",
@@ -14,18 +14,20 @@ export const metadata = {
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
 
-  const [racesResult, usersResult, suggestionsResult] = await Promise.all([
+  const [racesResult, usersResult, suggestionsResult, clicksResult] = await Promise.all([
     supabase.from("races").select("id, date, status", { count: "exact" }),
     supabase.from("profiles").select("id", { count: "exact" }),
     supabase
       .from("race_suggestions")
       .select("id", { count: "exact" })
       .eq("status", "pending"),
+    supabase.from("link_clicks").select("id", { count: "exact" }),
   ]);
 
   const totalRaces = racesResult.count ?? 0;
   const totalUsers = usersResult.count ?? 0;
   const pendingSuggestions = suggestionsResult.count ?? 0;
+  const totalClicks = clicksResult.count ?? 0;
 
   const today = new Date().toISOString().split("T")[0];
   const upcomingRaces =
@@ -53,6 +55,11 @@ export default async function AdminDashboardPage() {
       title: "Sugestões Pendentes",
       value: pendingSuggestions,
       icon: MessageSquarePlus,
+    },
+    {
+      title: "Cliques em Inscrições",
+      value: totalClicks,
+      icon: MousePointerClick,
     },
   ];
 

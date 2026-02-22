@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_rules: {
+        Row: {
+          id: string
+          domain: string
+          param_key: string
+          param_value: string
+          active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          domain: string
+          param_key: string
+          param_value: string
+          active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          domain?: string
+          param_key?: string
+          param_value?: string
+          active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      link_clicks: {
+        Row: {
+          id: string
+          race_id: string
+          user_id: string | null
+          clicked_at: string
+        }
+        Insert: {
+          id?: string
+          race_id: string
+          user_id?: string | null
+          clicked_at?: string
+        }
+        Update: {
+          id?: string
+          race_id?: string
+          user_id?: string | null
+          clicked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_clicks_race_id_fkey"
+            columns: ["race_id"]
+            isOneToOne: false
+            referencedRelation: "races"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "link_clicks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cities: {
         Row: {
           id: string

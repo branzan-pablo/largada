@@ -13,10 +13,19 @@ export const metadata = {
 export default async function AdminRacesPage() {
   const supabase = await createClient();
 
-  const { data: races } = await supabase
-    .from("races")
-    .select("id, name, city, state, date, status, distances, rsvp_count")
-    .order("date", { ascending: false });
+  const [{ data: races }, { data: clickCounts }] = await Promise.all([
+    supabase
+      .from("races")
+      .select("id, name, city, state, date, status, distances, rsvp_count")
+      .order("date", { ascending: false }),
+    supabase.from("link_clicks").select("race_id"),
+  ]);
+
+  // Build a map of race_id -> click count
+  const clickMap = new Map<string, number>();
+  clickCounts?.forEach((c) => {
+    clickMap.set(c.race_id, (clickMap.get(c.race_id) ?? 0) + 1);
+  });
 
   return (
     <div className="p-6">
@@ -45,6 +54,9 @@ export default async function AdminRacesPage() {
               <th className="hidden px-4 py-3 text-right font-medium sm:table-cell">
                 RSVPs
               </th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell">
+                Cliques
+              </th>
               <th className="px-4 py-3 text-right font-medium">Ação</th>
             </tr>
           </thead>
@@ -64,6 +76,9 @@ export default async function AdminRacesPage() {
                 <td className="hidden px-4 py-3 text-right sm:table-cell">
                   {race.rsvp_count}
                 </td>
+                <td className="hidden px-4 py-3 text-right md:table-cell">
+                  {clickMap.get(race.id) ?? 0}
+                </td>
                 <td className="px-4 py-3 text-right">
                   <Button variant="ghost" size="sm" asChild>
                     <Link href={`/admin/corridas/${race.id}/editar`}>
@@ -76,7 +91,7 @@ export default async function AdminRacesPage() {
             {(!races || races.length === 0) && (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-4 py-8 text-center text-muted-foreground"
                 >
                   Nenhuma corrida cadastrada.

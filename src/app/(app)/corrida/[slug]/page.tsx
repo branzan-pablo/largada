@@ -273,7 +273,7 @@ export default async function RaceDetailPage({ params }: PageProps) {
               ) : (
                 <Button className="w-full" asChild>
                   <a
-                    href={typedRace.registration_link}
+                    href={`/api/r/${typedRace.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
