@@ -66,6 +66,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   const [status, setStatus] = useState<string>(race?.status ?? "confirmed");
   const [notes, setNotes] = useState(race?.notes ?? suggestionData?.notes ?? "");
   const [link, setLink] = useState(race?.link ?? suggestionData?.link ?? "");
+  const [isPromoted, setIsPromoted] = useState(race?.is_promoted ?? false);
 
   const handleDistanceToggle = (distance: string) => {
     setDistances((prev) =>
@@ -98,6 +99,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       organizer: organizer || undefined,
       description: description || undefined,
       status,
+      isPromoted,
       link: link || undefined,
       notes: notes || undefined,
     });
@@ -264,6 +266,17 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                 <SelectItem value="cancelled">Cancelada</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex items-center gap-2 sm:col-span-2">
+            <Checkbox
+              id="isPromoted"
+              checked={isPromoted}
+              onCheckedChange={(checked) => setIsPromoted(checked === true)}
+            />
+            <Label htmlFor="isPromoted" className="cursor-pointer">
+              Destacar corrida (aparece no topo da listagem)
+            </Label>
           </div>
 
           <div className="space-y-2">

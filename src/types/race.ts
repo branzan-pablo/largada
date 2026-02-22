@@ -22,6 +22,7 @@ export interface Race {
   status: "confirmed" | "postponed" | "cancelled";
   notes: string | null;
   link: string | null;
+  is_promoted: boolean;
   rsvp_count: number;
   created_by: string;
   origin: "admin" | "approved_suggestion";

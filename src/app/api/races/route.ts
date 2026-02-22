@@ -72,8 +72,10 @@ export async function GET(request: Request) {
     );
   }
 
-  // Sort by date ascending
-  query = query.order("date", { ascending: true });
+  // Promoted races first, then by date ascending
+  query = query
+    .order("is_promoted", { ascending: false })
+    .order("date", { ascending: true });
 
   // Pagination
   const from = (page - 1) * limit;
@@ -180,6 +182,7 @@ export async function POST(request: Request) {
     organizer: body.organizer ?? null,
     description: body.description ?? null,
     status: body.status ?? "confirmed",
+    is_promoted: body.isPromoted ?? false,
     created_by: user.id,
     origin: raw.origin === "approved_suggestion" ? "approved_suggestion" : "admin",
   };

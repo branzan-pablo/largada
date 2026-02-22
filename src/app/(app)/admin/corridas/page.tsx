@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus } from "lucide-react";
+import { Plus, Star } from "lucide-react";
 import { formatDateShort } from "@/lib/utils";
 import { RACE_STATUSES } from "@/lib/constants";
 
@@ -16,7 +16,7 @@ export default async function AdminRacesPage() {
   const [{ data: races }, { data: clickCounts }] = await Promise.all([
     supabase
       .from("races")
-      .select("id, name, city, state, date, status, distances, rsvp_count")
+      .select("id, name, city, state, date, status, distances, rsvp_count, is_promoted")
       .order("date", { ascending: false }),
     supabase.from("link_clicks").select("race_id"),
   ]);
@@ -63,7 +63,12 @@ export default async function AdminRacesPage() {
           <tbody>
             {races?.map((race) => (
               <tr key={race.id} className="border-b">
-                <td className="px-4 py-3 font-medium">{race.name}</td>
+                <td className="px-4 py-3 font-medium">
+                  <span className="flex items-center gap-1.5">
+                    {race.is_promoted && <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500 shrink-0" />}
+                    {race.name}
+                  </span>
+                </td>
                 <td className="hidden px-4 py-3 sm:table-cell">
                   {`${race.city} — ${race.state}`}
                 </td>

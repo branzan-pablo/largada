@@ -26,7 +26,7 @@ export function ProfilePageClient() {
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
   const [cityId, setCityId] = useState(profile?.city_id ?? "");
   const [cityName, setCityName] = useState(profile?.city ?? "");
-  const [radius, setRadius] = useState(profile?.notification_radius_km ?? 150);
+  const [radius, setRadius] = useState(profile?.notification_radius_km ?? 100);
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     profile?.notifications_enabled ?? false
   );

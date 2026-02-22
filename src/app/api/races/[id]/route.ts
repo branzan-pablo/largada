@@ -51,6 +51,7 @@ export async function PATCH(
     organizer: "organizer",
     description: "description",
     status: "status",
+    isPromoted: "is_promoted",
   };
 
   for (const [camel, snake] of Object.entries(fieldMap)) {

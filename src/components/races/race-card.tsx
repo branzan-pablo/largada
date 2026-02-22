@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { RaceDistanceBadges } from "./race-distance-badges";
 import { RacePrizeBadge } from "./race-prize-badge";
-import { MapPin, Users, ArrowRight, Tag } from "lucide-react";
+import { MapPin, Users, ArrowRight, Tag, Star } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Race } from "@/types/race";
@@ -21,6 +21,12 @@ export function RaceCard({ race }: { race: Race }) {
             <span className="text-xs font-bold text-zinc-300 leading-none mb-0.5">{day}</span>
             <span className="text-[10px] font-semibold text-zinc-500 leading-none">{month}</span>
           </div>
+          {race.is_promoted && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-yellow-900/50 border border-yellow-700/50 px-2 py-0.5 text-[10px] font-semibold text-yellow-400">
+              <Star className="w-3 h-3 fill-yellow-400" />
+              Destaque
+            </span>
+          )}
           {race.prize_type !== "none" && (
             <RacePrizeBadge prizeType={race.prize_type} />
           )}

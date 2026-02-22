@@ -45,6 +45,7 @@ export const raceSchemaBase = z.object({
   organizer: z.string().optional(),
   description: z.string().optional(),
   status: z.enum(["confirmed", "postponed", "cancelled"]).default("confirmed"),
+  isPromoted: z.boolean().optional(),
 });
 
 export const raceSchema = raceSchemaBase.refine(
