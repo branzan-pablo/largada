@@ -18,7 +18,7 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
 
   const handleGoogleLogin = async () => {
     setIsLoadingGoogle(true);
-    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    const siteUrl = window.location.origin;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -34,7 +34,7 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
   const handleStravaLogin = () => {
     setIsLoadingStrava(true);
     const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
-    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    const siteUrl = window.location.origin;
     const redirectUri = `${siteUrl}/auth/strava/callback`;
     const scope = "read,profile:read_all";
     const state = crypto.randomUUID();
