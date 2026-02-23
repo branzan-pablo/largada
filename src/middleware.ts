@@ -2,9 +2,11 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  // Force canonical www domain in production to prevent OAuth state mismatch
+  // Force canonical www domain in production to prevent OAuth state mismatch.
+  // Skip API routes — redirecting POST requests (e.g. webhooks) breaks them.
   const host = request.headers.get("host") || "";
-  if (host === "largadas.com.br") {
+  const pathname = request.nextUrl.pathname;
+  if (host === "largadas.com.br" && !pathname.startsWith("/api/")) {
     const url = request.nextUrl.clone();
     url.host = "www.largadas.com.br";
     return NextResponse.redirect(url, { status: 301 });
@@ -44,7 +46,6 @@ export async function middleware(request: NextRequest) {
 
   // Server-side route protection
   const protectedPaths = ["/perfil", "/sugerir", "/admin"];
-  const pathname = request.nextUrl.pathname;
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
 
   if (isProtected && !user) {

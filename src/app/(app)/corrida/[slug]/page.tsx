@@ -6,6 +6,7 @@ import { RaceDistanceBadges } from "@/components/races/race-distance-badges";
 import { RacePrizeBadge } from "@/components/races/race-prize-badge";
 import { RaceStatusBadge } from "@/components/races/race-status-badge";
 import { RsvpProvider, ParticipantsSection, RsvpCard } from "./race-detail-client";
+import { PromoteRaceCard } from "@/components/races/promote-race-card";
 import {
   CalendarDays,
   Clock,
@@ -66,12 +67,14 @@ export default async function RaceDetailPage({ params }: PageProps) {
   const deadlineSoon =
     !deadlinePassed &&
     new Date(typedRace.registration_deadline).getTime() - Date.now() <
-      3 * 24 * 60 * 60 * 1000;
+    3 * 24 * 60 * 60 * 1000;
 
   // Fetch current user's RSVP status
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const isOwner = !!user && user.id === typedRace.created_by;
 
   let userRsvped = false;
   if (user) {
@@ -286,6 +289,15 @@ export default async function RaceDetailPage({ params }: PageProps) {
 
             {/* RSVP Card — shares state with ParticipantsSection */}
             <RsvpCard />
+
+            {/* Promote card — visible only to the race creator */}
+            {isOwner && (
+              <PromoteRaceCard
+                raceId={typedRace.id}
+                raceName={typedRace.name}
+                isPromoted={typedRace.is_promoted}
+              />
+            )}
           </aside>
         </div>
       </RsvpProvider>

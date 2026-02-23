@@ -6,8 +6,9 @@ import { useLoginModal } from "@/contexts/login-modal-context";
 import { createClient } from "@/lib/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RaceCard } from "@/components/races/race-card";
+import { PromoteRaceCard } from "@/components/races/promote-race-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, CalendarDays } from "lucide-react";
+import { Trophy, CalendarDays, Star } from "lucide-react";
 import { toast } from "sonner";
 import type { Race } from "@/types/race";
 
@@ -16,6 +17,7 @@ export function MyRacesClient() {
   const { openLogin } = useLoginModal();
   const [upcoming, setUpcoming] = useState<Race[]>([]);
   const [past, setPast] = useState<Race[]>([]);
+  const [created, setCreated] = useState<Race[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const supabaseRef = useRef(createClient());
   const fetchedRef = useRef(false);
@@ -35,15 +37,23 @@ export function MyRacesClient() {
         throw rsvpsError;
       }
 
-      if (!rsvps || rsvps.length === 0) {
+      const raceIds = (rsvps ?? []).map((r) => r.race_id);
+
+      const createdQuery = supabase
+        .from("races")
+        .select("*")
+        .eq("created_by", userId)
+        .order("date", { ascending: false });
+
+      if (raceIds.length === 0) {
+        const { data: createdData } = await createdQuery;
         setUpcoming([]);
         setPast([]);
+        setCreated((createdData as Race[]) ?? []);
         return;
       }
 
-      const raceIds = rsvps.map((r) => r.race_id);
-
-      const [upcomingRes, pastRes] = await Promise.all([
+      const [upcomingRes, pastRes, createdRes] = await Promise.all([
         supabase
           .from("races")
           .select("*")
@@ -56,10 +66,12 @@ export function MyRacesClient() {
           .in("id", raceIds)
           .lt("date", today)
           .order("date", { ascending: false }),
+        createdQuery,
       ]);
 
       setUpcoming((upcomingRes.data as Race[]) ?? []);
       setPast((pastRes.data as Race[]) ?? []);
+      setCreated((createdRes.data as Race[]) ?? []);
     } catch {
       toast.error("Erro ao carregar suas corridas.");
     } finally {
@@ -102,6 +114,12 @@ export function MyRacesClient() {
           <Trophy className="mr-1.5 h-4 w-4" />
           Passadas ({past.length})
         </TabsTrigger>
+        {created.length > 0 && (
+          <TabsTrigger value="created">
+            <Star className="mr-1.5 h-4 w-4" />
+            Criadas ({created.length})
+          </TabsTrigger>
+        )}
       </TabsList>
 
       <TabsContent value="upcoming" className="mt-4">
@@ -123,6 +141,28 @@ export function MyRacesClient() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {past.map((race) => (
               <RaceCard key={race.id} race={race} />
+            ))}
+          </div>
+        )}
+      </TabsContent>
+
+      <TabsContent value="created" className="mt-4">
+        {created.length === 0 ? (
+          <EmptyState message="Você ainda não criou nenhuma corrida." />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {created.map((race) => (
+              <div key={race.id} className="flex flex-col gap-2">
+                <RaceCard race={race} />
+                <div className="flex justify-end px-1">
+                  <PromoteRaceCard
+                    raceId={race.id}
+                    raceName={race.name}
+                    isPromoted={race.is_promoted}
+                    variant="button"
+                  />
+                </div>
+              </div>
             ))}
           </div>
         )}

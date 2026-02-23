@@ -108,10 +108,23 @@ export async function POST(request: NextRequest) {
                             paid_at: new Date().toISOString(),
                         })
                         .eq("abacatepay_id", abacatePayRefId)
-                        .select("id")
+                        .select("id, order_type, metadata")
                         .single();
 
                     orderId = updatedOrder?.id ?? null;
+
+                    // Handle race promotion: mark race as promoted
+                    if (updatedOrder?.order_type === "race_promotion") {
+                        const meta = updatedOrder.metadata as Record<string, unknown> | null;
+                        const raceId = meta?.raceId as string | undefined;
+                        if (raceId) {
+                            await admin
+                                .from("races")
+                                .update({ is_promoted: true })
+                                .eq("id", raceId);
+                            console.info(`[Webhook] Race ${raceId} marked as promoted`);
+                        }
+                    }
                 }
                 break;
             }
