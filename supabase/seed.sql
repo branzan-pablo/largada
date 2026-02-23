@@ -1,27 +1,414 @@
--- Seed data: sample races in the SP interior region
--- Note: These are fictional races for development purposes
+-- ============================================================
+-- seed.sql — 20 corridas de teste
+-- Cobre diferentes estados, tipos de premiação, status,
+-- distâncias, e casos de promoção paga.
+-- ============================================================
 
-INSERT INTO public.races (name, slug, date, start_time, city, state, address, latitude, longitude, distances, registration_price, registration_link, registration_deadline, prize_type, prize_details, route_description, organizer, description, status, rsvp_count, created_by, origin) VALUES
+INSERT INTO public.races (
+  name, slug, date, start_time,
+  city, state, address, latitude, longitude,
+  distances, registration_price, registration_link, registration_deadline,
+  prize_type, prize_details,
+  route_description, organizer, description,
+  status, rsvp_count, is_promoted, promoted_until, origin
+) VALUES
 
-('Corrida Noturna Rio Preto', 'corrida-noturna-rio-preto', '2026-03-15', '19:00', 'São José do Rio Preto', 'SP', 'Represa Municipal, Av. Danilo Galeazzi', -20.8113, -49.3758, ARRAY['5k','10k'], '1º lote R$80, 2º lote R$100', 'https://example.com/inscricao1', '2026-03-10', 'trophy', 'Troféu para os 5 primeiros de cada categoria', 'Percurso plano ao redor da represa municipal', 'Assessoria Rio Preto Runners', 'A tradicional corrida noturna de Rio Preto está de volta! Percurso iluminado e plano, ideal para todos os níveis.', 'confirmed', 0, NULL, 'admin'),
+-- 1 ── São Paulo/SP · 42k · premiação em dinheiro · destaque ativo
+(
+  'Maratona Internacional de São Paulo',
+  'maratona-internacional-sao-paulo',
+  '2026-04-12', '06:00',
+  'São Paulo', 'SP',
+  'Av. Paulista, 1578 - Bela Vista, São Paulo',
+  -23.5617, -46.6558,
+  ARRAY['21k','42k'],
+  '21k: R$180 | 42k: R$250',
+  'https://example.com/maratona-sp',
+  '2026-04-05',
+  'money',
+  'Maratona: R$10.000 (1º), R$5.000 (2º), R$2.500 (3º) — masc/fem. Meia: R$3.000 (1º), R$1.500 (2º).',
+  'Largada na Av. Paulista, percurso certificado pela CBAt passando por Ibirapuera, Vila Madalena e retorno pelo centro expandido.',
+  'Associação de Atletismo de São Paulo',
+  'A maior prova de rua do Brasil reúne atletas de elite e amadores num percurso histórico pela capital paulista. Classificatória para Boston e Berlin.',
+  'confirmed', 342, true, '2026-03-25 23:59:59+00', 'admin'
+),
 
-('Meia Maratona de Votuporanga', 'meia-maratona-votuporanga', '2026-04-05', '06:30', 'Votuporanga', 'SP', 'Praça Fernando Costa, Centro', -20.4218, -49.9729, ARRAY['5k','10k','21k'], '1º lote R$100, 2º lote R$130', 'https://example.com/inscricao2', '2026-03-28', 'both', 'Premiação em dinheiro: R$1.000 (1º), R$500 (2º), R$300 (3º). Troféu até 5º lugar', 'Percurso com leves ondulações pelas ruas centrais da cidade', 'Prefeitura de Votuporanga', 'A maior prova de corrida de rua de Votuporanga. Percurso certificado pela CBAt.', 'confirmed', 0, NULL, 'admin'),
+-- 2 ── Rio de Janeiro/RJ · 5k+10k · troféu
+(
+  'Corrida Lagoa Rodrigo de Freitas',
+  'corrida-lagoa-rodrigo-de-freitas',
+  '2026-03-22', '07:00',
+  'Rio de Janeiro', 'RJ',
+  'Av. Epitácio Pessoa - Lagoa, Rio de Janeiro',
+  -22.9711, -43.1966,
+  ARRAY['5k','10k'],
+  'R$85',
+  'https://example.com/lagoa-run',
+  '2026-03-15',
+  'trophy',
+  'Troféu para os 3 primeiros de cada categoria e faixa etária.',
+  'Volta completa ao redor da Lagoa Rodrigo de Freitas com vista para o Corcovado. Percurso plano e rápido.',
+  'Rio Running Events',
+  'Clássica prova carioca com o cenário mais bonito da cidade. Percurso plano, perfeito para buscar marcas pessoais.',
+  'confirmed', 128, false, NULL, 'admin'
+),
 
-('5K Solidária Araçatuba', '5k-solidaria-aracatuba', '2026-03-22', '07:00', 'Araçatuba', 'SP', 'Parque Ecológico, Rua Cuiabá', -21.2089, -50.4328, ARRAY['5k'], 'R$50 + 1kg de alimento', 'https://example.com/inscricao3', '2026-03-18', 'none', NULL, 'Percurso dentro do Parque Ecológico, totalmente plano', 'ONG Correr para Ajudar', 'Corrida beneficente com renda revertida para instituições de caridade locais.', 'confirmed', 0, NULL, 'admin'),
+-- 3 ── Belo Horizonte/MG · trail 21k+42k · dinheiro
+(
+  'Ultra BH Mountain Race',
+  'ultra-bh-mountain-race',
+  '2026-05-03', '05:30',
+  'Belo Horizonte', 'MG',
+  'Parque Estadual Serra do Rola-Moça - Nova Lima, BH',
+  -20.0161, -44.0256,
+  ARRAY['21k','42k'],
+  '21k: R$160 | 42k: R$220',
+  'https://example.com/ultra-bh',
+  '2026-04-25',
+  'money',
+  '42k: R$5.000 (1º), R$2.500 (2º), R$1.200 (3º). 21k: R$2.000 (1º), R$1.000 (2º).',
+  'Trilha técnica com 1.800m de ganho de elevação. Terreno misto de mata atlântica, pedras e gramado. Abastecimentos a cada 7km.',
+  'BH Trail Adventures',
+  'A prova de trail mais desafiadora de Minas Gerais. Cenário deslumbrante da Serra do Rola-Moça com corredores de todo o Brasil.',
+  'confirmed', 89, false, NULL, 'admin'
+),
 
-('Desafio Trail Catanduva', 'desafio-trail-catanduva', '2026-04-12', '06:00', 'Catanduva', 'SP', 'Fazenda Santa Clara, Rod. Washington Luís km 380', -21.1378, -48.9726, ARRAY['10k','21k'], 'R$120', 'https://example.com/inscricao4', '2026-04-05', 'money', 'R$2.000 (1º), R$1.000 (2º), R$500 (3º) - categorias masculino e feminino', 'Trilha com terreno misto, subidas e descidas em fazenda', 'Adventure Sports Catanduva', 'Para quem gosta de desafio! Prova de trail running com percurso técnico em meio à natureza.', 'confirmed', 0, NULL, 'admin'),
+-- 4 ── Curitiba/PR · 5k+10k · troféu+dinheiro
+(
+  'Corrida das Flores de Curitiba',
+  'corrida-das-flores-curitiba',
+  '2026-04-19', '07:30',
+  'Curitiba', 'PR',
+  'Jardim Botânico - R. Eng. Ostoja Roguski, 690, Curitiba',
+  -25.4409, -49.2373,
+  ARRAY['5k','10k'],
+  'R$70',
+  'https://example.com/corrida-flores-cwb',
+  '2026-04-12',
+  'both',
+  'Dinheiro: R$1.500 (1º), R$800 (2º), R$400 (3º). Troféu até 5º lugar por faixa etária.',
+  'Percurso pelas alamedas do Jardim Botânico com vista para a estufa de ferro. Terreno levemente ondulado.',
+  'Curitiba Runners Club',
+  'A corrida mais fotogênica do sul do Brasil acontece em plena florada do Jardim Botânico. Venha com sua família!',
+  'confirmed', 201, false, NULL, 'admin'
+),
 
-('Circuito de Corridas Fernandópolis - Etapa 1', 'circuito-corridas-fernandopolis-etapa-1', '2026-03-29', '07:30', 'Fernandópolis', 'SP', 'Ginásio de Esportes, Av. Litério Grecco', -20.2839, -50.2467, ARRAY['5k','10k'], 'R$60', 'https://example.com/inscricao5', '2026-03-25', 'trophy', 'Troféu para os 3 primeiros overall e por faixa etária', 'Percurso urbano passando pelos principais pontos da cidade', 'Secretaria de Esportes de Fernandópolis', 'Primeira etapa do Circuito Municipal de Corridas 2026.', 'confirmed', 0, NULL, 'admin'),
+-- 5 ── Porto Alegre/RS · noturna 5k+10k · sem premiação
+(
+  'Night Run Beira-Rio Porto Alegre',
+  'night-run-beira-rio-porto-alegre',
+  '2026-03-28', '20:00',
+  'Porto Alegre', 'RS',
+  'Av. Edvaldo Pereira Paiva - Orla do Guaíba, Porto Alegre',
+  -30.0407, -51.2427,
+  ARRAY['5k','10k'],
+  'R$75',
+  'https://example.com/night-run-poa',
+  '2026-03-21',
+  'none',
+  NULL,
+  'Percurso plano ao longo da Orla do Guaíba com iluminação especial e DJs ao vivo nos pontos de apoio.',
+  'POA Night Sports',
+  'Corra à beira do Guaíba com o pôr do sol como cenário. Evento com festa pós-prova inclusa na inscrição.',
+  'confirmed', 95, false, NULL, 'admin'
+),
 
-('Night Run Olimpia', 'night-run-olimpia', '2026-04-19', '20:00', 'Olímpia', 'SP', 'Thermas dos Laranjais, Av. do Folclore', -20.7368, -48.9163, ARRAY['5k'], 'R$90 (inclui acesso ao parque)', 'https://example.com/inscricao6', '2026-04-15', 'none', NULL, 'Percurso ao redor do complexo turístico com iluminação especial', 'Thermas dos Laranjais', 'Corrida noturna com clima de festa! Inclui acesso ao parque aquático no dia seguinte.', 'confirmed', 0, NULL, 'admin'),
+-- 6 ── Salvador/BA · 5k+10k+21k · troféu
+(
+  'Corrida do Pelourinho',
+  'corrida-do-pelourinho',
+  '2026-06-07', '06:30',
+  'Salvador', 'BA',
+  'Terreiro de Jesus - Pelourinho, Salvador',
+  -12.9714, -38.5088,
+  ARRAY['5k','10k','21k'],
+  '5k: R$60 | 10k: R$80 | 21k: R$110',
+  'https://example.com/corrida-pelourinho',
+  '2026-05-31',
+  'trophy',
+  'Troféu artesanal baiano para os 3 primeiros overall e por categoria em cada distância.',
+  'Largada no Terreiro de Jesus, descida pelo Comércio, Barra e retorno pela orla de Ondina. Percurso com leves aclives no centro histórico.',
+  'Federação Baiana de Atletismo',
+  'Corra pelas ruas históricas de Salvador com a energia e a cultura baiana. Uma experiência única no coração do Pelourinho.',
+  'confirmed', 77, false, NULL, 'admin'
+),
 
-('Maratona Regional do Noroeste Paulista', 'maratona-regional-noroeste-paulista', '2026-05-10', '05:30', 'São José do Rio Preto', 'SP', 'Centro de Convenções, Av. Alberto Andaló', -20.8200, -49.3800, ARRAY['5k','10k','21k','42k'], '21k: R$150, 42k: R$200', 'https://example.com/inscricao7', '2026-04-30', 'money', 'Maratona: R$5.000 (1º), R$3.000 (2º), R$1.500 (3º). Meia: R$2.000 (1º), R$1.000 (2º)', 'Percurso certificado pela CBAt, passando por avenidas principais com apoio completo', 'Associação de Atletismo do Noroeste Paulista', 'A maior prova de corrida de rua da região noroeste de SP. Percurso plano e rápido, ideal para buscar marcas pessoais.', 'confirmed', 0, NULL, 'admin'),
+-- 7 ── Recife/PE · praia 5k+10k · dinheiro+troféu
+(
+  'Beach Run Boa Viagem',
+  'beach-run-boa-viagem',
+  '2026-05-17', '06:00',
+  'Recife', 'PE',
+  'Av. Boa Viagem - Praia de Boa Viagem, Recife',
+  -8.1195, -34.9007,
+  ARRAY['5k','10k'],
+  'R$65',
+  'https://example.com/beach-run-recife',
+  '2026-05-10',
+  'both',
+  'R$2.000 (1º), R$1.000 (2º), R$500 (3º) nas categorias elite. Troféu até 5º lugar amador.',
+  'Percurso à beira-mar pela Praia de Boa Viagem, totalmente plano e com brisa do mar. Largada ao nascer do sol.',
+  'Recife Beach Sports',
+  'A corrida mais fresca de Pernambuco! Percurso à beira do Atlântico com o sol nascendo no mar.',
+  'confirmed', 156, false, NULL, 'admin'
+),
 
-('Corrida do Trabalhador - Birigui', 'corrida-do-trabalhador-birigui', '2026-05-01', '07:00', 'Birigui', 'SP', 'Praça Cândido Rondon, Centro', -21.2883, -50.3400, ARRAY['5k','10k'], 'R$45', 'https://example.com/inscricao8', '2026-04-28', 'trophy', 'Troféu para os 5 primeiros de cada categoria', 'Percurso plano pelas ruas centrais de Birigui', 'Prefeitura de Birigui', 'Corrida especial do Dia do Trabalhador com percurso para toda a família.', 'confirmed', 0, NULL, 'admin'),
+-- 8 ── Fortaleza/CE · meia maratona · dinheiro · destaque ativo
+(
+  'Meia Maratona Beira-Mar Fortaleza',
+  'meia-maratona-beira-mar-fortaleza',
+  '2026-04-26', '05:30',
+  'Fortaleza', 'CE',
+  'Av. Beira Mar - Meireles, Fortaleza',
+  -3.7266, -38.4916,
+  ARRAY['10k','21k'],
+  '10k: R$80 | 21k: R$130',
+  'https://example.com/meia-fortaleza',
+  '2026-04-19',
+  'money',
+  'Meia: R$8.000 (1º), R$4.000 (2º), R$2.000 (3º). 10k: R$2.000 (1º), R$1.000 (2º).',
+  'Percurso certificado pela AIMS ao longo da Av. Beira Mar, totalmente plano. Condições ideais para recordes — largada às 5h30 evitando o calor.',
+  'Federação Cearense de Atletismo',
+  'A prova mais rápida do Nordeste! Percurso plano à beira-mar de Fortaleza com largada no fresco da madrugada.',
+  'confirmed', 213, true, '2026-04-01 23:59:59+00', 'admin'
+),
 
-('Penápolis Run 10K', 'penapolis-run-10k', '2026-04-26', '06:30', 'Penápolis', 'SP', 'Avenida São José, Centro', -21.4173, -50.0766, ARRAY['5k','10k'], 'R$70', 'https://example.com/inscricao9', '2026-04-20', 'both', 'Dinheiro: R$500 (1º), R$300 (2º). Troféu até 5º lugar', 'Percurso com leves aclives na região central', 'Equipe Penápolis Runners', 'Prova competitiva com excelente estrutura e percurso desafiador.', 'confirmed', 0, NULL, 'admin'),
+-- 9 ── Brasília/DF · 5k+10k · troféu
+(
+  'Corrida da Esplanada',
+  'corrida-da-esplanada',
+  '2026-05-24', '06:00',
+  'Brasília', 'DF',
+  'Esplanada dos Ministérios - Eixo Monumental, Brasília',
+  -15.7997, -47.8642,
+  ARRAY['5k','10k'],
+  'R$70',
+  'https://example.com/corrida-esplanada',
+  '2026-05-17',
+  'trophy',
+  'Troféu comemorativo para os 3 primeiros de cada categoria. Medalha finisher para todos.',
+  'Largada em frente ao Congresso Nacional, passando pelo Museu Nacional e retorno pelo Eixo Monumental. Percurso plano e sinalizado.',
+  'SESC DF Esportes',
+  'Corra pelos cartões-postais da capital federal com o cenário único de Brasília ao amanhecer.',
+  'confirmed', 134, false, NULL, 'admin'
+),
 
-('Corrida da Primavera - Jales', 'corrida-da-primavera-jales', '2026-09-21', '07:00', 'Jales', 'SP', 'Praça da Matriz, Centro', -20.269, -50.546, ARRAY['5k','10k'], 'R$55', 'https://example.com/inscricao10', '2026-09-15', 'trophy', NULL, NULL, NULL, NULL),
-('Corrida do Aniversário de Mirassol', 'corrida-aniversario-mirassol', '2026-06-14', '07:00', 'Mirassol', 'SP', 'Praça Cel. Joaquim de Toledo Piza, Centro', -20.8186, -49.5204, ARRAY['5k','10k'], 'R$65', 'https://example.com/inscricao11', '2026-06-10', 'trophy', 'Troféu para os 5 primeiros overall', 'Percurso pelas ruas do centro de Mirassol', 'Prefeitura de Mirassol', 'Comemoração do aniversário da cidade com corrida de rua para toda a comunidade.', 'confirmed', 0, NULL, 'admin'),
+-- 10 ── Florianópolis/SC · 5k+10k · dinheiro+troféu
+(
+  'Corrida das Dunas Florianópolis',
+  'corrida-das-dunas-florianopolis',
+  '2026-04-05', '07:00',
+  'Florianópolis', 'SC',
+  'Av. das Rendeiras - Lagoa da Conceição, Florianópolis',
+  -27.5990, -48.4698,
+  ARRAY['5k','10k'],
+  'R$80',
+  'https://example.com/corrida-dunas-fpolis',
+  '2026-03-29',
+  'both',
+  'R$1.500 (1º), R$750 (2º), R$350 (3º) geral. Troféu por categoria e faixa etária.',
+  'Percurso ao redor da Lagoa da Conceição com vista para as dunas. Trecho de trilha nas dunas (+/- 2km) para as categorias 10k.',
+  'Floripa Trail & Run',
+  'A natureza privilegiada da Ilha da Magia como cenário. Percurso misto de asfalto e dunas com a Lagoa da Conceição.',
+  'confirmed', 167, false, NULL, 'admin'
+),
 
-('10K Barretos Night', '10k-barretos-night', '2026-05-23', '19:30', 'Barretos', 'SP', 'Parque do Peão, Rod. Brigadeiro Faria Lima', -20.5573, -48.5678, ARRAY['5k','10k'], 'R$85', 'https://example.com/inscricao12', '2026-05-18', 'money', 'R$1.500 (1º), R$800 (2º), R$400 (3º) - masc e fem', 'Percurso ao redor do Parque do Peão com iluminação', 'Associação de Atletismo de Barretos', 'Corrida noturna no famoso Parque do Peão de Barretos.', 'confirmed', 0, NULL, 'admin');
+-- 11 ── Campinas/SP · trail noturno 10k+21k · dinheiro
+(
+  'Night Trail Campinas',
+  'night-trail-campinas',
+  '2026-03-14', '19:30',
+  'Campinas', 'SP',
+  'Parque Estadual Mata de Santa Genebra - Rod. Dom Pedro I, Campinas',
+  -22.8878, -46.9891,
+  ARRAY['10k','21k'],
+  '10k: R$95 | 21k: R$140',
+  'https://example.com/night-trail-campinas',
+  '2026-03-07',
+  'money',
+  'R$2.000 (1º), R$1.000 (2º), R$500 (3º) em cada distância — masc/fem.',
+  'Trilha noturna na Mata de Santa Genebra com uso de headlamp obrigatório. Terreno técnico com raízes e trechos de lama.',
+  'Campinas Trail Adventures',
+  'A única prova noturna de trail de Campinas. Headlamp incluso no kit. Adrenalina garantida na mata fechada!',
+  'confirmed', 48, false, NULL, 'admin'
+),
+
+-- 12 ── Ribeirão Preto/SP · 5k+10k · troféu
+(
+  'Corrida do Vinho Ribeirão Preto',
+  'corrida-do-vinho-ribeirao-preto',
+  '2026-06-28', '07:30',
+  'Ribeirão Preto', 'SP',
+  'Av. Independência - Bosque Municipal, Ribeirão Preto',
+  -21.1895, -47.8009,
+  ARRAY['5k','10k'],
+  'R$65',
+  'https://example.com/corrida-vinho-rp',
+  '2026-06-21',
+  'trophy',
+  'Troféu artístico com tema vitivinícola para os 3 primeiros. Medalha finisher para todos.',
+  'Percurso pelas principais avenidas de Ribeirão Preto passando pelo Bosque Municipal. Leve ondulação.',
+  'Ribeirão Runners',
+  'A corrida mais tradicional do interior paulista. Kit inclui taça e degustação de vinhos da região na festa pós-prova.',
+  'confirmed', 62, false, NULL, 'admin'
+),
+
+-- 13 ── Goiânia/GO · 5k+10k+21k · dinheiro
+(
+  'Goiânia City Run',
+  'goiania-city-run',
+  '2026-05-10', '06:00',
+  'Goiânia', 'GO',
+  'Parque Flamboyant - Av. José Hermeto do Espírito Santo, Goiânia',
+  -16.7107, -49.2408,
+  ARRAY['5k','10k','21k'],
+  '5k: R$55 | 10k: R$75 | 21k: R$120',
+  'https://example.com/goiania-city-run',
+  '2026-05-03',
+  'money',
+  'Meia: R$4.000 (1º), R$2.000 (2º), R$1.000 (3º). 10k: R$1.500 (1º), R$750 (2º).',
+  'Percurso plano pelo Parque Flamboyant e Setor Bueno. Três distâncias com largadas escalonadas.',
+  'Federação Goiana de Atletismo',
+  'A maior prova de rua de Goiás com percurso pelos parques e avenidas mais bonitas de Goiânia.',
+  'confirmed', 184, false, NULL, 'admin'
+),
+
+-- 14 ── Vitória/ES · orla 5k+10k · troféu
+(
+  'Corrida da Baía de Vitória',
+  'corrida-da-baia-de-vitoria',
+  '2026-04-25', '06:30',
+  'Vitória', 'ES',
+  'Av. Marechal Mascarenhas de Moraes - Enseada do Suá, Vitória',
+  -20.3156, -40.2952,
+  ARRAY['5k','10k'],
+  'R$60',
+  'https://example.com/corrida-baia-vitoria',
+  '2026-04-18',
+  'trophy',
+  'Troféu para os 3 primeiros geral e por faixa etária em cada distância.',
+  'Percurso pela orla da Enseada do Suá com vista para a Baía de Vitória e os mangues. Terreno plano.',
+  'Vitória Running',
+  'Contemple a beleza única da Baía de Vitória enquanto corre pela orla mais bonita do Espírito Santo.',
+  'confirmed', 73, false, NULL, 'admin'
+),
+
+-- 15 ── Natal/RN · 5k+10k · dinheiro+troféu
+(
+  'Arena das Dunas Run',
+  'arena-das-dunas-run',
+  '2026-05-31', '06:00',
+  'Natal', 'RN',
+  'Arena das Dunas - Av. Sen. Salgado Filho, 5001, Natal',
+  -5.8357, -35.2116,
+  ARRAY['5k','10k'],
+  'R$70',
+  'https://example.com/arena-dunas-run',
+  '2026-05-24',
+  'both',
+  'R$2.000 (1º), R$1.000 (2º), R$500 (3º) overall. Troféu até 5º lugar por categoria.',
+  'Largada na Arena das Dunas, percurso pela Via Costeira com vista para o Atlântico. Trecho pelas dunas do Parque das Dunas.',
+  'Natal Sport Events',
+  'Corra ao redor do estádio mais bonito do Brasil com o mar de Natal ao fundo. Uma experiência inesquecível!',
+  'confirmed', 91, false, NULL, 'admin'
+),
+
+-- 16 ── Sorocaba/SP · trail 10k+21k · dinheiro · destaque ativo
+(
+  'Trail das Serras Sorocaba',
+  'trail-das-serras-sorocaba',
+  '2026-04-18', '06:00',
+  'Sorocaba', 'SP',
+  'Parque Zoológico Municipal Quinzinho de Barros - Sorocaba',
+  -23.4977, -47.4544,
+  ARRAY['10k','21k'],
+  '10k: R$90 | 21k: R$140',
+  'https://example.com/trail-serras-sorocaba',
+  '2026-04-11',
+  'money',
+  'R$3.000 (1º), R$1.500 (2º), R$700 (3º) em cada distância — masc/fem.',
+  'Trilha nas serras ao redor de Sorocaba com 900m de ganho de elevação no 21k. Terreno variado: mata fechada, campo e pedras.',
+  'Serra Trail Team',
+  'O maior evento de trail running do interior de São Paulo. Percurso técnico com vistas panorâmicas das serras sorocabanas.',
+  'confirmed', 117, true, '2026-03-20 23:59:59+00', 'admin'
+),
+
+-- 17 ── Londrina/PR · 5k+10k · troféu
+(
+  'Corrida do Café Londrina',
+  'corrida-do-cafe-londrina',
+  '2026-06-14', '07:00',
+  'Londrina', 'PR',
+  'Calçadão de Londrina - R. XV de Novembro, Centro, Londrina',
+  -23.3095, -51.1627,
+  ARRAY['5k','10k'],
+  'R$65',
+  'https://example.com/corrida-cafe-londrina',
+  '2026-06-07',
+  'trophy',
+  'Troféu temático do café para os 3 primeiros geral. Medalha finisher para todos os participantes.',
+  'Percurso pelas principais avenidas do centro de Londrina passando pelos pontos históricos da cidade.',
+  'Londrina Runners',
+  'A corrida que celebra a história cafeeira de Londrina. Kit inclui café especial da região e camiseta exclusiva.',
+  'confirmed', 103, false, NULL, 'admin'
+),
+
+-- 18 ── Joinville/SC · maratona 21k+42k · dinheiro
+(
+  'Maratona de Joinville',
+  'maratona-de-joinville',
+  '2026-07-05', '06:00',
+  'Joinville', 'SC',
+  'Palácio dos Festivais - Av. José Vieira, 315, Joinville',
+  -26.3045, -48.8464,
+  ARRAY['21k','42k'],
+  '21k: R$150 | 42k: R$210',
+  'https://example.com/maratona-joinville',
+  '2026-06-28',
+  'money',
+  'Maratona: R$8.000 (1º), R$4.000 (2º), R$2.000 (3º). Meia: R$3.000 (1º), R$1.500 (2º).',
+  'Percurso certificado pela AIMS pelas ruas arborizadas de Joinville. Clima ameno de julho favorece marcas pessoais.',
+  'Associação Atlética de Joinville',
+  'A maior prova de rua de Santa Catarina com percurso pelas ruas históricas da Cidade das Flores.',
+  'confirmed', 78, false, NULL, 'admin'
+),
+
+-- 19 ── Manaus/AM · 5k+10k · troféu
+(
+  'Corrida Amazônica Manaus',
+  'corrida-amazonica-manaus',
+  '2026-06-21', '05:30',
+  'Manaus', 'AM',
+  'Av. Eduardo Ribeiro - Centro Histórico, Manaus',
+  -3.1303, -60.0234,
+  ARRAY['5k','10k'],
+  'R$70',
+  'https://example.com/corrida-amazonica',
+  '2026-06-14',
+  'trophy',
+  'Troféu artesanal amazônico para os 3 primeiros de cada categoria.',
+  'Percurso pelo centro histórico de Manaus passando pelo Teatro Amazonas, Mercado Municipal e Porto de Manaus. Largada às 5h30 para fugir do calor.',
+  'Federação Amazonense de Atletismo',
+  'Uma prova única no coração da maior floresta do mundo. Largada ao amanhecer com o frescor amazônico antes do sol quente.',
+  'confirmed', 55, false, NULL, 'admin'
+),
+
+-- 20 ── São Paulo/SP · 5k+10k · sem premiação · adiada (para testar status)
+(
+  'SP Centro Histórico Run',
+  'sp-centro-historico-run',
+  '2026-05-16', '08:00',
+  'São Paulo', 'SP',
+  'Praça da Sé - Centro Histórico, São Paulo',
+  -23.5505, -46.6333,
+  ARRAY['5k','10k'],
+  'R$65',
+  'https://example.com/sp-centro-run',
+  '2026-05-09',
+  'none',
+  NULL,
+  'Percurso pelo centro histórico de SP passando pela Praça da Sé, Viaduto do Chá, Pinacoteca e Parque da Luz.',
+  'SP Urban Runners',
+  'Descubra o centro histórico de São Paulo correndo. Prova ADIADA — nova data a confirmar. Inscrições mantidas.',
+  'postponed', 38, false, NULL, 'admin'
+);

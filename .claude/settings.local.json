@@ -46,7 +46,10 @@
       "Bash(git mv:*)",
       "Bash(cat:*)",
       "Bash(node scripts/generate-cities-migration.js:*)",
-      "Bash(git -C /c/Users/pablo/Development/MVP log --oneline -20)"
+      "Bash(git -C /c/Users/pablo/Development/MVP log --oneline -20)",
+      "Bash(head:*)",
+      "WebFetch(domain:docs.abacatepay.com)",
+      "Bash(cd:*)"
     ]
   }
 }
