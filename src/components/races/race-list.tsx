@@ -135,20 +135,23 @@ export function RaceList() {
 
 function RaceCardSkeleton() {
   return (
-    <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-3">
-      <div className="flex gap-2">
-        <Skeleton className="h-6 w-16 rounded-md bg-gray-200" />
-        <Skeleton className="h-6 w-16 rounded-md bg-gray-200" />
-      </div>
-      <Skeleton className="h-5 w-3/4 bg-gray-200" />
-      <Skeleton className="h-4 w-1/2 bg-gray-200" />
-      <div className="flex gap-1.5">
-        <Skeleton className="h-5 w-10 rounded-md bg-gray-200" />
-        <Skeleton className="h-5 w-10 rounded-md bg-gray-200" />
-      </div>
-      <div className="flex justify-between pt-3 border-t border-gray-100">
-        <Skeleton className="h-4 w-24 bg-gray-200" />
-        <Skeleton className="h-4 w-16 bg-gray-200" />
+    <div className="rounded-xl border border-gray-200 bg-gray-50 overflow-hidden space-y-3">
+      <Skeleton className="aspect-[16/9] w-full bg-gray-200" />
+      <div className="px-5 pb-5 space-y-3">
+        <div className="flex gap-2">
+          <Skeleton className="h-6 w-16 rounded-md bg-gray-200" />
+          <Skeleton className="h-6 w-16 rounded-md bg-gray-200" />
+        </div>
+        <Skeleton className="h-5 w-3/4 bg-gray-200" />
+        <Skeleton className="h-4 w-1/2 bg-gray-200" />
+        <div className="flex gap-1.5">
+          <Skeleton className="h-5 w-10 rounded-md bg-gray-200" />
+          <Skeleton className="h-5 w-10 rounded-md bg-gray-200" />
+        </div>
+        <div className="flex justify-between pt-3 border-t border-gray-100">
+          <Skeleton className="h-4 w-24 bg-gray-200" />
+          <Skeleton className="h-4 w-16 bg-gray-200" />
+        </div>
       </div>
     </div>
   );

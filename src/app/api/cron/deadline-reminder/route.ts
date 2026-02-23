@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendToSubscriptions } from "@/lib/notifications";
+import { futureDateInBrazil } from "@/lib/date";
 
 // Cron: send reminders for races with registration deadline in 3 days
 export async function GET(request: Request) {
@@ -11,10 +12,8 @@ export async function GET(request: Request) {
 
   const supabase = createAdminClient();
 
-  // Find races with deadline in exactly 3 days
-  const threeDaysFromNow = new Date();
-  threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
-  const targetDate = threeDaysFromNow.toISOString().split("T")[0];
+  // Find races with deadline in exactly 3 days (Brazil timezone)
+  const targetDate = futureDateInBrazil(3);
 
   const { data: races } = await supabase
     .from("races")

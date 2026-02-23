@@ -49,7 +49,12 @@
       "Bash(git -C /c/Users/pablo/Development/MVP log --oneline -20)",
       "Bash(head:*)",
       "WebFetch(domain:docs.abacatepay.com)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "WebSearch",
+      "WebFetch(domain:context7.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:abacatepay.readme.io)",
+      "Bash(tail:*)"
     ]
   }
 }

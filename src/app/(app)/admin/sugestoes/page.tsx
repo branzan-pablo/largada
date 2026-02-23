@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatDateShort } from "@/lib/utils";
+import { formatDateShort, formatDateTime } from "@/lib/date";
 import { SuggestionActions } from "./suggestion-actions";
 
 export const metadata = {
@@ -62,7 +62,7 @@ export default async function AdminSuggestionsPage() {
                   <p className="text-xs text-muted-foreground">
                     Por:{" "}
                     {suggestion.profiles?.full_name ?? "Anônimo"}{" "}
-                    — {formatDateShort(suggestion.created_at)}
+                    — {formatDateTime(suggestion.created_at)}
                   </p>
                   <SuggestionActions suggestion={suggestion} />
                 </CardContent>

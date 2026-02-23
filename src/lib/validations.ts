@@ -41,6 +41,7 @@ export const raceSchemaBase = z.object({
   prizeType: z.enum(["money", "trophy", "both", "none"]),
   prizeDetails: z.string().optional(),
   routeDescription: z.string().optional(),
+  imageUrl: z.string().url("URL da imagem inválida").optional(),
   routeImageUrl: z.string().optional(),
   organizer: z.string().optional(),
   description: z.string().optional(),

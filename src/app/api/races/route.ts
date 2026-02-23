@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { slugify } from "@/lib/utils";
+import { todayInBrazil } from "@/lib/date";
 import { haversineDistance } from "@/lib/geo";
 import { ITEMS_PER_PAGE } from "@/lib/constants";
 import { notifyNewRace } from "@/lib/notifications";
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
 
   // Only future races by default
   if (!includePast) {
-    const today = new Date().toISOString().split("T")[0];
+    const today = todayInBrazil();
     query = query.gte("date", today);
   }
 
@@ -177,6 +178,7 @@ export async function POST(request: Request) {
     registration_deadline: body.registrationDeadline,
     prize_type: body.prizeType,
     prize_details: body.prizeDetails ?? null,
+    image_url: body.imageUrl ?? null,
     route_description: body.routeDescription ?? null,
     route_image_url: body.routeImageUrl ?? null,
     organizer: body.organizer ?? null,

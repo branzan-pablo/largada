@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { REGION_CITIES } from "@/lib/constants";
 import { rateLimit } from "@/lib/rate-limit";
 import { requireAuth } from "@/lib/auth";
+import { utcNow } from "@/lib/date";
 
 export async function PATCH(request: Request) {
   const authResult = await requireAuth();
@@ -75,7 +76,7 @@ export async function PATCH(request: Request) {
     updateData.onboarding_completed = onboardingCompleted;
   }
 
-  updateData.updated_at = new Date().toISOString();
+  updateData.updated_at = utcNow();
 
   const { data, error } = await supabase
     .from("profiles")

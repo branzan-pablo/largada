@@ -4,6 +4,7 @@
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { utcNow } from "@/lib/date";
 
 export async function GET(request: Request) {
     const authHeader = request.headers.get("authorization");
@@ -12,7 +13,7 @@ export async function GET(request: Request) {
     }
 
     const admin = createAdminClient();
-    const now = new Date().toISOString();
+    const now = utcNow();
 
     const { data, error } = await admin
         .from("races")

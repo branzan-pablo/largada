@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
+import { utcNow } from "@/lib/date";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
       endpoint,
       p256dh: keys.p256dh,
       auth: keys.auth,
-      updated_at: new Date().toISOString(),
+      updated_at: utcNow(),
     },
     { onConflict: "endpoint" }
   );

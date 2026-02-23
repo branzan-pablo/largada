@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { DISTANCES } from "@/lib/constants";
 import { raceSchema } from "@/lib/validations";
 import { toast } from "sonner";
@@ -67,6 +68,8 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   const [notes, setNotes] = useState(race?.notes ?? suggestionData?.notes ?? "");
   const [link, setLink] = useState(race?.link ?? suggestionData?.link ?? "");
   const [isPromoted, setIsPromoted] = useState(race?.is_promoted ?? false);
+  const [imageUrl, setImageUrl] = useState<string | null>(race?.image_url ?? null);
+  const [uploadFolder] = useState(() => race?.id ?? crypto.randomUUID());
 
   const handleDistanceToggle = (distance: string) => {
     setDistances((prev) =>
@@ -100,6 +103,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       description: description || undefined,
       status,
       isPromoted,
+      imageUrl: imageUrl || undefined,
       link: link || undefined,
       notes: notes || undefined,
     });
@@ -174,6 +178,19 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
+            <Label>Imagem / Banner da corrida</Label>
+            <ImageUpload
+              bucket="race-images"
+              folder={uploadFolder}
+              value={imageUrl}
+              onChange={setImageUrl}
+            />
+            <p className="text-xs text-muted-foreground">
+              Aceita JPEG, PNG ou WebP. Tamanho máximo: 5MB.
+            </p>
+          </div>
+
+          <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="name">Nome da corrida *</Label>
             <Input
               id="name"
@@ -221,11 +238,12 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="date">Data *</Label>
+            <Label htmlFor="date">Data da corrida *</Label>
             <Input
               id="date"
               type="date"
               value={date}
+              min={new Date().toISOString().split("T")[0]}
               onChange={(e) => setDate(e.target.value)}
               className={errors.date ? "border-destructive" : ""}
             />
@@ -311,11 +329,13 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
         </div>
       </section>
 
-      {/* Distances + Prize side by side */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* Distances, Prize & Registration */}
+      <section className="space-y-5 rounded-lg border border-gray-200 p-5">
+        <h2 className="text-lg font-semibold">Distâncias, Premiação e Inscrição</h2>
+
         {/* Distances */}
-        <section className="space-y-4 rounded-lg border border-gray-200 p-5">
-          <h2 className="text-lg font-semibold">Distâncias *</h2>
+        <div className="space-y-2">
+          <Label>Distâncias *</Label>
           <div className="flex flex-wrap gap-4">
             {DISTANCES.map((d) => (
               <label
@@ -331,12 +351,12 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
             ))}
           </div>
           {errors.distances && <p className="text-xs text-destructive">{errors.distances}</p>}
-        </section>
+        </div>
+
+        <hr className="border-gray-100" />
 
         {/* Prize */}
-        <section className="space-y-4 rounded-lg border border-gray-200 p-5">
-          <h2 className="text-lg font-semibold">Premiação</h2>
-
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="prizeType">Tipo de premiação *</Label>
             <Select value={prizeType} onValueChange={setPrizeType}>
@@ -353,7 +373,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           </div>
 
           {prizeType !== "none" && (
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="prizeDetails">Detalhes da premiação</Label>
               <Textarea
                 id="prizeDetails"
@@ -364,13 +384,11 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
               />
             </div>
           )}
-        </section>
-      </div>
+        </div>
 
-      {/* Registration */}
-      <section className="space-y-4 rounded-lg border border-gray-200 p-5">
-        <h2 className="text-lg font-semibold">Inscrição</h2>
+        <hr className="border-gray-100" />
 
+        {/* Registration */}
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="registrationPrice">Valor da inscrição *</Label>
@@ -389,6 +407,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
               id="registrationDeadline"
               type="date"
               value={registrationDeadline}
+              max={date || undefined}
               onChange={(e) => setRegistrationDeadline(e.target.value)}
               className={errors.registrationDeadline ? "border-destructive" : ""}
             />

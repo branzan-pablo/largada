@@ -9,6 +9,7 @@ import { RaceCard } from "@/components/races/race-card";
 import { PromoteRaceCard } from "@/components/races/promote-race-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, CalendarDays, Star } from "lucide-react";
+import { todayInBrazil } from "@/lib/date";
 import { toast } from "sonner";
 import type { Race } from "@/types/race";
 
@@ -25,7 +26,7 @@ export function MyRacesClient() {
   const fetchRaces = useCallback(async (userId: string) => {
     setIsLoading(true);
     const supabase = supabaseRef.current;
-    const today = new Date().toISOString().split("T")[0];
+    const today = todayInBrazil();
 
     try {
       const { data: rsvps, error: rsvpsError } = await supabase

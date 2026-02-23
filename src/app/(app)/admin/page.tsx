@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { todayInBrazil } from "@/lib/date";
 import { Trophy, Users, MessageSquarePlus, CalendarDays, MousePointerClick } from "lucide-react";
 
 export const metadata = {
@@ -29,7 +30,7 @@ export default async function AdminDashboardPage() {
   const pendingSuggestions = suggestionsResult.count ?? 0;
   const totalClicks = clicksResult.count ?? 0;
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayInBrazil();
   const upcomingRaces =
     racesResult.data?.filter(
       (r) => r.date >= today && r.status === "confirmed"

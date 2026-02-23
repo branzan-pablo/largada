@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkPixStatus } from "@/lib/payments/pix";
 import { AbacatePayApiError } from "@/lib/payments/errors";
+import { utcNow } from "@/lib/date";
 
 export async function GET(request: NextRequest) {
     try {
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
                 .from("payment_orders")
                 .update({
                     status: pixStatus.status,
-                    ...(pixStatus.status === "PAID" ? { paid_at: new Date().toISOString() } : {}),
+                    ...(pixStatus.status === "PAID" ? { paid_at: utcNow() } : {}),
                 })
                 .eq("id", order.id);
         }

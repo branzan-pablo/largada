@@ -45,6 +45,7 @@ CREATE POLICY "Users can update own profile"
 -- ──────────────────────────────────────────────────────────
 CREATE TABLE public.races (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  image_url             TEXT,
   name                  TEXT NOT NULL,
   slug                  TEXT NOT NULL UNIQUE,
   date                  DATE NOT NULL,

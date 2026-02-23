@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -18,7 +19,7 @@ import {
   Trophy,
   Banknote,
 } from "lucide-react";
-import { formatDateFull, formatTime } from "@/lib/utils";
+import { formatDateFull, formatTime, todayInBrazil, utcNow } from "@/lib/date";
 import { PRIZE_TYPES } from "@/lib/constants";
 import type { Race } from "@/types/race";
 import type { Metadata } from "next";
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const supabase = await createClient();
   const { data: race } = await supabase
     .from("races")
-    .select("name, city, date, distances")
+    .select("name, city, date, distances, image_url")
     .eq("slug", slug)
     .single();
 
@@ -48,6 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: race.name,
       description: `Corrida em ${race.city} — ${distances}`,
       type: "article",
+      images: race.image_url ? [{ url: race.image_url }] : undefined,
     },
   };
 }
@@ -67,12 +69,19 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
   if (!race) notFound();
 
   const typedRace = race as Race;
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayInBrazil();
   const deadlinePassed = typedRace.registration_deadline < today;
+  // Deadline is "soon" if within 3 days — compare date strings (DATE type)
   const deadlineSoon =
     !deadlinePassed &&
-    new Date(typedRace.registration_deadline).getTime() - Date.now() <
-    3 * 24 * 60 * 60 * 1000;
+    typedRace.registration_deadline <= (() => {
+      const d = new Date(today + "T00:00:00");
+      d.setDate(d.getDate() + 3);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${dd}`;
+    })();
 
   // Fetch current user's RSVP status
   const {
@@ -109,7 +118,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
               .update({
                 status: "PAID",
                 paid_amount: billing.amount,
-                paid_at: new Date().toISOString(),
+                paid_at: utcNow(),
               })
               .eq("id", pendingOrder.id),
             admin
@@ -159,7 +168,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
     "@context": "https://schema.org",
     "@type": "SportsEvent",
     name: typedRace.name,
-    startDate: `${typedRace.date}T${typedRace.start_time || "06:00"}`,
+    startDate: `${typedRace.date}T${typedRace.start_time || "06:00:00"}-03:00`,
     location: {
       "@type": "Place",
       name: typedRace.address,
@@ -182,6 +191,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
           ? "https://schema.org/EventPostponed"
           : "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    image: typedRace.image_url || undefined,
   };
 
   return (
@@ -214,6 +224,20 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
           </span>
         </div>
       </div>
+
+      {/* Banner image */}
+      {typedRace.image_url && (
+        <div className="relative mb-8 aspect-[21/9] w-full overflow-hidden rounded-xl">
+          <Image
+            src={typedRace.image_url}
+            alt={typedRace.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 1024px) 100vw, 1024px"
+            priority
+          />
+        </div>
+      )}
 
       <RsvpProvider
         raceId={typedRace.id}

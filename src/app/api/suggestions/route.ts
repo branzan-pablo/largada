@@ -3,6 +3,7 @@ import { SUGGESTION_DAILY_LIMIT } from "@/lib/constants";
 import { notifyNewSuggestion } from "@/lib/notifications";
 import { suggestionSchema } from "@/lib/validations";
 import { requireAuth, requireAdmin } from "@/lib/auth";
+import { utcNow } from "@/lib/date";
 import { z } from "zod/v4";
 
 export async function POST(request: Request) {
@@ -92,7 +93,7 @@ export async function PATCH(request: Request) {
     .update({
       status,
       reviewed_by: user.id,
-      reviewed_at: new Date().toISOString(),
+      reviewed_at: utcNow(),
     })
     .eq("id", id)
     .select()

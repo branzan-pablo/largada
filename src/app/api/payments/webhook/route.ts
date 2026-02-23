@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyWebhook } from "@/lib/payments/webhook";
 import { AbacatePayWebhookError } from "@/lib/payments/errors";
+import { utcNow } from "@/lib/date";
 import type { Json } from "@/types/database";
 import type {
   WebhookPayload,
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
             .update({
               status: "PAID",
               paid_amount: paidAmount ?? 0,
-              paid_at: new Date().toISOString(),
+              paid_at: utcNow(),
             })
             .eq("abacatepay_id", abacatePayRefId)
             .select("id, order_type, metadata")
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
                 .update({
                   status: "PAID",
                   paid_amount: paidAmount ?? 0,
-                  paid_at: new Date().toISOString(),
+                  paid_at: utcNow(),
                 })
                 .eq("external_id", metaRaceId)
                 .eq("order_type", "race_promotion")
@@ -160,7 +161,7 @@ export async function POST(request: NextRequest) {
             const raceId = meta?.raceId as string | undefined;
             if (raceId) {
               const promotedUntil = new Date(
-                Date.now() + 30 * 24 * 60 * 60 * 1000,
+                Date.now() + 30 * 24 * 60 * 60 * 1000
               ).toISOString();
               await admin
                 .from("races")
@@ -191,7 +192,7 @@ export async function POST(request: NextRequest) {
       .update({
         order_id: orderId,
         processed: true,
-        processed_at: new Date().toISOString(),
+        processed_at: utcNow(),
       })
       .eq("event_id", payload.id);
 

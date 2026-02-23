@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getBillingById } from "@/lib/payments/billing";
 import { AbacatePayApiError } from "@/lib/payments/errors";
+import { utcNow } from "@/lib/date";
 
 export async function GET(request: NextRequest) {
     try {
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
                 .update({
                     status: remoteStatus,
                     ...(remoteStatus === "PAID"
-                        ? { paid_amount: billing.amount, paid_at: new Date().toISOString() }
+                        ? { paid_amount: billing.amount, paid_at: utcNow() }
                         : {}),
                 })
                 .eq("id", order.id);

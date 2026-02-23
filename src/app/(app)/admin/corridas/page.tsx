@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Star } from "lucide-react";
-import { formatDateShort } from "@/lib/utils";
+import { formatDateShort } from "@/lib/date";
 import { RACE_STATUSES } from "@/lib/constants";
 
 export const metadata = {

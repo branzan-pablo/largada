@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { raceSchemaBase } from "@/lib/validations";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { utcNow } from "@/lib/date";
 
 export async function PATCH(
   request: Request,
@@ -28,7 +29,7 @@ export async function PATCH(
   const body = parsed.data as Record<string, unknown>;
 
   const updateData: Record<string, unknown> = {
-    updated_at: new Date().toISOString(),
+    updated_at: utcNow(),
   };
 
   const fieldMap: Record<string, string> = {
@@ -46,6 +47,7 @@ export async function PATCH(
     registrationDeadline: "registration_deadline",
     prizeType: "prize_type",
     prizeDetails: "prize_details",
+    imageUrl: "image_url",
     routeDescription: "route_description",
     routeImageUrl: "route_image_url",
     organizer: "organizer",

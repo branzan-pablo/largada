@@ -278,6 +278,7 @@ export type Database = {
           description: string | null
           distances: string[]
           id: string
+          image_url: string | null
           is_promoted: boolean
           promoted_until: string | null
           latitude: number
@@ -311,6 +312,7 @@ export type Database = {
           description?: string | null
           distances: string[]
           id?: string
+          image_url?: string | null
           is_promoted?: boolean
           promoted_until?: string | null
           latitude: number
@@ -344,6 +346,7 @@ export type Database = {
           description?: string | null
           distances?: string[]
           id?: string
+          image_url?: string | null
           is_promoted?: boolean
           promoted_until?: string | null
           latitude?: number

@@ -15,6 +15,7 @@ export interface Race {
   registration_deadline: string;
   prize_type: "money" | "trophy" | "both" | "none";
   prize_details: string | null;
+  image_url: string | null;
   route_description: string | null;
   route_image_url: string | null;
   organizer: string | null;
