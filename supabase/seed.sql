@@ -2,6 +2,7 @@
 -- seed.sql — 20 corridas de teste
 -- Cobre diferentes estados, tipos de premiação, status,
 -- distâncias, e casos de promoção paga.
+-- Todas vinculadas ao único perfil existente (admin/owner).
 -- ============================================================
 
 INSERT INTO public.races (
@@ -10,7 +11,8 @@ INSERT INTO public.races (
   distances, registration_price, registration_link, registration_deadline,
   prize_type, prize_details,
   route_description, organizer, description,
-  status, rsvp_count, is_promoted, promoted_until, origin
+  status, rsvp_count, is_promoted, promoted_until, origin,
+  created_by
 ) VALUES
 
 -- 1 ── São Paulo/SP · 42k · premiação em dinheiro · destaque ativo
@@ -30,7 +32,8 @@ INSERT INTO public.races (
   'Largada na Av. Paulista, percurso certificado pela CBAt passando por Ibirapuera, Vila Madalena e retorno pelo centro expandido.',
   'Associação de Atletismo de São Paulo',
   'A maior prova de rua do Brasil reúne atletas de elite e amadores num percurso histórico pela capital paulista. Classificatória para Boston e Berlin.',
-  'confirmed', 342, true, '2026-03-25 23:59:59+00', 'admin'
+  'confirmed', 342, true, '2026-03-25 23:59:59+00', 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 2 ── Rio de Janeiro/RJ · 5k+10k · troféu
@@ -50,7 +53,8 @@ INSERT INTO public.races (
   'Volta completa ao redor da Lagoa Rodrigo de Freitas com vista para o Corcovado. Percurso plano e rápido.',
   'Rio Running Events',
   'Clássica prova carioca com o cenário mais bonito da cidade. Percurso plano, perfeito para buscar marcas pessoais.',
-  'confirmed', 128, false, NULL, 'admin'
+  'confirmed', 128, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 3 ── Belo Horizonte/MG · trail 21k+42k · dinheiro
@@ -70,7 +74,8 @@ INSERT INTO public.races (
   'Trilha técnica com 1.800m de ganho de elevação. Terreno misto de mata atlântica, pedras e gramado. Abastecimentos a cada 7km.',
   'BH Trail Adventures',
   'A prova de trail mais desafiadora de Minas Gerais. Cenário deslumbrante da Serra do Rola-Moça com corredores de todo o Brasil.',
-  'confirmed', 89, false, NULL, 'admin'
+  'confirmed', 89, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 4 ── Curitiba/PR · 5k+10k · troféu+dinheiro
@@ -90,7 +95,8 @@ INSERT INTO public.races (
   'Percurso pelas alamedas do Jardim Botânico com vista para a estufa de ferro. Terreno levemente ondulado.',
   'Curitiba Runners Club',
   'A corrida mais fotogênica do sul do Brasil acontece em plena florada do Jardim Botânico. Venha com sua família!',
-  'confirmed', 201, false, NULL, 'admin'
+  'confirmed', 201, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 5 ── Porto Alegre/RS · noturna 5k+10k · sem premiação
@@ -110,7 +116,8 @@ INSERT INTO public.races (
   'Percurso plano ao longo da Orla do Guaíba com iluminação especial e DJs ao vivo nos pontos de apoio.',
   'POA Night Sports',
   'Corra à beira do Guaíba com o pôr do sol como cenário. Evento com festa pós-prova inclusa na inscrição.',
-  'confirmed', 95, false, NULL, 'admin'
+  'confirmed', 95, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 6 ── Salvador/BA · 5k+10k+21k · troféu
@@ -130,7 +137,8 @@ INSERT INTO public.races (
   'Largada no Terreiro de Jesus, descida pelo Comércio, Barra e retorno pela orla de Ondina. Percurso com leves aclives no centro histórico.',
   'Federação Baiana de Atletismo',
   'Corra pelas ruas históricas de Salvador com a energia e a cultura baiana. Uma experiência única no coração do Pelourinho.',
-  'confirmed', 77, false, NULL, 'admin'
+  'confirmed', 77, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 7 ── Recife/PE · praia 5k+10k · dinheiro+troféu
@@ -150,7 +158,8 @@ INSERT INTO public.races (
   'Percurso à beira-mar pela Praia de Boa Viagem, totalmente plano e com brisa do mar. Largada ao nascer do sol.',
   'Recife Beach Sports',
   'A corrida mais fresca de Pernambuco! Percurso à beira do Atlântico com o sol nascendo no mar.',
-  'confirmed', 156, false, NULL, 'admin'
+  'confirmed', 156, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 8 ── Fortaleza/CE · meia maratona · dinheiro · destaque ativo
@@ -170,7 +179,8 @@ INSERT INTO public.races (
   'Percurso certificado pela AIMS ao longo da Av. Beira Mar, totalmente plano. Condições ideais para recordes — largada às 5h30 evitando o calor.',
   'Federação Cearense de Atletismo',
   'A prova mais rápida do Nordeste! Percurso plano à beira-mar de Fortaleza com largada no fresco da madrugada.',
-  'confirmed', 213, true, '2026-04-01 23:59:59+00', 'admin'
+  'confirmed', 213, true, '2026-04-01 23:59:59+00', 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 9 ── Brasília/DF · 5k+10k · troféu
@@ -190,7 +200,8 @@ INSERT INTO public.races (
   'Largada em frente ao Congresso Nacional, passando pelo Museu Nacional e retorno pelo Eixo Monumental. Percurso plano e sinalizado.',
   'SESC DF Esportes',
   'Corra pelos cartões-postais da capital federal com o cenário único de Brasília ao amanhecer.',
-  'confirmed', 134, false, NULL, 'admin'
+  'confirmed', 134, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 10 ── Florianópolis/SC · 5k+10k · dinheiro+troféu
@@ -210,7 +221,8 @@ INSERT INTO public.races (
   'Percurso ao redor da Lagoa da Conceição com vista para as dunas. Trecho de trilha nas dunas (+/- 2km) para as categorias 10k.',
   'Floripa Trail & Run',
   'A natureza privilegiada da Ilha da Magia como cenário. Percurso misto de asfalto e dunas com a Lagoa da Conceição.',
-  'confirmed', 167, false, NULL, 'admin'
+  'confirmed', 167, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 11 ── Campinas/SP · trail noturno 10k+21k · dinheiro
@@ -230,7 +242,8 @@ INSERT INTO public.races (
   'Trilha noturna na Mata de Santa Genebra com uso de headlamp obrigatório. Terreno técnico com raízes e trechos de lama.',
   'Campinas Trail Adventures',
   'A única prova noturna de trail de Campinas. Headlamp incluso no kit. Adrenalina garantida na mata fechada!',
-  'confirmed', 48, false, NULL, 'admin'
+  'confirmed', 48, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 12 ── Ribeirão Preto/SP · 5k+10k · troféu
@@ -250,7 +263,8 @@ INSERT INTO public.races (
   'Percurso pelas principais avenidas de Ribeirão Preto passando pelo Bosque Municipal. Leve ondulação.',
   'Ribeirão Runners',
   'A corrida mais tradicional do interior paulista. Kit inclui taça e degustação de vinhos da região na festa pós-prova.',
-  'confirmed', 62, false, NULL, 'admin'
+  'confirmed', 62, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 13 ── Goiânia/GO · 5k+10k+21k · dinheiro
@@ -270,7 +284,8 @@ INSERT INTO public.races (
   'Percurso plano pelo Parque Flamboyant e Setor Bueno. Três distâncias com largadas escalonadas.',
   'Federação Goiana de Atletismo',
   'A maior prova de rua de Goiás com percurso pelos parques e avenidas mais bonitas de Goiânia.',
-  'confirmed', 184, false, NULL, 'admin'
+  'confirmed', 184, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 14 ── Vitória/ES · orla 5k+10k · troféu
@@ -290,7 +305,8 @@ INSERT INTO public.races (
   'Percurso pela orla da Enseada do Suá com vista para a Baía de Vitória e os mangues. Terreno plano.',
   'Vitória Running',
   'Contemple a beleza única da Baía de Vitória enquanto corre pela orla mais bonita do Espírito Santo.',
-  'confirmed', 73, false, NULL, 'admin'
+  'confirmed', 73, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 15 ── Natal/RN · 5k+10k · dinheiro+troféu
@@ -310,7 +326,8 @@ INSERT INTO public.races (
   'Largada na Arena das Dunas, percurso pela Via Costeira com vista para o Atlântico. Trecho pelas dunas do Parque das Dunas.',
   'Natal Sport Events',
   'Corra ao redor do estádio mais bonito do Brasil com o mar de Natal ao fundo. Uma experiência inesquecível!',
-  'confirmed', 91, false, NULL, 'admin'
+  'confirmed', 91, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 16 ── Sorocaba/SP · trail 10k+21k · dinheiro · destaque ativo
@@ -330,7 +347,8 @@ INSERT INTO public.races (
   'Trilha nas serras ao redor de Sorocaba com 900m de ganho de elevação no 21k. Terreno variado: mata fechada, campo e pedras.',
   'Serra Trail Team',
   'O maior evento de trail running do interior de São Paulo. Percurso técnico com vistas panorâmicas das serras sorocabanas.',
-  'confirmed', 117, true, '2026-03-20 23:59:59+00', 'admin'
+  'confirmed', 117, true, '2026-03-20 23:59:59+00', 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 17 ── Londrina/PR · 5k+10k · troféu
@@ -350,7 +368,8 @@ INSERT INTO public.races (
   'Percurso pelas principais avenidas do centro de Londrina passando pelos pontos históricos da cidade.',
   'Londrina Runners',
   'A corrida que celebra a história cafeeira de Londrina. Kit inclui café especial da região e camiseta exclusiva.',
-  'confirmed', 103, false, NULL, 'admin'
+  'confirmed', 103, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 18 ── Joinville/SC · maratona 21k+42k · dinheiro
@@ -370,7 +389,8 @@ INSERT INTO public.races (
   'Percurso certificado pela AIMS pelas ruas arborizadas de Joinville. Clima ameno de julho favorece marcas pessoais.',
   'Associação Atlética de Joinville',
   'A maior prova de rua de Santa Catarina com percurso pelas ruas históricas da Cidade das Flores.',
-  'confirmed', 78, false, NULL, 'admin'
+  'confirmed', 78, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 19 ── Manaus/AM · 5k+10k · troféu
@@ -390,7 +410,8 @@ INSERT INTO public.races (
   'Percurso pelo centro histórico de Manaus passando pelo Teatro Amazonas, Mercado Municipal e Porto de Manaus. Largada às 5h30 para fugir do calor.',
   'Federação Amazonense de Atletismo',
   'Uma prova única no coração da maior floresta do mundo. Largada ao amanhecer com o frescor amazônico antes do sol quente.',
-  'confirmed', 55, false, NULL, 'admin'
+  'confirmed', 55, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 ),
 
 -- 20 ── São Paulo/SP · 5k+10k · sem premiação · adiada (para testar status)
@@ -410,5 +431,6 @@ INSERT INTO public.races (
   'Percurso pelo centro histórico de SP passando pela Praça da Sé, Viaduto do Chá, Pinacoteca e Parque da Luz.',
   'SP Urban Runners',
   'Descubra o centro histórico de São Paulo correndo. Prova ADIADA — nova data a confirmar. Inscrições mantidas.',
-  'postponed', 38, false, NULL, 'admin'
+  'postponed', 38, false, NULL, 'admin',
+  (SELECT id FROM public.profiles LIMIT 1)
 );
