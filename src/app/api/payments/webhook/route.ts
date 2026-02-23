@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
 
         if (abacatePayRefId) {
           // Update order status
-          const { data: updatedOrder } = await admin
+          let { data: updatedOrder } = await admin
             .from("payment_orders")
             .update({
               status: "PAID",
@@ -117,6 +117,37 @@ export async function POST(request: NextRequest) {
             .eq("abacatepay_id", abacatePayRefId)
             .select("id, order_type, metadata")
             .single();
+
+          // Fallback: if order not found by abacatepay_id, try metadata match
+          if (!updatedOrder) {
+            const webhookMeta = payload.data as unknown as Record<string, unknown>;
+            const billingMeta = webhookMeta.billing as Record<string, unknown> | undefined;
+            const metaRaceId = billingMeta?.metadata
+              ? (billingMeta.metadata as Record<string, unknown>)?.raceId as string | undefined
+              : undefined;
+
+            if (metaRaceId) {
+              const { data: fallbackOrder } = await admin
+                .from("payment_orders")
+                .update({
+                  status: "PAID",
+                  paid_amount: paidAmount ?? 0,
+                  paid_at: new Date().toISOString(),
+                })
+                .eq("external_id", metaRaceId)
+                .eq("order_type", "race_promotion")
+                .eq("status", "PENDING")
+                .select("id, order_type, metadata")
+                .single();
+
+              if (fallbackOrder) {
+                updatedOrder = fallbackOrder;
+                console.warn(
+                  `[Webhook] Order found via external_id fallback (raceId: ${metaRaceId}), not by abacatepay_id: ${abacatePayRefId}`
+                );
+              }
+            }
+          }
 
           orderId = updatedOrder?.id ?? null;
 

@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getBillingById } from "@/lib/payments/billing";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RaceDistanceBadges } from "@/components/races/race-distance-badges";
@@ -78,6 +80,55 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
   } = await supabase.auth.getUser();
 
   const isOwner = !!user && user.id === typedRace.created_by;
+
+  // Verify promotion payment when returning from checkout
+  let promotionVerified = false;
+  if (paymentSuccess && !typedRace.is_promoted && isOwner && user) {
+    try {
+      const admin = createAdminClient();
+      const { data: pendingOrder } = await admin
+        .from("payment_orders")
+        .select("id, abacatepay_id, status")
+        .eq("order_type", "race_promotion")
+        .eq("external_id", typedRace.id)
+        .eq("status", "PENDING")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (pendingOrder?.abacatepay_id) {
+        const billing = await getBillingById(pendingOrder.abacatepay_id);
+        if (billing?.status === "PAID") {
+          const promotedUntil = new Date(
+            Date.now() + 30 * 24 * 60 * 60 * 1000
+          ).toISOString();
+
+          await Promise.all([
+            admin
+              .from("payment_orders")
+              .update({
+                status: "PAID",
+                paid_amount: billing.amount,
+                paid_at: new Date().toISOString(),
+              })
+              .eq("id", pendingOrder.id),
+            admin
+              .from("races")
+              .update({ is_promoted: true, promoted_until: promotedUntil })
+              .eq("id", typedRace.id),
+          ]);
+
+          promotionVerified = true;
+          console.info(
+            `[Race Detail] Promotion verified via billing check for race ${typedRace.id}`
+          );
+        }
+      }
+    } catch (err) {
+      console.error("[Race Detail] Failed to verify promotion payment:", err);
+    }
+  }
+  const isPromoted = typedRace.is_promoted || promotionVerified;
 
   let userRsvped = false;
   if (user) {
@@ -294,11 +345,11 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
             <RsvpCard />
 
             {/* Promote card — payment for owner, contact hint for others (hidden when already promoted + not owner) */}
-            {(!typedRace.is_promoted || isOwner || paymentSuccess) && (
+            {(!isPromoted || isOwner) && (
               <PromoteRaceCard
                 raceId={typedRace.id}
                 raceName={typedRace.name}
-                isPromoted={typedRace.is_promoted || paymentSuccess}
+                isPromoted={isPromoted}
                 isOwner={isOwner}
               />
             )}

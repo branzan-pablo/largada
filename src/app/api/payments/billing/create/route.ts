@@ -100,6 +100,15 @@ export async function POST(request: NextRequest) {
 
         const billing = billingResult.data;
 
+        console.info("[Payments] Billing created on AbacatePay:", {
+            billingId: billing.id,
+            status: billing.status,
+            devMode: billing.devMode,
+            methods: billing.methods,
+            amount: billing.amount,
+            url: billing.url,
+        });
+
         // 5. Persist order in database
         const { data: order, error: insertError } = await admin
             .from("payment_orders")

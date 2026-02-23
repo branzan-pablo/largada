@@ -13,6 +13,21 @@ import type {
 import { apiPost, apiGet } from "./abacatepay-client";
 
 /**
+ * Fetches a specific billing by its AbacatePay ID.
+ *
+ * AbacatePay doesn't offer a /billing/get endpoint, so we list all
+ * billings and filter client-side.  Returns null when the billing is
+ * not found or the API call fails.
+ */
+export async function getBillingById(
+    billingId: string
+): Promise<BillingResponse | null> {
+    const result = await listBillings();
+    if (result.error || !result.data) return null;
+    return result.data.find((b) => b.id === billingId) ?? null;
+}
+
+/**
  * Creates a new billing charge on AbacatePay.
  *
  * The returned `url` can be used to redirect the customer to the payment page.

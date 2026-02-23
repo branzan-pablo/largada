@@ -146,6 +146,15 @@ export async function POST(
 
         const billing = billingResult.data;
 
+        console.info("[Promote Race] Billing created on AbacatePay:", {
+            billingId: billing.id,
+            status: billing.status,
+            devMode: billing.devMode,
+            methods: billing.methods,
+            amount: billing.amount,
+            url: billing.url,
+        });
+
         // 7. Persist order in database
         const promotionExpiresAt = new Date(
             Date.now() + PROMOTION_DAYS * 24 * 60 * 60 * 1000
