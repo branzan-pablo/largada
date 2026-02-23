@@ -33,12 +33,20 @@ export async function POST(request: NextRequest) {
         const secretParam = request.nextUrl.searchParams.get("webhookSecret");
         const signatureHeader = request.headers.get("x-webhook-signature");
 
+        console.info("[Webhook] Incoming request —", {
+            method: request.method,
+            hasSecret: !!secretParam,
+            hasSignature: !!signatureHeader,
+            contentType: request.headers.get("content-type"),
+            bodyLength: rawBody.length,
+        });
+
         verifyWebhook(rawBody, signatureHeader, secretParam);
     } catch (error) {
         if (error instanceof AbacatePayWebhookError) {
             console.warn("[Webhook] Verification failed:", error.message);
             return NextResponse.json(
-                { error: "Webhook verification failed" },
+                { error: "Webhook verification failed", detail: error.message },
                 { status: 401 }
             );
         }
