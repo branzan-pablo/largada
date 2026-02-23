@@ -23,6 +23,7 @@ import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ destaque?: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -49,8 +50,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function RaceDetailPage({ params }: PageProps) {
+export default async function RaceDetailPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
+  const resolvedSearch = await searchParams;
+  const paymentSuccess = resolvedSearch?.destaque === "sucesso";
   const supabase = await createClient();
 
   const { data: race } = await supabase
@@ -291,11 +294,11 @@ export default async function RaceDetailPage({ params }: PageProps) {
             <RsvpCard />
 
             {/* Promote card — payment for owner, contact hint for others (hidden when already promoted + not owner) */}
-            {(!typedRace.is_promoted || isOwner) && (
+            {(!typedRace.is_promoted || isOwner || paymentSuccess) && (
               <PromoteRaceCard
                 raceId={typedRace.id}
                 raceName={typedRace.name}
-                isPromoted={typedRace.is_promoted}
+                isPromoted={typedRace.is_promoted || paymentSuccess}
                 isOwner={isOwner}
               />
             )}
