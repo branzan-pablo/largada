@@ -125,9 +125,6 @@ function parseCsvLine(line) {
 // ---------------------------------------------------------------------------
 
 async function main() {
-  console.log("⬇️  Fetching dataset from GitHub...");
-  console.log(`   ${CSV_URL}\n`);
-
   const csvText = await fetchText(CSV_URL);
   const lines = csvText
     .split("\n")
@@ -153,8 +150,6 @@ async function main() {
     );
   }
 
-  console.log(`📄 CSV columns: ${headers.join(", ")}`);
-
   // -------------------------------------------------------------------------
   // Parse rows
   // -------------------------------------------------------------------------
@@ -176,14 +171,11 @@ async function main() {
     }
 
     if (!nome || isNaN(lat) || isNaN(lng) || !uf) {
-      console.warn(`  ⚠️  Skipping malformed row ${i}: ${lines[i]}`);
       continue;
     }
 
     rawCities.push({ name: nome, latitude: lat, longitude: lng, stateCode: uf });
   }
-
-  console.log(`\n✅ Parsed ${rawCities.length} municipalities`);
 
   // -------------------------------------------------------------------------
   // Generate unique slugs
@@ -275,15 +267,6 @@ NOTIFY pgrst, 'reload schema';
   // -------------------------------------------------------------------------
   fs.mkdirSync(path.dirname(OUTPUT_FILE), { recursive: true });
   fs.writeFileSync(OUTPUT_FILE, sql, "utf8");
-
-  const fileSizeKb = Math.round(fs.statSync(OUTPUT_FILE).size / 1024);
-  console.log(`\n🎉 Migration written:`);
-  console.log(`   ${OUTPUT_FILE}`);
-  console.log(`   Size: ${fileSizeKb} KB  |  Cities: ${cities.length}  |  Batches: ${batches.length}`);
-  console.log(`\nNext steps:`);
-  console.log(`  1. Review the file (optional)`);
-  console.log(`  2a. Local dev  → supabase db reset`);
-  console.log(`  2b. Production → supabase db push   (or apply via SQL editor)`);
 }
 
 main().catch((err) => {

@@ -16,21 +16,21 @@ import { AbacatePayWebhookError } from "./errors";
  * someone who knows our webhook secret.
  */
 export function verifyWebhookSecret(secretFromUrl: string | null): void {
-    const env = getPaymentEnv();
+  const env = getPaymentEnv();
 
-    if (!secretFromUrl) {
-        throw new AbacatePayWebhookError("Missing webhook secret in URL");
-    }
+  if (!secretFromUrl) {
+    throw new AbacatePayWebhookError("Missing webhook secret in URL");
+  }
 
-    const expected = Buffer.from(env.ABACATEPAY_WEBHOOK_SECRET);
-    const received = Buffer.from(secretFromUrl);
+  const expected = Buffer.from(env.ABACATEPAY_WEBHOOK_SECRET);
+  const received = Buffer.from(secretFromUrl);
 
-    if (
-        expected.length !== received.length ||
-        !crypto.timingSafeEqual(expected, received)
-    ) {
-        throw new AbacatePayWebhookError("Invalid webhook secret");
-    }
+  if (
+    expected.length !== received.length ||
+    !crypto.timingSafeEqual(expected, received)
+  ) {
+    throw new AbacatePayWebhookError("Invalid webhook secret");
+  }
 }
 
 /**
@@ -39,27 +39,25 @@ export function verifyWebhookSecret(secretFromUrl: string | null): void {
  * compares using constant-time comparison to prevent timing attacks.
  */
 export function verifyWebhookSignature(
-    rawBody: string,
-    signatureFromHeader: string | null
+  rawBody: string,
+  signatureFromHeader: string | null,
 ): void {
-    if (!signatureFromHeader) {
-        throw new AbacatePayWebhookError(
-            "Missing X-Webhook-Signature header"
-        );
-    }
+  if (!signatureFromHeader) {
+    throw new AbacatePayWebhookError("Missing X-Webhook-Signature header");
+  }
 
-    const bodyBuffer = Buffer.from(rawBody, "utf8");
-    const expectedSig = crypto
-        .createHmac("sha256", ABACATEPAY_PUBLIC_KEY)
-        .update(bodyBuffer)
-        .digest("base64");
+  const bodyBuffer = Buffer.from(rawBody, "utf8");
+  const expectedSig = crypto
+    .createHmac("sha256", ABACATEPAY_PUBLIC_KEY)
+    .update(bodyBuffer)
+    .digest("base64");
 
-    const A = Buffer.from(expectedSig);
-    const B = Buffer.from(signatureFromHeader);
+  const A = Buffer.from(expectedSig);
+  const B = Buffer.from(signatureFromHeader);
 
-    if (A.length !== B.length || !crypto.timingSafeEqual(A, B)) {
-        throw new AbacatePayWebhookError("Invalid webhook signature");
-    }
+  if (A.length !== B.length || !crypto.timingSafeEqual(A, B)) {
+    throw new AbacatePayWebhookError("Invalid webhook signature");
+  }
 }
 
 /**
@@ -71,17 +69,15 @@ export function verifyWebhookSignature(
  * A warning is logged so missing signatures are always visible in logs.
  */
 export function verifyWebhook(
-    rawBody: string,
-    signatureHeader: string | null,
-    secretParam: string | null
+  rawBody: string,
+  signatureHeader: string | null,
+  secretParam: string | null,
 ): void {
-    verifyWebhookSecret(secretParam);
+  verifyWebhookSecret(secretParam);
 
-    if (!signatureHeader) {
-        // Header absent — likely dev/simulation mode. Log and continue.
-        console.warn("[Webhook] X-Webhook-Signature header missing — skipping HMAC check");
-        return;
-    }
+  if (!signatureHeader) {
+    return;
+  }
 
-    verifyWebhookSignature(rawBody, signatureHeader);
+  verifyWebhookSignature(rawBody, signatureHeader);
 }

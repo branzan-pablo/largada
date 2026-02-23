@@ -8,7 +8,7 @@ import { RaceCard } from "./race-card";
 import { RaceFiltersDesktop } from "./race-filters";
 import { RaceFiltersMobile } from "./race-filters-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, ChevronDown, Search } from "lucide-react";
+import { Trophy, ChevronDown } from "lucide-react";
 import type { RaceFilters } from "@/types/race";
 
 export function RaceList() {

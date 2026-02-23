@@ -8,7 +8,7 @@ function ensureVapid() {
   webpush.setVapidDetails(
     process.env.VAPID_SUBJECT!,
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-    process.env.VAPID_PRIVATE_KEY!
+    process.env.VAPID_PRIVATE_KEY!,
   );
   vapidConfigured = true;
 }
@@ -48,9 +48,9 @@ export async function sendToSubscriptions({
           endpoint: sub.endpoint,
           keys: { p256dh: sub.p256dh, auth: sub.auth },
         },
-        payload
-      )
-    )
+        payload,
+      ),
+    ),
   );
 
   // Clean up expired subscriptions (HTTP 404/410)
@@ -61,7 +61,7 @@ export async function sendToSubscriptions({
       console.error(
         `[notifications] subscription[${idx}] failed:`,
         err?.statusCode,
-        err
+        err,
       );
       if (err?.statusCode === 404 || err?.statusCode === 410) {
         expiredEndpoints.push(subscriptions[idx].endpoint);
@@ -75,9 +75,6 @@ export async function sendToSubscriptions({
       .from("push_subscriptions")
       .delete()
       .in("endpoint", expiredEndpoints);
-    console.log(
-      `[notifications] cleaned up ${expiredEndpoints.length} expired subscriptions`
-    );
   }
 
   const sent = results.filter((r) => r.status === "fulfilled").length;
@@ -104,14 +101,14 @@ export async function notifyNewRace(raceId: string) {
     // Radius-based matching via PostGIS
     const { data: recipients } = await supabase.rpc(
       "get_race_notification_recipients",
-      { p_race_city_id: race.city_id }
+      { p_race_city_id: race.city_id },
     );
 
     if (!recipients || recipients.length === 0) return;
 
-    const userIds = (recipients as { user_id: string; distance_km: number }[]).map(
-      (r) => r.user_id
-    );
+    const userIds = (
+      recipients as { user_id: string; distance_km: number }[]
+    ).map((r) => r.user_id);
 
     const { data: subs } = await supabase
       .from("push_subscriptions")
@@ -131,7 +128,7 @@ export async function notifyNewRace(raceId: string) {
     const { data: rows } = await supabase
       .from("push_subscriptions")
       .select(
-        "endpoint, p256dh, auth, profiles!push_subscriptions_user_id_fkey(notifications_enabled, city)"
+        "endpoint, p256dh, auth, profiles!push_subscriptions_user_id_fkey(notifications_enabled, city)",
       )
       .not("endpoint", "is", null);
 
@@ -163,7 +160,10 @@ export async function notifyNewRace(raceId: string) {
 /**
  * Notify all admins when a new suggestion is submitted
  */
-export async function notifyNewSuggestion(suggestionName: string, city: string) {
+export async function notifyNewSuggestion(
+  suggestionName: string,
+  city: string,
+) {
   const supabase = createAdminClient();
 
   const { data: admins } = await supabase
