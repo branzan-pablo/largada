@@ -6,6 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthProvider } from "@/contexts/auth-context";
 import { LoginModalProvider, LoginModalUrlHandler } from "@/contexts/login-modal-context";
 import { LoginModal } from "@/components/auth/login-modal";
+import { SwRegister } from "@/components/pwa/sw-register";
 import "./globals.css";
 
 const inter = Inter({
@@ -59,6 +60,7 @@ export default function RootLayout({
           </LoginModalProvider>
         </AuthProvider>
         <Toaster position="bottom-center" richColors />
+        <SwRegister />
         <SpeedInsights />
       </body>
     </html>
