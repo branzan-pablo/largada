@@ -54,13 +54,20 @@ async function fetchWithRetry(
 
             // Don't retry on client errors (4xx), only on server errors (5xx)
             if (!response.ok) {
-                const body = await response.text().catch(() => "");
+                const rawBody = await response.text().catch(() => "");
+                let parsedBody: unknown;
+                try {
+                    parsedBody = rawBody ? JSON.parse(rawBody) : undefined;
+                } catch {
+                    // Non-JSON error body (plain text, HTML, etc.) — keep as string
+                    parsedBody = rawBody || undefined;
+                }
 
                 if (response.status < 500) {
                     throw new AbacatePayApiError(
                         `AbacatePay API error: ${response.status} ${response.statusText}`,
                         response.status,
-                        body ? JSON.parse(body) : undefined
+                        parsedBody
                     );
                 }
 
@@ -68,7 +75,7 @@ async function fetchWithRetry(
                 lastError = new AbacatePayApiError(
                     `AbacatePay server error: ${response.status}`,
                     response.status,
-                    body ? JSON.parse(body) : undefined
+                    parsedBody
                 );
 
                 if (attempt < maxRetries) {
