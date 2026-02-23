@@ -63,15 +63,17 @@ export async function POST(
 
         // 4. Resolve or create AbacatePay customer
         let abacatepayCustomerId: string | undefined;
+        let internalCustomerId: string | undefined;
 
         const { data: existingCustomer } = await admin
             .from("payment_customers")
-            .select("abacatepay_id")
+            .select("id, abacatepay_id")
             .eq("user_id", user.id)
             .single();
 
         if (existingCustomer) {
             abacatepayCustomerId = existingCustomer.abacatepay_id;
+            internalCustomerId = existingCustomer.id;
         } else if (customerInput?.name && customerInput?.email && customerInput?.taxId && customerInput?.cellphone) {
             const customerResult = await createCustomer(customerInput);
             if (customerResult.error) {
@@ -81,14 +83,19 @@ export async function POST(
                 );
             }
             abacatepayCustomerId = customerResult.data.id;
-            await admin.from("payment_customers").insert({
-                user_id: user.id,
-                abacatepay_id: customerResult.data.id,
-                email: customerInput.email,
-                name: customerInput.name,
-                cellphone: customerInput.cellphone,
-                tax_id: customerInput.taxId,
-            });
+            const { data: newCustomer } = await admin
+                .from("payment_customers")
+                .insert({
+                    user_id: user.id,
+                    abacatepay_id: customerResult.data.id,
+                    email: customerInput.email,
+                    name: customerInput.name,
+                    cellphone: customerInput.cellphone,
+                    tax_id: customerInput.taxId,
+                })
+                .select("id")
+                .single();
+            internalCustomerId = newCustomer?.id;
         } else {
             return NextResponse.json(
                 { error: "Dados do cliente obrigatórios (nome, e-mail, CPF, celular)" },
@@ -142,10 +149,15 @@ export async function POST(
         const billing = billingResult.data;
 
         // 7. Persist order in database
+        const promotionExpiresAt = new Date(
+            Date.now() + PROMOTION_DAYS * 24 * 60 * 60 * 1000
+        ).toISOString();
+
         const { data: order } = await admin
             .from("payment_orders")
             .insert({
                 user_id: user.id,
+                customer_id: internalCustomerId ?? null,
                 abacatepay_id: billing.id,
                 payment_url: billing.url,
                 payment_method: billing.methods,
@@ -163,6 +175,7 @@ export async function POST(
                     },
                 ],
                 external_id: raceId,
+                expires_at: promotionExpiresAt,
                 metadata: { raceId, raceName: race.name, raceSlug: race.slug },
             })
             .select("id")

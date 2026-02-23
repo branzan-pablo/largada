@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/deadline-reminder",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/expire-promotions",
+      "schedule": "0 3 * * *"
     }
   ]
 }

@@ -121,16 +121,19 @@ export async function POST(request: NextRequest) {
 
                     orderId = updatedOrder?.id ?? null;
 
-                    // Handle race promotion: mark race as promoted
+                    // Handle race promotion: mark race as promoted with expiry
                     if (updatedOrder?.order_type === "race_promotion") {
                         const meta = updatedOrder.metadata as Record<string, unknown> | null;
                         const raceId = meta?.raceId as string | undefined;
                         if (raceId) {
+                            const promotedUntil = new Date(
+                                Date.now() + 30 * 24 * 60 * 60 * 1000
+                            ).toISOString();
                             await admin
                                 .from("races")
-                                .update({ is_promoted: true })
+                                .update({ is_promoted: true, promoted_until: promotedUntil })
                                 .eq("id", raceId);
-                            console.info(`[Webhook] Race ${raceId} marked as promoted`);
+                            console.info(`[Webhook] Race ${raceId} promoted until ${promotedUntil}`);
                         }
                     }
                 }

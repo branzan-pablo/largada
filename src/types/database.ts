@@ -279,6 +279,7 @@ export type Database = {
           distances: string[]
           id: string
           is_promoted: boolean
+          promoted_until: string | null
           latitude: number
           longitude: number
           name: string
@@ -311,6 +312,7 @@ export type Database = {
           distances: string[]
           id?: string
           is_promoted?: boolean
+          promoted_until?: string | null
           latitude: number
           link?: string | null
           longitude: number
@@ -343,6 +345,7 @@ export type Database = {
           distances?: string[]
           id?: string
           is_promoted?: boolean
+          promoted_until?: string | null
           latitude?: number
           link?: string | null
           longitude?: number
