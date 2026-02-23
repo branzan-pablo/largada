@@ -7,7 +7,6 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createBilling } from "@/lib/payments/billing";
 import { createCustomer } from "@/lib/payments/customer";
-import { getPaymentEnv } from "@/lib/payments/env";
 import { AbacatePayApiError } from "@/lib/payments/errors";
 
 const PROMOTION_PRICE_CENTAVOS = 2990; // R$ 29,90
@@ -104,16 +103,15 @@ export async function POST(
         }
 
         // 5. Build URLs
-        const env = getPaymentEnv();
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://largada.app";
-        const returnUrl = `${appUrl}/corrida/${race.slug}?destaque=sucesso`;
-        const completionUrl = `${appUrl}/api/payments/webhook?webhookSecret=${env.ABACATEPAY_WEBHOOK_SECRET}`;
+        const returnUrl = `${appUrl}/corrida/${race.slug}`;
+        const completionUrl = `${appUrl}/corrida/${race.slug}?destaque=sucesso`;
 
         console.info("[Promote Race] Creating billing", {
             raceId,
             customerId: abacatepayCustomerId,
             returnUrl,
-            completionUrl: completionUrl.replace(env.ABACATEPAY_WEBHOOK_SECRET, "***"),
+            completionUrl,
         });
 
         // 6. Create billing on AbacatePay
