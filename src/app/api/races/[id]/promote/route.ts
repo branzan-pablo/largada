@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createBilling } from "@/lib/payments/billing";
 import { createCustomer } from "@/lib/payments/customer";
 import { getPaymentEnv } from "@/lib/payments/env";
+import { AbacatePayApiError } from "@/lib/payments/errors";
 
 const PROMOTION_PRICE_CENTAVOS = 2990; // R$ 29,90
 const PROMOTION_DAYS = 30;
@@ -101,6 +102,13 @@ export async function POST(
         const returnUrl = `${appUrl}/corrida/${race.slug}?destaque=sucesso`;
         const completionUrl = `${appUrl}/api/payments/webhook?webhookSecret=${env.ABACATEPAY_WEBHOOK_SECRET}`;
 
+        console.info("[Promote Race] Creating billing", {
+            raceId,
+            customerId: abacatepayCustomerId,
+            returnUrl,
+            completionUrl: completionUrl.replace(env.ABACATEPAY_WEBHOOK_SECRET, "***"),
+        });
+
         // 6. Create billing on AbacatePay
         const billingResult = await createBilling({
             frequency: "ONE_TIME",
@@ -165,7 +173,18 @@ export async function POST(
             url: billing.url,
         });
     } catch (error) {
-        console.error("[Promote Race] Error:", error);
+        if (error instanceof AbacatePayApiError) {
+            console.error("[Promote Race] AbacatePay API error:", {
+                status: error.statusCode,
+                message: error.message,
+                body: error.responseBody,
+            });
+            return NextResponse.json(
+                { error: "Erro no gateway de pagamento", details: error.message },
+                { status: error.statusCode >= 500 ? 502 : error.statusCode }
+            );
+        }
+        console.error("[Promote Race] Unexpected error:", error);
         return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
     }
 }
