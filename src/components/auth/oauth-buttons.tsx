@@ -30,6 +30,7 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleStravaLogin = () => {
     setIsLoadingStrava(true);
     const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;

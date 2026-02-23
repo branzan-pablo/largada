@@ -290,12 +290,13 @@ export default async function RaceDetailPage({ params }: PageProps) {
             {/* RSVP Card — shares state with ParticipantsSection */}
             <RsvpCard />
 
-            {/* Promote card — visible only to the race creator */}
-            {isOwner && (
+            {/* Promote card — payment for owner, contact hint for others (hidden when already promoted + not owner) */}
+            {(!typedRace.is_promoted || isOwner) && (
               <PromoteRaceCard
                 raceId={typedRace.id}
                 raceName={typedRace.name}
                 isPromoted={typedRace.is_promoted}
+                isOwner={isOwner}
               />
             )}
           </aside>

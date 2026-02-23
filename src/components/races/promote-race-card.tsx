@@ -19,6 +19,8 @@ interface PromoteRaceCardProps {
   raceId: string;
   raceName: string;
   isPromoted: boolean;
+  /** Whether the current user is the race creator. Defaults to true for backward compat. */
+  isOwner?: boolean;
   /** "sidebar" renders a full card; "button" renders an inline action */
   variant?: "sidebar" | "button";
 }
@@ -27,6 +29,7 @@ export function PromoteRaceCard({
   raceId,
   raceName,
   isPromoted,
+  isOwner = true,
   variant = "sidebar",
 }: PromoteRaceCardProps) {
   const { user, profile } = useAuth();
@@ -228,7 +231,22 @@ export function PromoteRaceCard({
     );
   }
 
-  // sidebar variant
+  // sidebar variant — non-owner
+  if (!isOwner) {
+    return (
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-2">
+        <div className="flex items-center gap-2">
+          <Star className="h-4 w-4 text-[#FF4D00]" />
+          <h3 className="font-semibold text-[#0D1B2A]">Destacar esta corrida</h3>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Interessado em destacar esta corrida? Entre em contato com o organizador.
+        </p>
+      </div>
+    );
+  }
+
+  // sidebar variant — owner
   return (
     <>
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-3">
