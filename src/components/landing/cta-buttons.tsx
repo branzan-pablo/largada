@@ -19,7 +19,7 @@ export function CtaButtons() {
     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
       <Link href="/corridas" className={primaryClass}>
         <Footprints className="w-5 h-5" />
-        {user ? "Ver corridas" : "Explorar Corridas"}
+        Ver corridas
       </Link>
       {user ? (
         <Link href="/sugerir" className={secondaryClass}>

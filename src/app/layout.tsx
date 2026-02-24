@@ -49,7 +49,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body
+        className={`${inter.variable} font-sans antialiased`}
+        style={{
+          backgroundImage: "url('/sand-texture.webp')",
+          backgroundRepeat: "repeat",
+          backgroundSize: "300px",
+        }}
+      >
         <AuthProvider>
           <LoginModalProvider>
             <Suspense>

@@ -96,24 +96,6 @@
 }
 
 @layer utilities {
-  /* Grid background pattern with bottom fade */
-  .bg-grid {
-    position: relative;
-  }
-
-  .bg-grid::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image:
-      linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
-    background-size: 48px 48px;
-    -webkit-mask-image: linear-gradient(to bottom, white 0%, transparent 100%);
-    mask-image: linear-gradient(to bottom, white 0%, transparent 100%);
-  }
-
   /* Infinite horizontal ticker */
   .ticker-mask {
     overflow: hidden;

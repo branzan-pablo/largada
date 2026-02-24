@@ -118,9 +118,12 @@ export function Header() {
               </PopoverContent>
             </Popover>
           ) : (
-            <Button size="sm" onClick={openLogin} className={primaryClass}>
+            <button
+              onClick={openLogin}
+              className="text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors"
+            >
               Entrar
-            </Button>
+            </button>
           )}
         </div>
       </div>
