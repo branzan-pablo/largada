@@ -1,6 +1,6 @@
 import { LandingHeader } from "@/components/landing/landing-header";
 import { Footer } from "@/components/footer/footer";
-import { Mail, Instagram } from "lucide-react";
+import { Mail } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -22,19 +22,19 @@ export default function ContatoPage() {
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Email */}
+          {/* E-mail */}
           <div className="border border-gray-200 rounded-xl p-6 hover:border-gray-300 transition-colors">
             <div className="w-10 h-10 rounded-lg bg-[#FF4D00]/10 flex items-center justify-center mb-4">
               <Mail className="w-5 h-5 text-[#FF4D00]" />
             </div>
             <h2 className="text-lg font-semibold text-[#0D1B2A] mb-1">
-              Email
+              E-mail
             </h2>
             <a
-              href="mailto:contato@largada.app"
+              href="mailto:branzan.pablo@gmail.com"
               className="text-[#FF4D00] hover:underline text-sm"
             >
-              contato@largada.app
+              branzan.pablo@gmail.com
             </a>
             <p className="text-sm text-gray-400 mt-2">
               Respondemos em até 48 horas.
@@ -42,7 +42,7 @@ export default function ContatoPage() {
           </div>
 
           {/* Instagram */}
-          <div className="border border-gray-200 rounded-xl p-6 hover:border-gray-300 transition-colors">
+          {/* <div className="border border-gray-200 rounded-xl p-6 hover:border-gray-300 transition-colors">
             <div className="w-10 h-10 rounded-lg bg-[#FF4D00]/10 flex items-center justify-center mb-4">
               <Instagram className="w-5 h-5 text-[#FF4D00]" />
             </div>
@@ -60,7 +60,7 @@ export default function ContatoPage() {
             <p className="text-sm text-gray-400 mt-2">
               Nos mande uma DM!
             </p>
-          </div>
+          </div> */}
         </div>
 
         <div className="mt-12 p-6 bg-gray-50 rounded-xl">
@@ -69,13 +69,13 @@ export default function ContatoPage() {
               Proteção de dados (LGPD):
             </strong>{" "}
             Para exercer seus direitos como titular de dados pessoais
-            (acesso, correção, exclusão ou portabilidade), envie um email
+            (acesso, correção, exclusão ou portabilidade), envie um e-mail
             para{" "}
             <a
-              href="mailto:contato@largada.app"
+              href="mailto:branzan.pablo@gmail.com"
               className="text-[#FF4D00] hover:underline"
             >
-              contato@largada.app
+              branzan.pablo@gmail.com
             </a>{" "}
             com o assunto &quot;Direitos LGPD&quot;.
           </p>

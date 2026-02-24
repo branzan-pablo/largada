@@ -1,11 +1,10 @@
 import Link from "next/link"
-import { Instagram } from "lucide-react"
 
 export function Footer() {
     return (
         <footer className="relative border-t border-white/10 bg-[#0D1B2A] py-12 md:py-16">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
                     {/* Brand */}
                     <div className="col-span-2 sm:col-span-1">
                         <div className="flex items-center gap-2 mb-3">
@@ -49,22 +48,6 @@ export function Footer() {
                                 Contato
                             </Link>
                         </nav>
-                    </div>
-
-                    {/* Social */}
-                    <div>
-                        <p className="text-sm font-semibold text-white mb-4">Social</p>
-                        <div className="flex gap-3">
-                            <a
-                                href="https://instagram.com/largadaoficial"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-9 h-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/20 transition-colors"
-                                aria-label="Instagram"
-                            >
-                                <Instagram className="w-4 h-4" />
-                            </a>
-                        </div>
                     </div>
                 </div>
 

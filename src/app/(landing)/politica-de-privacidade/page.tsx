@@ -43,7 +43,7 @@ export default function PoliticaDePrivacidadePage() {
               2.1 Dados de cadastro
             </h3>
             <p>
-              Nome completo, endereço de email e foto de perfil (quando
+              Nome completo, endereço de e-mail e foto de perfil (quando
               fornecida via login com Google ou Strava).
             </p>
 
@@ -69,7 +69,7 @@ export default function PoliticaDePrivacidadePage() {
             </h3>
             <p>
               Ao contratar o serviço de Corrida em Destaque, coletamos nome,
-              email, telefone e CPF/CNPJ. Esses dados são enviados diretamente
+              e-mail, telefone e CPF/CNPJ. Esses dados são enviados diretamente
               ao nosso processador de pagamento (AbacatePay) para criação da
               cobrança. A Largada não armazena dados de cartão de crédito.
             </p>
@@ -89,7 +89,7 @@ export default function PoliticaDePrivacidadePage() {
             </h3>
             <p>
               Quando você faz login via Google ou Strava, recebemos nome,
-              email e foto de perfil conforme autorizado por você no momento
+              e-mail e foto de perfil conforme autorizado por você no momento
               da autenticação. Não acessamos outros dados dessas contas.
             </p>
           </section>
@@ -130,7 +130,7 @@ export default function PoliticaDePrivacidadePage() {
             <ul className="list-disc pl-6 mt-3 space-y-2">
               <li>
                 <strong className="text-[#0D1B2A]">AbacatePay</strong> —
-                processamento de pagamentos (nome, email, telefone, CPF/CNPJ)
+                processamento de pagamentos (nome, e-mail, telefone, CPF/CNPJ)
               </li>
               <li>
                 <strong className="text-[#0D1B2A]">Supabase</strong> —
@@ -274,12 +274,12 @@ export default function PoliticaDePrivacidadePage() {
               em contato com nosso encarregado de dados:
             </p>
             <p className="mt-3">
-              <strong className="text-[#0D1B2A]">Email:</strong>{" "}
+              <strong className="text-[#0D1B2A]">E-mail:</strong>{" "}
               <a
-                href="mailto:contato@largada.app"
+                href="mailto:branzan.pablo@gmail.com"
                 className="text-[#FF4D00] hover:underline"
               >
-                contato@largada.app
+                branzan.pablo@gmail.com
               </a>
             </p>
             <p className="mt-1">
