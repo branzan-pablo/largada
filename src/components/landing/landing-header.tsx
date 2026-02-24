@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,14 +14,15 @@ export function LandingHeader() {
     <header className="fixed top-0 w-full z-50 border-b border-gray-200/80 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-[#FF4D00] rounded flex items-center justify-center">
-            <span className="text-white font-semibold text-lg">L</span>
-          </div>
-          <Link href="/" className="text-[#0D1B2A] font-medium text-lg tracking-tight">
-            Largada
-          </Link>
-        </div>
+        <Link href="/" className="flex items-center gap-1">
+          <Image
+            src="/logo-largada.jpeg"
+            alt="Largada"
+            width={60}
+            height={60}
+          />
+          <span className="font-[family-name:var(--font-logo)] text-3xl tracking-wide text-[#0D1B2A]">LARGADA</span>
+        </Link>
 
         {/* Nav links - desktop */}
         <nav className="hidden md:flex items-center gap-8">

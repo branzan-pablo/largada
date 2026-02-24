@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 
 export function Footer() {
     return (
@@ -7,12 +8,16 @@ export function Footer() {
                 <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
                     {/* Brand */}
                     <div className="col-span-2 sm:col-span-1">
-                        <div className="flex items-center gap-2 mb-3">
-                            <div className="w-6 h-6 bg-[#FF4D00] rounded flex items-center justify-center">
-                                <span className="text-white font-semibold text-xs">L</span>
-                            </div>
+                        <Link href="/" className="flex items-center gap-2 mb-3">
+                            <Image
+                                src="/icons/icon-largada.png"
+                                alt="Largada"
+                                width={24}
+                                height={24}
+                                className="rounded"
+                            />
                             <span className="text-white font-medium">Largada</span>
-                        </div>
+                        </Link>
                         <p className="text-sm text-gray-400 max-w-xs">
                             O calendário de corridas de rua do Brasil.
                         </p>

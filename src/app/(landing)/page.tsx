@@ -28,11 +28,12 @@ export default async function LandingPage() {
       <section className="relative bg-white bg-grid pt-20 md:pt-40 pb-20 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
           {/* Headline */}
-          <h1 className="text-5xl md:text-6xl font-extrabold text-[#0D1B2A] tracking-tight mb-6 leading-[1.1]">
-            Nunca mais perca uma corrida
+          <h1 className="font-[family-name:var(--font-logo)] text-5xl md:text-6xl font-extrabold tracking-wide text-[#0D1B2A] mb-6 leading-[1.1]">
+            Vai ter corrida.
             <br />
-            <span className="text-[#6B7280]">por falta de informação.</span>
+            <span className="text-[#6B7280]">Você vai ficar sabendo.</span>
           </h1>
+          <br />
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-[#6B7280] max-w-2xl mb-10 font-normal leading-relaxed">

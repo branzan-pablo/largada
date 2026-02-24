@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { Inter } from "next/font/google";
+import { Inter, Bebas_Neue } from "next/font/google";
 import { Toaster } from "sonner";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthProvider } from "@/contexts/auth-context";
@@ -12,6 +12,12 @@ import "./globals.css";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+});
+
+const bebasNeue = Bebas_Neue({
+  variable: "--font-logo",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const viewport: Viewport = {
@@ -35,6 +41,7 @@ export const metadata: Metadata = {
     siteName: "Largada",
     locale: "pt_BR",
     type: "website",
+    images: [{ url: "/logo-largada.jpeg", width: 1080, height: 1080, alt: "Largada" }],
   },
   manifest: "/manifest.json",
   icons: {
@@ -50,7 +57,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={`${inter.variable} font-sans antialiased`}
+        className={`${inter.variable} ${bebasNeue.variable} font-sans antialiased`}
         style={{
           backgroundImage: "url('/sand-texture.webp')",
           backgroundRepeat: "repeat",

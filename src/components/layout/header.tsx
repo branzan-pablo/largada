@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
@@ -31,16 +32,17 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-14 max-w-screen-xl items-center justify-between px-4">
+      <div className="mx-auto flex h-16 max-w-screen-xl items-center justify-between px-4">
         {/* Logo */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-[#FF4D00] rounded flex items-center justify-center">
-            <span className="text-white font-semibold text-lg">L</span>
-          </div>
-          <Link href="/" className="text-[#0D1B2A] font-medium text-lg tracking-tight">
-            Largada
-          </Link>
-        </div>
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/logo-largada.jpeg"
+            alt="Largada"
+            width={60}
+            height={60}
+          />
+          <span className="font-[family-name:var(--font-logo)] text-2xl tracking-wide text-[#0D1B2A]">ARGADA</span>
+        </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
           {!isCorridasPage && (
