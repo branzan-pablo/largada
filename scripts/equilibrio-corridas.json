@@ -1,0 +1,92 @@
+[
+  {
+    "nome": "29ª CORRIDA PEDESTRE CIDADE DE LOURDES-SP 2026",
+    "data": "2026-03-07",
+    "cidade": "Lourdes",
+    "estado": "SP",
+    "local_de_largada": "Rodovia vicinal da cidade de Lourdes",
+    "distancias": [
+      "7.5km"
+    ],
+    "valor_inscricao": 30,
+    "data_limite_inscricao": null,
+    "descricao": "O evento 29ª Corrida Pedestre CIDADE DE LOURDES, é uma iniciativa de caráter eminentemente esportivo e social, voltada para o público praticante de corrida de rua, com objetivo de através da prática esportiva, encontrar uma melhor qualidade de vida. É uma promoção da Prefeitura Municipal de LOURDES, através do Departamento de Esportes e cronometragem da empresa Equilíbrio Esportes.",
+    "organizador": "Equilíbrio Esportes",
+    "link_oficial": "https://equilibrio.esp.br/29a-corrida-pedestre-cidade-de-lourdes-sp-2026/",
+    "link_inscricao": "https://www.sympla.com.br/evento/29-corrida-pedestre-cidade-de-lourdes-sp/3301163",
+    "image_url": null,
+    "status": "inscrições abertas"
+  },
+  {
+    "nome": "11ª EDIÇÃO RUN AVOA – VOTUPORANGA-SP",
+    "data": "2026-03-15",
+    "cidade": "Votuporanga",
+    "estado": "SP",
+    "local_de_largada": "Parque da Cultura de Votuporanga",
+    "distancias": [
+      "6km"
+    ],
+    "valor_inscricao": 35,
+    "data_limite_inscricao": "2026-03-10",
+    "descricao": "A Corrida Pedestre RUN AVOA – 11ª EDIÇÃO é uma realização da Associação Votuporanguense de Atletismo com apoio da Prefeitura Municipal de Votuporanga. Tem por objetivo comemorar o Aniversário da AVOA, promover o atletismo no município de Votuporanga e região, favorecendo a descoberta de novos valores para a modalidade e proporcionando momentos de lazer em todos os meios sociais e esportivos.",
+    "organizador": "Equilíbrio Esportes",
+    "link_oficial": "https://equilibrio.esp.br/11a-edicao-run-avoa-votuporanga-sp/",
+    "link_inscricao": "https://www.sympla.com.br/evento/11-ediCAo--run-avoa---votuporangasp/3262889",
+    "image_url": "https://equilibrio.esp.br/wp-content/uploads/2025/12/11a-EDICAO-RUN-AVOA-VOTUPORANGA-SP.webp",
+    "status": "inscrições abertas"
+  },
+  {
+    "nome": "1ª CORRIDA ZRUN NIGHT RUN – FERNANDÓPOLIS-SP",
+    "data": "2026-04-04",
+    "cidade": "Fernandópolis",
+    "estado": "SP",
+    "local_de_largada": "New House - Rua dos Arnaldos, 3782, Parque Universitário, Fernandópolis-SP",
+    "distancias": [
+      "5km"
+    ],
+    "valor_inscricao": 45,
+    "data_limite_inscricao": "2026-03-31",
+    "descricao": "A 1ª Corrida ZRUN NIGHT RUN é uma realização da Time Run Assessoria e Amigos, com apoio da Prefeitura Municipal de Fernandópolis. Tem por objetivo promover o atletismo no município de Fernandópolis e região, favorecendo a descoberta de novos valores para a modalidade e proporcionando momentos de lazer em todos os meios sociais e esportivos.",
+    "organizador": "Equilíbrio Esportes",
+    "link_oficial": "https://equilibrio.esp.br/1a-corrida-zrun-night-run-fernandopolis-s/",
+    "link_inscricao": null,
+    "image_url": null,
+    "status": "inscrições abertas"
+  },
+  {
+    "nome": "14ª Corrida De Santo Atanásio – Macaubal-SP",
+    "data": "2026-04-26",
+    "cidade": "Macaubal",
+    "estado": "SP",
+    "local_de_largada": "Praça da Matriz",
+    "distancias": [
+      "6km"
+    ],
+    "valor_inscricao": 70,
+    "data_limite_inscricao": null,
+    "descricao": "A Corrida Pedestre CIDADE DE MACAUBAL é uma Realização da Prefeitura Municipal de Macaubal, Câmara Municipal, Secretarias Municipais, Policia Militar e patrocinadores. Tem por objetivo promover o atletismo no município de Macaubal e região, favorecendo a descoberta de novos valores para a modalidade e proporcionando momentos de lazer em todos os meios sociais e esportivos.",
+    "organizador": "Equilíbrio Esportes",
+    "link_oficial": "https://equilibrio.esp.br/14a-corrida-de-santo-atanasio-macaubal-sp/",
+    "link_inscricao": "https://www.sympla.com.br/evento/14-corrida-de-santo-atanAsio---macaubal-sp/3266091",
+    "image_url": null,
+    "status": "inscrições abertas"
+  },
+  {
+    "nome": "1ª CORRIDA PEDESTRE PROSPERE RUN – VALENTIM GENTIL-SP",
+    "data": "2026-05-17",
+    "cidade": "Valentim Gentil",
+    "estado": "SP",
+    "local_de_largada": "Av. da Chopplandia",
+    "distancias": [
+      "5km"
+    ],
+    "valor_inscricao": 35,
+    "data_limite_inscricao": "2026-05-10",
+    "descricao": "A 1ª Corrida Pedestre PROSPERE RUN é uma corrida disputada na distância de 5km em percurso asfáltico. Os 05 primeiros colocados na categoria geral masculino e feminino receberão prêmios em dinheiro e troféus. Haverá medalha e camiseta alusiva para os 500 atletas inscritos.",
+    "organizador": "Equilíbrio Esportes",
+    "link_oficial": "https://equilibrio.esp.br/1a-corrida-pedestre-prospere-run-valentim-gentil-sp/",
+    "link_inscricao": "https://www.sympla.com.br/evento/1-corrida-pedestre-prospere-run---valentim-gentil-sp/3295357",
+    "image_url": null,
+    "status": "inscrições abertas"
+  }
+]
