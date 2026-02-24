@@ -54,7 +54,8 @@
       "WebFetch(domain:context7.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:abacatepay.readme.io)",
-      "Bash(tail:*)"
+      "Bash(tail:*)",
+      "Bash(cd /c/Users/pablo/Development/MVP && npx tsx --version 2>&1)"
     ]
   }
 }
