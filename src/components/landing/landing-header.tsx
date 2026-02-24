@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function LandingHeader() {
@@ -39,13 +38,10 @@ export function LandingHeader() {
             <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
           ) : user ? (
             <>
-              <Button
-                size="sm"
-                asChild
-                className="bg-[#FF4D00] text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-[#E04400] border-0"
-              >
+              <button className="text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors">
                 <Link href="/corridas">Ir para corridas</Link>
-              </Button>
+              </button>
+
               <Link href="/perfil">
                 <Avatar className="h-8 w-8">
                   {profile?.avatar_url && (

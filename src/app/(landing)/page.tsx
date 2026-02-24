@@ -25,7 +25,7 @@ export default async function LandingPage() {
       <LandingHeader />
 
       {/* ==================== Hero Section ==================== */}
-      <section className="relative bg-white bg-grid pt-40 pb-20 overflow-hidden">
+      <section className="relative bg-white bg-grid pt-20 md:pt-40 pb-20 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
           {/* Headline */}
           <h1 className="text-5xl md:text-6xl font-extrabold text-[#0D1B2A] tracking-tight mb-6 leading-[1.1]">
@@ -36,7 +36,7 @@ export default async function LandingPage() {
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-[#6B7280] max-w-2xl mb-10 font-normal leading-relaxed">
-            Largada reúne corridas de rua de todo o Brasil em um calendário só. Filtre por cidade, distância e premiação. Receba alertas antes que os prazos vençam.
+            Descubra provas perto de você, filtre por distância ou cidade e seja avisado antes das inscrições encerrarem.
           </p>
 
           {/* CTA Buttons */}
