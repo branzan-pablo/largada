@@ -38,10 +38,16 @@ export function Footer() {
                     {/* Legal */}
                     <div>
                         <p className="text-sm font-semibold text-white mb-4">Legal</p>
-                        <nav className="flex flex-col gap-2.5 text-sm text-gray-500">
-                            <span>Termos de Uso</span>
-                            <span>Privacidade</span>
-                            <span>Contato</span>
+                        <nav className="flex flex-col gap-2.5 text-sm text-gray-400">
+                            <Link href="/termos-de-uso" className="hover:text-white transition-colors">
+                                Termos de Uso
+                            </Link>
+                            <Link href="/politica-de-privacidade" className="hover:text-white transition-colors">
+                                Privacidade
+                            </Link>
+                            <Link href="/contato" className="hover:text-white transition-colors">
+                                Contato
+                            </Link>
                         </nav>
                     </div>
 
