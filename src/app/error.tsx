@@ -16,11 +16,11 @@ export default function Error({
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center">
-      <h1 className="text-4xl font-bold text-destructive">Ops!</h1>
+      <h1 className="text-4xl font-bold text-primary">Ops!</h1>
       <p className="mt-4 text-lg text-muted-foreground">
         Algo deu errado. Tente novamente.
       </p>
-      <Button onClick={reset} className="mt-6">
+      <Button onClick={reset} className="mt-6 cursor-pointer">
         Tentar novamente
       </Button>
     </main>

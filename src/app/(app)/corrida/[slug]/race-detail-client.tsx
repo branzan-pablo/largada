@@ -153,7 +153,7 @@ export function RsvpCard() {
         onClick={toggle}
         disabled={isToggling}
         variant={rsvped ? "default" : "outline"}
-        className="w-full"
+        className="w-full cursor-pointer"
       >
         {rsvped ? (
           <>

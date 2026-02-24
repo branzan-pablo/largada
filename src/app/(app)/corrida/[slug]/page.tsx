@@ -12,6 +12,7 @@ import { RsvpProvider, ParticipantsSection, RsvpCard } from "./race-detail-clien
 import { PromoteRaceCard } from "@/components/races/promote-race-card";
 import {
   CalendarDays,
+  ChevronLeft,
   Clock,
   MapPin,
   ExternalLink,
@@ -23,6 +24,7 @@ import { formatDateFull, formatTime, todayInBrazil, utcNow } from "@/lib/date";
 import { PRIZE_TYPES } from "@/lib/constants";
 import type { Race } from "@/types/race";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -200,6 +202,15 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {/* Back link */}
+      <Link
+        href="/corridas"
+        className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        Voltar para listagem
+      </Link>
+
       {/* Header */}
       <div className="mb-8 space-y-3">
         <div className="flex flex-wrap items-center gap-2">

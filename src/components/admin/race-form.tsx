@@ -191,7 +191,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           </div>
 
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="name">Nome da corrida *</Label>
+            <Label htmlFor="name">Nome da corrida <span className="text-destructive">*</span></Label>
             <Input
               id="name"
               value={name}
@@ -203,7 +203,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           </div>
 
           <div className="space-y-2 sm:col-span-1">
-            <Label>Cidade *</Label>
+            <Label>Cidade <span className="text-destructive">*</span></Label>
             <CityAutocomplete
               onSelect={(c) => setSelectedCity({
                 name: c.name,
@@ -226,7 +226,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           </div>
 
           <div className="space-y-2 sm:col-span-1">
-            <Label htmlFor="address">Endereço / local de largada *</Label>
+            <Label htmlFor="address">Endereço / local de largada <span className="text-destructive">*</span></Label>
             <Input
               id="address"
               value={address}
@@ -238,7 +238,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="date">Data da corrida *</Label>
+            <Label htmlFor="date">Data da corrida <span className="text-destructive">*</span></Label>
             <Input
               id="date"
               type="date"
@@ -251,7 +251,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="startTime">Horário de largada *</Label>
+            <Label htmlFor="startTime">Horário de largada <span className="text-destructive">*</span></Label>
             <Input
               id="startTime"
               type="time"
@@ -273,7 +273,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           </div>
 
           <div className="space-y-2 sm:col-span-1">
-            <Label htmlFor="status">Status *</Label>
+            <Label htmlFor="status">Status <span className="text-destructive">*</span></Label>
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger>
                 <SelectValue />
@@ -284,17 +284,6 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                 <SelectItem value="cancelled">Cancelada</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="flex items-center gap-2 sm:col-span-2">
-            <Checkbox
-              id="isPromoted"
-              checked={isPromoted}
-              onCheckedChange={(checked) => setIsPromoted(checked === true)}
-            />
-            <Label htmlFor="isPromoted" className="cursor-pointer">
-              Destacar corrida (aparece no topo da listagem)
-            </Label>
           </div>
 
           <div className="space-y-2">
@@ -326,6 +315,17 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
               rows={3}
             />
           </div>
+
+          <div className="flex items-center gap-2 sm:col-span-2">
+            <Checkbox
+              id="isPromoted"
+              checked={isPromoted}
+              onCheckedChange={(checked) => setIsPromoted(checked === true)}
+            />
+            <Label htmlFor="isPromoted" className="cursor-pointer">
+              Destacar corrida (aparece no topo da listagem)
+            </Label>
+          </div>
         </div>
       </section>
 
@@ -335,7 +335,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
 
         {/* Distances */}
         <div className="space-y-2">
-          <Label>Distâncias *</Label>
+          <Label>Distâncias <span className="text-destructive">*</span></Label>
           <div className="flex flex-wrap gap-4">
             {DISTANCES.map((d) => (
               <label
@@ -358,7 +358,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
         {/* Prize */}
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="prizeType">Tipo de premiação *</Label>
+            <Label htmlFor="prizeType">Tipo de premiação <span className="text-destructive">*</span></Label>
             <Select value={prizeType} onValueChange={setPrizeType}>
               <SelectTrigger>
                 <SelectValue />
@@ -391,7 +391,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
         {/* Registration */}
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="registrationPrice">Valor da inscrição *</Label>
+            <Label htmlFor="registrationPrice">Valor da inscrição <span className="text-destructive">*</span></Label>
             <Input
               id="registrationPrice"
               value={registrationPrice}
@@ -402,7 +402,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
             {errors.registrationPrice && <p className="text-xs text-destructive">{errors.registrationPrice}</p>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="registrationDeadline">Prazo final *</Label>
+            <Label htmlFor="registrationDeadline">Prazo final<span className="text-destructive">*</span></Label>
             <Input
               id="registrationDeadline"
               type="date"
@@ -414,7 +414,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
             {errors.registrationDeadline && <p className="text-xs text-destructive">{errors.registrationDeadline}</p>}
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="registrationLink">Link de inscrição *</Label>
+            <Label htmlFor="registrationLink">Link de inscrição <span className="text-destructive">*</span></Label>
             <Input
               id="registrationLink"
               type="text"
@@ -464,7 +464,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       </section>
 
       <div className="flex gap-3 pt-2">
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading} className="cursor-pointer">
           {isLoading
             ? "Salvando..."
             : isEditing
@@ -475,6 +475,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           type="button"
           variant="outline"
           onClick={() => router.push("/admin/corridas")}
+          className="cursor-pointer"
         >
           Cancelar
         </Button>

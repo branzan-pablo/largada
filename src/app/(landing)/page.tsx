@@ -21,7 +21,7 @@ export default async function LandingPage() {
 
   const cities = (data ?? []).map((c: { name: string; state_code: string }) => `${c.name} - ${c.state_code}`);
   return (
-    <main className="text-[#6B7280] antialiased overflow-x-hidden min-h-screen scroll-smooth bg-white">
+    <main className="text-[#6B7280] antialiased overflow-x-hidden min-h-screen scroll-smooth bg-white pt-16">
       <LandingHeader />
 
       {/* ==================== Hero Section ==================== */}

@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, LogOut, Shield, Heart } from "lucide-react";
 import {
@@ -14,14 +13,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-const primaryClass =
-  "w-full sm:w-auto flex items-center justify-center gap-2 bg-[#FF4D00] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#E04400] transition-colors";
-
 export function Header() {
   const { user, profile, isLoading, signOut } = useAuth();
   const { openLogin } = useLoginModal();
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  const isCorridasPage = pathname === "/corridas";
 
   const handleSignOut = async () => {
     setOpen(false);
@@ -44,6 +43,14 @@ export function Header() {
         </div>
 
         <nav className="hidden items-center gap-6 md:flex">
+          {!isCorridasPage && (
+            <Link
+              href="/corridas"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Corridas
+            </Link>
+          )}
           {user && (
             <>
               <Link

@@ -57,7 +57,7 @@ export default async function AdminLayout({
         </nav>
       </div>
 
-      <main className="flex-1 pb-16 md:pb-0">{children}</main>
+      <main className="flex-1 pb-16 md:pb-0 pt-16">{children}</main>
     </div>
   );
 }

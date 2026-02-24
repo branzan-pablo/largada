@@ -80,7 +80,7 @@ export function SuggestionFormClient() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 grid gap-4 sm:grid-cols-2">
       <div className="space-y-2 sm:col-span-2">
-        <Label htmlFor="name">Nome da corrida *</Label>
+        <Label htmlFor="name">Nome da corrida <span className="text-destructive">*</span></Label>
         <Input
           id="name"
           value={name}
@@ -93,7 +93,7 @@ export function SuggestionFormClient() {
       </div>
 
       <div className="space-y-2 sm:col-span-1">
-        <Label>Cidade *</Label>
+        <Label>Cidade <span className="text-destructive">*</span></Label>
         <CityAutocomplete
           onSelect={(c) => { setCity(c.name); setState(c.state_code); }}
           onClear={() => { setCity(""); setState(""); }}
@@ -144,7 +144,7 @@ export function SuggestionFormClient() {
         />
       </div>
 
-      <Button type="submit" disabled={isSubmitting} className="sm:col-span-2">
+      <Button type="submit" disabled={isSubmitting} className="sm:col-span-2 cursor-pointer">
         {isSubmitting ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         ) : (

@@ -263,7 +263,7 @@ export function PromoteRaceCard({
             por 30 dias
           </span>
         </p>
-        <Button className="w-full" variant="outline" onClick={() => handleOpen(true)}>
+        <Button className="w-full cursor-pointer" variant="outline" onClick={() => handleOpen(true)}>
           <Star className="mr-2 h-4 w-4" />
           Destacar corrida
         </Button>
