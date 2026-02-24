@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { CtaButtons } from "@/components/landing/cta-buttons";
 import { createClient } from "@/lib/supabase/server";
@@ -25,18 +26,36 @@ export default async function LandingPage() {
       <LandingHeader />
 
       {/* ==================== Hero Section ==================== */}
-      <section className="relative bg-white bg-grid pt-20 md:pt-40 pb-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
+      <section className="relative min-h-[620px] md:min-h-[700px] flex items-center overflow-hidden">
+        {/* Background photo — Ken Burns zoom */}
+        <Image
+          src="/background-hero.jpg"
+          alt="Corredores em prova de rua"
+          fill
+          className="object-cover object-center hero-bg"
+          priority
+        />
+        {/* Overlay: base escuro + gradiente vertical */}
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+
+        {/* Content */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center text-center py-24 md:py-32">
           {/* Headline */}
-          <h1 className="font-[family-name:var(--font-logo)] text-5xl md:text-6xl font-extrabold tracking-wide text-[#0D1B2A] mb-6 leading-[1.1]">
+          <h1
+            className="font-[family-name:var(--font-logo)] text-5xl md:text-7xl tracking-wide text-white mb-6 leading-tight"
+            style={{ textShadow: "0 2px 24px rgba(0,0,0,0.85)" }}
+          >
             Vai ter corrida.
             <br />
-            <span className="text-[#6B7280]">Você vai ficar sabendo.</span>
+            <span className="text-[#FF4D00]">Você vai ficar sabendo.</span>
           </h1>
-          <br />
 
           {/* Subheadline */}
-          <p className="text-lg md:text-xl text-[#6B7280] max-w-2xl mb-10 font-normal leading-relaxed">
+          <p
+            className="text-lg md:text-xl text-white max-w-2xl mb-10 font-normal leading-relaxed"
+            style={{ textShadow: "0 1px 12px rgba(0,0,0,0.9)" }}
+          >
             Descubra provas perto de você, filtre por distância ou cidade e seja avisado antes das inscrições encerrarem.
           </p>
 
