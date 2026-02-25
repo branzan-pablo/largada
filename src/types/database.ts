@@ -163,6 +163,7 @@ export type Database = {
           onboarding_completed: boolean
           role: string
           state: string | null
+          strava_athlete_id: number | null
           updated_at: string
         }
         Insert: {
@@ -179,6 +180,7 @@ export type Database = {
           onboarding_completed?: boolean
           role?: string
           state?: string | null
+          strava_athlete_id?: number | null
           updated_at?: string
         }
         Update: {
@@ -195,6 +197,7 @@ export type Database = {
           onboarding_completed?: boolean
           role?: string
           state?: string | null
+          strava_athlete_id?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -590,6 +593,50 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "payment_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      strava_tokens: {
+        Row: {
+          id: string
+          user_id: string
+          athlete_id: number
+          access_token: string
+          refresh_token: string
+          expires_at: number
+          scope: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          athlete_id: number
+          access_token: string
+          refresh_token: string
+          expires_at: number
+          scope: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          athlete_id?: number
+          access_token?: string
+          refresh_token?: string
+          expires_at?: number
+          scope?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strava_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
@@ -30,7 +31,6 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleStravaLogin = () => {
     setIsLoadingStrava(true);
     const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
@@ -71,24 +71,35 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
         )}
       </Button>
 
-      <Button
-        variant="outline"
-        className="w-full opacity-50 cursor-not-allowed"
-        disabled
-        title="Em breve"
+      {/* Official "Connect with Strava" button — SVG asset is unmodified (Strava Brand Guidelines).
+          Container bg matches SVG's internal fill (#FC5200) to extend the button to full width. */}
+      <button
+        type="button"
+        onClick={handleStravaLogin}
+        disabled={isAnyLoading}
+        className="relative flex h-12 w-full items-center justify-center overflow-hidden rounded-md bg-[#FC5200] disabled:opacity-50"
       >
-        <span className="flex items-center gap-2">
-          <StravaIcon />
-          Continuar com Strava (em breve)
-        </span>
-      </Button>
+        {isLoadingStrava && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#FC5200]/80">
+            <LoadingSpinner className="text-white" />
+          </div>
+        )}
+        <Image
+          src="/strava/btn_strava_connect_with_orange.svg"
+          alt="Connect with Strava"
+          width={237}
+          height={48}
+          className="h-full w-auto"
+          unoptimized
+        />
+      </button>
     </div>
   );
 }
 
-function LoadingSpinner() {
+function LoadingSpinner({ className }: { className?: string }) {
   return (
-    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+    <svg className={`h-4 w-4 animate-spin ${className ?? ""}`} viewBox="0 0 24 24" fill="none">
       <circle
         className="opacity-25"
         cx="12"
@@ -129,10 +140,3 @@ function GoogleIcon() {
   );
 }
 
-function StravaIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="#FC4C02">
-      <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
-    </svg>
-  );
-}

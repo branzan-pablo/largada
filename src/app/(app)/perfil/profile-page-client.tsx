@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
@@ -15,7 +16,7 @@ import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
 import { RadiusSelector } from "@/components/onboarding/radius-selector";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { toast } from "sonner";
-import { LogOut, Loader2, Mail, MapPin, Bell, Heart, MessageSquarePlus, ChevronRight } from "lucide-react";
+import { LogOut, Loader2, Mail, MapPin, Bell, Heart, MessageSquarePlus, ChevronRight, Unlink } from "lucide-react";
 
 export function ProfilePageClient() {
   const { user, profile, isLoading, signOut, updateProfile } = useAuth();
@@ -31,6 +32,7 @@ export function ProfilePageClient() {
     profile?.notifications_enabled ?? false
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [isDisconnectingStrava, setIsDisconnectingStrava] = useState(false);
 
   // Sync state when profile loads or updates
   const [syncedProfileUpdatedAt, setSyncedProfileUpdatedAt] = useState<string | null>(null);
@@ -83,6 +85,24 @@ export function ProfilePageClient() {
   const handleSignOut = async () => {
     await signOut();
     router.replace("/");
+  };
+
+  const handleDisconnectStrava = async () => {
+    setIsDisconnectingStrava(true);
+    try {
+      const res = await fetch("/api/strava/disconnect", { method: "POST" });
+      if (res.ok) {
+        toast.success("Strava desconectado.");
+        await signOut();
+        router.replace("/");
+      } else {
+        toast.error("Erro ao desconectar Strava.");
+      }
+    } catch {
+      toast.error("Erro ao desconectar Strava.");
+    } finally {
+      setIsDisconnectingStrava(false);
+    }
   };
 
   return (
@@ -213,6 +233,42 @@ export function ProfilePageClient() {
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </Link>
       </div>
+
+      {user.user_metadata?.provider === "strava" && (
+        <>
+          <Separator />
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-1.5">
+                <Image
+                  src="/strava/api_logo_pwrdBy_strava_horiz_orange.svg"
+                  alt="Powered by Strava"
+                  width={365}
+                  height={37}
+                  className="h-5 w-auto"
+                  unoptimized
+                />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Conta Strava conectada
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDisconnectStrava}
+              disabled={isDisconnectingStrava}
+            >
+              {isDisconnectingStrava ? (
+                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+              ) : (
+                <Unlink className="mr-1 h-3 w-3" />
+              )}
+              Desconectar
+            </Button>
+          </div>
+        </>
+      )}
 
       <Separator />
 

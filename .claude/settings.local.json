@@ -55,7 +55,10 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:abacatepay.readme.io)",
       "Bash(tail:*)",
-      "Bash(cd /c/Users/pablo/Development/MVP && npx tsx --version 2>&1)"
+      "Bash(cd /c/Users/pablo/Development/MVP && npx tsx --version 2>&1)",
+      "WebFetch(domain:developers.strava.com)",
+      "WebFetch(domain:strava.com)",
+      "Bash(cd \"C:/Users/pablo/Development/MVP\" && npx eslint src/components/auth/oauth-buttons.tsx src/components/footer/footer.tsx \"src/app/\\(app\\)/perfil/profile-page-client.tsx\" 2>&1)"
     ]
   }
 }

@@ -60,9 +60,25 @@ export function Footer() {
                     <p className="text-xs text-gray-500">
                         &copy; {new Date().getFullYear()} Largada. Todos os direitos reservados.
                     </p>
-                    <p className="text-xs text-gray-500">
-                        Nasceu no interior de SP. Chegou ao Brasil.
-                    </p>
+                    <div className="flex items-center gap-4">
+                        <a
+                            href="https://www.strava.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <Image
+                                src="/strava/api_logo_pwrdBy_strava_horiz_white.svg"
+                                alt="Powered by Strava"
+                                width={365}
+                                height={37}
+                                className="h-6 w-auto"
+                                unoptimized
+                            />
+                        </a>
+                        <p className="text-xs text-gray-500">
+                            Nasceu no interior de SP. Chegou ao Brasil.
+                        </p>
+                    </div>
                 </div>
             </div>
         </footer>

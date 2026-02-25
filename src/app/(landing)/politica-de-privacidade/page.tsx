@@ -92,6 +92,15 @@ export default function PoliticaDePrivacidadePage() {
               e-mail e foto de perfil conforme autorizado por você no momento
               da autenticação. Não acessamos outros dados dessas contas.
             </p>
+            <p className="mt-2">
+              No caso do login via Strava, armazenamos também tokens de
+              autenticação (access token e refresh token) necessários para
+              manter a conexão com sua conta Strava e permitir a desconexão.
+              Esses tokens são excluídos imediatamente quando você desconecta
+              sua conta Strava ou quando o Strava nos notifica de revogação
+              de acesso. A Largada não acessa nem armazena dados de atividades
+              do Strava.
+            </p>
           </section>
 
           <section>
@@ -142,7 +151,9 @@ export default function PoliticaDePrivacidadePage() {
               </li>
               <li>
                 <strong className="text-[#0D1B2A]">Google / Strava</strong> —
-                autenticação OAuth (somente durante o login)
+                autenticação OAuth. Apenas nome, foto de perfil e tokens de
+                sessão são utilizados. A Largada não armazena dados de
+                atividades do Strava.
               </li>
             </ul>
             <p className="mt-3">
@@ -247,6 +258,12 @@ export default function PoliticaDePrivacidadePage() {
               Seus dados pessoais são mantidos enquanto sua conta estiver
               ativa. Ao solicitar exclusão da conta, seus dados pessoais serão
               removidos em até 30 dias.
+            </p>
+            <p className="mt-3">
+              Dados obtidos via Strava (nome, foto de perfil e tokens de
+              autenticação) são excluídos quando você desconecta sua conta
+              Strava ou quando o Strava nos notifica de revogação de acesso,
+              conforme exigido pelo Strava API Agreement.
             </p>
             <p className="mt-3">
               Registros de pagamento podem ser retidos por prazo superior

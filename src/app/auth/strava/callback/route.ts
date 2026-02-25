@@ -13,6 +13,10 @@ interface StravaAthlete {
 
 interface StravaTokenResponse {
   access_token: string;
+  refresh_token: string;
+  expires_at: number;
+  expires_in: number;
+  token_type: string;
   athlete: StravaAthlete;
 }
 
@@ -72,43 +76,17 @@ export async function GET(request: NextRequest) {
       provider: "strava",
     };
 
-    // 2. Try to create user — if already exists, Supabase returns an error
-    const { data: newUserData, error: createError } =
-      await supabaseAdmin.auth.admin.createUser({
-        email,
-        email_confirm: true,
-        user_metadata: userMetadata,
-      });
+    // 2. Find existing user by indexed strava_athlete_id (O(1) lookup)
+    let userId: string | null = null;
 
-    let userId: string;
+    const { data: existingProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("strava_athlete_id", athlete.id)
+      .maybeSingle();
 
-    if (newUserData?.user) {
-      // New user created
-      userId = newUserData.user.id;
-    } else if (createError) {
-      // User already exists — find them (bounded search)
-      let existingUserId: string | null = null;
-      const MAX_PAGES = 20;
-      let page = 1;
-      const perPage = 50;
-      while (page <= MAX_PAGES) {
-        const { data: pageData } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
-        const users = pageData?.users ?? [];
-        if (users.length === 0) break;
-        const match = users.find((u) => u.email === email);
-        if (match) {
-          existingUserId = match.id;
-          break;
-        }
-        if (users.length < perPage) break;
-        page++;
-      }
-
-      if (!existingUserId) {
-        return NextResponse.redirect(`${origin}/corridas?error=auth`);
-      }
-
-      userId = existingUserId;
+    if (existingProfile) {
+      userId = existingProfile.id;
 
       // Update user metadata with latest Strava info
       await supabaseAdmin.auth.admin.updateUserById(userId, {
@@ -121,10 +99,83 @@ export async function GET(request: NextRequest) {
         .update({ full_name: fullName, avatar_url: avatarUrl })
         .eq("id", userId);
     } else {
+      // 3. Try to create new user
+      const { data: newUserData, error: createError } =
+        await supabaseAdmin.auth.admin.createUser({
+          email,
+          email_confirm: true,
+          user_metadata: userMetadata,
+        });
+
+      if (newUserData?.user) {
+        userId = newUserData.user.id;
+
+        // Set strava_athlete_id on the new profile
+        await supabaseAdmin
+          .from("profiles")
+          .update({ strava_athlete_id: athlete.id })
+          .eq("id", userId);
+      } else if (createError) {
+        // Fallback: user exists but strava_athlete_id not yet set (pre-migration users)
+        // Search by email (bounded)
+        const MAX_PAGES = 20;
+        let page = 1;
+        const perPage = 50;
+        while (page <= MAX_PAGES) {
+          const { data: pageData } =
+            await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+          const users = pageData?.users ?? [];
+          if (users.length === 0) break;
+          const match = users.find((u) => u.email === email);
+          if (match) {
+            userId = match.id;
+            break;
+          }
+          if (users.length < perPage) break;
+          page++;
+        }
+
+        if (!userId) {
+          return NextResponse.redirect(`${origin}/corridas?error=auth`);
+        }
+
+        console.warn(
+          `[Strava Callback] Fallback user lookup for athlete ${athlete.id} — migrate strava_athlete_id`
+        );
+
+        // Backfill strava_athlete_id + update metadata
+        await supabaseAdmin.auth.admin.updateUserById(userId, {
+          user_metadata: userMetadata,
+        });
+        await supabaseAdmin
+          .from("profiles")
+          .update({
+            full_name: fullName,
+            avatar_url: avatarUrl,
+            strava_athlete_id: athlete.id,
+          })
+          .eq("id", userId);
+      }
+    }
+
+    if (!userId) {
       return NextResponse.redirect(`${origin}/corridas?error=auth`);
     }
 
-    // 3. Generate a magic link to create a session
+    // 4. Store Strava tokens (upsert — handles both first login and re-login)
+    await supabaseAdmin.from("strava_tokens").upsert(
+      {
+        user_id: userId,
+        athlete_id: athlete.id,
+        access_token: tokenData.access_token,
+        refresh_token: tokenData.refresh_token,
+        expires_at: tokenData.expires_at,
+        scope: "read,profile:read_all",
+      },
+      { onConflict: "user_id" }
+    );
+
+    // 5. Generate a magic link to create a session
     const { data: linkData, error: linkError } =
       await supabaseAdmin.auth.admin.generateLink({
         type: "magiclink",
@@ -135,12 +186,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}/corridas?error=auth`);
     }
 
-    // 4. Extract token from the link and verify it to establish session
+    // 6. Extract token from the link and verify it to establish session
     const hashed_token = linkData.properties.hashed_token;
 
     const redirectResponse = NextResponse.redirect(`${origin}/corridas`);
     // Clear the CSRF state cookie
-    redirectResponse.cookies.set("strava_oauth_state", "", { maxAge: 0, path: "/" });
+    redirectResponse.cookies.set("strava_oauth_state", "", {
+      maxAge: 0,
+      path: "/",
+    });
 
     const cookieStore = await cookies();
     const supabase = createServerClient(
@@ -171,7 +225,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}/corridas?error=auth`);
     }
 
-    // 5. Redirect to the app with session cookies attached
+    // 7. Redirect to the app with session cookies attached
     return redirectResponse;
   } catch {
     return NextResponse.redirect(`${origin}/corridas?error=auth`);
