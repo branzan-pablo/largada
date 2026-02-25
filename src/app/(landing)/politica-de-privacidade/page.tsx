@@ -308,10 +308,10 @@ export default function PoliticaDePrivacidadePage() {
             <p className="mt-3">
               <strong className="text-[#0D1B2A]">E-mail:</strong>{" "}
               <a
-                href="mailto:branzan.pablo@gmail.com"
+                href="mailto:contato.largadas@gmail.com"
                 className="text-[#FF4D00] hover:underline"
               >
-                branzan.pablo@gmail.com
+                contato.largadas@gmail.com
               </a>
             </p>
             <p className="mt-1">

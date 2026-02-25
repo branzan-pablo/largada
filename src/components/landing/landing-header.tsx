@@ -59,13 +59,13 @@ export function LandingHeader() {
             <>
               <button
                 onClick={openLogin}
-                className="text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors"
+                className="cursor-pointer text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors"
               >
                 Entrar
               </button>
               <button
                 onClick={openRegister}
-                className="hidden sm:inline-flex items-center justify-center gap-2 bg-[#FF4D00] text-white text-sm px-6 py-3 rounded-full font-semibold hover:bg-[#E04400] transition-colors"
+                className="cursor-pointer hidden sm:inline-flex items-center justify-center gap-2 bg-[#FF4D00] text-white text-sm px-6 py-3 rounded-full font-semibold hover:bg-[#E04400] transition-colors"
               >
                 Criar conta
               </button>

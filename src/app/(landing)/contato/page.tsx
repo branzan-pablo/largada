@@ -1,6 +1,6 @@
 import { LandingHeader } from "@/components/landing/landing-header";
 import { Footer } from "@/components/footer/footer";
-import { Mail } from "lucide-react";
+import { Instagram, Mail } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -31,10 +31,10 @@ export default function ContatoPage() {
               E-mail
             </h2>
             <a
-              href="mailto:branzan.pablo@gmail.com"
+              href="mailto:contato.largadas@gmail.com"
               className="text-[#FF4D00] hover:underline text-sm"
             >
-              branzan.pablo@gmail.com
+              contato.largadas@gmail.com
             </a>
             <p className="text-sm text-gray-400 mt-2">
               Respondemos em até 48 horas.
@@ -42,7 +42,7 @@ export default function ContatoPage() {
           </div>
 
           {/* Instagram */}
-          {/* <div className="border border-gray-200 rounded-xl p-6 hover:border-gray-300 transition-colors">
+          <div className="border border-gray-200 rounded-xl p-6 hover:border-gray-300 transition-colors">
             <div className="w-10 h-10 rounded-lg bg-[#FF4D00]/10 flex items-center justify-center mb-4">
               <Instagram className="w-5 h-5 text-[#FF4D00]" />
             </div>
@@ -50,17 +50,17 @@ export default function ContatoPage() {
               Instagram
             </h2>
             <a
-              href="https://instagram.com/largadaoficial"
+              href="https://instagram.com/largada.run"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#FF4D00] hover:underline text-sm"
             >
-              @largadaoficial
+              @largada.run
             </a>
             <p className="text-sm text-gray-400 mt-2">
               Nos mande uma DM!
             </p>
-          </div> */}
+          </div>
         </div>
 
         <div className="mt-12 p-6 bg-gray-50 rounded-xl">
@@ -72,10 +72,10 @@ export default function ContatoPage() {
             (acesso, correção, exclusão ou portabilidade), envie um e-mail
             para{" "}
             <a
-              href="mailto:branzan.pablo@gmail.com"
+              href="mailto:contato.largadas@gmail.com"
               className="text-[#FF4D00] hover:underline"
             >
-              branzan.pablo@gmail.com
+              contato.largadas@gmail.com
             </a>{" "}
             com o assunto &quot;Direitos LGPD&quot;.
           </p>

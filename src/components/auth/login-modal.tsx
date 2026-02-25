@@ -70,8 +70,8 @@ export function LoginModal() {
 
           <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "register")}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Entrar</TabsTrigger>
-              <TabsTrigger value="register">Criar conta</TabsTrigger>
+              <TabsTrigger value="login" className="cursor-pointer">Entrar</TabsTrigger>
+              <TabsTrigger value="register" className="cursor-pointer">Criar conta</TabsTrigger>
             </TabsList>
             <TabsContent value="login" className="mt-4">
               <LoginForm onSuccess={() => { close(); router.refresh(); }} />

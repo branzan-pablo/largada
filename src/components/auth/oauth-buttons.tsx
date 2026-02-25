@@ -54,7 +54,7 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
     <div className="flex flex-col gap-3">
       <Button
         variant="outline"
-        className="w-full"
+        className="w-full cursor-pointer"
         onClick={handleGoogleLogin}
         disabled={isAnyLoading}
       >
@@ -77,7 +77,7 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
         type="button"
         onClick={handleStravaLogin}
         disabled={isAnyLoading}
-        className="relative flex h-12 w-full items-center justify-center overflow-hidden rounded-md border bg-white disabled:opacity-50"
+        className="cursor-pointer relative flex h-12 w-full items-center justify-center overflow-hidden rounded-md border bg-white disabled:opacity-50"
       >
         {isLoadingStrava && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80">

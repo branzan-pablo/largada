@@ -26,7 +26,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Largada — Corridas de rua em todo o Brasil",
+    default: "Largada",
     template: "%s | Largada",
   },
   description:
@@ -35,13 +35,13 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
   ),
   openGraph: {
-    title: "Largada — Corridas de rua em todo o Brasil",
+    title: "Largada",
     description:
       "Calendário de corridas de rua com mais de 5.000 cidades. Filtre por distância, premiação e data.",
     siteName: "Largada",
     locale: "pt_BR",
     type: "website",
-    images: [{ url: "/logo_120.png", width: 1080, height: 1080, alt: "Largada" }],
+    images: [{ url: "/logo_largada.png", width: 2048, height: 2048, alt: "Largada" }],
   },
   manifest: "/manifest.json",
   icons: {

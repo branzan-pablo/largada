@@ -15,7 +15,7 @@ interface LoginFormProps {
 }
 
 const primaryClass =
-  "w-full flex items-center justify-center gap-2 bg-[#FF4D00] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#E04400] transition-colors";
+  "cursor-pointer w-full flex items-center justify-center gap-2 bg-[#FF4D00] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#E04400] transition-colors";
 
 export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
   const [email, setEmail] = useState("");
@@ -146,7 +146,7 @@ export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
       <button
         type="button"
         onClick={() => setShowReset(true)}
-        className="w-full text-sm text-muted-foreground hover:text-foreground"
+        className="cursor-pointer w-full text-sm text-muted-foreground hover:text-foreground"
       >
         Esqueci minha senha
       </button>
