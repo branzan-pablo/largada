@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { cleanupStravaProfileData } from "@/lib/strava";
 
 interface StravaWebhookEvent {
   object_type: "activity" | "athlete";
@@ -83,23 +84,8 @@ async function handleStravaDeauth(athleteId: number) {
   // Delete stored tokens
   await admin.from("strava_tokens").delete().eq("user_id", profile.id);
 
-  // Clear strava_athlete_id from profile
-  await admin
-    .from("profiles")
-    .update({ strava_athlete_id: null })
-    .eq("id", profile.id);
-
-  // Clear Strava-specific metadata from auth user
-  const { data: userData } = await admin.auth.admin.getUserById(profile.id);
-  if (userData?.user?.user_metadata?.provider === "strava") {
-    await admin.auth.admin.updateUserById(profile.id, {
-      user_metadata: {
-        ...userData.user.user_metadata,
-        strava_id: null,
-        provider: null,
-      },
-    });
-  }
+  // Clean up all Strava-originated profile data (avatar, name, metadata)
+  await cleanupStravaProfileData(admin, profile.id);
 
   console.info(
     `[Strava Webhook] Deauthorized athlete ${athleteId}, user ${profile.id}`

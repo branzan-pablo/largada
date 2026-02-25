@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { deauthorizeFromStrava, refreshStravaToken } from "@/lib/strava";
+import {
+  deauthorizeFromStrava,
+  refreshStravaToken,
+  cleanupStravaProfileData,
+} from "@/lib/strava";
 
 /**
  * POST /api/strava/disconnect
@@ -53,24 +57,11 @@ export async function POST() {
   // Call Strava deauthorize API (invalidates all tokens on Strava side)
   await deauthorizeFromStrava(accessToken);
 
-  // Clean up local Strava data
+  // Delete stored tokens
   await admin.from("strava_tokens").delete().eq("user_id", user.id);
-  await admin
-    .from("profiles")
-    .update({ strava_athlete_id: null })
-    .eq("id", user.id);
 
-  // Clear Strava-specific metadata from auth user
-  const { data: userData } = await admin.auth.admin.getUserById(user.id);
-  if (userData?.user?.user_metadata?.provider === "strava") {
-    await admin.auth.admin.updateUserById(user.id, {
-      user_metadata: {
-        ...userData.user.user_metadata,
-        strava_id: null,
-        provider: null,
-      },
-    });
-  }
+  // Clean up all Strava-originated profile data (avatar, name, metadata)
+  await cleanupStravaProfileData(admin, user.id);
 
   return NextResponse.json({ disconnected: true });
 }

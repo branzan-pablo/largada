@@ -16,7 +16,18 @@ import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
 import { RadiusSelector } from "@/components/onboarding/radius-selector";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { toast } from "sonner";
-import { LogOut, Loader2, Mail, MapPin, Bell, Heart, MessageSquarePlus, ChevronRight, Unlink } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { LogOut, Loader2, Mail, MapPin, Bell, Heart, MessageSquarePlus, ChevronRight, Unlink, ExternalLink, Trash2 } from "lucide-react";
 
 export function ProfilePageClient() {
   const { user, profile, isLoading, signOut, updateProfile } = useAuth();
@@ -33,6 +44,8 @@ export function ProfilePageClient() {
   );
   const [isSaving, setIsSaving] = useState(false);
   const [isDisconnectingStrava, setIsDisconnectingStrava] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   // Sync state when profile loads or updates
   const [syncedProfileUpdatedAt, setSyncedProfileUpdatedAt] = useState<string | null>(null);
@@ -102,6 +115,24 @@ export function ProfilePageClient() {
       toast.error("Erro ao desconectar Strava.");
     } finally {
       setIsDisconnectingStrava(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeletingAccount(true);
+    try {
+      const res = await fetch("/api/account", { method: "DELETE" });
+      if (res.ok) {
+        await signOut();
+        router.replace("/");
+      } else {
+        toast.error("Erro ao excluir conta. Tente novamente.");
+      }
+    } catch {
+      toast.error("Erro ao excluir conta. Tente novamente.");
+    } finally {
+      setIsDeletingAccount(false);
+      setDeleteConfirmText("");
     }
   };
 
@@ -237,35 +268,50 @@ export function ProfilePageClient() {
       {user.user_metadata?.provider === "strava" && (
         <>
           <Separator />
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-1.5">
-                <Image
-                  src="/strava/api_logo_pwrdBy_strava_horiz_orange.svg"
-                  alt="Powered by Strava"
-                  width={365}
-                  height={37}
-                  className="h-5 w-auto"
-                  unoptimized
-                />
+          <div className="rounded-lg border p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-1.5">
+                  <Image
+                    src="/strava/api_logo_pwrdBy_strava_horiz_orange.svg"
+                    alt="Powered by Strava"
+                    width={365}
+                    height={37}
+                    className="h-5 w-auto"
+                    unoptimized
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Conta Strava conectada
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Conta Strava conectada
-              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDisconnectStrava}
+                disabled={isDisconnectingStrava}
+              >
+                {isDisconnectingStrava ? (
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                ) : (
+                  <Unlink className="mr-1 h-3 w-3" />
+                )}
+                Desconectar
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDisconnectStrava}
-              disabled={isDisconnectingStrava}
+            <a
+              href="https://www.strava.com/dashboard"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-sm text-[#FC5200] hover:underline"
             >
-              {isDisconnectingStrava ? (
-                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-              ) : (
-                <Unlink className="mr-1 h-3 w-3" />
-              )}
-              Desconectar
-            </Button>
+              <ExternalLink className="h-3.5 w-3.5" />
+              Ver minha conta no Strava
+            </a>
+            <p className="text-xs text-muted-foreground">
+              Ao desconectar, todos os dados obtidos via Strava (nome, foto e
+              tokens) serão excluídos permanentemente da Largada.
+            </p>
           </div>
         </>
       )}
@@ -280,6 +326,51 @@ export function ProfilePageClient() {
         <LogOut className="mr-2 h-4 w-4" />
         Sair da conta
       </Button>
+
+      <AlertDialog onOpenChange={() => setDeleteConfirmText("")}>
+        <AlertDialogTrigger asChild>
+          <Button
+            variant="ghost"
+            className="w-full text-muted-foreground hover:text-destructive"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Excluir minha conta
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir conta permanentemente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação é irreversível. Todos os seus dados serão excluídos,
+              incluindo perfil, corridas salvas, confirmações de presença e
+              histórico de pagamentos. Se sua conta estiver conectada ao Strava,
+              os tokens serão revogados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Digite <strong className="text-foreground">EXCLUIR</strong> para confirmar:
+            </p>
+            <Input
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="EXCLUIR"
+              autoComplete="off"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              disabled={deleteConfirmText !== "EXCLUIR" || isDeletingAccount}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeletingAccount && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Excluir conta
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

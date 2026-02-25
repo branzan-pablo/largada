@@ -3,6 +3,9 @@
  * Used by the disconnect API and webhook handler.
  */
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/database";
+
 /**
  * Revoke access to Strava for a user.
  * Invalidates ALL refresh and access tokens for the athlete.
@@ -41,4 +44,45 @@ export async function refreshStravaToken(refreshToken: string): Promise<{
 
   if (!res.ok) return null;
   return res.json();
+}
+
+/**
+ * Remove all Strava-originated data from a user's profile.
+ * Used by both the disconnect API and the deauthorization webhook.
+ * Clears avatar_url, full_name, strava_athlete_id from profiles,
+ * removes Strava metadata from auth user, and deletes avatar from Storage.
+ */
+export async function cleanupStravaProfileData(
+  admin: SupabaseClient<Database>,
+  userId: string
+) {
+  // Clear Strava-originated fields from profile
+  await admin
+    .from("profiles")
+    .update({ avatar_url: null, full_name: null, strava_athlete_id: null })
+    .eq("id", userId);
+
+  // Clear Strava-specific metadata from auth user
+  const { data: userData } = await admin.auth.admin.getUserById(userId);
+  if (userData?.user?.user_metadata?.provider === "strava") {
+    await admin.auth.admin.updateUserById(userId, {
+      user_metadata: {
+        ...userData.user.user_metadata,
+        strava_id: null,
+        provider: null,
+        avatar_url: null,
+        full_name: null,
+      },
+    });
+  }
+
+  // Delete avatar file from Storage (best-effort)
+  const { data: files } = await admin.storage
+    .from("avatars")
+    .list(userId, { limit: 10 });
+
+  if (files && files.length > 0) {
+    const paths = files.map((f) => `${userId}/${f.name}`);
+    await admin.storage.from("avatars").remove(paths);
+  }
 }

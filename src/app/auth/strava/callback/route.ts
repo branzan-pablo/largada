@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/database";
 
 interface StravaAthlete {
   id: number;
@@ -64,17 +66,11 @@ export async function GET(request: NextRequest) {
     const tokenData: StravaTokenResponse = await tokenRes.json();
     const { athlete } = tokenData;
 
-    const email = `strava_${athlete.id}@strava.largada.app`;
+    const email = `athlete_${athlete.id}@auth.largada.app`;
     const fullName = `${athlete.firstname} ${athlete.lastname}`.trim();
-    const avatarUrl = athlete.profile || athlete.profile_medium || "";
+    const stravaAvatarUrl = athlete.profile || athlete.profile_medium || "";
 
     const supabaseAdmin = createAdminClient();
-    const userMetadata = {
-      full_name: fullName,
-      avatar_url: avatarUrl,
-      strava_id: athlete.id,
-      provider: "strava",
-    };
 
     // 2. Find existing user by indexed strava_athlete_id (O(1) lookup)
     let userId: string | null = null;
@@ -87,24 +83,17 @@ export async function GET(request: NextRequest) {
 
     if (existingProfile) {
       userId = existingProfile.id;
-
-      // Update user metadata with latest Strava info
-      await supabaseAdmin.auth.admin.updateUserById(userId, {
-        user_metadata: userMetadata,
-      });
-
-      // Update profile with latest info
-      await supabaseAdmin
-        .from("profiles")
-        .update({ full_name: fullName, avatar_url: avatarUrl })
-        .eq("id", userId);
     } else {
       // 3. Try to create new user
       const { data: newUserData, error: createError } =
         await supabaseAdmin.auth.admin.createUser({
           email,
           email_confirm: true,
-          user_metadata: userMetadata,
+          user_metadata: {
+            full_name: fullName,
+            strava_id: athlete.id,
+            provider: "strava",
+          },
         });
 
       if (newUserData?.user) {
@@ -117,7 +106,8 @@ export async function GET(request: NextRequest) {
           .eq("id", userId);
       } else if (createError) {
         // Fallback: user exists but strava_athlete_id not yet set (pre-migration users)
-        // Search by email (bounded)
+        // Search by email — check both current and legacy email formats
+        const legacyEmail = `strava_${athlete.id}@strava.largada.app`;
         const MAX_PAGES = 20;
         let page = 1;
         const perPage = 50;
@@ -126,7 +116,7 @@ export async function GET(request: NextRequest) {
             await supabaseAdmin.auth.admin.listUsers({ page, perPage });
           const users = pageData?.users ?? [];
           if (users.length === 0) break;
-          const match = users.find((u) => u.email === email);
+          const match = users.find((u) => u.email === email || u.email === legacyEmail);
           if (match) {
             userId = match.id;
             break;
@@ -142,25 +132,38 @@ export async function GET(request: NextRequest) {
         console.warn(
           `[Strava Callback] Fallback user lookup for athlete ${athlete.id} — migrate strava_athlete_id`
         );
-
-        // Backfill strava_athlete_id + update metadata
-        await supabaseAdmin.auth.admin.updateUserById(userId, {
-          user_metadata: userMetadata,
-        });
-        await supabaseAdmin
-          .from("profiles")
-          .update({
-            full_name: fullName,
-            avatar_url: avatarUrl,
-            strava_athlete_id: athlete.id,
-          })
-          .eq("id", userId);
       }
     }
 
     if (!userId) {
       return NextResponse.redirect(`${origin}/corridas?error=auth`);
     }
+
+    // Copy avatar from Strava CDN to Supabase Storage (Strava API Agreement: 7-day cache limit).
+    // Storing locally decouples our app from Strava's infrastructure.
+    const localAvatarUrl = stravaAvatarUrl
+      ? await uploadAvatarToStorage(supabaseAdmin, userId, stravaAvatarUrl)
+      : null;
+
+    const userMetadata = {
+      full_name: fullName,
+      avatar_url: localAvatarUrl,
+      strava_id: athlete.id,
+      provider: "strava",
+    };
+
+    // Update user metadata and profile with latest info
+    await supabaseAdmin.auth.admin.updateUserById(userId, {
+      user_metadata: userMetadata,
+    });
+    await supabaseAdmin
+      .from("profiles")
+      .update({
+        full_name: fullName,
+        avatar_url: localAvatarUrl,
+        strava_athlete_id: athlete.id,
+      })
+      .eq("id", userId);
 
     // 4. Store Strava tokens (upsert — handles both first login and re-login)
     await supabaseAdmin.from("strava_tokens").upsert(
@@ -229,5 +232,41 @@ export async function GET(request: NextRequest) {
     return redirectResponse;
   } catch {
     return NextResponse.redirect(`${origin}/corridas?error=auth`);
+  }
+}
+
+/**
+ * Download an avatar from an external URL and upload it to Supabase Storage.
+ * Returns the public URL of the uploaded avatar, or null on failure.
+ * This decouples avatar serving from Strava's CDN (Strava API Agreement: 7-day cache limit).
+ */
+async function uploadAvatarToStorage(
+  admin: SupabaseClient<Database>,
+  userId: string,
+  externalUrl: string
+): Promise<string | null> {
+  try {
+    const res = await fetch(externalUrl, { signal: AbortSignal.timeout(10_000) });
+    if (!res.ok) return null;
+
+    const contentType = res.headers.get("content-type") ?? "image/jpeg";
+    const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
+    const buffer = await res.arrayBuffer();
+    const path = `${userId}/avatar.${ext}`;
+
+    const { error: uploadError } = await admin.storage
+      .from("avatars")
+      .upload(path, buffer, { contentType, upsert: true });
+
+    if (uploadError) {
+      console.warn(`[Strava Callback] Avatar upload failed: ${uploadError.message}`);
+      return null;
+    }
+
+    const { data: urlData } = admin.storage.from("avatars").getPublicUrl(path);
+    return urlData.publicUrl;
+  } catch (err) {
+    console.warn(`[Strava Callback] Avatar download/upload failed:`, err);
+    return null;
   }
 }
