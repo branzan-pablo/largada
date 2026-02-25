@@ -103,7 +103,7 @@ export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
           />
         </div>
         <Button type="submit" className={primaryClass} disabled={isLoading}>
-          {isLoading ? "Enviando..." : "Enviar email de recuperação"}
+          {isLoading ? "Enviando..." : "Enviar e-mail de recuperação"}
         </Button>
         <button
           type="button"
@@ -119,7 +119,7 @@ export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
   return (
     <form onSubmit={handleLogin} className="space-y-4" noValidate>
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">E-mail</Label>
         <Input
           id="email"
           type="email"
