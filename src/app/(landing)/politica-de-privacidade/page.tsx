@@ -101,6 +101,19 @@ export default function PoliticaDePrivacidadePage() {
               de acesso. A Largada não acessa nem armazena dados de atividades
               do Strava.
             </p>
+            <p className="mt-2">
+              A Strava pode monitorar e coletar dados de uso relacionados à
+              integração com a API do Strava, conforme descrito no{" "}
+              <a
+                href="https://www.strava.com/legal/api"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#FF4D00] hover:underline"
+              >
+                Strava API Agreement
+              </a>
+              .
+            </p>
           </section>
 
           <section>

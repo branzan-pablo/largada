@@ -42,10 +42,12 @@ export default function TermosDeUsoPage() {
               que usuários descubram provas por localização, distância e data.
             </p>
             <p className="mt-3">
-              A Largada <strong className="text-[#0D1B2A]">não organiza corridas</strong> e{" "}
-              <strong className="text-[#0D1B2A]">não realiza inscrições</strong> em eventos. Os
-              links para inscrição direcionam para sites externos de
-              responsabilidade dos organizadores de cada evento.
+              A Largada{" "}
+              <strong className="text-[#0D1B2A]">não organiza corridas</strong>{" "}
+              e{" "}
+              <strong className="text-[#0D1B2A]">não realiza inscrições</strong>{" "}
+              em eventos. Os links para inscrição direcionam para sites externos
+              de responsabilidade dos organizadores de cada evento.
             </p>
           </section>
 
@@ -61,9 +63,7 @@ export default function TermosDeUsoPage() {
             <ul className="list-disc pl-6 mt-3 space-y-1">
               <li>Fornecer informações verdadeiras e atualizadas</li>
               <li>Manter a segurança das suas credenciais de acesso</li>
-              <li>
-                Todas as atividades realizadas na sua conta
-              </li>
+              <li>Todas as atividades realizadas na sua conta</li>
             </ul>
           </section>
 
@@ -76,7 +76,9 @@ export default function TermosDeUsoPage() {
               utilizar a Largada, você concorda em:
             </p>
             <ul className="list-disc pl-6 mt-3 space-y-1">
-              <li>Não publicar informações falsas ou enganosas sobre corridas</li>
+              <li>
+                Não publicar informações falsas ou enganosas sobre corridas
+              </li>
               <li>
                 Não utilizar a plataforma para fins ilegais ou não autorizados
               </li>
@@ -106,9 +108,7 @@ export default function TermosDeUsoPage() {
                 O destaque é ativado após confirmação do pagamento e permanece
                 ativo até a data do evento
               </li>
-              <li>
-                Não há reembolso após a ativação do destaque
-              </li>
+              <li>Não há reembolso após a ativação do destaque</li>
               <li>
                 A Largada reserva-se o direito de remover destaques de corridas
                 que violem estes termos
@@ -147,17 +147,26 @@ export default function TermosDeUsoPage() {
                 Cancelamentos, alterações de data ou problemas na organização
                 dos eventos
               </li>
-              <li>
-                Problemas com inscrições realizadas em sites externos
-              </li>
+              <li>Problemas com inscrições realizadas em sites externos</li>
               <li>
                 Conteúdo de sites de terceiros acessados através de links na
                 plataforma
               </li>
             </ul>
             <p className="mt-3">
-              Links exibidos na plataforma podem conter parâmetros de
-              afiliados.
+              Links exibidos na plataforma podem conter parâmetros de afiliados.
+            </p>
+            <p className="mt-3">
+              Serviços de terceiros integrados à plataforma (incluindo Strava,
+              Google e AbacatePay) são fornecidos{" "}
+              <strong className="text-[#0D1B2A]">
+                &quot;no estado em que se encontram&quot;
+              </strong>
+              , sem garantias de qualquer tipo, expressas ou implícitas,
+              incluindo garantias de comercialização, adequação a um fim
+              específico e não violação de direitos. A Largada não se
+              responsabiliza por danos consequenciais, especiais, punitivos ou
+              indiretos decorrentes do uso desses serviços de terceiros.
             </p>
           </section>
 
@@ -191,10 +200,7 @@ export default function TermosDeUsoPage() {
             <p>
               Em caso de dúvidas sobre estes termos, entre em contato conosco
               através da nossa{" "}
-              <Link
-                href="/contato"
-                className="text-[#FF4D00] hover:underline"
-              >
+              <Link href="/contato" className="text-[#FF4D00] hover:underline">
                 página de contato
               </Link>
               .
