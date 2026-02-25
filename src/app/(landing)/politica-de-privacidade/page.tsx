@@ -30,7 +30,9 @@ export default function PoliticaDePrivacidadePage() {
               de Privacidade descreve quais dados pessoais coletamos, por que os
               coletamos, como os utilizamos e quais são os seus direitos,
               conforme a Lei Geral de Proteção de Dados (LGPD — Lei nº
-              13.709/2018).
+              13.709/2018). Esta política também atende aos requisitos do
+              Regulamento Geral de Proteção de Dados (GDPR) da União Europeia
+              e do UK GDPR.
             </p>
           </section>
 
