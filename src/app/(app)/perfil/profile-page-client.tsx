@@ -273,8 +273,8 @@ export function ProfilePageClient() {
               <div className="space-y-0.5">
                 <div className="flex items-center gap-1.5">
                   <Image
-                    src="/strava/api_logo_pwrdBy_strava_horiz_orange.svg"
-                    alt="Powered by Strava"
+                    src="/strava/api_logo_cptblWith_strava_horiz_orange.svg"
+                    alt="Compatible with Strava"
                     width={365}
                     height={37}
                     className="h-5 w-auto"

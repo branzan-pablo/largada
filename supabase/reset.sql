@@ -49,10 +49,17 @@ SET session_replication_role = DEFAULT;
 
 
 -- ──────────────────────────────────────────────────────────
--- 4. Limpar Storage (buckets criados por migrations)
+-- 4. Limpar Storage policies (buckets criados por migrations)
+--    Supabase protege storage.objects/buckets contra DELETE direto.
+--    Apenas removemos as policies — o bucket e seus arquivos devem
+--    ser limpos pelo Dashboard: Storage → avatars → Delete bucket.
+--    A migration 007 usa ON CONFLICT DO NOTHING, então é seguro
+--    rodar mesmo com o bucket já existente.
 -- ──────────────────────────────────────────────────────────
-DELETE FROM storage.objects  WHERE bucket_id = 'avatars';
-DELETE FROM storage.buckets  WHERE id = 'avatars';
+DROP POLICY IF EXISTS "Users can upload own avatar"           ON storage.objects;
+DROP POLICY IF EXISTS "Users can update own avatar"           ON storage.objects;
+DROP POLICY IF EXISTS "Public avatar read access"             ON storage.objects;
+DROP POLICY IF EXISTS "Service role full access to avatars"   ON storage.objects;
 
 
 -- ──────────────────────────────────────────────────────────

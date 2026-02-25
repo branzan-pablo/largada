@@ -8,15 +8,14 @@ export function Footer() {
                 <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
                     {/* Brand */}
                     <div className="col-span-2 sm:col-span-1">
-                        <Link href="/" className="flex items-center gap-2 mb-3">
+                        <Link href="/" className="flex items-center gap-1 mb-3">
                             <Image
-                                src="/icons/icon-largada.png"
+                                src="/logo_120.png"
                                 alt="Largada"
-                                width={24}
-                                height={24}
-                                className="rounded"
+                                width={40}
+                                height={40}
                             />
-                            <span className="text-white font-medium">Largada</span>
+                            <span className="font-[family-name:var(--font-logo)] text-xl tracking-wide text-white">LARGADA</span>
                         </Link>
                         <p className="text-sm text-gray-400 max-w-xs">
                             O calendário de corridas de rua do Brasil.
@@ -67,17 +66,14 @@ export function Footer() {
                             rel="noopener noreferrer"
                         >
                             <Image
-                                src="/strava/api_logo_pwrdBy_strava_horiz_white.svg"
-                                alt="Powered by Strava"
+                                src="/strava/api_logo_cptblWith_strava_horiz_white.svg"
+                                alt="Compatible with Strava"
                                 width={365}
                                 height={37}
                                 className="h-6 w-auto"
                                 unoptimized
                             />
                         </a>
-                        <p className="text-xs text-gray-500">
-                            Nasceu no interior de SP. Chegou ao Brasil.
-                        </p>
                     </div>
                 </div>
             </div>

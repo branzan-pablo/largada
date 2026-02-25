@@ -16,6 +16,7 @@ import { RegisterForm } from "@/components/auth/register-form";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import { useLoginModal } from "@/contexts/login-modal-context";
 import { useAuth } from "@/contexts/auth-context";
+import Image from "next/image";
 
 export function LoginModal() {
   const { isOpen, defaultTab, close } = useLoginModal();
@@ -41,14 +42,15 @@ export function LoginModal() {
       <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden text-foreground">
         <DialogHeader className="p-6 pb-0 text-center">
           <DialogTitle className="text-2xl font-extrabold uppercase tracking-wider text-primary">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#FF4D00] rounded flex items-center justify-center">
-                <span className="text-white font-semibold text-lg">L</span>
-              </div>
-              <div className="text-[#0D1B2A] font-medium text-lg tracking-tight">
-                Largada
-              </div>
+            {/* Logo — same as header */}
+            <div className="flex items-center gap-1">
+              <Image
+                src="/logo_120.png"
+                alt="Largada"
+                width={60}
+                height={60}
+              />
+              <span className="font-[family-name:var(--font-logo)] text-2xl tracking-wide text-[#0D1B2A]">LARGADA</span>
             </div>
           </DialogTitle>
           <DialogDescription>

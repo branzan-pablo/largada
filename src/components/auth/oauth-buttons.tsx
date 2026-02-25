@@ -72,20 +72,20 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
       </Button>
 
       {/* Official "Connect with Strava" button — SVG asset is unmodified (Strava Brand Guidelines).
-          Container bg matches SVG's internal fill (#FC5200) to extend the button to full width. */}
+          Container bg matches SVG's internal fill (white) to extend the button to full width. */}
       <button
         type="button"
         onClick={handleStravaLogin}
         disabled={isAnyLoading}
-        className="relative flex h-12 w-full items-center justify-center overflow-hidden rounded-md bg-[#FC5200] disabled:opacity-50"
+        className="relative flex h-12 w-full items-center justify-center overflow-hidden rounded-md border bg-white disabled:opacity-50"
       >
         {isLoadingStrava && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#FC5200]/80">
-            <LoadingSpinner className="text-white" />
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80">
+            <LoadingSpinner className="text-[#FC5200]" />
           </div>
         )}
         <Image
-          src="/strava/btn_strava_connect_with_orange.svg"
+          src="/strava/btn_strava_connect_with_white.svg"
           alt="Connect with Strava"
           width={237}
           height={48}

@@ -16,7 +16,7 @@ export function LandingHeader() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-1">
           <Image
-            src="/logo-largada.jpeg"
+            src="/logo_120.png"
             alt="Largada"
             width={60}
             height={60}

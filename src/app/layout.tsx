@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     siteName: "Largada",
     locale: "pt_BR",
     type: "website",
-    images: [{ url: "/logo-largada.jpeg", width: 1080, height: 1080, alt: "Largada" }],
+    images: [{ url: "/logo_120.png", width: 1080, height: 1080, alt: "Largada" }],
   },
   manifest: "/manifest.json",
   icons: {
@@ -59,9 +59,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${bebasNeue.variable} font-sans antialiased`}
         style={{
-          backgroundImage: "url('/sand-texture.webp')",
-          backgroundRepeat: "repeat",
-          backgroundSize: "300px",
+          backgroundColor: "#f5f0f2",
         }}
       >
         <AuthProvider>

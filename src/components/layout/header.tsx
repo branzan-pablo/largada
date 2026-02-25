@@ -36,12 +36,12 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/logo-largada.jpeg"
+            src="/logo_120.png"
             alt="Largada"
             width={60}
             height={60}
           />
-          <span className="font-[family-name:var(--font-logo)] text-2xl tracking-wide text-[#0D1B2A]">ARGADA</span>
+          <span className="font-[family-name:var(--font-logo)] text-2xl tracking-wide text-[#0D1B2A]">LARGADA</span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
