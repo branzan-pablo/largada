@@ -12,6 +12,8 @@
 --      003_cities_seed.sql      (pode demorar ~30s)
 --      004_analytics.sql
 --      005_monetization.sql
+--      006_strava_tokens.sql
+--      007_avatars_bucket.sql
 -- ============================================================
 
 
@@ -47,8 +49,17 @@ SET session_replication_role = DEFAULT;
 
 
 -- ──────────────────────────────────────────────────────────
--- 4. Drop de tabelas (ordem: dependentes primeiro)
+-- 4. Limpar Storage (buckets criados por migrations)
 -- ──────────────────────────────────────────────────────────
+DELETE FROM storage.objects  WHERE bucket_id = 'avatars';
+DELETE FROM storage.buckets  WHERE id = 'avatars';
+
+
+-- ──────────────────────────────────────────────────────────
+-- 5. Drop de tabelas (ordem: dependentes primeiro)
+--    strava_tokens antes de profiles (FK)
+-- ──────────────────────────────────────────────────────────
+DROP TABLE IF EXISTS public.strava_tokens        CASCADE;
 DROP TABLE IF EXISTS public.payment_events      CASCADE;
 DROP TABLE IF EXISTS public.payment_orders      CASCADE;
 DROP TABLE IF EXISTS public.payment_customers   CASCADE;
@@ -63,7 +74,7 @@ DROP TABLE IF EXISTS public.cities              CASCADE;
 
 
 -- ──────────────────────────────────────────────────────────
--- 5. Drop de funções
+-- 6. Drop de funções
 -- ──────────────────────────────────────────────────────────
 DROP FUNCTION IF EXISTS public.handle_new_user()                      CASCADE;
 DROP FUNCTION IF EXISTS public.update_rsvp_count()                    CASCADE;
@@ -74,7 +85,7 @@ DROP FUNCTION IF EXISTS public.get_random_cities(INT)                 CASCADE;
 
 
 -- ──────────────────────────────────────────────────────────
--- 6. Drop de tipos / ENUMs
+-- 7. Drop de tipos / ENUMs
 -- ──────────────────────────────────────────────────────────
 DROP TYPE IF EXISTS public.payment_method    CASCADE;
 DROP TYPE IF EXISTS public.billing_frequency CASCADE;
@@ -83,7 +94,7 @@ DROP TYPE IF EXISTS public.order_type        CASCADE;
 
 
 -- ──────────────────────────────────────────────────────────
--- 7. Limpar histórico de migrations
+-- 8. Limpar histórico de migrations
 --    Permite re-aplicar todas as migrations do zero
 -- ──────────────────────────────────────────────────────────
 DO $$
@@ -99,6 +110,6 @@ END $$;
 
 
 -- ──────────────────────────────────────────────────────────
--- 8. Recarregar schema cache
+-- 9. Recarregar schema cache
 -- ──────────────────────────────────────────────────────────
 NOTIFY pgrst, 'reload schema';
