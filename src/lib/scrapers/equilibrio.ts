@@ -78,7 +78,16 @@ function extractCidadeEstado(titulo: string): {
   for (let i = segmentos.length - 1; i >= 0; i--) {
     const seg = segmentos[i].trim();
     const m = seg.match(/^(.+?)\s*[-–]\s*([A-Z]{2})$/);
-    if (m) return { cidade: m[1].trim(), estado: m[2].trim() };
+    if (m) {
+      let cidade = m[1].trim();
+      const estado = m[2].trim();
+      // If city name is suspiciously long, extract from "DE X" suffix
+      if (cidade.split(/\s+/).length > 4) {
+        const deMatch = cidade.match(/\bde\s+(.+)$/i);
+        if (deMatch) cidade = deMatch[1].trim();
+      }
+      return { cidade, estado };
+    }
   }
   const fallback = normalizado.match(/\bde\s+(.+?)\s*[-–]\s*([A-Z]{2})\b/i);
   if (fallback)
@@ -103,15 +112,23 @@ const MESES: Record<string, string> = {
 };
 
 function extractDataEvento(texto: string): string | null {
+  // \w+ doesn't match accented chars (e.g. "março"), so use explicit char class
+  const MES_RE = "[a-záéíóúâêôãõç]+";
   const m1 = texto.match(
-    /(?:dia|n[oa]?\s+dia)\s+(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/i,
+    new RegExp(
+      `(?:dia|n[oa]?\\s+dia)\\s+(\\d{1,2})\\s+de\\s+(${MES_RE})\\s+de\\s+(\\d{4})`,
+      "i",
+    ),
   );
   if (m1) {
     const mes = MESES[m1[2].toLowerCase()];
     if (mes) return `${m1[3]}-${mes}-${m1[1].padStart(2, "0")}`;
   }
   const m2 = texto.match(
-    /realizado\s+(?:no\s+)?dia\s+(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/i,
+    new RegExp(
+      `realizado\\s+(?:no\\s+)?dia\\s+(\\d{1,2})\\s+de\\s+(${MES_RE})\\s+de\\s+(\\d{4})`,
+      "i",
+    ),
   );
   if (m2) {
     const mes = MESES[m2[2].toLowerCase()];
@@ -119,12 +136,32 @@ function extractDataEvento(texto: string): string | null {
   }
   const m3 = texto.match(/(\d{2})\/(\d{2})\/(\d{4})/);
   if (m3) return `${m3[3]}-${m3[2]}-${m3[1]}`;
+  // Pattern 4: "dia X de MÊS" without explicit year — infer from text context
+  const m4 = texto.match(new RegExp(`\\bdia\\s+(\\d{1,2})\\s+de\\s+(${MES_RE})`, "i"));
+  if (m4) {
+    const mes = MESES[m4[2].toLowerCase()];
+    if (mes) {
+      const yearMatch = texto.match(/\b(20\d{2})\b/);
+      const year = yearMatch
+        ? yearMatch[1]
+        : new Date().getFullYear().toString();
+      return `${year}-${mes}-${m4[1].padStart(2, "0")}`;
+    }
+  }
+  // Pattern 5: "X de MÊS de ANO" without any prefix (e.g. "26 de março de 2026")
+  const m5 = texto.match(
+    new RegExp(`\\b(\\d{1,2})\\s+de\\s+(${MES_RE})\\s+de\\s+(20\\d{2})\\b`, "i"),
+  );
+  if (m5) {
+    const mes = MESES[m5[2].toLowerCase()];
+    if (mes) return `${m5[3]}-${mes}-${m5[1].padStart(2, "0")}`;
+  }
   return null;
 }
 
 function extractHorarioLargada(texto: string): string | null {
   const m = texto.match(
-    /largada\s+(?:est[aá]\s+)?prevista\s+para\s+[àa]s?\s+(\d{1,2})[h:](\d{2})?/i,
+    /largada\b[^.]{0,40}?prevista\s+para\s+[àa]s?\s+(\d{1,2})[h:](\d{2})?/i,
   );
   if (m) return `${m[1].padStart(2, "0")}:${m[2] || "00"}`;
   const m2 = texto.match(/largada\s+[àa]s?\s+(\d{1,2})[h:](\d{2})?/i);
@@ -179,7 +216,7 @@ function extractValorInscricao(texto: string): string | null {
 
 function extractDataLimiteInscricao(texto: string): string | null {
   const m1 = texto.match(
-    /encerrad[ao]s?\s+(?:via\s+internet\s+)?(?:no\s+)?dia\s+(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/i,
+    /encerrad[ao]s?\s+(?:via\s+internet\s+)?(?:no\s+)?dia\s+(\d{1,2})\s+de\s+([a-záéíóúâêôãõç]+)\s+de\s+(\d{4})/i,
   );
   if (m1) {
     const mes = MESES[m1[2].toLowerCase()];
@@ -204,7 +241,11 @@ function extractLocalLargada(texto: string): string | null {
     return local || null;
   }
   const m2 = texto.match(/LARGADA\s+E\s+CHEGADA\s*\n(.+)/i);
-  if (m2) return m2[1].trim();
+  if (m2) {
+    const line = m2[1].trim();
+    // Skip lines about timing/date — we want location, not schedule
+    if (!/\bprevista\s+para\b/i.test(line)) return line;
+  }
   return null;
 }
 

@@ -136,6 +136,7 @@ export async function GET(request: Request) {
         notifyNewRace(insertedRace.id).catch((err) => console.error("[scrape-races] notifyNewRace failed:", err));
     }
 
+    if (errors.length > 0) console.warn("[scrape-races] Error details:", errors.join(" | "));
     console.log(`[scrape-races] Done: scraped=${scraped.length} inserted=${inserted} skipped=${skipped} errors=${errors.length}`);
     return NextResponse.json({ scraped: scraped.length, inserted, skipped, errors: errors.length > 0 ? errors.length : undefined });
 }
