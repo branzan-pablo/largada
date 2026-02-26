@@ -6,7 +6,8 @@
  */
 
 const BASE_URL = "https://equilibrio.esp.br";
-const FETCH_TIMEOUT_MS = 15_000;
+const FETCH_TIMEOUT_MS = 8_000;
+const CONCURRENCY = 5;
 
 export interface ScrapedRace {
   name: string;
@@ -281,8 +282,7 @@ export async function scrapeEquilibrio(): Promise<ScrapedRace[]> {
     );
   }
 
-  const races: ScrapedRace[] = [];
-  for (const corridaAPI of corridasAPI) {
+  async function processRace(corridaAPI: WPCorridaProxima): Promise<ScrapedRace> {
     const titulo = stripHTML(corridaAPI.title.rendered);
     const slug = corridaAPI.slug;
     const pageURL = `${BASE_URL}/${slug}/`;
@@ -331,7 +331,6 @@ export async function scrapeEquilibrio(): Promise<ScrapedRace[]> {
     const routeDescription = extractRouteDescription(textoDetalhe);
 
     let image_url: string | null = null;
-    // Exact slug match first, then fuzzy with minimum length to avoid false matches
     const produto =
       produtosPorSlug[slug] ??
       Object.values(produtosPorSlug).find((p) => {
@@ -349,7 +348,7 @@ export async function scrapeEquilibrio(): Promise<ScrapedRace[]> {
     if (address && cidade) address = `${address}, ${cidade}-${estado || "SP"}`;
     else if (cidade) address = `${cidade}-${estado || "SP"}`;
 
-    races.push({
+    return {
       name: titulo,
       slug,
       date: data,
@@ -368,7 +367,21 @@ export async function scrapeEquilibrio(): Promise<ScrapedRace[]> {
       organizer: "Equilíbrio Esportes",
       description: descricao,
       link: pageURL,
-    });
+    };
+  }
+
+  // Process races in parallel batches (CONCURRENCY at a time)
+  const races: ScrapedRace[] = [];
+  for (let i = 0; i < corridasAPI.length; i += CONCURRENCY) {
+    const batch = corridasAPI.slice(i, i + CONCURRENCY);
+    const results = await Promise.allSettled(batch.map(processRace));
+    for (const result of results) {
+      if (result.status === "fulfilled") {
+        races.push(result.value);
+      } else {
+        console.warn("[equilibrio] Race processing failed:", result.reason);
+      }
+    }
   }
   return races;
 }

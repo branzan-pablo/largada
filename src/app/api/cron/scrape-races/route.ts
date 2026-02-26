@@ -6,6 +6,8 @@ import { notifyNewRace } from "@/lib/notifications";
 import { timingSafeEqual } from "crypto";
 import { todayInBrazil } from "@/lib/date";
 
+export const maxDuration = 60;
+
 function isValidDate(dateStr: string): boolean {
     return /^\d{4}-\d{2}-\d{2}$/.test(dateStr) && !isNaN(Date.parse(dateStr));
 }
@@ -132,7 +134,7 @@ export async function GET(request: Request) {
         // Track newly inserted slug to avoid duplicates within same batch
         existingSlugsSet.add(slug);
         inserted++;
-        try { await notifyNewRace(insertedRace.id); } catch (err) { console.error("[scrape-races] notifyNewRace failed:", err); }
+        notifyNewRace(insertedRace.id).catch((err) => console.error("[scrape-races] notifyNewRace failed:", err));
     }
 
     console.log(`[scrape-races] Done: scraped=${scraped.length} inserted=${inserted} skipped=${skipped} errors=${errors.length}`);
