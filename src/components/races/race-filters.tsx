@@ -88,7 +88,7 @@ export function RaceFiltersDesktop({
           </div>
 
           {/* City */}
-          <div className="w-[200px]">
+          <div className="w-[300px]">
             <CityAutocomplete
               key={cityKey}
               initialCity={filters.city}

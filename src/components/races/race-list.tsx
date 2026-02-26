@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useInfiniteRaces } from "@/hooks/use-infinite-races";
@@ -15,6 +15,16 @@ export function RaceList() {
   const { profile } = useAuth();
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<RaceFilters>({});
+  const hasInitializedFilters = useRef(false);
+
+  useEffect(() => {
+    if (profile && !hasInitializedFilters.current) {
+      hasInitializedFilters.current = true;
+      if (profile.notification_radius_km && profile.latitude && profile.longitude) {
+        setFilters({ radius: profile.notification_radius_km });
+      }
+    }
+  }, [profile]);
   const [availableDistances, setAvailableDistances] = useState<string[]>([]);
 
   useEffect(() => {

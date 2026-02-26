@@ -25,7 +25,7 @@ export default function OnboardingPage() {
   const { isSupported, subscribe } = usePushNotifications();
 
   const [selectedCity, setSelectedCity] = useState<SelectedCity | null>(null);
-  const [radius, setRadius] = useState(150);
+  const [radius, setRadius] = useState(100);
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleConfirm() {
