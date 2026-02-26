@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { todayInBrazil } from "@/lib/date";
-import { Trophy, CalendarDays, Clock, MousePointerClick } from "lucide-react";
+import { Trophy, CalendarDays, Clock, MessageSquarePlus, MousePointerClick } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -16,12 +16,16 @@ export const metadata = {
 export default async function AdminPage() {
   const supabase = await createClient();
 
-  const [racesResult, clicksResult] = await Promise.all([
+  const [racesResult, clicksResult, suggestionsResult] = await Promise.all([
     supabase
       .from("races")
       .select("id, name, city, state, date, status, origin, distances, rsvp_count, is_promoted")
       .order("date", { ascending: false }),
     supabase.from("link_clicks").select("race_id"),
+    supabase
+      .from("race_suggestions")
+      .select("id", { count: "exact" })
+      .eq("status", "pending"),
   ]);
 
   const races = racesResult.data ?? [];
@@ -39,12 +43,14 @@ export default async function AdminPage() {
     (r) => r.date >= today && r.status === "confirmed"
   ).length;
   const totalClicks = clicksResult.data?.length ?? 0;
+  const pendingSuggestions = suggestionsResult.count ?? 0;
 
   const stats = [
-    { title: "Total", value: totalRaces, icon: Trophy },
-    { title: "Futuras", value: upcomingRaces, icon: CalendarDays },
-    { title: "Pendentes", value: pendingReview, icon: Clock },
-    { title: "Cliques", value: totalClicks, icon: MousePointerClick },
+    { title: "Total de Corridas", value: totalRaces, icon: Trophy },
+    { title: "Corridas Futuras", value: upcomingRaces, icon: CalendarDays },
+    { title: "Pendentes de Revisão", value: pendingReview, icon: Clock },
+    { title: "Sugestões Pendentes", value: pendingSuggestions, icon: MessageSquarePlus },
+    { title: "Cliques em Inscrições", value: totalClicks, icon: MousePointerClick },
   ];
 
   // Enrich races with click counts
@@ -55,7 +61,9 @@ export default async function AdminPage() {
 
   return (
     <div className="p-6 md:p-8">
-      <div className="mb-6 grid gap-3 grid-cols-2 lg:grid-cols-4">
+      <h1 className="mb-6 text-2xl font-bold">Gerenciar Corridas</h1>
+
+      <div className="mb-6 grid gap-3 grid-cols-2 lg:grid-cols-5">
         {stats.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">

@@ -73,38 +73,44 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
   return (
     <>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           {/* Status filter */}
-          <div className="flex gap-1 rounded-lg bg-muted p-1">
-            {STATUS_FILTERS.map((f) => (
-              <button
-                key={f.value}
-                onClick={() => setStatusFilter(f.value)}
-                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                  statusFilter === f.value
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Status:</span>
+            <div className="flex gap-1 rounded-lg bg-muted p-1">
+              {STATUS_FILTERS.map((f) => (
+                <button
+                  key={f.value}
+                  onClick={() => setStatusFilter(f.value)}
+                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                    statusFilter === f.value
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
           </div>
           {/* Origin filter */}
-          <div className="flex gap-1 rounded-lg bg-muted p-1">
-            {ORIGIN_FILTERS.map((f) => (
-              <button
-                key={f.value}
-                onClick={() => setOriginFilter(f.value)}
-                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                  originFilter === f.value
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Origem:</span>
+            <div className="flex gap-1 rounded-lg bg-muted p-1">
+              {ORIGIN_FILTERS.map((f) => (
+                <button
+                  key={f.value}
+                  onClick={() => setOriginFilter(f.value)}
+                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                    originFilter === f.value
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

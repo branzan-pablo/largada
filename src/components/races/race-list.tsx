@@ -31,7 +31,7 @@ export function RaceList() {
     fetch("/api/races/distances")
       .then((r) => r.json())
       .then((data: string[]) => setAvailableDistances(data))
-      .catch(() => {/* silently fall back to defaults in filter components */});
+      .catch(() => {/* silently fall back to defaults in filter components */ });
   }, []);
   const debouncedSearch = useDebounce(search, 300);
 

@@ -34,14 +34,14 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-screen-xl items-center justify-between px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-1">
           <Image
             src="/logo_120.png"
             alt="Largada"
             width={60}
             height={60}
           />
-          <span className="font-[family-name:var(--font-logo)] text-2xl tracking-wide text-[#0D1B2A]">LARGADA</span>
+          <span className="font-[family-name:var(--font-logo)] text-3xl tracking-wide text-[#0D1B2A]">LARGADA</span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
