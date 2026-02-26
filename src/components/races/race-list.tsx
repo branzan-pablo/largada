@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useInfiniteRaces } from "@/hooks/use-infinite-races";
@@ -15,6 +15,14 @@ export function RaceList() {
   const { profile } = useAuth();
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<RaceFilters>({});
+  const [availableDistances, setAvailableDistances] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("/api/races/distances")
+      .then((r) => r.json())
+      .then((data: string[]) => setAvailableDistances(data))
+      .catch(() => {/* silently fall back to defaults in filter components */});
+  }, []);
   const debouncedSearch = useDebounce(search, 300);
 
   // If radius filter is active and user has coordinates, pass them
@@ -61,6 +69,7 @@ export function RaceList() {
           onFiltersChange={setFilters}
           search={search}
           onSearchChange={setSearch}
+          availableDistances={availableDistances}
         />
       </div>
 
@@ -70,6 +79,7 @@ export function RaceList() {
         onFiltersChange={setFilters}
         search={search}
         onSearchChange={setSearch}
+        availableDistances={availableDistances}
       />
 
       {/* Race grid */}

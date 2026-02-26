@@ -31,6 +31,7 @@ interface RaceFiltersMobileProps {
   onFiltersChange: (filters: Filters) => void;
   search: string;
   onSearchChange: (value: string) => void;
+  availableDistances?: string[];
 }
 
 export function RaceFiltersMobile({
@@ -38,7 +39,11 @@ export function RaceFiltersMobile({
   onFiltersChange,
   search,
   onSearchChange,
+  availableDistances,
 }: RaceFiltersMobileProps) {
+  const distanceOptions = availableDistances && availableDistances.length > 0
+    ? availableDistances
+    : DEFAULT_DISTANCES;
   const [open, setOpen] = useState(false);
   const [cityKey, setCityKey] = useState(0);
 
@@ -180,7 +185,7 @@ export function RaceFiltersMobile({
                   active={!filters.distances || filters.distances.length === 0}
                   onClick={() => onFiltersChange({ ...filters, distances: undefined })}
                 />
-                {DEFAULT_DISTANCES.map((d) => (
+                {distanceOptions.map((d) => (
                   <ToggleChip
                     key={d}
                     label={d.toUpperCase()}

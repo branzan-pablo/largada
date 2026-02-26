@@ -21,6 +21,7 @@ interface RaceFiltersProps {
   onFiltersChange: (filters: Filters) => void;
   search: string;
   onSearchChange: (value: string) => void;
+  availableDistances?: string[];
 }
 
 export function RaceFiltersDesktop({
@@ -28,7 +29,11 @@ export function RaceFiltersDesktop({
   onFiltersChange,
   search,
   onSearchChange,
+  availableDistances,
 }: RaceFiltersProps) {
+  const distanceOptions = availableDistances && availableDistances.length > 0
+    ? availableDistances
+    : DEFAULT_DISTANCES;
   const [cityKey, setCityKey] = useState(0);
 
   const hasActiveFilters =
@@ -157,7 +162,7 @@ export function RaceFiltersDesktop({
               active={!filters.distances || filters.distances.length === 0}
               onClick={() => onFiltersChange({ ...filters, distances: undefined })}
             />
-            {DEFAULT_DISTANCES.map((d) => (
+            {distanceOptions.map((d) => (
               <ToggleChip
                 key={d}
                 label={d.toUpperCase()}
