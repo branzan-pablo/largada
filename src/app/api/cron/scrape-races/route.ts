@@ -115,7 +115,7 @@ export async function GET(request: Request) {
             name: race.name, slug, date: race.date, start_time: race.startTime || "07:00",
             city: race.city || "Desconhecida", city_id: cityId, state: race.state || "SP",
             address: race.address || race.city || "A definir", latitude, longitude,
-            distances: race.distances || ["5km"], registration_price: race.registrationPrice || "Consultar site",
+            distances: race.distances || ["5k"], registration_price: race.registrationPrice || "Consultar site",
             registration_link: race.registrationLink || race.link, registration_deadline: deadline || race.date,
             prize_type: race.prizeType, prize_details: race.prizeDetails, image_url: race.image_url || undefined,
             route_description: race.routeDescription || undefined, organizer: race.organizer, description: race.description || undefined,

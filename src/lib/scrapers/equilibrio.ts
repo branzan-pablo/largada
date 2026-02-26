@@ -180,7 +180,7 @@ function extractDistancias(texto: string): string[] | null {
     const num = parseFloat(numStr);
     if (num >= 3 && num <= 42.2 && !seen.has(numStr)) {
       seen.add(numStr);
-      result.push(`${numStr}km`);
+      result.push(`${numStr}k`);
     }
   }
   return result.length > 0 ? result : null;

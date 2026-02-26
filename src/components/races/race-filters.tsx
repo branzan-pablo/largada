@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleChip } from "@/components/ui/toggle-chip";
-import { DISTANCES } from "@/lib/constants";
+import { DEFAULT_DISTANCES } from "@/lib/constants";
 import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
 import { X, CalendarDays, Search } from "lucide-react";
 import type { RaceFilters as Filters } from "@/types/race";
@@ -157,7 +157,7 @@ export function RaceFiltersDesktop({
               active={!filters.distances || filters.distances.length === 0}
               onClick={() => onFiltersChange({ ...filters, distances: undefined })}
             />
-            {DISTANCES.map((d) => (
+            {DEFAULT_DISTANCES.map((d) => (
               <ToggleChip
                 key={d}
                 label={d.toUpperCase()}

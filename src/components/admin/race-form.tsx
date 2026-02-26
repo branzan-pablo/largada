@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
 import { ImageUpload } from "@/components/ui/image-upload";
-import { DISTANCES } from "@/lib/constants";
+import { DEFAULT_DISTANCES } from "@/lib/constants";
 import { raceSchema } from "@/lib/validations";
 import { toast } from "sonner";
 import type { Race } from "@/types/race";
@@ -56,6 +56,8 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   );
   const [address, setAddress] = useState(race?.address ?? "");
   const [distances, setDistances] = useState<string[]>(race?.distances ?? []);
+  const [customDistanceInput, setCustomDistanceInput] = useState("");
+  const [customDistanceError, setCustomDistanceError] = useState("");
   const [registrationPrice, setRegistrationPrice] = useState(race?.registration_price ?? "");
   const [registrationLink, setRegistrationLink] = useState(race?.registration_link ?? "");
   const [registrationDeadline, setRegistrationDeadline] = useState(race?.registration_deadline ?? "");
@@ -77,6 +79,27 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
         ? prev.filter((d) => d !== distance)
         : [...prev, distance]
     );
+  };
+
+  const normalizeDistance = (raw: string): string | null => {
+    const cleaned = raw.trim().toLowerCase().replace(/km$/, "k");
+    if (/^\d+(\.\d+)?k$/.test(cleaned)) return cleaned;
+    return null;
+  };
+
+  const handleAddCustomDistance = () => {
+    const normalized = normalizeDistance(customDistanceInput);
+    if (!normalized) {
+      setCustomDistanceError('Formato inválido. Use "42k", "100k" ou "21.1k".');
+      return;
+    }
+    if (distances.includes(normalized)) {
+      setCustomDistanceError("Essa distância já foi adicionada.");
+      return;
+    }
+    setCustomDistanceError("");
+    setDistances((prev) => [...prev, normalized]);
+    setCustomDistanceInput("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -337,11 +360,8 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
         <div className="space-y-2">
           <Label>Distâncias <span className="text-destructive">*</span></Label>
           <div className="flex flex-wrap gap-4">
-            {DISTANCES.map((d) => (
-              <label
-                key={d}
-                className="flex items-center gap-2 text-sm"
-              >
+            {DEFAULT_DISTANCES.map((d) => (
+              <label key={d} className="flex items-center gap-2 text-sm">
                 <Checkbox
                   checked={distances.includes(d)}
                   onCheckedChange={() => handleDistanceToggle(d)}
@@ -349,7 +369,46 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                 {d.toUpperCase()}
               </label>
             ))}
+            {distances
+              .filter((d) => !(DEFAULT_DISTANCES as readonly string[]).includes(d))
+              .map((d) => (
+                <span key={d} className="flex items-center gap-1.5 text-sm">
+                  <Checkbox
+                    checked
+                    onCheckedChange={() => handleDistanceToggle(d)}
+                  />
+                  {d.toUpperCase()}
+                  <button
+                    type="button"
+                    onClick={() => handleDistanceToggle(d)}
+                    className="ml-0.5 text-gray-400 hover:text-destructive transition-colors"
+                    aria-label={`Remover ${d}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
           </div>
+          <div className="flex items-center gap-2 pt-1">
+            <Input
+              value={customDistanceInput}
+              onChange={(e) => {
+                setCustomDistanceInput(e.target.value);
+                setCustomDistanceError("");
+              }}
+              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddCustomDistance())}
+              placeholder="Ex: 42k, 100k"
+              className="w-36 h-8 text-sm"
+            />
+            <button
+              type="button"
+              onClick={handleAddCustomDistance}
+              className="text-sm text-primary hover:underline"
+            >
+              + Adicionar
+            </button>
+          </div>
+          {customDistanceError && <p className="text-xs text-destructive">{customDistanceError}</p>}
           {errors.distances && <p className="text-xs text-destructive">{errors.distances}</p>}
         </div>
 

@@ -22,7 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { ToggleChip } from "@/components/ui/toggle-chip";
 import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
 import { SlidersHorizontal, Search, CalendarDays } from "lucide-react";
-import { DISTANCES } from "@/lib/constants";
+import { DEFAULT_DISTANCES } from "@/lib/constants";
 import type { RaceFilters as Filters } from "@/types/race";
 import { getDateRange, getDatePreset } from "@/lib/filter-utils";
 
@@ -180,7 +180,7 @@ export function RaceFiltersMobile({
                   active={!filters.distances || filters.distances.length === 0}
                   onClick={() => onFiltersChange({ ...filters, distances: undefined })}
                 />
-                {DISTANCES.map((d) => (
+                {DEFAULT_DISTANCES.map((d) => (
                   <ToggleChip
                     key={d}
                     label={d.toUpperCase()}

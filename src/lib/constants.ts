@@ -1,5 +1,5 @@
-export const DISTANCES = ["5k", "10k", "21k", "42k"] as const;
-export type Distance = (typeof DISTANCES)[number];
+export const DEFAULT_DISTANCES = ["5k", "10k", "21k"] as const;
+export type Distance = (typeof DEFAULT_DISTANCES)[number];
 
 export const PRIZE_TYPES = {
   money: "Dinheiro",
