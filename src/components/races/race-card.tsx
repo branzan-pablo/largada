@@ -17,15 +17,27 @@ export function RaceCard({ race }: { race: Race }) {
   return (
     <Link href={`/corrida/${race.slug}`} className="block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden">
       {/* Thumbnail */}
-      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-gray-100">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-100">
         {race.image_url ? (
-          <Image
-            src={race.image_url}
-            alt={race.name}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
+          <>
+            {/* Blurred background layer */}
+            <Image
+              src={race.image_url}
+              alt=""
+              fill
+              className="object-cover scale-110 blur-xl brightness-75"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              aria-hidden
+            />
+            {/* Sharp foreground — full image visible */}
+            <Image
+              src={race.image_url}
+              alt={race.name}
+              fill
+              className="object-contain transition-transform duration-300 group-hover:scale-[1.03] relative"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          </>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
             <span className="text-3xl font-black text-[#0D1B2A]">{day}</span>
@@ -35,7 +47,7 @@ export function RaceCard({ race }: { race: Race }) {
 
         {/* Promoted badge — top left */}
         {race.is_promoted && (
-          <div className="absolute top-2 left-2 flex items-center gap-1 rounded-md bg-yellow-400 px-2 py-0.5 shadow-sm">
+          <div className="absolute top-2 left-2 flex items-center gap-1 rounded-md bg-yellow-400 px-2 py-0.5 shadow-sm z-10">
             <Star className="w-5 h-5 fill-yellow-800 text-yellow-800" />
             <span className="text-[12px] font-bold text-yellow-900 uppercase tracking-wide">Destaque</span>
           </div>
@@ -43,7 +55,7 @@ export function RaceCard({ race }: { race: Race }) {
 
         {/* Date pill — bottom right (like YT duration) */}
         {race.image_url && (
-          <div className="absolute bottom-2 right-2 rounded-md bg-black/80 px-1.5 py-0.5">
+          <div className="absolute bottom-2 right-2 rounded-md bg-black/80 px-1.5 py-0.5 z-10">
             <span className="text-[16px] font-bold text-white">{day} {month}</span>
           </div>
         )}

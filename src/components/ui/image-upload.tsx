@@ -2,11 +2,12 @@
 
 import { useState, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Upload, X, Loader2, ImageIcon } from "lucide-react";
+import { X, Loader2, ImageIcon } from "lucide-react";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE_MB = 5;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+const MAX_DIMENSION = 1200;
 
 interface ImageUploadProps {
   bucket: string;
@@ -21,6 +22,42 @@ function extractStoragePath(url: string, bucket: string): string | null {
   const idx = url.indexOf(marker);
   if (idx === -1) return null;
   return url.substring(idx + marker.length);
+}
+
+async function resizeToWebP(file: File): Promise<Blob> {
+  const objectUrl = URL.createObjectURL(file);
+
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = objectUrl;
+  });
+
+  URL.revokeObjectURL(objectUrl);
+
+  let { width, height } = image;
+
+  // Scale down if either dimension exceeds MAX_DIMENSION
+  if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+    const scale = MAX_DIMENSION / Math.max(width, height);
+    width = Math.round(width * scale);
+    height = Math.round(height * scale);
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(image, 0, 0, width, height);
+
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Canvas toBlob failed"))),
+      "image/webp",
+      0.9,
+    );
+  });
 }
 
 export function ImageUpload({ bucket, folder, value, onChange, className }: ImageUploadProps) {
@@ -50,6 +87,7 @@ export function ImageUpload({ bucket, folder, value, onChange, className }: Imag
     setIsUploading(true);
 
     try {
+      const blob = await resizeToWebP(file);
       const supabase = createClient();
 
       // Remove old file if exists
@@ -60,12 +98,11 @@ export function ImageUpload({ bucket, folder, value, onChange, className }: Imag
         }
       }
 
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${folder}/${Date.now()}.${ext}`;
+      const path = `${folder}/${Date.now()}.webp`;
 
       const { error: uploadError } = await supabase.storage
         .from(bucket)
-        .upload(path, file, { upsert: true });
+        .upload(path, blob, { upsert: true, contentType: "image/webp" });
 
       if (uploadError) {
         throw new Error(uploadError.message);
@@ -80,6 +117,7 @@ export function ImageUpload({ bucket, folder, value, onChange, className }: Imag
       setError(err instanceof Error ? err.message : "Erro ao enviar imagem");
     } finally {
       setIsUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
     }
   }, [bucket, folder, value, onChange]);
 
@@ -132,11 +170,11 @@ export function ImageUpload({ bucket, folder, value, onChange, className }: Imag
   if (value) {
     return (
       <div className={`relative ${className ?? ""}`}>
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg border border-gray-200">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
           <img
             src={value}
             alt="Preview"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-contain"
           />
           <button
             type="button"

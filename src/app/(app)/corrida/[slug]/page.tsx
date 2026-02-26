@@ -238,12 +238,22 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
 
       {/* Banner image */}
       {typedRace.image_url && (
-        <div className="relative mb-8 aspect-[21/9] w-full overflow-hidden rounded-xl">
+        <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-xl bg-gray-100">
+          {/* Blurred background layer */}
+          <Image
+            src={typedRace.image_url}
+            alt=""
+            fill
+            className="object-cover scale-110 blur-xl brightness-75"
+            sizes="(max-width: 1024px) 100vw, 1024px"
+            aria-hidden
+          />
+          {/* Sharp foreground — full image visible */}
           <Image
             src={typedRace.image_url}
             alt={typedRace.name}
             fill
-            className="object-cover"
+            className="object-contain relative"
             sizes="(max-width: 1024px) 100vw, 1024px"
             priority
           />

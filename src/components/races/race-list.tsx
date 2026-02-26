@@ -156,7 +156,7 @@ export function RaceList() {
 function RaceCardSkeleton() {
   return (
     <div>
-      <Skeleton className="aspect-[16/9] w-full rounded-xl bg-gray-200" />
+      <Skeleton className="aspect-[4/3] w-full rounded-xl bg-gray-200" />
       <div className="pt-3 space-y-2">
         <Skeleton className="h-4 w-full bg-gray-200 rounded" />
         <Skeleton className="h-4 w-3/4 bg-gray-200 rounded" />
