@@ -7,6 +7,7 @@ import { useInfiniteRaces } from "@/hooks/use-infinite-races";
 import { RaceCard } from "./race-card";
 import { RaceFiltersDesktop } from "./race-filters";
 import { RaceFiltersMobile } from "./race-filters-mobile";
+import { RadiusBanner } from "./radius-banner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, ChevronDown } from "lucide-react";
 import type { RaceFilters } from "@/types/race";
@@ -92,8 +93,17 @@ export function RaceList() {
         availableDistances={availableDistances}
       />
 
+      {/* Radius banner */}
+      {filters.radius && (
+        <RadiusBanner
+          radius={filters.radius}
+          onRadiusChange={(r) => setFilters({ ...filters, radius: r })}
+          onRemove={() => setFilters({ ...filters, radius: undefined })}
+        />
+      )}
+
       {/* Race grid */}
-      <div className="mt-6">
+      <div className="mt-3">
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (

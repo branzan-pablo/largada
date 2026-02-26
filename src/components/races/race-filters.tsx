@@ -45,7 +45,6 @@ export function RaceFiltersDesktop({
     filters.dateTo ||
     (filters.distances && filters.distances.length > 0) ||
     (filters.prizeType && filters.prizeType.length > 0) ||
-    filters.radius ||
     search;
 
   const toggleDistance = (d: string) => {
