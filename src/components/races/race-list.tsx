@@ -97,7 +97,6 @@ export function RaceList() {
       {filters.radius && (
         <RadiusBanner
           radius={filters.radius}
-          onRadiusChange={(r) => setFilters({ ...filters, radius: r })}
           onRemove={() => setFilters({ ...filters, radius: undefined })}
         />
       )}

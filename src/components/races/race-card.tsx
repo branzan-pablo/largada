@@ -75,15 +75,16 @@ export function RaceCard({ race }: { race: Race }) {
         <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-2">
           <CalendarDays className="w-3.5 h-3.5 shrink-0" />
           <span>{formattedDate}</span>
-          <span className="mx-0.5">·</span>
-          <Users className="w-3.5 h-3.5 shrink-0" />
         </div>
 
-        {race.rsvp_count && (
-          <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-3">
-            <span>{race.rsvp_count} pessoas confirmaram</span>
-          </div>
-        )}
+        <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-2">
+          <Users className="w-3.5 h-3.5 shrink-0" />
+          {race.rsvp_count && (
+            <div className="flex items-center gap-1 text-sm text-[#6B7280]">
+              <span>{race.rsvp_count === 1 ? "1 Pessoa confirmou" : `${race.rsvp_count} Pessoas confirmaram`}</span>
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center gap-1.5 flex-wrap">
           <RaceDistanceBadges distances={race.distances} />

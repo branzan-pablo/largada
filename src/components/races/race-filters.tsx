@@ -177,7 +177,7 @@ export function RaceFiltersDesktop({
           {hasActiveFilters && (
             <button
               onClick={() => {
-                onFiltersChange({});
+                onFiltersChange({ radius: filters.radius });
                 onSearchChange("");
                 setCityKey((k) => k + 1);
               }}
