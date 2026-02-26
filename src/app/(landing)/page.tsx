@@ -1,4 +1,4 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 import Image from "next/image";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { CtaButtons } from "@/components/landing/cta-buttons";
@@ -14,6 +14,15 @@ import {
   UserPlus,
 } from "lucide-react";
 import { Footer } from "@/components/footer/footer";
+
+export const metadata: Metadata = {
+  title: "Largada — Calendário de Corridas de Rua",
+  description:
+    "Encontre corridas de rua perto de você. Filtre por distância, premiação e data. Receba alertas antes dos prazos fecharem.",
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default async function LandingPage() {
   const supabase = await createClient();

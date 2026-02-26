@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     siteName: "Largada",
     locale: "pt_BR",
     type: "website",
-    images: [{ url: "/logo_largada.png", width: 2048, height: 2048, alt: "Largada" }],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Largada — Calendário de Corridas de Rua" }],
   },
   manifest: "/manifest.json",
   icons: {
