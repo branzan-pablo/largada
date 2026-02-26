@@ -1,8 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
-import { createClient } from "@/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import type { User, SupabaseClient } from "@supabase/supabase-js";
 import type { UserProfile } from "@/types/user";
 
 interface AuthContextValue {
@@ -20,10 +19,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const supabaseRef = useRef(createClient());
+  const supabaseRef = useRef<SupabaseClient | null>(null);
 
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data } = await supabaseRef.current
+    const supabase = supabaseRef.current;
+    if (!supabase) return;
+    const { data } = await supabase
       .from("profiles")
       .select("id, full_name, avatar_url, city, city_id, state, latitude, longitude, notifications_enabled, notification_radius_km, onboarding_completed, role, created_at, updated_at")
       .eq("id", userId)
@@ -32,28 +33,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const supabase = supabaseRef.current;
+    let cancelled = false;
+    let subscription: { unsubscribe: () => void } | undefined;
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        // setTimeout defers the fetch to after the auth lock is released,
-        // preventing a deadlock when querying Supabase inside onAuthStateChange.
-        setTimeout(() => fetchProfile(currentUser.id), 0);
-      } else {
-        setProfile(null);
-      }
-      setIsLoading(false);
+    // Lazy-load Supabase client — keeps ~80-100 KiB out of the critical JS parse path.
+    // The auth listener is set up as soon as the module resolves (typically <100ms).
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      if (cancelled) return;
+      const supabase = createClient();
+      supabaseRef.current = supabase;
+
+      const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        if (currentUser) {
+          // setTimeout defers the fetch to after the auth lock is released,
+          // preventing a deadlock when querying Supabase inside onAuthStateChange.
+          setTimeout(() => fetchProfile(currentUser.id), 0);
+        } else {
+          setProfile(null);
+        }
+        setIsLoading(false);
+      });
+      subscription = sub;
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      subscription?.unsubscribe();
+    };
   }, [fetchProfile]);
 
   const signOut = useCallback(async () => {
-    await supabaseRef.current.auth.signOut();
+    await supabaseRef.current?.auth.signOut();
     setUser(null);
     setProfile(null);
   }, []);

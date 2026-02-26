@@ -1,11 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Inter, Bebas_Neue } from "next/font/google";
-import { Toaster } from "sonner";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthProvider } from "@/contexts/auth-context";
 import { LoginModalProvider, LoginModalUrlHandler } from "@/contexts/login-modal-context";
-import { LoginModal } from "@/components/auth/login-modal";
+import { ClientLoginModal, ClientToaster } from "@/components/layout/client-shell";
 import { SwRegister } from "@/components/pwa/sw-register";
 import "./globals.css";
 
@@ -68,10 +67,10 @@ export default function RootLayout({
               <LoginModalUrlHandler />
             </Suspense>
             {children}
-            <LoginModal />
+            <ClientLoginModal />
           </LoginModalProvider>
         </AuthProvider>
-        <Toaster position="bottom-center" richColors />
+        <ClientToaster />
         <SwRegister />
         <SpeedInsights />
       </body>

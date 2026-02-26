@@ -88,7 +88,6 @@ export async function GET(request: Request) {
             continue;
         }
         if (race.date < today) {
-            errors.push(`${race.name}: data no passado (${race.date})`);
             skipped++;
             continue;
         }

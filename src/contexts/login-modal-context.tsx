@@ -8,7 +8,6 @@ import {
   useEffect,
 } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { toast } from "sonner";
 
 interface LoginModalContextValue {
   isOpen: boolean;
@@ -59,12 +58,16 @@ export function LoginModalUrlHandler() {
     const login = searchParams.get("login");
     const error = searchParams.get("error");
 
-    if (error === "strava_limit") {
-      toast.error("Login com Strava temporariamente indisponível. Use outra forma de login.", { duration: 6000 });
-    } else if (error === "auth") {
-      toast.error("Erro na autenticação. Tente novamente.");
-    } else if (error === "confirmation") {
-      toast.error("Erro ao confirmar email. Tente novamente.");
+    if (error) {
+      import("sonner").then(({ toast }) => {
+        if (error === "strava_limit") {
+          toast.error("Login com Strava temporariamente indisponível. Use outra forma de login.", { duration: 6000 });
+        } else if (error === "auth") {
+          toast.error("Erro na autenticação. Tente novamente.");
+        } else if (error === "confirmation") {
+          toast.error("Erro ao confirmar email. Tente novamente.");
+        }
+      });
     }
 
     if (login === "true" || error) {

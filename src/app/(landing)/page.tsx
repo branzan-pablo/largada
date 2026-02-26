@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 export default async function LandingPage() {
   const supabase = await createClient();
   const { data } = await supabase
-    .rpc("get_random_cities", { p_limit: 60 });
+    .rpc("get_random_cities", { p_limit: 30 });
 
   const cities = (data ?? []).map((c: { name: string; state_code: string }) => `${c.name} - ${c.state_code}`);
   return (
@@ -43,6 +43,7 @@ export default async function LandingPage() {
           fill
           className="object-cover object-center hero-bg"
           priority
+          fetchPriority="high"
         />
         {/* Overlay: base escuro + gradiente vertical */}
         <div className="absolute inset-0 bg-black/50" />
@@ -145,7 +146,7 @@ export default async function LandingPage() {
                 <div className="w-12 h-12 rounded-xl bg-[#FF4D00]/10 border border-[#FF4D00]/20 flex items-center justify-center">
                   <Filter className="w-6 h-6 text-[#FF4D00]" />
                 </div>
-                <span className="text-xs font-mono font-black text-gray-300">01</span>
+                <span className="text-xs font-mono font-black text-gray-400">01</span>
               </div>
               <h3 className="text-xl font-semibold text-[#1A1A2E] mb-3">Filtros na medida certa</h3>
               <p className="text-sm text-[#6B7280] leading-relaxed">
@@ -159,7 +160,7 @@ export default async function LandingPage() {
                 <div className="w-10 h-10 rounded-xl bg-[#FF4D00]/10 border border-[#FF4D00]/20 flex items-center justify-center">
                   <Trophy className="w-5 h-5 text-[#FF4D00]" />
                 </div>
-                <span className="text-xs font-mono font-black text-gray-300">02</span>
+                <span className="text-xs font-mono font-black text-gray-400">02</span>
               </div>
               <h3 className="text-base font-semibold text-[#1A1A2E] mb-2">Só corridas que valem</h3>
               <p className="text-sm text-[#6B7280] leading-relaxed">Quer dinheiro, troféu ou os dois? Um toque filtra só as provas que fazem sentido pra você.</p>
@@ -171,7 +172,7 @@ export default async function LandingPage() {
                 <div className="w-10 h-10 rounded-xl bg-[#FF4D00]/10 border border-[#FF4D00]/20 flex items-center justify-center">
                   <Search className="w-5 h-5 text-[#FF4D00]" />
                 </div>
-                <span className="text-xs font-mono font-black text-gray-300">03</span>
+                <span className="text-xs font-mono font-black text-gray-400">03</span>
               </div>
               <h3 className="text-base font-semibold text-[#1A1A2E] mb-2">Busca direta</h3>
               <p className="text-sm text-[#6B7280] leading-relaxed">Pesquise pelo nome da corrida, cidade ou organizador. Resultado na hora.</p>
@@ -183,7 +184,7 @@ export default async function LandingPage() {
                 <div className="w-10 h-10 rounded-xl bg-[#FF4D00]/10 border border-[#FF4D00]/20 flex items-center justify-center">
                   <CalendarDays className="w-5 h-5 text-[#FF4D00]" />
                 </div>
-                <span className="text-xs font-mono font-black text-gray-300">04</span>
+                <span className="text-xs font-mono font-black text-gray-400">04</span>
               </div>
               <h3 className="text-base font-semibold text-[#1A1A2E] mb-2">Informação completa</h3>
               <p className="text-sm text-[#6B7280] leading-relaxed">Categorias, local de largada, percurso, valores por lote e prazo de inscrição tudo na mesma tela.</p>
@@ -195,7 +196,7 @@ export default async function LandingPage() {
                 <div className="w-10 h-10 rounded-xl bg-[#FF4D00]/10 border border-[#FF4D00]/20 flex items-center justify-center">
                   <Bell className="w-5 h-5 text-[#FF4D00]" />
                 </div>
-                <span className="text-xs font-mono font-black text-gray-300">05</span>
+                <span className="text-xs font-mono font-black text-gray-400">05</span>
               </div>
               <h3 className="text-base font-semibold text-[#1A1A2E] mb-2">Aviso antes do prazo fechar</h3>
               <p className="text-sm text-[#6B7280] leading-relaxed">Receba notificação quando surgir uma corrida nova na sua região e lembrete 3 dias antes do prazo de inscrição encerrar.</p>
@@ -208,7 +209,7 @@ export default async function LandingPage() {
                 <div className="w-12 h-12 rounded-xl bg-[#FF4D00]/10 border border-[#FF4D00]/20 flex items-center justify-center">
                   <Award className="w-6 h-6 text-[#FF4D00]" />
                 </div>
-                <span className="text-xs font-mono font-black text-gray-300">06</span>
+                <span className="text-xs font-mono font-black text-gray-400">06</span>
               </div>
               <h3 className="text-xl font-semibold text-[#1A1A2E] mb-3">Instala como app, sem a loja</h3>
               <p className="text-sm text-[#6B7280] leading-relaxed">
