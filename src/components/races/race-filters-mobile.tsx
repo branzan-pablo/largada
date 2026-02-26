@@ -41,9 +41,12 @@ export function RaceFiltersMobile({
   onSearchChange,
   availableDistances,
 }: RaceFiltersMobileProps) {
-  const distanceOptions = availableDistances && availableDistances.length > 0
-    ? availableDistances
-    : DEFAULT_DISTANCES;
+  const distanceOptions = [
+    ...DEFAULT_DISTANCES,
+    ...(availableDistances ?? []).filter(
+      (d) => !(DEFAULT_DISTANCES as readonly string[]).includes(d)
+    ),
+  ].sort((a, b) => parseFloat(a) - parseFloat(b));
   const [open, setOpen] = useState(false);
   const [cityKey, setCityKey] = useState(0);
 

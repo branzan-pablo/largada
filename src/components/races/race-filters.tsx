@@ -31,9 +31,12 @@ export function RaceFiltersDesktop({
   onSearchChange,
   availableDistances,
 }: RaceFiltersProps) {
-  const distanceOptions = availableDistances && availableDistances.length > 0
-    ? availableDistances
-    : DEFAULT_DISTANCES;
+  const distanceOptions = [
+    ...DEFAULT_DISTANCES,
+    ...(availableDistances ?? []).filter(
+      (d) => !(DEFAULT_DISTANCES as readonly string[]).includes(d)
+    ),
+  ].sort((a, b) => parseFloat(a) - parseFloat(b));
   const [cityKey, setCityKey] = useState(0);
 
   const hasActiveFilters =
