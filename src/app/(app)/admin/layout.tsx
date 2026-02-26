@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { LayoutDashboard, Trophy, MessageSquarePlus } from "lucide-react";
+import { Trophy, MessageSquarePlus } from "lucide-react";
 
 export default async function AdminLayout({
   children,
@@ -36,10 +36,7 @@ export default async function AdminLayout({
           </Link>
         </div>
         <nav className="space-y-1 px-3">
-          <NavLink href="/admin" icon={LayoutDashboard}>
-            Dashboard
-          </NavLink>
-          <NavLink href="/admin/corridas" icon={Trophy}>
+          <NavLink href="/admin" icon={Trophy}>
             Corridas
           </NavLink>
           <NavLink href="/admin/sugestoes" icon={MessageSquarePlus}>
@@ -51,8 +48,7 @@ export default async function AdminLayout({
       {/* Mobile nav */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background md:hidden">
         <nav className="flex justify-around py-2">
-          <MobileNavLink href="/admin" icon={LayoutDashboard} label="Dashboard" />
-          <MobileNavLink href="/admin/corridas" icon={Trophy} label="Corridas" />
+          <MobileNavLink href="/admin" icon={Trophy} label="Corridas" />
           <MobileNavLink href="/admin/sugestoes" icon={MessageSquarePlus} label="Sugestões" />
         </nav>
       </div>

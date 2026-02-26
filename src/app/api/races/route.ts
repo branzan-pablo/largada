@@ -30,6 +30,9 @@ export async function GET(request: Request) {
 
   let query = supabase.from("races").select("*", { count: "exact" });
 
+  // Only confirmed races for public API
+  query = query.eq("status", "confirmed");
+
   // Only future races by default
   if (!includePast) {
     const today = todayInBrazil();
@@ -183,11 +186,16 @@ export async function POST(request: Request) {
     route_image_url: body.routeImageUrl ?? null,
     organizer: body.organizer ?? null,
     description: body.description ?? null,
-    status: body.status ?? "confirmed",
+    status: (body.status ?? "confirmed") as string,
     is_promoted: body.isPromoted ?? false,
     created_by: user.id,
     origin: raw.origin === "approved_suggestion" ? "approved_suggestion" : "admin",
   };
+
+  // Suggestions enter as pending_review
+  if (raceData.origin === "approved_suggestion") {
+    raceData.status = "pending_review";
+  }
 
   const { data, error } = await supabase
     .from("races")
@@ -199,11 +207,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  // Send push notifications before returning (Vercel kills the runtime after response)
-  try {
-    await notifyNewRace(data.id);
-  } catch (err) {
-    console.error("[notifications] notifyNewRace failed:", err);
+  // Only notify for directly confirmed races (not pending_review)
+  if (data.status === "confirmed") {
+    try {
+      await notifyNewRace(data.id);
+    } catch (err) {
+      console.error("[notifications] notifyNewRace failed:", err);
+    }
   }
 
   return NextResponse.json(data, { status: 201 });

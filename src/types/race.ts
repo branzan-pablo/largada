@@ -20,13 +20,13 @@ export interface Race {
   route_image_url: string | null;
   organizer: string | null;
   description: string | null;
-  status: "confirmed" | "postponed" | "cancelled";
+  status: "confirmed" | "postponed" | "cancelled" | "pending_review";
   notes: string | null;
   link: string | null;
   is_promoted: boolean;
   rsvp_count: number;
   created_by: string;
-  origin: "admin" | "approved_suggestion";
+  origin: "admin" | "approved_suggestion" | "scraper";
   created_at: string;
   updated_at: string;
 }

@@ -177,7 +177,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       }
 
       toast.success(isEditing ? "Corrida atualizada!" : "Corrida criada!");
-      router.push("/admin/corridas");
+      router.push("/admin");
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao salvar");
@@ -303,6 +303,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="confirmed">Confirmada</SelectItem>
+                <SelectItem value="pending_review">Pendente</SelectItem>
                 <SelectItem value="postponed">Adiada</SelectItem>
                 <SelectItem value="cancelled">Cancelada</SelectItem>
               </SelectContent>
@@ -533,7 +534,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push("/admin/corridas")}
+          onClick={() => router.push("/admin")}
           className="cursor-pointer"
         >
           Cancelar

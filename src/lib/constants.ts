@@ -13,8 +13,16 @@ export const RACE_STATUSES = {
   confirmed: "Confirmada",
   postponed: "Adiada",
   cancelled: "Cancelada",
+  pending_review: "Pendente",
 } as const;
 export type RaceStatus = keyof typeof RACE_STATUSES;
+
+export const RACE_ORIGINS = {
+  admin: "Admin",
+  scraper: "Scraper",
+  approved_suggestion: "Sugestão",
+} as const;
+export type RaceOrigin = keyof typeof RACE_ORIGINS;
 
 export const RADIUS_OPTIONS = [50, 100, 150, 200] as const;
 
