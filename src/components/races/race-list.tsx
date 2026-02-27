@@ -48,14 +48,14 @@ export function RaceList() {
     useInfiniteRaces(enrichedFilters, debouncedSearch);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
+    <>
       {/* Page Header */}
       <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
-          <h1 className="text-3xl md:text-4xl font-semibold text-[#0D1B2A] tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#0D1B2A] tracking-tight">
             Calendário de Corridas
           </h1>
-          <p className="text-[#6B7280] text-lg">
+          <p className="text-[#6B7280] text-sm md:text-base">
             Filtre por cidade, distância e premiação. Marque &quot;Vou Nessa&quot; e veja quem da sua rede vai correr.
           </p>
         </div>
@@ -158,7 +158,7 @@ export function RaceList() {
           </>
         )}
       </div>
-    </div>
+    </>
   );
 }
 

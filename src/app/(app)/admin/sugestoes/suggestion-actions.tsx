@@ -61,6 +61,7 @@ export function SuggestionActions({ suggestion }: SuggestionActionsProps) {
       <Button
         size="sm"
         variant="outline"
+        className="cursor-pointer"
         onClick={handleReject}
         disabled={isRejecting}
       >

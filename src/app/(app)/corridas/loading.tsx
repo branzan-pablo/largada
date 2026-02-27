@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CorridasLoading() {
   return (
-    <div className="mx-auto max-w-screen-xl px-4 py-6">
+    <div className="py-6">
       <Skeleton className="mb-6 h-9 w-48" />
       <Skeleton className="mb-6 h-10 w-full" />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

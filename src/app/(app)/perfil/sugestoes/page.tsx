@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function MySuggestionsPage() {
   return (
-    <div className="mx-auto max-w-screen-sm px-4 py-6">
+    <div className="mx-auto max-w-screen-sm py-6">
       <h1 className="mb-6 text-2xl font-bold">Minhas Sugestões</h1>
       <Suspense
         fallback={

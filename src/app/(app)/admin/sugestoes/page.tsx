@@ -26,23 +26,27 @@ export default async function AdminSuggestionsPage() {
 
   return (
     <>
-      <h1 className="mb-6 text-2xl font-bold">Sugestões de Corridas</h1>
-
       {pending.length > 0 && (
         <section className="mb-8">
           <h2 className="mb-4 text-lg font-semibold">
             Pendentes ({pending.length})
           </h2>
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {pending.map((suggestion) => (
               <Card key={suggestion.id}>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">{suggestion.name}</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    {`${suggestion.city} — ${suggestion.state}`}
-                    {suggestion.date && ` — ${formatDateShort(suggestion.date)}`}
+                    Cidade: {`${suggestion.city} — ${suggestion.state}`}
                   </p>
+                  {suggestion.date && (
+                    <p className="text-sm text-muted-foreground">
+                      Data: {formatDateShort(suggestion.date)}
+                    </p>
+                  )}
                 </CardHeader>
+
                 <CardContent className="space-y-3">
                   {suggestion.link && (
                     <a

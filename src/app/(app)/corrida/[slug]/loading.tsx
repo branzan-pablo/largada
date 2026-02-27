@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function RaceDetailLoading() {
   return (
-    <div className="mx-auto max-w-screen-lg px-4 py-6">
+    <div className="py-6">
       <div className="mb-6 space-y-3">
         <Skeleton className="h-8 w-3/4" />
         <div className="flex gap-4">

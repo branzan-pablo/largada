@@ -197,7 +197,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
   };
 
   return (
-    <div className="mx-auto max-w-screen-lg px-4 py-8 md:py-12">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -401,6 +401,6 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
           </aside>
         </div>
       </RsvpProvider>
-    </div>
+    </>
   );
 }

@@ -28,7 +28,7 @@ export default async function EditRacePage({
   }
 
   return (
-    <div className="p-6">
+    <div>
       {/* Back link */}
       <Link
         href="/admin"

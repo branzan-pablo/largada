@@ -60,9 +60,7 @@ export default async function AdminPage() {
   }));
 
   return (
-    <div className="py-4 md:py-8">
-      <h1 className="mb-6 text-2xl font-bold">Gerenciar Corridas</h1>
-
+    <>
       <div className="mb-6 grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         {stats.map((stat, i) => (
           <Card key={stat.title} className={i === stats.length - 1 && stats.length % 2 !== 0 ? "col-span-2 sm:col-span-1 lg:col-span-1" : ""}>
@@ -80,6 +78,6 @@ export default async function AdminPage() {
       </div>
 
       <AdminRacesTable races={racesWithClicks} />
-    </div>
+    </>
   );
 }
