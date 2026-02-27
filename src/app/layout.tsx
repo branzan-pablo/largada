@@ -57,9 +57,6 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body
         className={`${inter.variable} ${bebasNeue.variable} font-sans antialiased`}
-        style={{
-          backgroundColor: "#f5f0f2",
-        }}
       >
         <AuthProvider>
           <LoginModalProvider>

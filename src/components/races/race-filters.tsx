@@ -87,7 +87,7 @@ export function RaceFiltersDesktop({
           </div>
 
           {/* City */}
-          <div className="w-[300px]">
+          <div className="w-full max-w-[300px]">
             <CityAutocomplete
               key={cityKey}
               initialCity={filters.city}
@@ -110,7 +110,7 @@ export function RaceFiltersDesktop({
               });
             }}
           >
-            <SelectTrigger className="h-10 w-[200px] bg-gray-50 border-gray-200 text-sm text-gray-800 px-3 focus:ring-0 focus:ring-offset-0 hover:bg-white hover:border-gray-300 transition-all rounded-lg">
+            <SelectTrigger className="h-10 w-full max-w-[200px] bg-gray-50 border-gray-200 text-sm text-gray-800 px-3 focus:ring-0 focus:ring-offset-0 hover:bg-white hover:border-gray-300 transition-all rounded-lg">
               <div className="flex items-center gap-2">
                 <CalendarDays className="h-4 w-4 text-gray-400 shrink-0" />
                 <SelectValue placeholder="Qualquer data" />

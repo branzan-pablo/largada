@@ -53,7 +53,7 @@ export default async function LandingPage() {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center text-center py-24 md:py-32">
           {/* Headline */}
           <h1
-            className="font-[family-name:var(--font-logo)] text-5xl md:text-7xl tracking-wide text-white mb-6 leading-tight"
+            className="font-[family-name:var(--font-logo)] text-4xl sm:text-5xl md:text-7xl tracking-wide text-white mb-6 leading-tight"
             style={{ textShadow: "0 2px 24px rgba(0,0,0,0.85)" }}
           >
             Vai ter corrida.
@@ -79,7 +79,7 @@ export default async function LandingPage() {
       <div className="h-px bg-gray-200" />
 
       {/* ==================== Problem → Solution Section ==================== */}
-      <section className="relative bg-[#F7F8FA] py-20 overflow-hidden">
+      <section className="relative bg-[#F7F8FA] py-12 md:py-20 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-extrabold text-[#0D1B2A] tracking-tight mb-3">
@@ -224,7 +224,7 @@ export default async function LandingPage() {
       <div className="h-px bg-gray-200" />
 
       {/* ==================== How It Works ==================== */}
-      <section className="relative bg-[#F7F8FA] py-20 overflow-hidden">
+      <section className="relative bg-[#F7F8FA] py-12 md:py-20 overflow-hidden">
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-extrabold text-[#0D1B2A] tracking-tight mb-3">

@@ -40,8 +40,9 @@ export function Header() {
             alt="Largada"
             width={60}
             height={60}
+            className="w-10 h-10 sm:w-[60px] sm:h-[60px]"
           />
-          <span className="font-[family-name:var(--font-logo)] text-3xl tracking-wide text-[#0D1B2A]">LARGADA</span>
+          <span className="font-[family-name:var(--font-logo)] text-2xl sm:text-3xl tracking-wide text-[#0D1B2A]">LARGADA</span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">

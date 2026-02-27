@@ -63,14 +63,10 @@ export async function GET(request: Request) {
     .in("slug", uniqueSlugs);
   const existingSlugsSet = new Set((existingRaces || []).map((r) => r.slug));
 
-  // Pre-fetch cities
-  const cityNames = [
-    ...new Set(scraped.map((r) => r.city).filter(Boolean)),
-  ] as string[];
+  // Pre-fetch all cities (table is small; avoids case-sensitive .in() mismatches)
   const { data: cities } = await supabase
     .from("cities")
-    .select("id, name, latitude, longitude")
-    .in("name", cityNames);
+    .select("id, name, latitude, longitude");
   const cityMap = new Map((cities || []).map((c) => [c.name.toLowerCase(), c]));
 
   const today = todayInBrazil();

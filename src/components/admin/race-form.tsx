@@ -393,7 +393,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                 }}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddCustomDistance())}
                 placeholder="Ex: 42k, 100k"
-                className="w-36 h-8 text-sm"
+                className="w-full sm:w-36 h-8 text-sm"
               />
               <button
                 type="button"

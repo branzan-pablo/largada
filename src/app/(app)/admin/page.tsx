@@ -19,7 +19,7 @@ export default async function AdminPage() {
   const [racesResult, clicksResult, suggestionsResult] = await Promise.all([
     supabase
       .from("races")
-      .select("id, name, city, state, date, status, origin, distances, rsvp_count, is_promoted")
+      .select("id, name, city, state, date, status, origin, distances, rsvp_count, is_promoted, latitude, longitude")
       .order("date", { ascending: false }),
     supabase.from("link_clicks").select("race_id"),
     supabase
@@ -60,12 +60,12 @@ export default async function AdminPage() {
   }));
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 md:p-8">
       <h1 className="mb-6 text-2xl font-bold">Gerenciar Corridas</h1>
 
-      <div className="mb-6 grid gap-3 grid-cols-2 lg:grid-cols-5">
-        {stats.map((stat) => (
-          <Card key={stat.title}>
+      <div className="mb-6 grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+        {stats.map((stat, i) => (
+          <Card key={stat.title} className={i === stats.length - 1 && stats.length % 2 !== 0 ? "col-span-2 sm:col-span-1 lg:col-span-1" : ""}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-medium text-muted-foreground">
                 {stat.title}

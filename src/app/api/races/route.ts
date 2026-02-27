@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   );
   const includePast = searchParams.get("includePast") === "true";
 
-  let query = supabase.from("races").select("*", { count: "exact" });
+  let query = supabase.from("races").select("*, cities(latitude, longitude)", { count: "exact" });
 
   // Only confirmed races for public API
   query = query.eq("status", "confirmed");
@@ -99,11 +99,13 @@ export async function GET(request: Request) {
     const userLat = parseFloat(lat);
     const userLng = parseFloat(lng);
     const maxRadius = parseFloat(radius);
-    filteredData = filteredData.filter(
-      (race) =>
-        haversineDistance(userLat, userLng, race.latitude, race.longitude) <=
-        maxRadius
-    );
+    filteredData = filteredData.filter((race) => {
+      const raceLat = race.latitude || race.cities?.latitude || 0;
+      const raceLng = race.longitude || race.cities?.longitude || 0;
+      // Include races with no coordinates (0,0) rather than silently excluding them
+      if (raceLat === 0 && raceLng === 0) return true;
+      return haversineDistance(userLat, userLng, raceLat, raceLng) <= maxRadius;
+    });
   }
 
   // When client-side filters (radius) are active, the DB count is unreliable
