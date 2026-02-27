@@ -12,10 +12,11 @@ export default function AppLayout({
   return (
     <div className="min-h-screen bg-white bg-grid text-[#6B7280] flex flex-col overflow-x-hidden">
       <Header />
-      <div className="flex-1 pb-16 md:pb-0">{children}</div>
+      <div className="flex-1">{children}</div>
+      <div className="pb-16 md:pb-0">
+        <Footer />
+      </div>
       <BottomNav />
-
-      <Footer />
       <NotificationPrompt />
       <InstallPrompt />
     </div>

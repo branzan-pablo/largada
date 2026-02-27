@@ -316,7 +316,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
               {errors.date && <p className="text-xs text-destructive">{errors.date}</p>}
             </div>
 
-            <div className="grid gap-4 grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="startTime">Horário de largada <span className="text-destructive">*</span></Label>
                 <Input
@@ -354,7 +354,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           {/* Distances */}
           <div className="space-y-2">
             <Label>Distâncias <span className="text-destructive">*</span></Label>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3 sm:gap-4">
               {DEFAULT_DISTANCES.map((d) => (
                 <label key={d} className="flex items-center gap-2 text-sm">
                   <Checkbox

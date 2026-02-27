@@ -141,8 +141,8 @@ export function PromoteRaceCard({
               Dados para cobrança
             </p>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2 space-y-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2 space-y-1">
                 <Label htmlFor="promo-name">Nome completo</Label>
                 <Input
                   id="promo-name"
@@ -153,7 +153,7 @@ export function PromoteRaceCard({
                 />
               </div>
 
-              <div className="col-span-2 space-y-1">
+              <div className="sm:col-span-2 space-y-1">
                 <Label htmlFor="promo-email">E-mail</Label>
                 <Input
                   id="promo-email"

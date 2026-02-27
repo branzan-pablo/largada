@@ -57,7 +57,7 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
           {/* Status filter */}
           <div className="flex items-center gap-2 min-w-0">
             <span className="shrink-0 text-xs font-medium text-muted-foreground">Status:</span>
-            <div className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1">
+            <div className="flex flex-wrap gap-1 rounded-lg bg-muted p-1">
               {STATUS_FILTERS.map((f) => (
                 <button
                   key={f.value}
@@ -75,7 +75,7 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
           {/* Origin filter */}
           <div className="flex items-center gap-2 min-w-0">
             <span className="shrink-0 text-xs font-medium text-muted-foreground">Origem:</span>
-            <div className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1">
+            <div className="flex flex-wrap gap-1 rounded-lg bg-muted p-1">
               {ORIGIN_FILTERS.map((f) => (
                 <button
                   key={f.value}

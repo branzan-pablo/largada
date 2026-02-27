@@ -106,7 +106,7 @@ export function MyRacesClient() {
 
   return (
     <Tabs defaultValue="upcoming">
-      <TabsList>
+      <TabsList className="w-full overflow-x-auto">
         <TabsTrigger value="upcoming">
           <CalendarDays className="mr-1.5 h-4 w-4" />
           Próximas ({upcoming.length})

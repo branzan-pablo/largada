@@ -47,13 +47,13 @@ export default async function AdminLayout({
 
       {/* Mobile nav */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background md:hidden">
-        <nav className="flex justify-around py-2">
+        <nav className="flex justify-around py-4 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
           <MobileNavLink href="/admin" icon={Trophy} label="Corridas" />
           <MobileNavLink href="/admin/sugestoes" icon={MessageSquarePlus} label="Sugestões" />
         </nav>
       </div>
 
-      <main className="flex-1 pb-16 md:pb-0 pt-16">{children}</main>
+      <main className="flex-1 px-4 md:px-8 py-16">{children}</main>
     </div>
   );
 }

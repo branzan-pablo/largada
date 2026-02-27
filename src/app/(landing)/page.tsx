@@ -235,7 +235,7 @@ export default async function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {[
               { step: "1", icon: UserPlus, title: "Crie sua conta", desc: "Cadastro com email, Google ou Strava. Selecione sua cidade e o quanto você topa viajar para uma prova." },
               { step: "2", icon: Search, title: "Encontre sua próxima prova", desc: "Use os filtros para achar provas na distância certa, com o nível de premiação que você quer sem rolar por dezenas de eventos irrelevantes." },

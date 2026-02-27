@@ -25,7 +25,7 @@ export default async function AdminSuggestionsPage() {
   const reviewed = suggestions?.filter((s) => s.status !== "pending") ?? [];
 
   return (
-    <div className="p-6">
+    <>
       <h1 className="mb-6 text-2xl font-bold">Sugestões de Corridas</h1>
 
       {pending.length > 0 && (
@@ -111,6 +111,6 @@ export default async function AdminSuggestionsPage() {
           </div>
         </section>
       )}
-    </div>
+    </>
   );
 }

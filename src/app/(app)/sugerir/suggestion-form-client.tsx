@@ -78,7 +78,7 @@ export function SuggestionFormClient() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 grid gap-4 sm:grid-cols-2">
+    <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
       <div className="space-y-2 sm:col-span-2">
         <Label htmlFor="name">Nome da corrida <span className="text-destructive">*</span></Label>
         <Input

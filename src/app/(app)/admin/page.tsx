@@ -60,7 +60,7 @@ export default async function AdminPage() {
   }));
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="py-4 md:py-8">
       <h1 className="mb-6 text-2xl font-bold">Gerenciar Corridas</h1>
 
       <div className="mb-6 grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
