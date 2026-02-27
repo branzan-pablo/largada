@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
         hostname: "equilibrio.esp.br",
         pathname: "/wp-content/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "static.wixstatic.com",
+      },
     ],
   },
   headers: async () => [

@@ -45,13 +45,13 @@ export const raceSchemaBase = z.object({
   routeImageUrl: z.string().optional(),
   organizer: z.string().optional(),
   description: z.string().optional(),
-  status: z.enum(["confirmed", "postponed", "cancelled"]).default("confirmed"),
+  status: z.enum(["confirmed", "pending_review", "postponed", "cancelled"]).default("confirmed"),
   isPromoted: z.boolean().optional(),
 });
 
 export const raceSchema = raceSchemaBase.refine(
-  (data) => !data.registrationDeadline || !data.date || data.registrationDeadline < data.date,
-  { message: "Prazo deve ser anterior à data da corrida", path: ["registrationDeadline"] }
+  (data) => !data.registrationDeadline || !data.date || data.registrationDeadline <= data.date,
+  { message: "Prazo deve ser igual ou anterior à data da corrida", path: ["registrationDeadline"] }
 );
 
 export const suggestionSchema = z.object({

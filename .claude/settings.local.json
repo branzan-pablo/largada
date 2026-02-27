@@ -69,7 +69,9 @@
       "WebFetch(domain:www.himetrica.com)",
       "WebFetch(domain:www.npmjs.com)",
       "WebFetch(domain:github.com)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "WebFetch(domain:www.raxeventos.com.br)",
+      "Bash(source:*)"
     ]
   }
 }
