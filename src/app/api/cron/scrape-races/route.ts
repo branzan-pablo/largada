@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { scrapeEquilibrio } from "@/lib/scrapers/equilibrio";
+import { runAllScrapers } from "@/lib/scrapers";
 import { slugify } from "@/lib/utils";
 
 import { timingSafeEqual } from "crypto";
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
   const supabase = createAdminClient();
   let scraped;
   try {
-    scraped = await scrapeEquilibrio();
+    scraped = await runAllScrapers();
   } catch (error) {
     console.error("[scrape-races] Falha no scraping:", error);
     return NextResponse.json({ error: "Falha no scraping" }, { status: 500 });
