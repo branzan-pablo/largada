@@ -71,7 +71,7 @@ export function RaceFiltersDesktop({
 
   return (
     <div className="hidden md:block">
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 space-y-4 relative z-10">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 space-y-4 relative z-10 overflow-hidden">
         {/* Top Row: Search + Selects + Toggle */}
         <div className="flex items-center gap-3">
           {/* Search */}

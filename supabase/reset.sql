@@ -14,6 +14,7 @@
 --      005_monetization.sql
 --      006_strava_tokens.sql
 --      007_avatars_bucket.sql
+--      008_pending_review_and_scraper_origin.sql
 -- ============================================================
 
 
