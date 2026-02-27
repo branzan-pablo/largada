@@ -155,7 +155,7 @@ export function RaceFiltersDesktop({
 
         {/* Bottom Row: Distances + Clear */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap min-w-0">
             <span className="text-[11px] uppercase tracking-wider text-gray-500 font-bold">
               DISTÂNCIA
             </span>
