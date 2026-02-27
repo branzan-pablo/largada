@@ -28,10 +28,6 @@ export default async function AdminSuggestionsPage() {
     <>
       {pending.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-4 text-lg font-semibold">
-            Pendentes ({pending.length})
-          </h2>
-
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {pending.map((suggestion) => (
               <Card key={suggestion.id}>

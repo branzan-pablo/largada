@@ -11,7 +11,7 @@ const tabs = [
   { href: "/admin/sugestoes", label: "Sugestões", icon: MessageSquarePlus },
 ] as const;
 
-export function AdminNav() {
+export function AdminNav({ pendingSuggestions }: { pendingSuggestions: number }) {
   const pathname = usePathname();
 
   return (
@@ -37,6 +37,9 @@ export function AdminNav() {
           >
             <Icon className="size-4" />
             {label}
+            {href === "/admin/sugestoes" && pendingSuggestions > 0 && (
+              <span className="ml-0.5 text-xs text-muted-foreground">({pendingSuggestions})</span>
+            )}
           </Link>
         );
       })}

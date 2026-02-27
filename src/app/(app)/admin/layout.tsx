@@ -26,6 +26,11 @@ export default async function AdminLayout({
     redirect("/corridas");
   }
 
+  const { count: pendingSuggestions } = await supabase
+    .from("race_suggestions")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending");
+
   return (
     <div className="min-h-screen">
       <div className="pt-8 pb-4">
@@ -33,7 +38,7 @@ export default async function AdminLayout({
         <p className="text-muted-foreground">Gerencie corridas e sugestões</p>
       </div>
       <div className="border-b">
-        <AdminNav />
+        <AdminNav pendingSuggestions={pendingSuggestions ?? 0} />
       </div>
 
       <main className="py-8 md:py-12">{children}</main>
