@@ -9,10 +9,10 @@ export const metadata: Metadata = {
 
 export default function ContatoPage() {
   return (
-    <main className="text-[#6B7280] antialiased overflow-x-hidden min-h-screen bg-white pt-16">
+    <main className="text-[#6B7280] antialiased overflow-x-hidden min-h-screen bg-white pt-16 flex flex-col">
       <LandingHeader />
 
-      <section className="max-w-3xl mx-auto px-6 py-16 md:py-24">
+      <section className="max-w-3xl mx-auto px-6 py-16 md:py-24 flex-1">
         <h1 className="text-3xl md:text-4xl font-extrabold text-[#0D1B2A] tracking-tight mb-4">
           Contato
         </h1>

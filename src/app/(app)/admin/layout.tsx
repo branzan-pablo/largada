@@ -33,7 +33,7 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen">
-      <div className="pt-8 pb-4">
+      <div className="pb-4">
         <h1 className="text-2xl font-bold">Admin</h1>
         <p className="text-muted-foreground">Gerencie corridas e sugestões</p>
       </div>

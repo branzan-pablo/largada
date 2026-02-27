@@ -12,7 +12,7 @@ export default function TermosDeUsoPage() {
     <main className="text-[#6B7280] antialiased overflow-x-hidden min-h-screen bg-white pt-16">
       <LandingHeader />
 
-      <article className="max-w-3xl mx-auto px-6 py-16 md:py-24">
+      <article className="max-w-7xl mx-auto px-6 py-16 md:py-12">
         <h1 className="text-3xl md:text-4xl font-extrabold text-[#0D1B2A] tracking-tight mb-2">
           Termos de Uso
         </h1>
