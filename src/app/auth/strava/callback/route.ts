@@ -99,11 +99,14 @@ export async function GET(request: NextRequest) {
       if (newUserData?.user) {
         userId = newUserData.user.id;
 
-        // Set strava_athlete_id on the new profile
+        // Ensure profile exists with strava_athlete_id
+        // (handle_new_user trigger should create it, but upsert as safety net)
         await supabaseAdmin
           .from("profiles")
-          .update({ strava_athlete_id: athlete.id })
-          .eq("id", userId);
+          .upsert(
+            { id: userId, full_name: fullName, strava_athlete_id: athlete.id },
+            { onConflict: "id" },
+          );
       } else if (createError) {
         // Fallback: user exists but strava_athlete_id not yet set (pre-migration users)
         // Search by email — check both current and legacy email formats
@@ -112,11 +115,15 @@ export async function GET(request: NextRequest) {
         let page = 1;
         const perPage = 50;
         while (page <= MAX_PAGES) {
-          const { data: pageData } =
-            await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+          const { data: pageData } = await supabaseAdmin.auth.admin.listUsers({
+            page,
+            perPage,
+          });
           const users = pageData?.users ?? [];
           if (users.length === 0) break;
-          const match = users.find((u) => u.email === email || u.email === legacyEmail);
+          const match = users.find(
+            (u) => u.email === email || u.email === legacyEmail,
+          );
           if (match) {
             userId = match.id;
             break;
@@ -130,7 +137,7 @@ export async function GET(request: NextRequest) {
         }
 
         console.warn(
-          `[Strava Callback] Fallback user lookup for athlete ${athlete.id} — migrate strava_athlete_id`
+          `[Strava Callback] Fallback user lookup for athlete ${athlete.id} — migrate strava_athlete_id`,
         );
       }
     }
@@ -156,14 +163,15 @@ export async function GET(request: NextRequest) {
     await supabaseAdmin.auth.admin.updateUserById(userId, {
       user_metadata: userMetadata,
     });
-    await supabaseAdmin
-      .from("profiles")
-      .update({
+    await supabaseAdmin.from("profiles").upsert(
+      {
+        id: userId,
         full_name: fullName,
         avatar_url: localAvatarUrl,
         strava_athlete_id: athlete.id,
-      })
-      .eq("id", userId);
+      },
+      { onConflict: "id" },
+    );
 
     // 4. Store Strava tokens (upsert — handles both first login and re-login)
     await supabaseAdmin.from("strava_tokens").upsert(
@@ -175,7 +183,7 @@ export async function GET(request: NextRequest) {
         expires_at: tokenData.expires_at,
         scope: "read,profile:read_all",
       },
-      { onConflict: "user_id" }
+      { onConflict: "user_id" },
     );
 
     // 5. Generate a magic link to create a session
@@ -215,7 +223,7 @@ export async function GET(request: NextRequest) {
             }
           },
         },
-      }
+      },
     );
 
     // Verify the OTP to establish the session (sets cookies via setAll)
@@ -243,14 +251,20 @@ export async function GET(request: NextRequest) {
 async function uploadAvatarToStorage(
   admin: SupabaseClient<Database>,
   userId: string,
-  externalUrl: string
+  externalUrl: string,
 ): Promise<string | null> {
   try {
-    const res = await fetch(externalUrl, { signal: AbortSignal.timeout(10_000) });
+    const res = await fetch(externalUrl, {
+      signal: AbortSignal.timeout(10_000),
+    });
     if (!res.ok) return null;
 
     const contentType = res.headers.get("content-type") ?? "image/jpeg";
-    const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
+    const ext = contentType.includes("png")
+      ? "png"
+      : contentType.includes("webp")
+        ? "webp"
+        : "jpg";
     const buffer = await res.arrayBuffer();
     const path = `${userId}/avatar.${ext}`;
 
@@ -259,7 +273,9 @@ async function uploadAvatarToStorage(
       .upload(path, buffer, { contentType, upsert: true });
 
     if (uploadError) {
-      console.warn(`[Strava Callback] Avatar upload failed: ${uploadError.message}`);
+      console.warn(
+        `[Strava Callback] Avatar upload failed: ${uploadError.message}`,
+      );
       return null;
     }
 
