@@ -76,8 +76,8 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
       <button
         type="button"
         onClick={handleStravaLogin}
-        disabled={isAnyLoading}
-        className="cursor-pointer relative flex h-12 w-full items-center justify-center overflow-hidden rounded-md border bg-white disabled:opacity-50"
+        disabled
+        className="cursor-pointer relative flex h-12 w-full items-center justify-center overflow-hidden rounded-md border bg-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoadingStrava && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80">
