@@ -44,7 +44,14 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   icons: {
-    apple: "/icons/icon-192.png",
+    apple: [
+      { url: "/icons/icon-180.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Largada",
   },
 };
 

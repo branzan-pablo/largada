@@ -34,13 +34,13 @@ export function InstallPrompt() {
 
   useEffect(() => {
     if (getIsStandalone()) return;
-    if (sessionStorage.getItem("largada_ios_install_dismissed") === "1") return;
+    if (localStorage.getItem("largada_install_dismissed") === "1") return;
 
     const visitCount = parseInt(
-      sessionStorage.getItem("largada_visits") || "0",
+      localStorage.getItem("largada_visits") || "0",
       10
     );
-    sessionStorage.setItem("largada_visits", String(visitCount + 1));
+    localStorage.setItem("largada_visits", String(visitCount + 1));
 
     // Only show after second visit
     if (visitCount < 1) return;
@@ -72,7 +72,7 @@ export function InstallPrompt() {
 
   const handleDismiss = () => {
     setDismissed(true);
-    sessionStorage.setItem("largada_ios_install_dismissed", "1");
+    localStorage.setItem("largada_install_dismissed", "1");
   };
 
   if (dismissed) return null;
