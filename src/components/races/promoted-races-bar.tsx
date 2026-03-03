@@ -50,7 +50,7 @@ export function PromotedRacesBar({ races }: { races: Race[] }) {
   if (races.length === 0 || dismissed) return null;
 
   return (
-    <div className="sticky top-16 z-30 mb-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-y border-amber-400 shadow-sm">
+    <div className="sticky top-16 z-30 mb-4 backdrop-blur-md bg-gradient-to-r from-amber-50/80 to-yellow-50/75 border-y border-amber-400/60 shadow-sm">
       <div className="mx-auto max-w-7xl px-4 md:px-8 py-2">
         {/* Label + dismiss */}
         <div className="flex items-center justify-between mb-1.5">

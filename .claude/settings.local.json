@@ -74,7 +74,11 @@
       "Bash(git restore:*)",
       "Bash(mkdir:*)",
       "Bash(rm:*)",
-      "Bash(npx sharp-cli:*)"
+      "Bash(npx sharp-cli:*)",
+      "WebFetch(domain:www.tnvteam.com.br)",
+      "WebFetch(domain:painel.tnvteam.com.br)",
+      "WebFetch(domain:api.tnvteam.com.br)",
+      "WebFetch(domain:tvcomrunning.com.br)"
     ]
   }
 }

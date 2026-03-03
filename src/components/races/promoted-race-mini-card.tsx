@@ -14,9 +14,9 @@ export function PromotedRaceMiniCard({ race }: { race: Race }) {
   const formattedDate = format(raceDate, "dd 'de' MMM, yyyy", { locale: ptBR });
 
   return (
-    <Link href={`/corrida/${race.slug}`} className="flex flex-col h-full group rounded-xl p-2 overflow-hidden shrink-0 w-[280px] bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-300 shadow-sm hover:shadow-md hover:border-amber-400 transition-all">
+    <Link href={`/corrida/${race.slug}`} className="flex flex-col h-full group rounded-xl p-2 overflow-hidden shrink-0 w-[240px] bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-300 shadow-sm hover:shadow-md hover:border-amber-400 transition-all">
       {/* Thumbnail */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-100">
+      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-gray-100">
         {race.image_url ? (
           <>
             {/* Blurred background layer */}
@@ -25,7 +25,7 @@ export function PromotedRaceMiniCard({ race }: { race: Race }) {
               alt=""
               fill
               className="object-cover scale-110 blur-xl brightness-75"
-              sizes="280px"
+              sizes="240px"
               aria-hidden
             />
             {/* Sharp foreground — full image visible */}
@@ -34,7 +34,7 @@ export function PromotedRaceMiniCard({ race }: { race: Race }) {
               alt={race.name}
               fill
               className="object-contain transition-transform duration-300 group-hover:scale-[1.03] relative"
-              sizes="280px"
+              sizes="240px"
             />
           </>
         ) : (
@@ -47,14 +47,14 @@ export function PromotedRaceMiniCard({ race }: { race: Race }) {
         {/* Date pill — bottom right (like YT duration) */}
         {race.image_url && (
           <div className="absolute bottom-2 right-2 rounded-md bg-black/80 px-1.5 py-0.5 z-10">
-            <span className="text-[16px] font-bold text-white">{day} {month}</span>
+            <span className="text-[13px] font-bold text-white">{day} {month}</span>
           </div>
         )}
       </div>
 
       {/* Info — below thumbnail, no border */}
-      <div className="pt-3 pb-1 flex-1 flex flex-col">
-        <h3 className="text-lg font-bold text-[#0D1B2A] line-clamp-2 leading-snug mb-1.5 flex items-start gap-1.5">
+      <div className="pt-2 pb-1 flex-1 flex flex-col">
+        <h3 className="text-base font-bold text-[#0D1B2A] line-clamp-2 leading-snug mb-1.5 flex items-start gap-1.5">
           <Star className="w-4 h-4 shrink-0 mt-1 fill-yellow-500 text-yellow-500" />
           <span>{race.name}</span>
         </h3>
@@ -64,12 +64,12 @@ export function PromotedRaceMiniCard({ race }: { race: Race }) {
           <span>{race.city}, {race.state}</span>
         </div>
 
-        <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-2">
+        <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-1">
           <CalendarDays className="w-3.5 h-3.5 shrink-0" />
           <span>{formattedDate}</span>
         </div>
 
-        <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-2">
+        <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-1">
           {race.rsvp_count > 0 && (
             <>
               <Users className="w-3.5 h-3.5 shrink-0" />
