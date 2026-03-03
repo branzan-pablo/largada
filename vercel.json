@@ -9,8 +9,20 @@
       "schedule": "0 3 * * *"
     },
     {
-      "path": "/api/cron/scrape-races",
+      "path": "/api/cron/scrape-equilibrio",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/scrape-rax-eventos",
+      "schedule": "5 12 * * *"
+    },
+    {
+      "path": "/api/cron/scrape-tnv-team",
+      "schedule": "10 12 * * *"
+    },
+    {
+      "path": "/api/cron/scrape-tvcom-running",
+      "schedule": "15 12 * * *"
     }
   ]
 }

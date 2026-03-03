@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { runAllScrapers } from "@/lib/scrapers";
-import { insertScrapedRaces } from "@/lib/scrapers/insert-races";
 import { timingSafeEqual } from "crypto";
+import { tnvTeamScraper } from "@/lib/scrapers/tnv-team";
+import { insertScrapedRaces } from "@/lib/scrapers/insert-races";
 
 export const maxDuration = 60;
 
@@ -17,36 +17,35 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  let scraped;
+  let races;
   try {
-    scraped = await runAllScrapers();
+    races = await tnvTeamScraper.scrape();
   } catch (error) {
-    console.error("[scrape-races] Falha no scraping:", error);
+    console.error("[scrape-tnv-team] Falha no scraping:", error);
     return NextResponse.json({ error: "Falha no scraping" }, { status: 500 });
   }
 
-  if (scraped.length === 0) {
-    console.warn(
-      "[scrape-races] Scraper retornou 0 corridas — possível indisponibilidade do site",
-    );
+  console.log(`[scrape-tnv-team] Scraped ${races.length} corridas`);
+
+  if (races.length === 0) {
     return NextResponse.json({ scraped: 0, inserted: 0, skipped: 0 });
   }
 
   try {
-    const result = await insertScrapedRaces(scraped);
+    const result = await insertScrapedRaces(races);
     if (result.errors.length > 0)
-      console.warn("[scrape-races] Error details:", result.errors.join(" | "));
+      console.warn("[scrape-tnv-team] Errors:", result.errors.join(" | "));
     console.log(
-      `[scrape-races] Done: scraped=${scraped.length} inserted=${result.inserted} skipped=${result.skipped} errors=${result.errors.length}`,
+      `[scrape-tnv-team] Done: scraped=${races.length} inserted=${result.inserted} skipped=${result.skipped} errors=${result.errors.length}`,
     );
     return NextResponse.json({
-      scraped: scraped.length,
+      scraped: races.length,
       inserted: result.inserted,
       skipped: result.skipped,
       errors: result.errors.length > 0 ? result.errors.length : undefined,
     });
   } catch (error) {
-    console.error("[scrape-races] Falha na inserção:", error);
+    console.error("[scrape-tnv-team] Falha na inserção:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Falha na inserção" },
       { status: 500 },
