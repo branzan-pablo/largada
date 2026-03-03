@@ -2,10 +2,16 @@ import type { Scraper, ScrapedRace } from "./types";
 import { equilibrioScraper } from "./equilibrio";
 import { raxEventosScraper } from "./rax-eventos";
 import { tnvTeamScraper } from "./tnv-team";
+import { tvcomRunningScraper } from "./tvcom-running";
 
 export type { ScrapedRace } from "./types";
 
-const scrapers: Scraper[] = [equilibrioScraper, raxEventosScraper, tnvTeamScraper];
+const scrapers: Scraper[] = [
+  equilibrioScraper,
+  raxEventosScraper,
+  tnvTeamScraper,
+  tvcomRunningScraper,
+];
 
 export async function runAllScrapers(): Promise<ScrapedRace[]> {
   const results = await Promise.allSettled(scrapers.map((s) => s.scrape()));
