@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPinOff, Plus, Star } from "lucide-react";
+import { Check, MapPin, MapPinOff, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import { formatDateShort } from "@/lib/date";
 import { RACE_STATUSES, RACE_ORIGINS } from "@/lib/constants";
+import { isWithinRegion } from "@/lib/geo";
+import { toast } from "sonner";
 
 interface RaceRow {
   id: string;
@@ -37,18 +40,71 @@ const ORIGIN_FILTERS = [
   { value: "approved_suggestion", label: "Sugestão" },
 ] as const;
 
+function hasCoords(race: RaceRow) {
+  return !(race.latitude === 0 && race.longitude === 0);
+}
+
+function isOutsideRegion(race: RaceRow) {
+  return hasCoords(race) && !isWithinRegion(race.latitude, race.longitude);
+}
+
 export function AdminRacesTable({ races }: { races: RaceRow[] }) {
+  const router = useRouter();
   const [statusFilter, setStatusFilter] = useState("all");
   const [originFilter, setOriginFilter] = useState("all");
   const [coordsFilter, setCoordsFilter] = useState(false);
-  // const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [outsideFilter, setOutsideFilter] = useState(false);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
+  const [localUpdates, setLocalUpdates] = useState<Record<string, Partial<RaceRow>>>({});
 
   const filtered = races.filter((r) => {
+    if (removedIds.has(r.id)) return false;
     if (statusFilter !== "all" && r.status !== statusFilter) return false;
     if (originFilter !== "all" && r.origin !== originFilter) return false;
-    if (coordsFilter && !(r.latitude === 0 && r.longitude === 0)) return false;
+    if (coordsFilter && hasCoords(r)) return false;
+    if (outsideFilter && !isOutsideRegion(r)) return false;
     return true;
   });
+
+  async function handleReview(raceId: string, action: "approve" | "reject") {
+    setLoadingId(raceId);
+    try {
+      const res = await fetch(`/api/races/${raceId}/review`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error ?? "Erro ao atualizar corrida");
+        return;
+      }
+      setLocalUpdates((prev) => ({ ...prev, [raceId]: { status: "confirmed" } }));
+      toast.success("Corrida aprovada com sucesso");
+      router.refresh();
+    } finally {
+      setLoadingId(null);
+    }
+  }
+
+  async function handleDelete(raceId: string, raceName: string) {
+    if (!window.confirm(`Excluir "${raceName}"? Esta ação não pode ser desfeita.`)) return;
+    setLoadingId(raceId);
+    try {
+      const res = await fetch(`/api/races/${raceId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error ?? "Erro ao excluir corrida");
+        return;
+      }
+      setRemovedIds((prev) => new Set(prev).add(raceId));
+      toast.success("Corrida excluída com sucesso");
+      router.refresh();
+    } finally {
+      setLoadingId(null);
+    }
+  }
 
   return (
     <>
@@ -101,6 +157,17 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
             <MapPinOff className="h-3.5 w-3.5" />
             Sem Coordenadas
           </button>
+          {/* Outside region filter */}
+          <button
+            onClick={() => setOutsideFilter((v) => !v)}
+            className={`flex items-center gap-1 rounded-md px-3 py-1 text-xs font-medium transition-colors ${outsideFilter
+              ? "bg-red-100 text-red-800"
+              : "text-muted-foreground hover:text-foreground"
+              }`}
+          >
+            <MapPin className="h-3.5 w-3.5" />
+            Fora da Região
+          </button>
         </div>
 
         <Button asChild size="sm" className="self-end sm:self-auto">
@@ -126,7 +193,9 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((race) => (
+            {filtered.map((raw) => {
+              const race = { ...raw, ...localUpdates[raw.id] };
+              return (
               <tr key={race.id} className="border-b">
                 <td className="px-3 sm:px-4 py-3 font-medium">
                   <div className="flex items-start gap-1.5">
@@ -142,9 +211,14 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
                 <td className="hidden px-4 py-3 sm:table-cell">
                   <span className="flex items-center gap-1">
                     {`${race.city} — ${race.state}`}
-                    {race.latitude === 0 && race.longitude === 0 && (
+                    {!hasCoords(race) && (
                       <span title="Sem coordenadas — defina a cidade para esta corrida">
                         <MapPinOff className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                      </span>
+                    )}
+                    {isOutsideRegion(race) && (
+                      <span title="Fora da região (>200km)">
+                        <MapPinOff className="h-3.5 w-3.5 text-red-500 shrink-0" />
                       </span>
                     )}
                   </span>
@@ -167,14 +241,45 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
                   {race.clicks}
                 </td>
                 <td className="px-3 sm:px-4 py-3 text-right">
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/admin/corridas/${race.id}/editar`}>
-                      Editar
-                    </Link>
-                  </Button>
+                  <div className="flex items-center justify-end gap-1">
+                    {race.status === "pending_review" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        title="Aprovar"
+                        disabled={loadingId === race.id}
+                        onClick={() => handleReview(race.id, "approve")}
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      title="Editar"
+                      asChild
+                    >
+                      <Link href={`/admin/corridas/${race.id}/editar`}>
+                        <Pencil className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      title="Excluir"
+                      disabled={loadingId === race.id}
+                      onClick={() => handleDelete(race.id, race.name)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
