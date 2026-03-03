@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useInfiniteRaces } from "@/hooks/use-infinite-races";
 import { RaceCard } from "./race-card";
+import { PromotedRacesBar } from "./promoted-races-bar";
 import { RaceFiltersDesktop } from "./race-filters";
 import { RaceFiltersMobile } from "./race-filters-mobile";
 import { RadiusBanner } from "./radius-banner";
@@ -47,6 +48,15 @@ export function RaceList() {
   const { races, isLoading, isLoadingMore, hasMore, loadMore, sentinelRef } =
     useInfiniteRaces(enrichedFilters, debouncedSearch);
 
+  const promotedRaces = useMemo(
+    () => races.filter((r) => r.is_promoted),
+    [races]
+  );
+  const regularRaces = useMemo(
+    () => races.filter((r) => !r.is_promoted),
+    [races]
+  );
+
   return (
     <>
       {/* Page Header */}
@@ -72,6 +82,11 @@ export function RaceList() {
           </div>
         )}
       </div>
+
+      {/* Promoted races sticky bar */}
+      {!isLoading &&
+        <PromotedRacesBar races={promotedRaces} />
+      }
 
       {/* Mobile: search + filter button */}
       <div className="mb-4 flex justify-end gap-3 md:hidden">
@@ -109,7 +124,7 @@ export function RaceList() {
               <RaceCardSkeleton key={i} />
             ))}
           </div>
-        ) : races.length === 0 ? (
+        ) : regularRaces.length === 0 && promotedRaces.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center rounded-lg border border-gray-200 bg-gray-50">
             <Trophy className="mb-4 h-12 w-12 text-gray-300" />
             <h3 className="text-lg font-semibold text-[#0D1B2A]">
@@ -128,7 +143,7 @@ export function RaceList() {
         ) : (
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {races.map((race) => (
+              {regularRaces.map((race) => (
                 <RaceCard key={race.id} race={race} />
               ))}
             </div>

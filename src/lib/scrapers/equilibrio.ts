@@ -118,7 +118,9 @@ function extractDataEvento(texto: string): string | null {
   const m3 = texto.match(/(\d{2})\/(\d{2})\/(\d{4})/);
   if (m3) return `${m3[3]}-${m3[2]}-${m3[1]}`;
   // Pattern 4: "dia X de MÊS" without explicit year — infer from text context
-  const m4 = texto.match(new RegExp(`\\bdia\\s+(\\d{1,2})\\s+de\\s+(${MES_RE})`, "i"));
+  const m4 = texto.match(
+    new RegExp(`\\bdia\\s+(\\d{1,2})\\s+de\\s+(${MES_RE})`, "i"),
+  );
   if (m4) {
     const mes = MESES[m4[2].toLowerCase()];
     if (mes) {
@@ -131,7 +133,10 @@ function extractDataEvento(texto: string): string | null {
   }
   // Pattern 5: "X de MÊS de ANO" without any prefix (e.g. "26 de março de 2026")
   const m5 = texto.match(
-    new RegExp(`\\b(\\d{1,2})\\s+de\\s+(${MES_RE})\\s+de\\s+(20\\d{2})\\b`, "i"),
+    new RegExp(
+      `\\b(\\d{1,2})\\s+de\\s+(${MES_RE})\\s+de\\s+(20\\d{2})\\b`,
+      "i",
+    ),
   );
   if (m5) {
     const mes = MESES[m5[2].toLowerCase()];
@@ -304,7 +309,9 @@ export async function scrapeEquilibrio(): Promise<ScrapedRace[]> {
     );
   }
 
-  async function processRace(corridaAPI: WPCorridaProxima): Promise<ScrapedRace> {
+  async function processRace(
+    corridaAPI: WPCorridaProxima,
+  ): Promise<ScrapedRace> {
     const titulo = stripHTML(corridaAPI.title.rendered);
     const slug = corridaAPI.slug;
     const pageURL = `${BASE_URL}/${slug}/`;

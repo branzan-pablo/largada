@@ -118,7 +118,7 @@ export async function notifyNewRace(raceId: string) {
     if (!subs || subs.length === 0) return;
 
     await sendToSubscriptions({
-      title: "Nova corrida na sua região!",
+      title: "Vai ter corrida!",
       body: `${race.name} em ${race.city}. Confira os detalhes.`,
       url: `/corrida/${race.slug}`,
       subscriptions: subs,
@@ -149,7 +149,7 @@ export async function notifyNewRace(raceId: string) {
       .map((r) => ({ endpoint: r.endpoint, p256dh: r.p256dh, auth: r.auth }));
 
     await sendToSubscriptions({
-      title: "Nova corrida na sua região!",
+      title: "Vai ter corrida!",
       body: `${race.name} em ${race.city}. Confira os detalhes.`,
       url: `/corrida/${race.slug}`,
       subscriptions: targetSubs,

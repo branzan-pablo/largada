@@ -73,7 +73,8 @@
       "Bash(source:*)",
       "Bash(git restore:*)",
       "Bash(mkdir:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(npx sharp-cli:*)"
     ]
   }
 }

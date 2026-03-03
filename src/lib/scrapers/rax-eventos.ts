@@ -7,8 +7,7 @@
 import type { Scraper, ScrapedRace } from "./types";
 import { slugify } from "@/lib/utils";
 
-const SITEMAP_URL =
-  "https://www.raxeventos.com.br/event-pages-sitemap.xml";
+const SITEMAP_URL = "https://www.raxeventos.com.br/event-pages-sitemap.xml";
 const FETCH_TIMEOUT_MS = 10_000;
 const CONCURRENCY = 5;
 
@@ -139,9 +138,7 @@ function extractCity(location: JsonLdEvent["location"]): {
 
   if (typeof location.address === "string") {
     // Rax format: "Bairro, São José do Rio Preto - SP, 15075, Brasil"
-    const m = location.address.match(
-      /,\s*([^,]+?)\s*-\s*([A-Z]{2})\s*,/,
-    );
+    const m = location.address.match(/,\s*([^,]+?)\s*-\s*([A-Z]{2})\s*,/);
     if (m) {
       return {
         city: m[1].trim(),
@@ -200,7 +197,11 @@ async function scrapeEventPage(url: string): Promise<ScrapedRace | null> {
     ogImage = jsonLd.image;
   } else if (Array.isArray(jsonLd.image)) {
     ogImage = jsonLd.image[0];
-  } else if (jsonLd.image && typeof jsonLd.image === "object" && "url" in jsonLd.image) {
+  } else if (
+    jsonLd.image &&
+    typeof jsonLd.image === "object" &&
+    "url" in jsonLd.image
+  ) {
     ogImage = jsonLd.image.url || null;
   } else {
     ogImage = extractOgImage(html);

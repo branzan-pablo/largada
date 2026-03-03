@@ -7,15 +7,14 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Race } from "@/types/race";
 
-export function RaceCard({ race }: { race: Race }) {
-  // DATE field ("2026-03-15") — append T00:00:00 to interpret as local midnight
+export function PromotedRaceMiniCard({ race }: { race: Race }) {
   const raceDate = new Date(race.date + "T00:00:00");
   const day = format(raceDate, "dd");
   const month = format(raceDate, "MMM", { locale: ptBR }).toUpperCase();
   const formattedDate = format(raceDate, "dd 'de' MMM, yyyy", { locale: ptBR });
 
   return (
-    <Link href={`/corrida/${race.slug}`} className={`block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden ${race.is_promoted ? "ring-2 ring-amber-400 bg-amber-50/30" : ""}`}>
+    <Link href={`/corrida/${race.slug}`} className="flex flex-col h-full group rounded-xl p-2 overflow-hidden shrink-0 w-[280px] bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-300 shadow-sm hover:shadow-md hover:border-amber-400 transition-all">
       {/* Thumbnail */}
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-100">
         {race.image_url ? (
@@ -26,7 +25,7 @@ export function RaceCard({ race }: { race: Race }) {
               alt=""
               fill
               className="object-cover scale-110 blur-xl brightness-75"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              sizes="280px"
               aria-hidden
             />
             {/* Sharp foreground — full image visible */}
@@ -35,20 +34,13 @@ export function RaceCard({ race }: { race: Race }) {
               alt={race.name}
               fill
               className="object-contain transition-transform duration-300 group-hover:scale-[1.03] relative"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              sizes="280px"
             />
           </>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
             <span className="text-3xl font-black text-[#0D1B2A]">{day}</span>
             <span className="text-xs font-bold text-gray-500 uppercase">{month}</span>
-          </div>
-        )}
-
-        {/* Promoted star — top left */}
-        {race.is_promoted && (
-          <div className="absolute top-2 left-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-amber-400 shadow-md">
-            <Star className="w-4.5 h-4.5 fill-white text-white" />
           </div>
         )}
 
@@ -61,9 +53,10 @@ export function RaceCard({ race }: { race: Race }) {
       </div>
 
       {/* Info — below thumbnail, no border */}
-      <div className="pt-3 pb-1">
-        <h3 className="text-lg font-bold text-[#0D1B2A] line-clamp-2 leading-snug mb-1.5">
-          {race.name}
+      <div className="pt-3 pb-1 flex-1 flex flex-col">
+        <h3 className="text-lg font-bold text-[#0D1B2A] line-clamp-2 leading-snug mb-1.5 flex items-start gap-1.5">
+          <Star className="w-4 h-4 shrink-0 mt-1 fill-yellow-500 text-yellow-500" />
+          <span>{race.name}</span>
         </h3>
 
         <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-1">
@@ -87,7 +80,7 @@ export function RaceCard({ race }: { race: Race }) {
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap mt-auto">
           <RaceDistanceBadges distances={race.distances} />
           {race.prize_type !== "none" && (
             <RacePrizeBadge prizeType={race.prize_type} />
