@@ -3,12 +3,18 @@
 // Called daily by Vercel Cron. Protected by CRON_SECRET.
 
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { utcNow } from "@/lib/date";
 
+function safeCompare(a: string, b: string): boolean {
+    if (a.length !== b.length) return false;
+    return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
+
 export async function GET(request: Request) {
     const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (!authHeader || !safeCompare(authHeader, `Bearer ${process.env.CRON_SECRET}`)) {
         return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 

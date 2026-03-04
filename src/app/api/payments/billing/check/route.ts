@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getBillingById } from "@/lib/payments/billing";
 import { AbacatePayApiError } from "@/lib/payments/errors";
-import { utcNow } from "@/lib/date";
+import { utcNow, futureUtc } from "@/lib/date";
 
 export async function GET(request: NextRequest) {
   try {
@@ -80,9 +80,7 @@ export async function GET(request: NextRequest) {
         const meta = order.metadata as Record<string, unknown> | null;
         const raceId = meta?.raceId as string | undefined;
         if (raceId) {
-          const promotedUntil = new Date(
-            Date.now() + 30 * 24 * 60 * 60 * 1000,
-          ).toISOString();
+          const promotedUntil = futureUtc(30);
           await admin
             .from("races")
             .update({ is_promoted: true, promoted_until: promotedUntil })

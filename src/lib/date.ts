@@ -93,6 +93,14 @@ export function futureDateInBrazil(days: number): string {
   return `${y}-${m}-${d}`;
 }
 
+/**
+ * Retorna um timestamp UTC ISO 8601 para daqui a N dias.
+ * Útil para calcular expirações (ex: promoted_until).
+ */
+export function futureUtc(days: number): string {
+  return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+}
+
 // ─── Parsing seguro ──────────────────────────────────────
 
 /**

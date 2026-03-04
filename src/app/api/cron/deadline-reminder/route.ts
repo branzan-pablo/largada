@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendToSubscriptions } from "@/lib/notifications";
 import { futureDateInBrazil } from "@/lib/date";
 
+function safeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
+
 // Cron: send reminders for races with registration deadline in 3 days
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!authHeader || !safeCompare(authHeader, `Bearer ${process.env.CRON_SECRET}`)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 

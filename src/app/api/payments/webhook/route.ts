@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyWebhook } from "@/lib/payments/webhook";
 import { AbacatePayWebhookError } from "@/lib/payments/errors";
-import { utcNow } from "@/lib/date";
+import { utcNow, futureUtc } from "@/lib/date";
 import type { Json } from "@/types/database";
 import type {
   WebhookPayload,
@@ -61,26 +61,16 @@ export async function POST(request: NextRequest) {
     const payload: WebhookPayload = JSON.parse(rawBody);
     const admin = createAdminClient();
 
-    // 4. Idempotency check — try to insert event
-    const { error: insertError } = await admin.from("payment_events").insert({
-      event_id: payload.id,
-      event_type: payload.event,
-      raw_payload: payload as unknown as Json,
-      dev_mode: payload.devMode,
-    });
+    // 4. Idempotency check — if event already exists, skip
+    const { data: existingEvent } = await admin
+      .from("payment_events")
+      .select("event_id")
+      .eq("event_id", payload.id)
+      .maybeSingle();
 
-    if (insertError) {
-      // UNIQUE constraint violation = already processed
-      if (insertError.code === "23505") {
-        console.info("[Webhook] Duplicate event, skipping:", payload.id);
-        return NextResponse.json({ received: true, duplicate: true });
-      }
-
-      console.error("[Webhook] Failed to insert event:", insertError);
-      return NextResponse.json(
-        { error: "Failed to persist event" },
-        { status: 500 },
-      );
+    if (existingEvent) {
+      console.info("[Webhook] Duplicate event, skipping:", payload.id);
+      return NextResponse.json({ received: true, duplicate: true });
     }
 
     // 5. Process event by type
@@ -108,7 +98,7 @@ export async function POST(request: NextRequest) {
 
         if (abacatePayRefId) {
           // Update order status
-          let { data: updatedOrder } = await admin
+          const { data: updatedOrderData, error: orderError } = await admin
             .from("payment_orders")
             .update({
               status: "PAID",
@@ -118,6 +108,12 @@ export async function POST(request: NextRequest) {
             .eq("abacatepay_id", abacatePayRefId)
             .select("id, order_type, metadata")
             .single();
+
+          let updatedOrder = updatedOrderData;
+
+          if (orderError && orderError.code !== "PGRST116") {
+            console.error("[Webhook] Failed to update order:", orderError);
+          }
 
           // Fallback: if order not found by abacatepay_id, try metadata match
           if (!updatedOrder) {
@@ -160,13 +156,14 @@ export async function POST(request: NextRequest) {
             > | null;
             const raceId = meta?.raceId as string | undefined;
             if (raceId) {
-              const promotedUntil = new Date(
-                Date.now() + 30 * 24 * 60 * 60 * 1000
-              ).toISOString();
-              await admin
+              const promotedUntil = futureUtc(30);
+              const { error: raceError } = await admin
                 .from("races")
                 .update({ is_promoted: true, promoted_until: promotedUntil })
                 .eq("id", raceId);
+              if (raceError) {
+                throw new Error(`Failed to promote race ${raceId}: ${raceError.message}`);
+              }
               console.info(
                 `[Webhook] Race ${raceId} promoted until ${promotedUntil}`,
               );
@@ -178,7 +175,6 @@ export async function POST(request: NextRequest) {
 
       case "withdraw.done":
       case "withdraw.failed":
-        // Log only — no order to update for withdrawals
         console.info(`[Webhook] ${payload.event}:`, payload.id);
         break;
 
@@ -186,15 +182,24 @@ export async function POST(request: NextRequest) {
         console.warn("[Webhook] Unknown event type:", payload.event);
     }
 
-    // 6. Update event record with order linkage and processed status
-    await admin
-      .from("payment_events")
-      .update({
-        order_id: orderId,
-        processed: true,
-        processed_at: utcNow(),
-      })
-      .eq("event_id", payload.id);
+    // 6. Persist event after successful processing (idempotency record)
+    const { error: insertError } = await admin.from("payment_events").insert({
+      event_id: payload.id,
+      event_type: payload.event,
+      raw_payload: payload as unknown as Json,
+      dev_mode: payload.devMode,
+      order_id: orderId,
+      processed: true,
+      processed_at: utcNow(),
+    });
+
+    if (insertError) {
+      // UNIQUE constraint = concurrent retry already processed it
+      if (insertError.code === "23505") {
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+      console.error("[Webhook] Failed to persist event:", insertError);
+    }
 
     return NextResponse.json({ received: true });
   } catch (error) {
