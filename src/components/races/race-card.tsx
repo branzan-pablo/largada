@@ -5,6 +5,7 @@ import { RacePrizeBadge } from "./race-prize-badge";
 import { MapPin, Users, Star, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { formatTime } from "@/lib/date";
 import type { Race } from "@/types/race";
 
 export function RaceCard({ race }: { race: Race }) {
@@ -74,7 +75,7 @@ export function RaceCard({ race }: { race: Race }) {
 
         <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-2">
           <CalendarDays className="w-3.5 h-3.5 shrink-0" />
-          <span>{formattedDate}</span>
+          <span>{formattedDate}{race.start_time ? ` · ${formatTime(race.start_time)}` : ""}</span>
         </div>
 
         <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-2">

@@ -8,7 +8,13 @@ import { Button } from "@/components/ui/button";
 import { RaceDistanceBadges } from "@/components/races/race-distance-badges";
 import { RacePrizeBadge } from "@/components/races/race-prize-badge";
 import { RaceStatusBadge } from "@/components/races/race-status-badge";
-import { RsvpProvider, ParticipantsSection, RsvpCard } from "./race-detail-client";
+import {
+  RsvpProvider,
+  ParticipantsSection,
+  RsvpCard,
+  StickyActionBar,
+  ExpandableDescription,
+} from "./race-detail-client";
 import { PromoteRaceCard } from "@/components/races/promote-race-card";
 import {
   CalendarDays,
@@ -73,7 +79,6 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
   const typedRace = race as Race;
   const today = todayInBrazil();
   const deadlinePassed = typedRace.registration_deadline < today;
-  // Deadline is "soon" if within 3 days — compare date strings (DATE type)
   const deadlineSoon =
     !deadlinePassed &&
     typedRace.registration_deadline <= (() => {
@@ -85,7 +90,6 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
       return `${y}-${m}-${dd}`;
     })();
 
-  // Fetch current user's RSVP status
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -152,7 +156,6 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
     userRsvped = !!rsvp;
   }
 
-  // Fetch RSVP participants
   const { data: rsvps } = await supabase
     .from("rsvps")
     .select("profiles!rsvps_user_id_fkey(id, full_name, avatar_url)")
@@ -202,63 +205,65 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
       {/* Back link */}
       <Link
         href="/corridas"
-        className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ChevronLeft className="h-4 w-4" />
         Voltar para listagem
       </Link>
 
-      {/* Header */}
-      <div className="mb-8 space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          {typedRace.status !== "confirmed" && (
-            <RaceStatusBadge status={typedRace.status} />
-          )}
-          <RacePrizeBadge prizeType={typedRace.prize_type} />
-        </div>
-        <h1 className="text-2xl font-medium text-[#0D1B2A] md:text-3xl tracking-tight">{typedRace.name}</h1>
-        <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <CalendarDays className="h-4 w-4" />
-            {formatDateFull(typedRace.date)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Clock className="h-4 w-4" />
-            {formatTime(typedRace.start_time)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <MapPin className="h-4 w-4" />
-            {typedRace.city}/{typedRace.state}
-          </span>
+      {/* Hero */}
+      <div className="relative -mx-4 md:-mx-0 mb-6 aspect-[16/9] md:aspect-[21/9] w-[calc(100%+2rem)] md:w-full overflow-hidden md:rounded-xl">
+        {typedRace.image_url ? (
+          <>
+            <Image
+              src={typedRace.image_url}
+              alt={typedRace.name}
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900" />
+        )}
+        {/* Overlay content */}
+        <div className="absolute inset-x-0 bottom-0 p-4 md:p-6">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            {typedRace.status !== "confirmed" && (
+              <RaceStatusBadge status={typedRace.status} />
+            )}
+            <RacePrizeBadge prizeType={typedRace.prize_type} />
+            {isPromoted && (
+              <Badge className="bg-yellow-400/90 text-yellow-950 text-xs">
+                Destaque
+              </Badge>
+            )}
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight leading-tight">
+            {typedRace.name}
+          </h1>
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-white text-sm">
+            <span className="flex items-center gap-1.5">
+              <CalendarDays className="h-4 w-4" />
+              {formatDateFull(typedRace.date)}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Clock className="h-4 w-4" />
+              {formatTime(typedRace.start_time)}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <MapPin className="h-4 w-4" />
+              {typedRace.city}/{typedRace.state}
+            </span>
+          </div>
         </div>
       </div>
-
-      {/* Banner image */}
-      {typedRace.image_url && (
-        <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-xl bg-gray-100">
-          {/* Blurred background layer */}
-          <Image
-            src={typedRace.image_url}
-            alt=""
-            fill
-            className="object-cover scale-110 blur-xl brightness-75"
-            sizes="(max-width: 1024px) 100vw, 1024px"
-            aria-hidden
-          />
-          {/* Sharp foreground — full image visible */}
-          <Image
-            src={typedRace.image_url}
-            alt={typedRace.name}
-            fill
-            className="object-contain relative"
-            sizes="(max-width: 1024px) 100vw, 1024px"
-            priority
-          />
-        </div>
-      )}
 
       <RsvpProvider
         raceId={typedRace.id}
@@ -266,24 +271,82 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
         initialCount={typedRace.rsvp_count}
         initialParticipants={participants}
       >
-        <div className="grid gap-8 md:grid-cols-3">
-          {/* Main Content */}
-          <div className="space-y-8 md:col-span-2">
-            {/* Address */}
-            <section>
-              <h2 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Local
-              </h2>
-              <p>{typedRace.address}</p>
-            </section>
+        {/* Info summary — compact location + distances */}
+        <div className="mb-6 flex flex-col md:flex-row md:items-center gap-3 md:gap-6 text-sm">
+          <div className="flex items-start gap-2 text-muted-foreground">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{typedRace.address}</span>
+          </div>
+          <div className="hidden md:block h-4 w-px bg-gray-300" />
+          <RaceDistanceBadges distances={typedRace.distances} />
+        </div>
 
-            {/* Distances */}
-            <section>
-              <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Distâncias
-              </h2>
-              <RaceDistanceBadges distances={typedRace.distances} />
-            </section>
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Sidebar — appears early on mobile via order */}
+          <aside className="order-1 md:order-2 md:col-start-3 space-y-4">
+            {/* Registration Card */}
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-4">
+              <h3 className="font-semibold text-[#0D1B2A]">Inscrição</h3>
+              <div className="space-y-2 text-sm">
+                <p>
+                  <span className="text-muted-foreground">Valor:</span>{" "}
+                  {typedRace.registration_price}
+                </p>
+                <p className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Prazo:</span>{" "}
+                  {formatDateFull(typedRace.registration_deadline)}
+                  {deadlineSoon && (
+                    <Badge variant="outline" className="ml-1 bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
+                      Expirando!
+                    </Badge>
+                  )}
+                </p>
+              </div>
+              {deadlinePassed ? (
+                <Badge variant="secondary" className="w-full justify-center py-2">
+                  Inscrições encerradas
+                </Badge>
+              ) : (
+                <Button className="w-full hidden md:inline-flex" asChild>
+                  <a
+                    href={`/api/r/${typedRace.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Inscreva-se
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
+              )}
+            </div>
+
+            {/* RSVP Card — hidden on mobile where StickyActionBar handles it */}
+            <div className="hidden md:block">
+              <RsvpCard deadlinePassed={deadlinePassed} />
+            </div>
+
+            {/* Promote card */}
+            {(!isPromoted || isOwner) && (
+              <PromoteRaceCard
+                raceId={typedRace.id}
+                raceName={typedRace.name}
+                isPromoted={isPromoted}
+                isOwner={isOwner}
+              />
+            )}
+          </aside>
+
+          {/* Main Content */}
+          <div className="order-2 md:order-1 md:col-span-2 space-y-8">
+            {/* Description */}
+            {typedRace.description && (
+              <section>
+                <h2 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  Sobre a corrida
+                </h2>
+                <ExpandableDescription text={typedRace.description} />
+              </section>
+            )}
 
             {/* Prize Details */}
             {typedRace.prize_type !== "none" && (
@@ -324,16 +387,6 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
               </section>
             )}
 
-            {/* Description */}
-            {typedRace.description && (
-              <section>
-                <h2 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  Sobre a corrida
-                </h2>
-                <p className="text-muted-foreground">{typedRace.description}</p>
-              </section>
-            )}
-
             {/* Organizer */}
             {typedRace.organizer && (
               <section>
@@ -344,62 +397,19 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
               </section>
             )}
 
-            {/* Participants — reacts to RSVP toggle */}
+            {/* Participants */}
             <ParticipantsSection />
           </div>
-
-          {/* Sidebar */}
-          <aside className="space-y-4">
-            {/* Registration Card */}
-            <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-4">
-              <h3 className="font-semibold text-[#0D1B2A]">Inscrição</h3>
-              <div className="space-y-2 text-sm">
-                <p>
-                  <span className="text-muted-foreground">Valor:</span>{" "}
-                  {typedRace.registration_price}
-                </p>
-                <p className="flex items-center gap-1">
-                  <span className="text-muted-foreground">Prazo:</span>{" "}
-                  {formatDateFull(typedRace.registration_deadline)}
-                  {deadlineSoon && (
-                    <Badge variant="outline" className="ml-1 bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
-                      Expirando!
-                    </Badge>
-                  )}
-                </p>
-              </div>
-              {deadlinePassed ? (
-                <Badge variant="secondary" className="w-full justify-center py-2">
-                  Inscrições encerradas
-                </Badge>
-              ) : (
-                <Button className="w-full" asChild>
-                  <a
-                    href={`/api/r/${typedRace.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Inscreva-se
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </a>
-                </Button>
-              )}
-            </div>
-
-            {/* RSVP Card — shares state with ParticipantsSection */}
-            <RsvpCard />
-
-            {/* Promote card — payment for owner, contact hint for others (hidden when already promoted + not owner) */}
-            {(!isPromoted || isOwner) && (
-              <PromoteRaceCard
-                raceId={typedRace.id}
-                raceName={typedRace.name}
-                isPromoted={isPromoted}
-                isOwner={isOwner}
-              />
-            )}
-          </aside>
         </div>
+
+        {/* Sticky action bar — mobile only */}
+        <StickyActionBar
+          registrationSlug={typedRace.slug}
+          deadlinePassed={deadlinePassed}
+        />
+
+        {/* Bottom padding so sticky bar doesn't cover content on mobile */}
+        <div className="h-20 md:hidden" />
       </RsvpProvider>
     </>
   );

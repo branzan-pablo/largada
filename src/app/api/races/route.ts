@@ -34,10 +34,13 @@ export async function GET(request: Request) {
   query = query.eq("status", "confirmed");
 
   // Only future races by default
+  const today = todayInBrazil();
   if (!includePast) {
-    const today = todayInBrazil();
     query = query.gte("date", today);
   }
+
+  // Hide races with closed registrations
+  query = query.gte("registration_deadline", today);
 
   if (city) {
     query = query.eq("city", city);
