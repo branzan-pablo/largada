@@ -15,7 +15,7 @@ export function RaceCard({ race }: { race: Race }) {
   const formattedDate = format(raceDate, "dd 'de' MMM, yyyy", { locale: ptBR });
 
   return (
-    <Link href={`/corrida/${race.slug}`} className={`block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden ${race.is_promoted ? "ring-2 ring-amber-400 bg-amber-50/30" : ""}`}>
+    <Link href={`/corrida/${race.slug}`} className={`block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden ${race.is_promoted ? "border-2 border-amber-400 shadow-lg shadow-amber-100 bg-gradient-to-b from-amber-50/40 to-transparent" : ""}`}>
       {/* Thumbnail */}
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-100">
         {race.image_url ? (
@@ -45,10 +45,11 @@ export function RaceCard({ race }: { race: Race }) {
           </div>
         )}
 
-        {/* Promoted star — top left */}
+        {/* Promoted badge pill — top right */}
         {race.is_promoted && (
-          <div className="absolute top-2 left-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-amber-400 shadow-md">
-            <Star className="w-4.5 h-4.5 fill-white text-white" />
+          <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-amber-500 text-white text-xs uppercase font-semibold px-2.5 py-1 rounded-full shadow-md">
+            <Star className="w-3.5 h-3.5 fill-white" />
+            Destaque
           </div>
         )}
 

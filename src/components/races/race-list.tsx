@@ -5,13 +5,47 @@ import { useAuth } from "@/contexts/auth-context";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useInfiniteRaces } from "@/hooks/use-infinite-races";
 import { RaceCard } from "./race-card";
-import { PromotedRacesBar } from "./promoted-races-bar";
+import { PromotedHeroCarousel } from "./promoted-hero-carousel";
 import { RaceFiltersDesktop } from "./race-filters";
 import { RaceFiltersMobile } from "./race-filters-mobile";
 import { RadiusBanner } from "./radius-banner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, ChevronDown } from "lucide-react";
-import type { RaceFilters } from "@/types/race";
+import type { Race, RaceFilters } from "@/types/race";
+
+const PROMOTED_INSERT_INTERVAL = 7;
+
+function buildMergedGrid(races: Race[], promotedRaces: Race[]): Race[] {
+  if (promotedRaces.length === 0) return races;
+
+  const result: Race[] = [];
+  const promotedIds = new Set(promotedRaces.map((r) => r.id));
+  let promotedIdx = 0;
+  let regularCount = 0;
+
+  for (const race of races) {
+    // Insert a promoted card every PROMOTED_INSERT_INTERVAL regular cards
+    if (
+      regularCount > 0 &&
+      regularCount % PROMOTED_INSERT_INTERVAL === 0 &&
+      promotedIdx < promotedRaces.length
+    ) {
+      const promoted = promotedRaces[promotedIdx];
+      // Only insert if not already the same race we're about to add
+      if (promoted.id !== race.id) {
+        result.push(promoted);
+        promotedIdx++;
+      }
+    }
+
+    result.push(race);
+    if (!promotedIds.has(race.id)) {
+      regularCount++;
+    }
+  }
+
+  return result;
+}
 
 export function RaceList() {
   const { profile } = useAuth();
@@ -52,9 +86,10 @@ export function RaceList() {
     () => races.filter((r) => r.is_promoted),
     [races]
   );
-  const regularRaces = useMemo(
-    () => races.filter((r) => !r.is_promoted),
-    [races]
+
+  const mergedRaces = useMemo(
+    () => buildMergedGrid(races, promotedRaces),
+    [races, promotedRaces]
   );
 
   return (
@@ -83,10 +118,10 @@ export function RaceList() {
         )}
       </div>
 
-      {/* Promoted races sticky bar */}
-      {!isLoading &&
-        <PromotedRacesBar races={promotedRaces} />
-      }
+      {/* Hero Carousel — promoted races (before filters) */}
+      {!isLoading && (
+        <PromotedHeroCarousel races={promotedRaces} />
+      )}
 
       {/* Mobile: search + filter button */}
       <div className="mb-4 flex justify-end gap-3 md:hidden">
@@ -124,7 +159,7 @@ export function RaceList() {
               <RaceCardSkeleton key={i} />
             ))}
           </div>
-        ) : regularRaces.length === 0 && promotedRaces.length === 0 ? (
+        ) : races.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center rounded-lg border border-gray-200 bg-gray-50">
             <Trophy className="mb-4 h-12 w-12 text-gray-300" />
             <h3 className="text-lg font-semibold text-[#0D1B2A]">
@@ -143,8 +178,8 @@ export function RaceList() {
         ) : (
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {regularRaces.map((race) => (
-                <RaceCard key={race.id} race={race} />
+              {mergedRaces.map((race, i) => (
+                <RaceCard key={`${race.id}-${i}`} race={race} />
               ))}
             </div>
 

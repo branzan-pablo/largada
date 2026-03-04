@@ -21,6 +21,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "static.wixstatic.com",
       },
+      {
+        protocol: "https",
+        hostname: "tvcomrunning.com.br",
+        pathname: "/uploads/**",
+      },
     ],
   },
   headers: async () => [
