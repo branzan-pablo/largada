@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 import type { Metadata } from "next";
 import Image from "next/image";
 import { LandingHeader } from "@/components/landing/landing-header";

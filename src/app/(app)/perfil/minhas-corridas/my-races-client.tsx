@@ -106,19 +106,28 @@ export function MyRacesClient() {
 
   return (
     <Tabs defaultValue="upcoming">
-      <TabsList className="w-full overflow-x-auto">
+      <TabsList className="w-full">
         <TabsTrigger value="upcoming">
-          <CalendarDays className="mr-1.5 h-4 w-4" />
-          Próximas ({upcoming.length})
+          <CalendarDays className="mr-1.5 hidden h-4 w-4 sm:inline-block" />
+          Próximas
+          <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#FF4D00]/10 px-1.5 text-xs font-semibold text-[#FF4D00]">
+            {upcoming.length}
+          </span>
         </TabsTrigger>
         <TabsTrigger value="past">
-          <Trophy className="mr-1.5 h-4 w-4" />
-          Passadas ({past.length})
+          <Trophy className="mr-1.5 hidden h-4 w-4 sm:inline-block" />
+          Passadas
+          <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gray-100 px-1.5 text-xs font-semibold text-[#6B7280]">
+            {past.length}
+          </span>
         </TabsTrigger>
         {created.length > 0 && (
           <TabsTrigger value="created">
-            <Star className="mr-1.5 h-4 w-4" />
-            Criadas ({created.length})
+            <Star className="mr-1.5 hidden h-4 w-4 sm:inline-block" />
+            Criadas
+            <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gray-100 px-1.5 text-xs font-semibold text-[#6B7280]">
+              {created.length}
+            </span>
           </TabsTrigger>
         )}
       </TabsList>

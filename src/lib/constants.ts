@@ -1,4 +1,4 @@
-export const DEFAULT_DISTANCES = ["5k", "10k", "21k"] as const;
+export const DEFAULT_DISTANCES = ["5k", "10k", "21k", "42k"] as const;
 export type Distance = (typeof DEFAULT_DISTANCES)[number];
 
 export const PRIZE_TYPES = {
@@ -47,6 +47,23 @@ export const REGION_CITIES = [
   { name: "Presidente Prudente", state: "SP", lat: -22.1207, lng: -51.3882 },
   { name: "Marília", state: "SP", lat: -22.2139, lng: -49.9461 },
   { name: "Araraquara", state: "SP", lat: -21.7946, lng: -48.1756 },
+] as const;
+
+export const RADAR_WHATSAPP_NUMBER = "5517996418555";
+
+export const RADAR_AGE_CATEGORIES = [
+  "16-19",
+  "20-24",
+  "25-29",
+  "30-34",
+  "35-39",
+  "40-44",
+  "45-49",
+  "50-54",
+  "55-59",
+  "60-64",
+  "65-69",
+  "70+",
 ] as const;
 
 export const ITEMS_PER_PAGE = 20;

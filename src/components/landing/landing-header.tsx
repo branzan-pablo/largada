@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MobileMenu } from "@/components/layout/mobile-menu";
 
 export function LandingHeader() {
   const { user, profile, isLoading } = useAuth();
@@ -27,6 +28,9 @@ export function LandingHeader() {
 
         {/* Nav links - desktop */}
         <nav className="hidden md:flex items-center gap-8">
+          <Link href="/radar-de-podio" className="text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors">
+            Radar de Pódio
+          </Link>
           <a href="#features" className="text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors">
             Funcionalidades
           </a>
@@ -37,41 +41,44 @@ export function LandingHeader() {
 
         {/* Auth area */}
         <div className="flex items-center gap-6">
-          {isLoading ? (
-            <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
-          ) : user ? (
-            <>
-              <button className="text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors">
-                <Link href="/corridas">Ir para corridas</Link>
-              </button>
+          <MobileMenu variant="landing" />
+          <div className="hidden md:flex md:items-center md:gap-6">
+            {isLoading ? (
+              <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
+            ) : user ? (
+              <>
+                <button className="text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors">
+                  <Link href="/corridas">Ir para corridas</Link>
+                </button>
 
-              <Link href="/perfil">
-                <Avatar className="h-8 w-8">
-                  {profile?.avatar_url && (
-                    <AvatarImage src={profile.avatar_url} />
-                  )}
-                  <AvatarFallback className="bg-gray-200 text-[#6B7280]">
-                    {profile?.full_name?.charAt(0)?.toUpperCase() ?? "U"}
-                  </AvatarFallback>
-                </Avatar>
-              </Link>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={openLogin}
-                className="cursor-pointer text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors"
-              >
-                Entrar
-              </button>
-              <button
-                onClick={openRegister}
-                className="cursor-pointer hidden sm:inline-flex items-center justify-center gap-2 bg-[#FF4D00] text-white text-sm px-6 py-3 rounded-full font-semibold hover:bg-[#E04400] transition-colors"
-              >
-                Criar conta
-              </button>
-            </>
-          )}
+                <Link href="/perfil">
+                  <Avatar className="h-8 w-8">
+                    {profile?.avatar_url && (
+                      <AvatarImage src={profile.avatar_url} />
+                    )}
+                    <AvatarFallback className="bg-gray-200 text-[#6B7280]">
+                      {profile?.full_name?.charAt(0)?.toUpperCase() ?? "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={openLogin}
+                  className="cursor-pointer text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors"
+                >
+                  Entrar
+                </button>
+                <button
+                  onClick={openRegister}
+                  className="cursor-pointer inline-flex items-center justify-center gap-2 bg-[#FF4D00] text-white text-sm px-6 py-3 rounded-full font-semibold hover:bg-[#E04400] transition-colors"
+                >
+                  Criar conta
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </header>

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Trophy, Heart, MessageSquarePlus, User } from "lucide-react";
+import { Trophy, Heart, MessageSquarePlus, User, Crosshair } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
 
 const navItems = [
   { href: "/corridas", icon: Trophy, label: "Corridas" },
+  { href: "/radar-de-podio", icon: Crosshair, label: "Radar" },
   { href: "/perfil/minhas-corridas", icon: Heart, label: "Minhas", requiresAuth: true },
   { href: "/sugerir", icon: MessageSquarePlus, label: "Sugerir", requiresAuth: true },
   { href: "/perfil", icon: User, label: "Perfil", requiresAuth: true },
