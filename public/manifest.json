@@ -4,7 +4,7 @@
   "description": "Calendário de corridas de rua com filtros, alertas de prazo e participação confirmada.",
   "start_url": "/corridas",
   "display": "standalone",
-  "background_color": "#FFFFFF",
+  "background_color": "#FF4D00",
   "theme_color": "#fc5200",
   "orientation": "portrait",
   "categories": ["sports"],

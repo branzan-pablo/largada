@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/auth-context";
 import { LoginModalProvider, LoginModalUrlHandler } from "@/contexts/login-modal-context";
 import { ClientLoginModal, ClientToaster } from "@/components/layout/client-shell";
 import { SwRegister } from "@/components/pwa/sw-register";
+import { SplashScreen } from "@/components/pwa/splash-screen";
 import "./globals.css";
 
 const inter = Inter({
@@ -76,6 +77,7 @@ export default function RootLayout({
         </AuthProvider>
         <ClientToaster />
         <SwRegister />
+        <SplashScreen />
         <SpeedInsights />
       </body>
     </html>
