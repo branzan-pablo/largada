@@ -600,6 +600,127 @@ export type Database = {
           },
         ]
       }
+      radar_profiles: {
+        Row: {
+          id: string
+          user_id: string
+          pace: string
+          preferred_distances: string[]
+          sex: string
+          age_category: string
+          city: string
+          city_id: string | null
+          state: string | null
+          latitude: number | null
+          longitude: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          pace: string
+          preferred_distances: string[]
+          sex: string
+          age_category: string
+          city: string
+          city_id?: string | null
+          state?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          pace?: string
+          preferred_distances?: string[]
+          sex?: string
+          age_category?: string
+          city?: string
+          city_id?: string | null
+          state?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "radar_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "radar_profiles_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      radar_analyses: {
+        Row: {
+          id: string
+          user_id: string
+          profile_id: string
+          distance_filter: string
+          races_found: number
+          races_recommended: number
+          is_paid: boolean
+          order_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          profile_id: string
+          distance_filter: string
+          races_found?: number
+          races_recommended?: number
+          is_paid?: boolean
+          order_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          profile_id?: string
+          distance_filter?: string
+          races_found?: number
+          races_recommended?: number
+          is_paid?: boolean
+          order_id?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "radar_analyses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "radar_analyses_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "radar_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "radar_analyses_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "payment_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       strava_tokens: {
         Row: {
           id: string

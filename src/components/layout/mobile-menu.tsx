@@ -24,6 +24,7 @@ import {
   User,
   LogOut,
   Hash,
+  Shield,
   ChevronRight,
 } from "lucide-react";
 
@@ -172,6 +173,52 @@ export function MobileMenu({ variant }: MobileMenuProps) {
               </div>
             </SheetHeader>
           </div>
+
+          {/* Admin link (first, with separator) */}
+          {profile?.role === "admin" && (
+            <div className="px-3 pb-2">
+              <Link
+                href="/admin"
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors",
+                  pathname.startsWith("/admin") ? "bg-[#FF4D00]/5" : "hover:bg-gray-50"
+                )}
+              >
+                <div
+                  className={cn(
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors",
+                    pathname.startsWith("/admin") ? "bg-[#FF4D00]/15" : "bg-gray-100"
+                  )}
+                >
+                  <Shield
+                    className={cn(
+                      "h-4 w-4",
+                      pathname.startsWith("/admin") ? "text-[#FF4D00]" : "text-[#6B7280]"
+                    )}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p
+                    className={cn(
+                      "text-sm",
+                      pathname.startsWith("/admin") ? "font-semibold text-[#FF4D00]" : "font-medium text-[#0D1B2A]"
+                    )}
+                  >
+                    Admin
+                  </p>
+                  <p className="text-[11px] text-[#6B7280]">Painel administrativo</p>
+                </div>
+                <ChevronRight
+                  className={cn(
+                    "h-3.5 w-3.5 shrink-0",
+                    pathname.startsWith("/admin") ? "text-[#FF4D00]/50" : "text-gray-300"
+                  )}
+                />
+              </Link>
+              <div className="mx-3 mt-2 border-b border-gray-100" />
+            </div>
+          )}
 
           {/* Nav */}
           <nav className="flex flex-col gap-1 px-3 py-1">

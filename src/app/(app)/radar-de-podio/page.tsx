@@ -1,9 +1,9 @@
 import { RadarDePodioClient } from "./radar-de-podio-client";
 
 export const metadata = {
-  title: "Radar de Pódio",
+  title: "Radar de Pódio — Descubra onde você tem chances reais de pódio",
   description:
-    "Descubra suas chances de pódio nas corridas da região. Analisamos seu pace, distância e categoria.",
+    "O Radar de Pódio cruza seu desempenho com o perfil de cada prova e mostra onde suas chances de pódio são maiores. Pare de adivinhar e comece a competir com estratégia.",
 };
 
 export default function RadarDePodioPage() {
