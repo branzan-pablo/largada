@@ -3,7 +3,13 @@
 import { createContext, useCallback, useContext, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
-import { Badge } from "@/components/ui/badge";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  AvatarGroup,
+  AvatarGroupCount,
+} from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Users, Check, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
@@ -109,8 +115,16 @@ export function RsvpProvider({
   );
 }
 
+function getInitials(name: string | null): string {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 export function ParticipantsSection() {
   const { count, participants } = useRsvpContext();
+  const maxVisible = 8;
 
   return (
     <section>
@@ -118,19 +132,17 @@ export function ParticipantsSection() {
         Participantes ({count})
       </h2>
       {participants.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {participants.slice(0, 10).map((p) => (
-            <Badge key={p.id} variant="secondary" className="gap-1.5 px-3 py-1">
-              <Users className="h-3 w-3" />
-              {p.full_name ?? "Corredor"}
-            </Badge>
+        <AvatarGroup>
+          {participants.slice(0, maxVisible).map((p) => (
+            <Avatar key={p.id} size="default">
+              {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.full_name ?? "Corredor"} />}
+              <AvatarFallback>{getInitials(p.full_name)}</AvatarFallback>
+            </Avatar>
           ))}
-          {count > 10 && (
-            <Badge variant="secondary" className="px-3 py-1">
-              +{count - 10} mais
-            </Badge>
+          {count > maxVisible && (
+            <AvatarGroupCount>+{count - maxVisible}</AvatarGroupCount>
           )}
-        </div>
+        </AvatarGroup>
       ) : (
         <p className="text-sm text-muted-foreground">
           Ninguém confirmou presença ainda. Seja o primeiro!
@@ -140,14 +152,28 @@ export function ParticipantsSection() {
   );
 }
 
+function socialProofText(participants: Participant[], count: number): string {
+  if (count === 0) return "Seja o primeiro a confirmar presença!";
+  const names = participants
+    .slice(0, 3)
+    .map((p) => p.full_name?.split(" ")[0] ?? "Corredor");
+  const remaining = count - names.length;
+  if (remaining > 0) {
+    return `${names.join(", ")} e mais ${remaining}`;
+  }
+  if (names.length === 1) return `${names[0]} confirmou presença`;
+  const last = names.pop();
+  return `${names.join(", ")} e ${last}`;
+}
+
 export function RsvpCard({ deadlinePassed = false }: { deadlinePassed?: boolean }) {
-  const { rsvped, count, isToggling, toggle } = useRsvpContext();
+  const { rsvped, count, participants, isToggling, toggle } = useRsvpContext();
 
   return (
     <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-3">
       <h3 className="font-semibold text-[#0D1B2A]">Vou nessa!</h3>
       <p className="text-sm text-muted-foreground">
-        {count} {count === 1 ? "pessoa confirmou" : "pessoas confirmaram"}
+        {socialProofText(participants, count)}
       </p>
       <Button
         onClick={toggle}
@@ -252,6 +278,34 @@ export function ExpandableDescription({ text }: ExpandableDescriptionProps) {
           )}
         </button>
       )}
+    </div>
+  );
+}
+
+interface ExpandableTextProps {
+  text: string;
+  maxLength?: number;
+}
+
+export function ExpandableText({ text, maxLength = 100 }: ExpandableTextProps) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = text.length > maxLength;
+
+  if (!text) return null;
+
+  if (!isLong) return <p className="text-sm">{text}</p>;
+
+  return (
+    <div>
+      <p className="text-sm">
+        {expanded ? text : `${text.slice(0, maxLength).trimEnd()}…`}
+      </p>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="mt-1 text-xs text-primary hover:underline cursor-pointer font-medium"
+      >
+        {expanded ? "ver menos" : "ver mais"}
+      </button>
     </div>
   );
 }

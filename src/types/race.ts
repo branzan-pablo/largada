@@ -11,6 +11,7 @@ export interface Race {
   longitude: number;
   distances: string[];
   registration_price: string;
+  registration_prices: Record<string, string> | null;
   registration_link: string;
   registration_deadline: string;
   prize_type: "money" | "trophy" | "both" | "none";

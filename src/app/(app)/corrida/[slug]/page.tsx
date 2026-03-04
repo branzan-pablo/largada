@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getBillingById } from "@/lib/payments/billing";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { RaceDistanceBadges } from "@/components/races/race-distance-badges";
 import { RacePrizeBadge } from "@/components/races/race-prize-badge";
 import { RaceStatusBadge } from "@/components/races/race-status-badge";
@@ -14,6 +15,7 @@ import {
   RsvpCard,
   StickyActionBar,
   ExpandableDescription,
+  ExpandableText,
 } from "./race-detail-client";
 import { PromoteRaceCard } from "@/components/races/promote-race-card";
 import {
@@ -282,18 +284,42 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {/* Sidebar — appears early on mobile via order */}
-          <aside className="order-1 md:order-2 md:col-start-3 space-y-4">
+          {/* Sidebar — after main content on mobile */}
+          <aside className="order-2 md:order-2 md:col-start-3 space-y-4">
             {/* Registration Card */}
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-4">
               <h3 className="font-semibold text-[#0D1B2A]">Inscrição</h3>
-              <div className="space-y-2 text-sm">
-                <p>
-                  <span className="text-muted-foreground">Valor:</span>{" "}
-                  {typedRace.registration_price}
-                </p>
-                <p className="flex items-center gap-1">
-                  <span className="text-muted-foreground">Prazo:</span>{" "}
+
+              {/* Per-distance prices */}
+              {typedRace.registration_prices && Object.keys(typedRace.registration_prices).length > 0 ? (
+                <div className="rounded-lg bg-white border border-gray-100 p-3">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Valor</p>
+                  <div className="space-y-1.5">
+                    {Object.entries(typedRace.registration_prices as Record<string, string>).map(([dist, price]) => (
+                      <div key={dist} className="flex items-center justify-between gap-2 text-sm">
+                        <Badge variant="secondary" className="text-xs shrink-0">
+                          {dist.toUpperCase()}
+                        </Badge>
+                        <span className="font-medium">{price}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {typedRace.registration_price && (
+                    <div className="mt-2 pt-2 border-t border-gray-100">
+                      <ExpandableText text={typedRace.registration_price} maxLength={100} />
+                    </div>
+                  )}
+                </div>
+              ) : typedRace.registration_price ? (
+                <div className="rounded-lg bg-white border border-gray-100 p-3">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Valor</p>
+                  <ExpandableText text={typedRace.registration_price} maxLength={100} />
+                </div>
+              ) : null}
+
+              <div className="rounded-lg bg-white border border-gray-100 p-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Prazo</p>
+                <p className="text-sm font-medium flex items-center gap-1">
                   {formatDateFull(typedRace.registration_deadline)}
                   {deadlineSoon && (
                     <Badge variant="outline" className="ml-1 bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
@@ -302,12 +328,13 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
                   )}
                 </p>
               </div>
+
               {deadlinePassed ? (
                 <Badge variant="secondary" className="w-full justify-center py-2">
                   Inscrições encerradas
                 </Badge>
               ) : (
-                <Button className="w-full hidden md:inline-flex" asChild>
+                <Button className="w-full" asChild>
                   <a
                     href={`/api/r/${typedRace.slug}`}
                     target="_blank"
@@ -337,7 +364,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
           </aside>
 
           {/* Main Content */}
-          <div className="order-2 md:order-1 md:col-span-2 space-y-8">
+          <div className="order-1 md:order-1 md:col-span-2 space-y-8">
             {/* Description */}
             {typedRace.description && (
               <section>
@@ -349,6 +376,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
             )}
 
             {/* Prize Details */}
+            {typedRace.prize_type !== "none" && typedRace.description && <Separator />}
             {typedRace.prize_type !== "none" && (
               <section>
                 <h2 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
@@ -365,7 +393,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
                       {PRIZE_TYPES[typedRace.prize_type as keyof typeof PRIZE_TYPES]}
                     </p>
                     {typedRace.prize_details && (
-                      <p className="mt-1 text-sm text-muted-foreground">
+                      <p className="mt-1 text-sm text-muted-foreground whitespace-pre-line">
                         {typedRace.prize_details}
                       </p>
                     )}
@@ -375,6 +403,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
             )}
 
             {/* Route */}
+            {typedRace.route_description && (typedRace.description || typedRace.prize_type !== "none") && <Separator />}
             {typedRace.route_description && (
               <section>
                 <h2 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
@@ -388,6 +417,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
             )}
 
             {/* Organizer */}
+            {typedRace.organizer && <Separator />}
             {typedRace.organizer && (
               <section>
                 <h2 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
@@ -398,6 +428,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
             )}
 
             {/* Participants */}
+            <Separator />
             <ParticipantsSection />
           </div>
         </div>

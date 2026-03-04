@@ -35,7 +35,8 @@ export const raceSchemaBase = z.object({
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
   distances: z.array(z.string()).min(1, "Selecione pelo menos uma distância"),
-  registrationPrice: z.string().min(1, "Valor da inscrição é obrigatório"),
+  registrationPrices: z.record(z.string(), z.string()).optional(),
+  registrationPrice: z.string().optional().default(""),
   registrationLink: z.string().min(1, "Link de inscrição é obrigatório").transform(normalizeUrl).pipe(z.url("Link de inscrição inválido")),
   registrationDeadline: z.string().min(1, "Prazo de inscrição é obrigatório"),
   prizeType: z.enum(["money", "trophy", "both", "none"]),
@@ -49,10 +50,18 @@ export const raceSchemaBase = z.object({
   isPromoted: z.boolean().optional(),
 });
 
-export const raceSchema = raceSchemaBase.refine(
-  (data) => !data.registrationDeadline || !data.date || data.registrationDeadline <= data.date,
-  { message: "Prazo deve ser igual ou anterior à data da corrida", path: ["registrationDeadline"] }
-);
+export const raceSchema = raceSchemaBase
+  .refine(
+    (data) => !data.registrationDeadline || !data.date || data.registrationDeadline <= data.date,
+    { message: "Prazo deve ser igual ou anterior à data da corrida", path: ["registrationDeadline"] }
+  )
+  .refine(
+    (data) => {
+      const hasPrices = data.registrationPrices && Object.keys(data.registrationPrices).length > 0;
+      return hasPrices || (data.registrationPrice && data.registrationPrice.length > 0);
+    },
+    { message: "Informe o valor por distância ou preencha o campo de valor da inscrição", path: ["registrationPrice"] }
+  );
 
 export const suggestionSchema = z.object({
   name: z.string().min(3, "Nome da corrida deve ter pelo menos 3 caracteres"),

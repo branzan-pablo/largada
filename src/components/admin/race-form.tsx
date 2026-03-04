@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +59,9 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   const [distances, setDistances] = useState<string[]>(race?.distances ?? []);
   const [customDistanceInput, setCustomDistanceInput] = useState("");
   const [customDistanceError, setCustomDistanceError] = useState("");
+  const [registrationPrices, setRegistrationPrices] = useState<Record<string, string>>(
+    race?.registration_prices ?? {}
+  );
   const [registrationPrice, setRegistrationPrice] = useState(race?.registration_price ?? "");
   const [registrationLink, setRegistrationLink] = useState(race?.registration_link ?? "");
   const [registrationDeadline, setRegistrationDeadline] = useState(race?.registration_deadline ?? "");
@@ -74,11 +78,18 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   const [uploadFolder] = useState(() => race?.id ?? crypto.randomUUID());
 
   const handleDistanceToggle = (distance: string) => {
-    setDistances((prev) =>
-      prev.includes(distance)
-        ? prev.filter((d) => d !== distance)
-        : [...prev, distance]
-    );
+    setDistances((prev) => {
+      if (prev.includes(distance)) {
+        // Remove price entry when distance is removed
+        setRegistrationPrices((prices) => {
+          const updated = { ...prices };
+          delete updated[distance];
+          return updated;
+        });
+        return prev.filter((d) => d !== distance);
+      }
+      return [...prev, distance];
+    });
   };
 
   const normalizeDistance = (raw: string): string | null => {
@@ -106,6 +117,11 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     e.preventDefault();
     setErrors({});
 
+    // Only include non-empty price entries
+    const filteredPrices = Object.fromEntries(
+      Object.entries(registrationPrices).filter(([, v]) => v.trim() !== "")
+    );
+
     const parsed = raceSchema.safeParse({
       name,
       date,
@@ -116,7 +132,8 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       latitude: selectedCity?.latitude,
       longitude: selectedCity?.longitude,
       distances,
-      registrationPrice,
+      registrationPrices: Object.keys(filteredPrices).length > 0 ? filteredPrices : undefined,
+      registrationPrice: registrationPrice || undefined,
       registrationLink,
       registrationDeadline,
       prizeType,
@@ -477,17 +494,58 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           <h2 className="text-lg font-semibold">Inscrição</h2>
 
           <div className="space-y-4">
+            {/* Per-distance prices */}
+            {distances.length > 0 && (
+              <div className="space-y-2">
+                <Label>Valor por distância</Label>
+                <div className="space-y-2">
+                  {distances.map((d) => (
+                    <div key={d} className="flex items-center gap-2">
+                      <Badge variant="secondary" className="shrink-0 min-w-[3.5rem] justify-center">
+                        {d.toUpperCase()}
+                      </Badge>
+                      <Input
+                        value={registrationPrices[d] ?? ""}
+                        onChange={(e) =>
+                          setRegistrationPrices((prev) => ({
+                            ...prev,
+                            [d]: e.target.value,
+                          }))
+                        }
+                        placeholder="Ex: R$ 89,90 + taxa"
+                        className="h-9"
+                      />
+                    </div>
+                  ))}
+                </div>
+                {errors.registrationPrice && !registrationPrice && (
+                  <p className="text-xs text-destructive">{errors.registrationPrice}</p>
+                )}
+              </div>
+            )}
+
+            {/* Free-text notes about pricing */}
             <div className="space-y-2">
-              <Label htmlFor="registrationPrice">Valor da inscrição <span className="text-destructive">*</span></Label>
-              <Input
+              <Label htmlFor="registrationPrice">
+                {distances.length > 0 ? "Observações sobre valores" : "Valor da inscrição"}
+                {distances.length === 0 && <span className="text-destructive"> *</span>}
+              </Label>
+              <Textarea
                 id="registrationPrice"
                 value={registrationPrice}
                 onChange={(e) => setRegistrationPrice(e.target.value)}
-                placeholder="Ex: 1º lote R$80, 2º lote R$100"
-                className={errors.registrationPrice ? "border-destructive" : ""}
+                placeholder={distances.length > 0
+                  ? "Ex: 1º lote até 15/01, desconto para idosos..."
+                  : "Ex: 1º lote R$80, 2º lote R$100"
+                }
+                className={`min-h-[60px] ${errors.registrationPrice && !distances.length ? "border-destructive" : ""}`}
+                rows={2}
               />
-              {errors.registrationPrice && <p className="text-xs text-destructive">{errors.registrationPrice}</p>}
+              {errors.registrationPrice && distances.length === 0 && (
+                <p className="text-xs text-destructive">{errors.registrationPrice}</p>
+              )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="registrationLink">Link de inscrição <span className="text-destructive">*</span></Label>
               <Input
