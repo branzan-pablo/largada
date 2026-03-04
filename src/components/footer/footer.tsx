@@ -18,7 +18,7 @@ export function Footer() {
                             <span className="font-[family-name:var(--font-logo)] text-xl tracking-wide text-white">LARGADA</span>
                         </Link>
                         <p className="text-sm text-gray-400 max-w-xs">
-                            O calendário de corridas de rua do Brasil.
+                            O calendário de corridas de rua do Noroeste Paulista.
                         </p>
                     </div>
 

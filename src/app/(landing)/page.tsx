@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { CtaButtons } from "@/components/landing/cta-buttons";
-import { createClient } from "@/lib/supabase/server";
+import { REGION_CITIES } from "@/lib/constants";
 import {
   Filter,
   Users,
@@ -25,11 +25,9 @@ export const metadata: Metadata = {
 };
 
 export default async function LandingPage() {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .rpc("get_random_cities", { p_limit: 30 });
-
-  const cities = (data ?? []).map((c: { name: string; state_code: string }) => `${c.name} - ${c.state_code}`);
+  const cities = [...REGION_CITIES]
+    .sort(() => Math.random() - 0.5)
+    .map((c) => `${c.name} - ${c.state}`);
   return (
     <main className="text-[#6B7280] antialiased overflow-x-hidden min-h-screen scroll-smooth bg-white pt-16">
       <LandingHeader />
@@ -255,11 +253,11 @@ export default async function LandingPage() {
 
       <div className="h-px bg-gray-200" />
 
-      {/* ==================== Cobertura Nacional ==================== */}
+      {/* ==================== Cobertura Regional ==================== */}
       <section id="cobertura" className="relative bg-white bg-grid py-16 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-center text-xs font-semibold text-[#6B7280] uppercase tracking-[0.2em] mb-10">
-            Corridas de todo o Brasil
+            Corridas do Noroeste Paulista
           </h2>
 
           <div className="ticker-mask">

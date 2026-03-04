@@ -1,5 +1,4 @@
 import type { Scraper, ScrapedRace } from "./types";
-import { alcerScraper } from "./alcer";
 import { equilibrioScraper } from "./equilibrio";
 import { raxEventosScraper } from "./rax-eventos";
 import { tnvTeamScraper } from "./tnv-team";
@@ -8,7 +7,6 @@ import { tvcomRunningScraper } from "./tvcom-running";
 export type { ScrapedRace } from "./types";
 
 const scrapers: Scraper[] = [
-  alcerScraper,
   equilibrioScraper,
   raxEventosScraper,
   tnvTeamScraper,

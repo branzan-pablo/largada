@@ -9,10 +9,6 @@
       "schedule": "0 3 * * *"
     },
     {
-      "path": "/api/cron/scrape-alcer",
-      "schedule": "20 12 * * *"
-    },
-    {
       "path": "/api/cron/scrape-equilibrio",
       "schedule": "0 12 * * *"
     },

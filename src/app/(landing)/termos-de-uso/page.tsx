@@ -37,7 +37,7 @@ export default function TermosDeUsoPage() {
               2. Descrição do Serviço
             </h2>
             <p>
-              A Largada é um calendário online de corridas de rua no Brasil. A
+              A Largada é um calendário online de corridas de rua da região Noroeste Paulista. A
               plataforma agrega informações sobre eventos de corrida, permitindo
               que usuários descubram provas por localização, distância e data.
             </p>

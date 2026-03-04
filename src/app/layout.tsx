@@ -29,14 +29,14 @@ export const metadata: Metadata = {
     template: "%s | Largada",
   },
   description:
-    "Calendário de corridas de rua com mais de 5.000 cidades. Filtre por distância, premiação e data. Receba alertas antes dos prazos fecharem.",
+    "Calendário de corridas de rua do Noroeste Paulista. Filtre por distância, premiação e data. Receba alertas antes dos prazos fecharem.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
   ),
   openGraph: {
     title: "Largada",
     description:
-      "Calendário de corridas de rua com mais de 5.000 cidades. Filtre por distância, premiação e data.",
+      "Calendário de corridas de rua do Noroeste Paulista. Filtre por distância, premiação e data.",
     siteName: "Largada",
     locale: "pt_BR",
     type: "website",
