@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/auth-context";
 import { LoginModalProvider, LoginModalUrlHandler } from "@/contexts/login-modal-context";
 import { ClientLoginModal, ClientToaster } from "@/components/layout/client-shell";
 import { SwRegister } from "@/components/pwa/sw-register";
+import { WhatsAppFab } from "@/components/layout/whatsapp-fab";
 import "./globals.css";
 
 const inter = Inter({
@@ -76,6 +77,7 @@ export default function RootLayout({
         </AuthProvider>
         <ClientToaster />
         <SwRegister />
+        <WhatsAppFab />
         <SpeedInsights />
       </body>
     </html>
