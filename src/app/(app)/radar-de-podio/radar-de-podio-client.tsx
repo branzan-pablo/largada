@@ -3,8 +3,6 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -13,26 +11,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
-import { DEFAULT_DISTANCES, RADAR_AGE_CATEGORIES } from "@/lib/constants";
-import { formatDate } from "@/lib/date";
+import {
+  DEFAULT_DISTANCES,
+  RADAR_AGE_CATEGORIES,
+  RADAR_WHATSAPP_NUMBER,
+} from "@/lib/constants";
 import {
   ArrowLeft,
   ArrowRight,
   Crosshair,
   Gauge,
-  Route,
   Users,
   MapPin,
-  Loader2,
-  Lock,
-  Trophy,
-  Calendar,
-  TrendingUp,
-  Zap,
-  Target,
-  ChevronRight,
+  MessageCircle,
+  CheckCircle2,
+  Sparkles,
 } from "lucide-react";
-import type { ScoredRace } from "@/lib/radar/scoring";
 
 interface FormData {
   pace: string;
@@ -46,27 +40,7 @@ interface FormData {
   longitude: number | null;
 }
 
-interface AnalysisResult {
-  totalFound: number;
-  totalRecommended: number;
-  freeResults: ScoredRace[];
-  lockedCount: number;
-  lockedResults: Array<{
-    score: number;
-    label: string;
-    race: { city: string; state: string; date: string };
-  }>;
-  profile: {
-    id: string;
-    pace: string;
-    distance: string;
-    sex: string;
-    ageCategory: string;
-    city: string;
-  };
-}
-
-type Step = "form" | "loading" | "results";
+type Step = "form" | "confirm" | "success";
 
 function formatPace(value: string): string {
   const digits = value.replace(/\D/g, "");
@@ -78,50 +52,21 @@ function isValidPace(pace: string): boolean {
   return /^\d{2}:\d{2}$/.test(pace);
 }
 
-function scoreColor(label: string): string {
-  switch (label) {
-    case "alta":
-      return "text-green-600";
-    case "media":
-      return "text-amber-500";
-    default:
-      return "text-gray-400";
-  }
-}
+function buildWhatsAppUrl(form: FormData): string {
+  const sexLabel = form.sex === "masculino" ? "Masculino" : "Feminino";
+  const message = [
+    "Olá! Gostaria de solicitar a *Curadoria de Corridas*.",
+    "",
+    `Pace: ${form.pace}/km`,
+    `Distância: ${form.distance}`,
+    `Sexo: ${sexLabel}`,
+    `Faixa etária: ${form.category}`,
+    `Cidade: ${form.city}`,
+    "",
+    "Estou ciente que o serviço custa R$ 29,90.",
+  ].join("\n");
 
-function scoreBg(label: string): string {
-  switch (label) {
-    case "alta":
-      return "bg-green-50 border-green-200";
-    case "media":
-      return "bg-amber-50 border-amber-200";
-    default:
-      return "bg-gray-50 border-gray-200";
-  }
-}
-
-function scoreBadgeVariant(
-  label: string,
-): string {
-  switch (label) {
-    case "alta":
-      return "bg-green-100 text-green-700 border-green-200";
-    case "media":
-      return "bg-amber-100 text-amber-700 border-amber-200";
-    default:
-      return "bg-gray-100 text-gray-500 border-gray-200";
-  }
-}
-
-function labelText(label: string): string {
-  switch (label) {
-    case "alta":
-      return "Alta chance";
-    case "media":
-      return "Chance moderada";
-    default:
-      return "Chance baixa";
-  }
+  return `https://wa.me/${RADAR_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
 export function RadarDePodioClient() {
@@ -137,8 +82,6 @@ export function RadarDePodioClient() {
     latitude: null,
     longitude: null,
   });
-  const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const isFormValid =
     isValidPace(form.pace) &&
@@ -147,46 +90,24 @@ export function RadarDePodioClient() {
     form.sex !== "" &&
     form.city !== "";
 
-  const handleAnalyze = useCallback(async () => {
-    if (!isFormValid) return;
-    setStep("loading");
-    setError(null);
-
-    try {
-      const res = await fetch("/api/radar/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          pace: form.pace,
-          distance: form.distance,
-          sex: form.sex,
-          ageCategory: form.category,
-          city: form.city,
-          cityId: form.cityId,
-          state: form.state,
-          latitude: form.latitude,
-          longitude: form.longitude,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Erro ao analisar");
-      }
-
-      const data: AnalysisResult = await res.json();
-      setResult(data);
-      setStep("results");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro inesperado");
-      setStep("form");
-    }
-  }, [form, isFormValid]);
+  const handleSendWhatsApp = useCallback(() => {
+    window.open(buildWhatsAppUrl(form), "_blank");
+    setStep("success");
+  }, [form]);
 
   const handleReset = useCallback(() => {
     setStep("form");
-    setResult(null);
-    setError(null);
+    setForm({
+      pace: "",
+      distance: "",
+      category: "",
+      sex: "",
+      city: "",
+      cityId: null,
+      state: null,
+      latitude: null,
+      longitude: null,
+    });
   }, []);
 
   return (
@@ -197,24 +118,18 @@ export function RadarDePodioClient() {
           <Crosshair className="h-5 w-5 text-[#FF4D00]" />
         </div>
         <div>
-          <h1 className="text-lg font-bold text-[#0D1B2A]">Radar de Pódio</h1>
+          <h1 className="text-lg font-bold text-[#0D1B2A]">
+            Curadoria de Corridas
+          </h1>
           <p className="text-xs text-muted-foreground">
-            {step === "results"
-              ? `${result?.totalFound ?? 0} corridas analisadas`
-              : "Descubra onde você tem chances reais de pódio"}
+            Encontre as melhores provas para o seu perfil
           </p>
         </div>
       </div>
 
-      {/* ──── FORM STEP ──── */}
+      {/* ──── STEP 1: FORM ──── */}
       {step === "form" && (
         <div className="space-y-4">
-          {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
           {/* Performance */}
           <div className="rounded-xl border border-gray-200 bg-white p-4">
             <div className="mb-3 flex items-center gap-2">
@@ -352,339 +267,122 @@ export function RadarDePodioClient() {
           </div>
 
           <Button
-            onClick={handleAnalyze}
+            onClick={() => setStep("confirm")}
             disabled={!isFormValid}
             className="w-full bg-[#FF4D00] hover:bg-[#E04500]"
             size="lg"
           >
-            Descobrir minhas corridas de pódio
+            Continuar
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-
-          <p className="text-center text-xs text-muted-foreground">
-            Analisamos seu pace e perfil contra todas as corridas disponíveis
-          </p>
         </div>
       )}
 
-      {/* ──── LOADING STEP ──── */}
-      {step === "loading" && (
+      {/* ──── STEP 2: CONFIRM ──── */}
+      {step === "confirm" && (
         <div className="space-y-4">
-          <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
-            <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-[#FF4D00]" />
-            <p className="text-sm font-medium text-[#0D1B2A]">
-              Analisando corridas...
+          {/* Review data */}
+          <div className="rounded-xl border border-gray-200 bg-white p-4">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#0D1B2A]">
+              Revise seus dados
+            </p>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <div className="flex justify-between">
+                <span>Pace</span>
+                <span className="font-medium text-[#0D1B2A]">
+                  {form.pace}/km
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Distância</span>
+                <span className="font-medium text-[#0D1B2A]">
+                  {form.distance}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Sexo</span>
+                <span className="font-medium text-[#0D1B2A]">
+                  {form.sex === "masculino" ? "Masculino" : "Feminino"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Faixa etária</span>
+                <span className="font-medium text-[#0D1B2A]">
+                  {form.category}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Cidade</span>
+                <span className="font-medium text-[#0D1B2A]">{form.city}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Pricing card */}
+          <div className="rounded-xl border-2 border-[#FF4D00]/30 bg-gradient-to-br from-[#FF4D00]/5 to-orange-50 p-5">
+            <div className="mb-2 flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-[#FF4D00]" />
+              <p className="text-sm font-bold text-[#0D1B2A]">
+                Curadoria personalizada
+              </p>
+            </div>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Um especialista vai analisar seu perfil e recomendar as melhores
+              corridas para você.
+            </p>
+            <p className="text-center text-lg font-bold text-[#0D1B2A]">
+              R$ 29,90
+            </p>
+            <p className="mt-1 text-center text-xs text-muted-foreground">
+              Pagamento único &middot; Retorno em até 48h
+            </p>
+          </div>
+
+          <Button
+            onClick={handleSendWhatsApp}
+            className="w-full bg-[#25D366] hover:bg-[#1DA851]"
+            size="lg"
+          >
+            <MessageCircle className="mr-2 h-4 w-4" />
+            Solicitar curadoria via WhatsApp
+          </Button>
+
+          <Button
+            variant="ghost"
+            onClick={() => setStep("form")}
+            className="w-full"
+            size="sm"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar e editar
+          </Button>
+        </div>
+      )}
+
+      {/* ──── STEP 3: SUCCESS ──── */}
+      {step === "success" && (
+        <div className="space-y-4">
+          <div className="rounded-xl border border-green-200 bg-green-50 p-6 text-center">
+            <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-green-600" />
+            <p className="text-sm font-semibold text-[#0D1B2A]">
+              Solicitação enviada!
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Cruzando seu pace de {form.pace}/km com o perfil de cada prova
+              Retornaremos em breve pelo WhatsApp com suas recomendações
+              personalizadas.
             </p>
           </div>
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="rounded-xl border border-gray-200 bg-white p-4"
-              >
-                <div className="flex items-center gap-3">
-                  <Skeleton className="h-12 w-12 rounded-lg" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </div>
-                  <Skeleton className="h-8 w-16 rounded-full" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* ──── RESULTS STEP ──── */}
-      {step === "results" && result && (
-        <div className="space-y-4">
-          {/* Summary card */}
-          <div className="rounded-xl border border-[#FF4D00]/20 bg-gradient-to-br from-[#FF4D00]/5 to-white p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-[#0D1B2A]">
-                  {result.totalRecommended > 0
-                    ? `${result.totalRecommended} corrida${result.totalRecommended > 1 ? "s" : ""} com potencial`
-                    : "Nenhuma corrida com alto potencial"}
-                </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {form.pace}/km &middot; {form.distance} &middot;{" "}
-                  {form.sex === "masculino" ? "M" : "F"} {form.category}
-                </p>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FF4D00]/10">
-                <Target className="h-5 w-5 text-[#FF4D00]" />
-              </div>
-            </div>
-          </div>
-
-          {/* Free results */}
-          {result.freeResults.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Suas melhores chances
-              </p>
-              {result.freeResults.map((item) => (
-                <RaceResultCard key={item.race.id} item={item} />
-              ))}
-            </div>
-          )}
-
-          {/* Locked results */}
-          {result.lockedCount > 0 && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  +{result.lockedCount} corrida
-                  {result.lockedCount > 1 ? "s" : ""} encontrada
-                  {result.lockedCount > 1 ? "s" : ""}
-                </p>
-              </div>
-              {result.lockedResults.slice(0, 3).map((item, i) => (
-                <LockedRaceCard key={i} item={item} />
-              ))}
-              {result.lockedCount > 3 && (
-                <p className="text-center text-xs text-muted-foreground">
-                  e mais {result.lockedCount - 3} corrida
-                  {result.lockedCount - 3 > 1 ? "s" : ""}...
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Paywall CTA */}
-          {result.lockedCount > 0 && (
-            <div className="rounded-xl border-2 border-[#FF4D00]/30 bg-gradient-to-br from-[#FF4D00]/5 to-orange-50 p-5">
-              <div className="mb-3 flex items-center gap-2">
-                <Zap className="h-5 w-5 text-[#FF4D00]" />
-                <p className="text-sm font-bold text-[#0D1B2A]">
-                  Desbloqueie a análise completa
-                </p>
-              </div>
-              <ul className="mb-4 space-y-2 text-xs text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <TrendingUp className="h-3.5 w-3.5 text-[#FF4D00]" />
-                  Todas as {result.totalFound} corridas com score detalhado
-                </li>
-                <li className="flex items-center gap-2">
-                  <Trophy className="h-3.5 w-3.5 text-[#FF4D00]" />
-                  Ranking completo de compatibilidade
-                </li>
-                <li className="flex items-center gap-2">
-                  <Target className="h-3.5 w-3.5 text-[#FF4D00]" />
-                  Análise por proximidade, competitividade e premiação
-                </li>
-              </ul>
-              <p className="mb-1 text-center text-lg font-bold text-[#0D1B2A]">
-                R$ 9,90
-              </p>
-              <p className="mb-3 text-center text-xs text-muted-foreground">
-                Análise avulsa &middot; Pagamento único
-              </p>
-              <Button
-                className="w-full bg-[#FF4D00] hover:bg-[#E04500]"
-                size="lg"
-                disabled
-              >
-                <Lock className="mr-2 h-4 w-4" />
-                Desbloquear análise completa
-              </Button>
-              <p className="mt-2 text-center text-[10px] text-muted-foreground">
-                Em breve &middot; Pagamento via PIX ou cartão
-              </p>
-            </div>
-          )}
-
-          {/* No results */}
-          {result.totalFound === 0 && (
-            <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
-              <Route className="mx-auto mb-3 h-8 w-8 text-gray-300" />
-              <p className="text-sm font-medium text-[#0D1B2A]">
-                Nenhuma corrida de {form.distance} encontrada
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Tente outra distância ou volte em breve — novas corridas são
-                adicionadas toda semana.
-              </p>
-            </div>
-          )}
-
-          {/* Social proof */}
-          <div className="rounded-lg bg-gray-50 p-3 text-center text-xs text-muted-foreground">
-            Baseado em dados reais de corridas cadastradas no Largada
-          </div>
-
-          {/* Anchoring phrase */}
-          <p className="text-center text-xs text-muted-foreground italic">
-            &ldquo;Uma inscrição custa entre R$80 e R$250. O Radar te ajuda a
-            investir onde o retorno é real.&rdquo;
-          </p>
-
-          {/* Reset button */}
           <Button
             variant="outline"
             onClick={handleReset}
             className="w-full"
             size="lg"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Nova consulta
+            Fazer nova consulta
           </Button>
         </div>
       )}
-    </div>
-  );
-}
-
-// ──── Sub-components ────
-
-function RaceResultCard({ item }: { item: ScoredRace }) {
-  const { race, score, distanceKm, label } = item;
-
-  return (
-    <a
-      href={`/corrida/${race.slug}`}
-      className={`block rounded-xl border p-4 transition-all hover:shadow-md ${scoreBg(label)}`}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="truncate text-sm font-semibold text-[#0D1B2A]">
-              {race.name}
-            </p>
-            {race.isPromoted && (
-              <Badge className="shrink-0 border-amber-200 bg-amber-100 text-[10px] text-amber-700">
-                Destaque
-              </Badge>
-            )}
-          </div>
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {race.city} - {race.state}
-            </span>
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              {formatDate(race.date)}
-            </span>
-            {distanceKm >= 0 && (
-              <span className="flex items-center gap-1">
-                <Route className="h-3 w-3" />
-                {distanceKm} km
-              </span>
-            )}
-          </div>
-          {/* Factor bars */}
-          <div className="mt-2.5 grid grid-cols-4 gap-1.5">
-            <FactorBar
-              label="Proximidade"
-              value={item.factors.proximity}
-            />
-            <FactorBar
-              label="Competição"
-              value={item.factors.competition}
-            />
-            <FactorBar label="Premiação" value={item.factors.prize} />
-            <FactorBar label="Timing" value={item.factors.timing} />
-          </div>
-        </div>
-        <div className="flex shrink-0 flex-col items-center gap-1">
-          <div
-            className={`flex h-11 w-11 items-center justify-center rounded-full text-base font-bold ${scoreColor(label)} ${
-              label === "alta"
-                ? "bg-green-100"
-                : label === "media"
-                  ? "bg-amber-100"
-                  : "bg-gray-100"
-            }`}
-          >
-            {score}
-          </div>
-          <Badge
-            className={`border text-[9px] ${scoreBadgeVariant(label)}`}
-          >
-            {labelText(label)}
-          </Badge>
-        </div>
-      </div>
-      <div className="mt-3 flex items-center justify-between">
-        <span className="text-xs font-medium text-[#FF4D00]">
-          Ver detalhes da corrida
-        </span>
-        <ChevronRight className="h-3.5 w-3.5 text-[#FF4D00]" />
-      </div>
-    </a>
-  );
-}
-
-function LockedRaceCard({
-  item,
-}: {
-  item: {
-    score: number;
-    label: string;
-    race: { city: string; state: string; date: string };
-  };
-}) {
-  return (
-    <div className="relative rounded-xl border border-gray-200 bg-white p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-32 rounded bg-gray-200" />
-            <Lock className="h-3 w-3 text-gray-300" />
-          </div>
-          <div className="mt-1.5 flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {item.race.city} - {item.race.state}
-            </span>
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              {formatDate(item.race.date)}
-            </span>
-          </div>
-        </div>
-        <div className="flex shrink-0 flex-col items-center gap-1 opacity-50">
-          <div
-            className={`flex h-11 w-11 items-center justify-center rounded-full text-base font-bold ${scoreColor(item.label)} ${
-              item.label === "alta"
-                ? "bg-green-100"
-                : item.label === "media"
-                  ? "bg-amber-100"
-                  : "bg-gray-100"
-            }`}
-          >
-            {item.score}
-          </div>
-          <Badge
-            className={`border text-[9px] ${scoreBadgeVariant(item.label)}`}
-          >
-            {labelText(item.label)}
-          </Badge>
-        </div>
-      </div>
-      {/* Blur overlay */}
-      <div className="pointer-events-none absolute inset-0 rounded-xl bg-white/60 backdrop-blur-[2px]" />
-    </div>
-  );
-}
-
-function FactorBar({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <div className="mb-0.5 text-[9px] text-muted-foreground">{label}</div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
-        <div
-          className="h-full rounded-full bg-[#FF4D00] transition-all"
-          style={{ width: `${Math.min(100, value)}%` }}
-        />
-      </div>
     </div>
   );
 }

@@ -37,7 +37,7 @@ export type PaymentStatus =
 export const OrderType = {
     RACE_PROMOTION: "race_promotion",
     PREMIUM_SUBSCRIPTION: "premium_subscription",
-    RADAR_ANALYSIS: "radar_analysis",
+
     RACE_REGISTRATION: "race_registration",
     EXTRA_SERVICE: "extra_service",
     OTHER: "other",
@@ -305,7 +305,6 @@ export const createBillingSchema = z.object({
     orderType: z.enum([
         "race_promotion",
         "premium_subscription",
-        "radar_analysis",
         "race_registration",
         "extra_service",
         "other",
@@ -322,7 +321,6 @@ export const createPixQrCodeSchema = z.object({
     orderType: z.enum([
         "race_promotion",
         "premium_subscription",
-        "radar_analysis",
         "race_registration",
         "extra_service",
         "other",
