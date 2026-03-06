@@ -7,6 +7,38 @@ function isValidDate(dateStr: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(dateStr) && !isNaN(Date.parse(dateStr));
 }
 
+function normalizeForDedup(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function jaccardSimilarity(a: string, b: string): number {
+  const setA = new Set(a.split(" "));
+  const setB = new Set(b.split(" "));
+  let intersection = 0;
+  for (const word of setA) {
+    if (setB.has(word)) intersection++;
+  }
+  const union = new Set([...setA, ...setB]).size;
+  return union === 0 ? 1 : intersection / union;
+}
+
+function isSimilarRace(
+  a: { name: string; date: string | null; city: string | null },
+  b: { name: string; date: string; city: string | null },
+): boolean {
+  if (a.date !== b.date) return false;
+  const cityA = a.city ? normalizeForDedup(a.city) : "";
+  const cityB = b.city ? normalizeForDedup(b.city) : "";
+  if (cityA !== cityB) return false;
+  return jaccardSimilarity(normalizeForDedup(a.name), normalizeForDedup(b.name)) >= 0.75;
+}
+
 export async function insertScrapedRaces(
   races: ScrapedRace[],
 ): Promise<{ inserted: number; skipped: number; errors: string[] }> {
@@ -40,16 +72,63 @@ export async function insertScrapedRaces(
     .select("id, name, latitude, longitude");
   const cityMap = new Map((cities || []).map((c) => [c.name.toLowerCase(), c]));
 
+  // Pre-fetch existing future races for fuzzy dedup against DB
   const today = todayInBrazil();
+  const { data: existingFutureRaces } = await supabase
+    .from("races")
+    .select("name, date, city")
+    .gte("date", today);
+  const dbRaces: { name: string; date: string; city: string | null }[] =
+    (existingFutureRaces || []).map((r) => ({
+      name: r.name,
+      date: r.date,
+      city: r.city,
+    }));
+
+  // Track races seen in this batch for within-batch fuzzy dedup
+  const seenRaces: { name: string; date: string; city: string | null }[] = [];
+
   let inserted = 0;
   let skipped = 0;
   const errors: string[] = [];
 
   for (const race of races) {
+    // Filter: only São Paulo state. Races without state go through for admin review.
+    if (race.state && race.state.toUpperCase() !== "SP") {
+      skipped++;
+      continue;
+    }
+
     const slug = slugify(`${race.name}-${race.city || ""}`);
 
-    // Unified duplicate check
+    // Slug-based duplicate check
     if (existingSlugsSet.has(slug) || existingSlugsSet.has(race.slug)) {
+      skipped++;
+      continue;
+    }
+
+    // Fuzzy duplicate check against DB
+    const dbMatch = race.date
+      ? dbRaces.find((db) => isSimilarRace(race, db))
+      : undefined;
+    if (dbMatch) {
+      console.log(
+        `[insert-races] Fuzzy duplicate (DB): "${race.name}" ~ "${dbMatch.name}" (date: ${dbMatch.date}, city: ${dbMatch.city || "N/A"})`,
+      );
+      skipped++;
+      continue;
+    }
+
+    // Fuzzy duplicate check within batch
+    const batchMatch = race.date
+      ? seenRaces.find((seen) =>
+          isSimilarRace(race, { name: seen.name, date: seen.date, city: seen.city }),
+        )
+      : undefined;
+    if (batchMatch) {
+      console.log(
+        `[insert-races] Fuzzy duplicate (batch): "${race.name}" ~ "${batchMatch.name}" (date: ${batchMatch.date}, city: ${batchMatch.city || "N/A"})`,
+      );
       skipped++;
       continue;
     }
@@ -100,7 +179,7 @@ export async function insertScrapedRaces(
       start_time: race.startTime || "07:00",
       city: race.city || "Desconhecida",
       city_id: cityId,
-      state: race.state || "SP",
+      state: race.state || "N/A",
       address: race.address || race.city || "A definir",
       latitude,
       longitude,
@@ -136,8 +215,11 @@ export async function insertScrapedRaces(
       continue;
     }
 
-    // Track newly inserted slug to avoid duplicates within same batch
+    // Track newly inserted slug and race info for dedup within same batch
     existingSlugsSet.add(slug);
+    if (race.date) {
+      seenRaces.push({ name: race.name, date: race.date, city: race.city });
+    }
     inserted++;
   }
 
