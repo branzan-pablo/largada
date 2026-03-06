@@ -129,7 +129,7 @@ function HeroSlide({ race }: { race: Race }) {
   return (
     <Link
       href={`/corrida/${race.slug}`}
-      className="relative block w-full shrink-0 aspect-[16/9] md:aspect-[21/9]"
+      className="relative block w-full shrink-0 aspect-video md:aspect-21/9"
     >
       {/* Background image */}
       {race.image_url ? (
@@ -142,15 +142,15 @@ function HeroSlide({ race }: { race: Race }) {
           priority
         />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900" />
+        <div className="absolute inset-0 bg-linear-to-br from-gray-700 to-gray-900" />
       )}
 
       {/* Dark gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
 
-      {/* "Patrocinado" label — top right */}
-      <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-amber-500 text-white text-xs font-semibold uppercase px-2.5 py-1 rounded-full shadow-md">
-        <Star className="w-3.5 h-3.5 fill-white" />
+      {/* "Patrocinado" label — flush top right corner */}
+      <div className="absolute top-0 right-0 z-10 flex items-center gap-1.5 bg-linear-to-r from-[#FF4D00] to-[#E04400] text-white text-[10px] sm:text-xs font-extrabold uppercase px-3 py-1.5 rounded-bl-xl shadow-lg shadow-[#FF4D00]/40">
+        <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white" />
         Destaque
       </div>
 

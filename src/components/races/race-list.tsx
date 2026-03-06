@@ -55,7 +55,11 @@ export function RaceList() {
 
   if (profile && !hasInitializedFilters) {
     setHasInitializedFilters(true);
-    if (profile.notification_radius_km && profile.latitude && profile.longitude) {
+    if (
+      profile.notification_radius_km &&
+      profile.latitude &&
+      profile.longitude
+    ) {
       setFilters({ radius: profile.notification_radius_km });
     }
   }
@@ -65,7 +69,9 @@ export function RaceList() {
     fetch("/api/races/distances")
       .then((r) => r.json())
       .then((data: string[]) => setAvailableDistances(data))
-      .catch(() => {/* silently fall back to defaults in filter components */ });
+      .catch(() => {
+        /* silently fall back to defaults in filter components */
+      });
   }, []);
   const debouncedSearch = useDebounce(search, 300);
 
@@ -82,12 +88,12 @@ export function RaceList() {
 
   const promotedRaces = useMemo(
     () => races.filter((r) => r.is_promoted),
-    [races]
+    [races],
   );
 
   const mergedRaces = useMemo(
     () => buildMergedGrid(races, promotedRaces),
-    [races, promotedRaces]
+    [races, promotedRaces],
   );
 
   return (
@@ -99,7 +105,8 @@ export function RaceList() {
             Calendário de Corridas
           </h1>
           <p className="text-[#6B7280] text-sm md:text-base">
-            Filtre por cidade, distância e premiação. Marque &quot;Vou Nessa&quot; e veja quem da sua rede vai correr.
+            Filtre por cidade, distância e premiação. Marque &quot;Vou
+            Nessa&quot; e veja quem da sua rede vai correr.
           </p>
         </div>
 
@@ -117,9 +124,7 @@ export function RaceList() {
       </div>
 
       {/* Hero Carousel — promoted races (before filters) */}
-      {!isLoading && (
-        <PromotedHeroCarousel races={promotedRaces} />
-      )}
+      {!isLoading && <PromotedHeroCarousel races={promotedRaces} />}
 
       {/* Mobile: search + filter button */}
       <div className="mb-4 flex justify-end gap-3 md:hidden">
@@ -168,7 +173,10 @@ export function RaceList() {
             </p>
             <p className="mt-3 text-sm text-[#6B7280]">
               Conhece uma corrida que deveria aparecer aqui?{" "}
-              <a href="/sugerir" className="text-[#FF4D00] hover:text-[#E04400] underline underline-offset-2 transition-colors">
+              <a
+                href="/sugerir"
+                className="text-[#FF4D00] hover:text-[#E04400] underline underline-offset-2 transition-colors"
+              >
                 Sugerir corrida
               </a>
             </p>
@@ -213,7 +221,7 @@ export function RaceList() {
 function RaceCardSkeleton() {
   return (
     <div>
-      <Skeleton className="aspect-[4/3] w-full rounded-xl bg-gray-200" />
+      <Skeleton className="aspect-4/3 w-full rounded-xl bg-gray-200" />
       <div className="pt-3 space-y-2">
         <Skeleton className="h-4 w-full bg-gray-200 rounded" />
         <Skeleton className="h-4 w-3/4 bg-gray-200 rounded" />

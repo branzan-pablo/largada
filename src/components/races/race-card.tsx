@@ -16,9 +16,9 @@ export function RaceCard({ race }: { race: Race }) {
   const formattedDate = format(raceDate, "dd 'de' MMM, yyyy", { locale: ptBR });
 
   return (
-    <Link href={`/corrida/${race.slug}`} className={`block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden ${race.is_promoted ? "border-2 border-amber-400 shadow-lg shadow-amber-100 bg-gradient-to-b from-amber-50/40 to-transparent" : ""}`}>
+    <Link href={`/corrida/${race.slug}`} className={`block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden transition-colors ${race.is_promoted ? "ring-2 ring-[#FF4D00] shadow-lg shadow-[#FF4D00]/20 bg-linear-to-b from-[#FF4D00]/5 to-transparent" : ""}`}>
       {/* Thumbnail */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-100">
+      <div className="relative aspect-4/3 w-full overflow-hidden rounded-xl bg-gray-100">
         {race.image_url ? (
           <>
             {/* Blurred background layer */}
@@ -40,16 +40,16 @@ export function RaceCard({ race }: { race: Race }) {
             />
           </>
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-linear-to-br from-gray-100 to-gray-200">
             <span className="text-3xl font-black text-[#0D1B2A]">{day}</span>
             <span className="text-xs font-bold text-gray-500 uppercase">{month}</span>
           </div>
         )}
 
-        {/* Promoted badge pill — top right */}
+        {/* Promoted badge — flush top right corner */}
         {race.is_promoted && (
-          <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-amber-500 text-white text-xs uppercase font-semibold px-2.5 py-1 rounded-full shadow-md">
-            <Star className="w-3.5 h-3.5 fill-white" />
+          <div className="absolute top-0 right-0 z-10 flex items-center gap-1.5 bg-linear-to-r from-[#FF4D00] to-[#E04400] text-white text-[10px] sm:text-xs uppercase font-extrabold px-3 py-1.5 rounded-tr-xl rounded-bl-xl shadow-lg shadow-[#FF4D00]/40">
+            <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white" />
             Destaque
           </div>
         )}
