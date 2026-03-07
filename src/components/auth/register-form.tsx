@@ -99,7 +99,7 @@ export function RegisterForm() {
         {errors.fullName && <p className="text-xs text-destructive">{errors.fullName}</p>}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="reg-email">Email</Label>
+        <Label htmlFor="reg-email">E-mail</Label>
         <Input
           id="reg-email"
           type="email"
