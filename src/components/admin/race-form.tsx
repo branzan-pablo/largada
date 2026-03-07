@@ -20,7 +20,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { DEFAULT_DISTANCES } from "@/lib/constants";
 import { raceSchema } from "@/lib/validations";
 import { toast } from "sonner";
-import type { Race } from "@/types/race";
+import type { Race, RegistrationBatch } from "@/types/race";
 
 interface RaceFormProps {
   race?: Race;
@@ -63,6 +63,9 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     race?.registration_prices ?? {}
   );
   const [registrationPrice, setRegistrationPrice] = useState(race?.registration_price ?? "");
+  const [registrationBatches, setRegistrationBatches] = useState<RegistrationBatch[]>(
+    race?.registration_batches ?? []
+  );
   const [registrationLink, setRegistrationLink] = useState(race?.registration_link ?? "");
   const [registrationDeadline, setRegistrationDeadline] = useState(race?.registration_deadline ?? "");
   const [prizeType, setPrizeType] = useState<string>(race?.prize_type ?? "none");
@@ -134,6 +137,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       distances,
       registrationPrices: Object.keys(filteredPrices).length > 0 ? filteredPrices : undefined,
       registrationPrice: registrationPrice || undefined,
+      registrationBatches: registrationBatches.length > 0 ? registrationBatches : undefined,
       registrationLink,
       registrationDeadline,
       prizeType,
@@ -494,8 +498,8 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           <h2 className="text-lg font-semibold">Inscrição</h2>
 
           <div className="space-y-4">
-            {/* Per-distance prices */}
-            {distances.length > 0 && (
+            {/* Per-distance prices (simple mode — shown when no batches) */}
+            {distances.length > 0 && registrationBatches.length === 0 && (
               <div className="space-y-2">
                 <Label>Valor por distância</Label>
                 <div className="space-y-2">
@@ -518,32 +522,179 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                     </div>
                   ))}
                 </div>
-                {errors.registrationPrice && !registrationPrice && (
-                  <p className="text-xs text-destructive">{errors.registrationPrice}</p>
-                )}
               </div>
             )}
+
+            {/* Registration Batches (lotes) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Lotes de preço</Label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setRegistrationBatches((prev) => [
+                      ...prev,
+                      { name: `${prev.length + 1}º Lote`, items: [{ label: "", price: "" }] },
+                    ])
+                  }
+                  className="text-sm text-primary hover:underline"
+                >
+                  + Adicionar lote
+                </button>
+              </div>
+
+              {registrationBatches.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Organize os preços por lote (ex: Lote Promocional, 1º Lote). Cada lote pode ter vários kits/modalidades.
+                </p>
+              )}
+
+              {registrationBatches.map((batch, batchIndex) => (
+                <div
+                  key={batchIndex}
+                  className="rounded-lg border border-gray-200 bg-gray-50/50 p-4 space-y-3"
+                >
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1 grid gap-2 sm:grid-cols-2">
+                      <Input
+                        value={batch.name}
+                        onChange={(e) =>
+                          setRegistrationBatches((prev) =>
+                            prev.map((b, i) =>
+                              i === batchIndex ? { ...b, name: e.target.value } : b
+                            )
+                          )
+                        }
+                        placeholder="Nome do lote (ex: 1º Lote)"
+                        className="h-9 text-sm font-medium"
+                      />
+                      <Input
+                        type="date"
+                        value={batch.deadline ?? ""}
+                        onChange={(e) =>
+                          setRegistrationBatches((prev) =>
+                            prev.map((b, i) =>
+                              i === batchIndex
+                                ? { ...b, deadline: e.target.value || undefined }
+                                : b
+                            )
+                          )
+                        }
+                        placeholder="Data limite (opcional)"
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setRegistrationBatches((prev) => prev.filter((_, i) => i !== batchIndex))
+                      }
+                      className="mt-1.5 text-gray-400 hover:text-destructive transition-colors text-lg leading-none"
+                      aria-label={`Remover ${batch.name}`}
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  {/* Batch items */}
+                  <div className="space-y-2 pl-1">
+                    {batch.items.map((item, itemIndex) => (
+                      <div key={itemIndex} className="flex items-center gap-2">
+                        <Input
+                          value={item.label}
+                          onChange={(e) =>
+                            setRegistrationBatches((prev) =>
+                              prev.map((b, bi) =>
+                                bi === batchIndex
+                                  ? {
+                                      ...b,
+                                      items: b.items.map((it, ii) =>
+                                        ii === itemIndex ? { ...it, label: e.target.value } : it
+                                      ),
+                                    }
+                                  : b
+                              )
+                            )
+                          }
+                          placeholder="Kit / modalidade (ex: Kit Premium 5K)"
+                          className="h-8 text-sm flex-1"
+                        />
+                        <Input
+                          value={item.price}
+                          onChange={(e) =>
+                            setRegistrationBatches((prev) =>
+                              prev.map((b, bi) =>
+                                bi === batchIndex
+                                  ? {
+                                      ...b,
+                                      items: b.items.map((it, ii) =>
+                                        ii === itemIndex ? { ...it, price: e.target.value } : it
+                                      ),
+                                    }
+                                  : b
+                              )
+                            )
+                          }
+                          placeholder="R$ 99,00"
+                          className="h-8 text-sm w-32"
+                        />
+                        {batch.items.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setRegistrationBatches((prev) =>
+                                prev.map((b, bi) =>
+                                  bi === batchIndex
+                                    ? { ...b, items: b.items.filter((_, ii) => ii !== itemIndex) }
+                                    : b
+                                )
+                              )
+                            }
+                            className="text-gray-400 hover:text-destructive transition-colors"
+                            aria-label="Remover item"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setRegistrationBatches((prev) =>
+                          prev.map((b, bi) =>
+                            bi === batchIndex
+                              ? { ...b, items: [...b.items, { label: "", price: "" }] }
+                              : b
+                          )
+                        )
+                      }
+                      className="text-xs text-primary hover:underline"
+                    >
+                      + Adicionar item
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {errors.registrationPrice && (
+                <p className="text-xs text-destructive">{errors.registrationPrice}</p>
+              )}
+            </div>
 
             {/* Free-text notes about pricing */}
             <div className="space-y-2">
               <Label htmlFor="registrationPrice">
-                {distances.length > 0 ? "Observações sobre valores" : "Valor da inscrição"}
-                {distances.length === 0 && <span className="text-destructive"> *</span>}
+                Observações sobre valores
               </Label>
               <Textarea
                 id="registrationPrice"
                 value={registrationPrice}
                 onChange={(e) => setRegistrationPrice(e.target.value)}
-                placeholder={distances.length > 0
-                  ? "Ex: 1º lote até 15/01, desconto para idosos..."
-                  : "Ex: 1º lote R$80, 2º lote R$100"
-                }
-                className={`min-h-[60px] ${errors.registrationPrice && !distances.length ? "border-destructive" : ""}`}
+                placeholder="Ex: 1º lote até 15/01, desconto para idosos, PcD..."
+                className="min-h-[60px]"
                 rows={2}
               />
-              {errors.registrationPrice && distances.length === 0 && (
-                <p className="text-xs text-destructive">{errors.registrationPrice}</p>
-              )}
             </div>
 
             <div className="space-y-2">

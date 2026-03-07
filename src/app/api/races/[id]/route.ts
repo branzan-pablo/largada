@@ -62,6 +62,7 @@ export async function PATCH(
     distances: "distances",
     registrationPrice: "registration_price",
     registrationPrices: "registration_prices",
+    registrationBatches: "registration_batches",
     registrationLink: "registration_link",
     registrationDeadline: "registration_deadline",
     prizeType: "prize_type",

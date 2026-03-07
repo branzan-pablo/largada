@@ -183,6 +183,7 @@ export async function POST(request: Request) {
     distances: body.distances,
     registration_price: body.registrationPrice ?? "",
     registration_prices: body.registrationPrices ?? null,
+    registration_batches: body.registrationBatches ?? null,
     registration_link: body.registrationLink,
     registration_deadline: body.registrationDeadline,
     prize_type: body.prizeType,

@@ -1,3 +1,14 @@
+export interface RegistrationBatchItem {
+  label: string;
+  price: string;
+}
+
+export interface RegistrationBatch {
+  name: string;
+  deadline?: string;
+  items: RegistrationBatchItem[];
+}
+
 export interface Race {
   id: string;
   name: string;
@@ -12,6 +23,7 @@ export interface Race {
   distances: string[];
   registration_price: string;
   registration_prices: Record<string, string> | null;
+  registration_batches: RegistrationBatch[] | null;
   registration_link: string;
   registration_deadline: string;
   prize_type: "money" | "trophy" | "both" | "none";

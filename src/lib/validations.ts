@@ -25,6 +25,17 @@ export const profileUpdateSchema = z.object({
   notificationsEnabled: z.boolean(),
 });
 
+const registrationBatchItemSchema = z.object({
+  label: z.string().min(1, "Nome do item é obrigatório"),
+  price: z.string().min(1, "Preço é obrigatório"),
+});
+
+const registrationBatchSchema = z.object({
+  name: z.string().min(1, "Nome do lote é obrigatório"),
+  deadline: z.string().optional(),
+  items: z.array(registrationBatchItemSchema).min(1, "Adicione pelo menos um item ao lote"),
+});
+
 export const raceSchemaBase = z.object({
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
   date: z.string().min(1, "Data é obrigatória"),
@@ -37,6 +48,7 @@ export const raceSchemaBase = z.object({
   distances: z.array(z.string()).min(1, "Selecione pelo menos uma distância"),
   registrationPrices: z.record(z.string(), z.string()).optional(),
   registrationPrice: z.string().optional().default(""),
+  registrationBatches: z.array(registrationBatchSchema).optional(),
   registrationLink: z.string().min(1, "Link de inscrição é obrigatório").transform(normalizeUrl).pipe(z.url("Link de inscrição inválido")),
   registrationDeadline: z.string().min(1, "Prazo de inscrição é obrigatório"),
   prizeType: z.enum(["money", "trophy", "both", "none"]),
@@ -58,9 +70,10 @@ export const raceSchema = raceSchemaBase
   .refine(
     (data) => {
       const hasPrices = data.registrationPrices && Object.keys(data.registrationPrices).length > 0;
-      return hasPrices || (data.registrationPrice && data.registrationPrice.length > 0);
+      const hasBatches = data.registrationBatches && data.registrationBatches.length > 0;
+      return hasPrices || hasBatches || (data.registrationPrice && data.registrationPrice.length > 0);
     },
-    { message: "Informe o valor por distância ou preencha o campo de valor da inscrição", path: ["registrationPrice"] }
+    { message: "Informe o valor por distância, adicione lotes de preço, ou preencha o campo de valor da inscrição", path: ["registrationPrice"] }
   );
 
 export const suggestionSchema = z.object({

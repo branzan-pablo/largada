@@ -295,6 +295,7 @@ export type Database = {
           registration_link: string
           registration_price: string
           registration_prices: Record<string, string> | null
+          registration_batches: Record<string, unknown>[] | null
           route_description: string | null
           link: string | null
           notes: string | null
@@ -332,6 +333,7 @@ export type Database = {
           registration_link: string
           registration_price: string
           registration_prices?: Record<string, string> | null
+          registration_batches?: Record<string, unknown>[] | null
           route_description?: string | null
           route_image_url?: string | null
           rsvp_count?: number
@@ -367,6 +369,7 @@ export type Database = {
           registration_link?: string
           registration_price?: string
           registration_prices?: Record<string, string> | null
+          registration_batches?: Record<string, unknown>[] | null
           route_description?: string | null
           route_image_url?: string | null
           rsvp_count?: number

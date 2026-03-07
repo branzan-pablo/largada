@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { formatDateFull, formatTime, todayInBrazil, utcNow } from "@/lib/date";
 import { PRIZE_TYPES } from "@/lib/constants";
-import type { Race } from "@/types/race";
+import type { Race, RegistrationBatch } from "@/types/race";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -290,8 +290,37 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-4">
               <h3 className="font-semibold text-[#0D1B2A]">Inscrição</h3>
 
-              {/* Per-distance prices */}
-              {typedRace.registration_prices && Object.keys(typedRace.registration_prices).length > 0 ? (
+              {/* Registration batches (lotes) */}
+              {(typedRace.registration_batches as RegistrationBatch[] | null)?.length ? (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Valores</p>
+                  {(typedRace.registration_batches as RegistrationBatch[]).map((batch, i) => (
+                    <div key={i} className="rounded-lg bg-white border border-gray-100 p-3">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-xs font-semibold text-[#0D1B2A]">{batch.name}</p>
+                        {batch.deadline && (
+                          <span className="text-[10px] text-muted-foreground">
+                            até {formatDateFull(batch.deadline)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        {batch.items.map((item, j) => (
+                          <div key={j} className="flex items-center justify-between gap-2 text-sm">
+                            <span className="text-muted-foreground text-xs">{item.label}</span>
+                            <span className="font-medium whitespace-nowrap">{item.price}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  {typedRace.registration_price && (
+                    <div className="rounded-lg bg-white border border-gray-100 p-3">
+                      <ExpandableText text={typedRace.registration_price} maxLength={100} />
+                    </div>
+                  )}
+                </div>
+              ) : typedRace.registration_prices && Object.keys(typedRace.registration_prices).length > 0 ? (
                 <div className="rounded-lg bg-white border border-gray-100 p-3">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Valor</p>
                   <div className="space-y-1.5">
