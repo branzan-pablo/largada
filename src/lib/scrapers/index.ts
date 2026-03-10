@@ -3,6 +3,7 @@ import { equilibrioScraper } from "./equilibrio";
 import { raxEventosScraper } from "./rax-eventos";
 import { tnvTeamScraper } from "./tnv-team";
 import { tvcomRunningScraper } from "./tvcom-running";
+import { wxEsportesScraper } from "./wx-esportes";
 
 export type { ScrapedRace } from "./types";
 
@@ -11,6 +12,7 @@ const scrapers: Scraper[] = [
   raxEventosScraper,
   tnvTeamScraper,
   tvcomRunningScraper,
+  wxEsportesScraper,
 ];
 
 export async function runAllScrapers(): Promise<ScrapedRace[]> {

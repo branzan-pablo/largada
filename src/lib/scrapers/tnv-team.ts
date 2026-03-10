@@ -4,7 +4,7 @@
  * Busca corridas futuras via API JSON paginada.
  */
 
-import type { Scraper, ScrapedRace } from "./types";
+import { isSaoPaulo, type Scraper, type ScrapedRace } from "./types";
 import { slugify } from "@/lib/utils";
 
 const API_BASE = "https://emporiodascarnesjales.com.br/api/eventos/future";
@@ -203,7 +203,7 @@ async function scrapeTnvTeam(): Promise<ScrapedRace[]> {
     }
   }
 
-  return races;
+  return races.filter((r) => isSaoPaulo(r.state));
 }
 
 export const tnvTeamScraper: Scraper = {

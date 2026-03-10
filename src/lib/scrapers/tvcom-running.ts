@@ -4,7 +4,7 @@
  * Busca corridas futuras via HTML da listagem + páginas de detalhe.
  */
 
-import type { Scraper, ScrapedRace } from "./types";
+import { isSaoPaulo, type Scraper, type ScrapedRace } from "./types";
 import { slugify } from "@/lib/utils";
 
 const BASE_URL = "https://tvcomrunning.com.br";
@@ -236,7 +236,7 @@ async function scrapeTvcomRunning(): Promise<ScrapedRace[]> {
     }
   }
 
-  return races;
+  return races.filter((r) => isSaoPaulo(r.state));
 }
 
 export const tvcomRunningScraper: Scraper = {

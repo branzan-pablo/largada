@@ -5,7 +5,7 @@
  * das páginas de detalhe para extrair informações completas.
  */
 
-import type { Scraper, ScrapedRace } from "./types";
+import { isSaoPaulo, type Scraper, type ScrapedRace } from "./types";
 
 const BASE_URL = "https://equilibrio.esp.br";
 const FETCH_TIMEOUT_MS = 8_000;
@@ -412,7 +412,7 @@ export async function scrapeEquilibrio(): Promise<ScrapedRace[]> {
       }
     }
   }
-  return races;
+  return races.filter((r) => isSaoPaulo(r.state));
 }
 
 export const equilibrioScraper: Scraper = {

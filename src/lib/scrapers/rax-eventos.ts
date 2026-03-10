@@ -4,7 +4,7 @@
  * Busca corridas via sitemap XML → páginas de evento → JSON-LD structured data.
  */
 
-import type { Scraper, ScrapedRace } from "./types";
+import { isSaoPaulo, type Scraper, type ScrapedRace } from "./types";
 import { slugify } from "@/lib/utils";
 
 const SITEMAP_URL = "https://www.raxeventos.com.br/event-pages-sitemap.xml";
@@ -262,7 +262,7 @@ async function scrapeRaxEventos(): Promise<ScrapedRace[]> {
     }
   }
 
-  return races;
+  return races.filter((r) => isSaoPaulo(r.state));
 }
 
 export const raxEventosScraper: Scraper = {

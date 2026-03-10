@@ -19,6 +19,12 @@ export interface ScrapedRace {
   link: string;
 }
 
+const SP_VARIANTS = new Set(["sp", "são paulo", "sao paulo"]);
+
+export function isSaoPaulo(state: string | null): boolean {
+  return state != null && SP_VARIANTS.has(state.trim().toLowerCase());
+}
+
 export interface Scraper {
   name: string;
   scrape(): Promise<ScrapedRace[]>;
