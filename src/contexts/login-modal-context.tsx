@@ -12,7 +12,9 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 interface LoginModalContextValue {
   isOpen: boolean;
   defaultTab: "login" | "register";
+  redirectTo: string | null;
   openLogin: () => void;
+  openLoginWithRedirect: (redirectTo: string) => void;
   openRegister: () => void;
   close: () => void;
 }
@@ -22,9 +24,16 @@ const LoginModalContext = createContext<LoginModalContextValue | null>(null);
 export function LoginModalProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [defaultTab, setDefaultTab] = useState<"login" | "register">("login");
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
   const openLogin = useCallback(() => {
     setDefaultTab("login");
+    setIsOpen(true);
+  }, []);
+
+  const openLoginWithRedirect = useCallback((redirect: string) => {
+    setDefaultTab("login");
+    setRedirectTo(redirect);
     setIsOpen(true);
   }, []);
 
@@ -35,10 +44,11 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
 
   const close = useCallback(() => {
     setIsOpen(false);
+    setRedirectTo(null);
   }, []);
 
   return (
-    <LoginModalContext.Provider value={{ isOpen, defaultTab, openLogin, openRegister, close }}>
+    <LoginModalContext.Provider value={{ isOpen, defaultTab, redirectTo, openLogin, openLoginWithRedirect, openRegister, close }}>
       {children}
     </LoginModalContext.Provider>
   );
@@ -49,7 +59,7 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
  * Must be rendered inside LoginModalProvider and wrapped in Suspense.
  */
 export function LoginModalUrlHandler() {
-  const { openLogin } = useLoginModal();
+  const { openLogin, openLoginWithRedirect } = useLoginModal();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -71,16 +81,22 @@ export function LoginModalUrlHandler() {
     }
 
     if (login === "true" || error) {
-      openLogin();
+      const redirect = searchParams.get("redirectTo");
+      if (redirect) {
+        openLoginWithRedirect(redirect);
+      } else {
+        openLogin();
+      }
 
       // Clean URL params
       const params = new URLSearchParams(searchParams.toString());
       params.delete("login");
       params.delete("error");
+      params.delete("redirectTo");
       const remaining = params.toString();
       router.replace(remaining ? `${pathname}?${remaining}` : pathname);
     }
-  }, [searchParams, router, pathname, openLogin]);
+  }, [searchParams, router, pathname, openLogin, openLoginWithRedirect]);
 
   return null;
 }

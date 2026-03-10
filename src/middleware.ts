@@ -51,6 +51,7 @@ export async function middleware(request: NextRequest) {
   if (isProtected && !user) {
     const url = new URL("/corridas", request.url);
     url.searchParams.set("login", "true");
+    url.searchParams.set("redirectTo", pathname + request.nextUrl.search);
     return NextResponse.redirect(url);
   }
 

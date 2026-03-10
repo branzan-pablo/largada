@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Star, Loader2, ExternalLink, Check } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Star, Loader2, ExternalLink, Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,8 +25,9 @@ import {
 
 const tiers = Object.values(SUBSCRIPTION_TIERS);
 
-export function SubscriptionClient() {
+export function SubscriptionClient({ initialTier }: { initialTier?: string }) {
   const { user, profile } = useAuth();
+  const router = useRouter();
   const [subscription, setSubscription] =
     useState<OrganizerSubscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +41,8 @@ export function SubscriptionClient() {
   const [email, setEmail] = useState("");
   const [cpf, setCpf] = useState("");
   const [phone, setPhone] = useState("");
+  const hasAutoOpened = useRef(false);
+  const avulsoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchSubscription() {
@@ -55,6 +60,26 @@ export function SubscriptionClient() {
     }
     fetchSubscription();
   }, []);
+
+  // Auto-open dialog or scroll to avulso based on URL tier param
+  useEffect(() => {
+    if (isLoading || hasAutoOpened.current || subscription) return;
+    if (!initialTier) return;
+    hasAutoOpened.current = true;
+
+    if (initialTier === "organizador" || initialTier === "organizador_pro") {
+      const config = SUBSCRIPTION_TIERS[initialTier as SubscriptionTier];
+      if (config) {
+        handleOpenDialog(config);
+      }
+    } else if (initialTier === "avulso" && avulsoRef.current) {
+      avulsoRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    // Clean tier param from URL to prevent re-trigger on back navigation
+    router.replace("/perfil/assinatura");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, initialTier, subscription]);
 
   const handleOpenDialog = (tier: SubscriptionConfig) => {
     setSelectedTier(tier);
@@ -167,12 +192,26 @@ export function SubscriptionClient() {
         ))}
       </div>
 
-      <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <div
+        ref={avulsoRef}
+        className={`mt-6 rounded-xl border p-6 space-y-3 ${
+          initialTier === "avulso"
+            ? "border-[#FF4D00] ring-2 ring-[#FF4D00]/30 bg-orange-50/30"
+            : "border-gray-200 bg-gray-50"
+        }`}
+      >
+        <h3 className="text-base font-semibold text-[#0D1B2A]">Avulso</h3>
         <p className="text-sm text-muted-foreground">
-          Prefere destacar uma corrida avulsa?{" "}
-          <span className="font-medium text-[#0D1B2A]">R$ 149,00</span> por
-          corrida, direto na página da corrida ou em Minhas Corridas.
+          Destaque uma corrida por{" "}
+          <span className="font-semibold text-[#0D1B2A]">R$ 149,00</span>{" "}
+          (pagamento único). Selecione a corrida que deseja destacar.
         </p>
+        <Link href="/perfil/minhas-corridas">
+          <Button variant="outline" className="w-full cursor-pointer">
+            Escolher corrida para destacar
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
       </div>
 
       {/* Payment dialog */}

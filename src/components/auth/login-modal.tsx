@@ -19,7 +19,7 @@ import { useAuth } from "@/contexts/auth-context";
 import Image from "next/image";
 
 export function LoginModal() {
-  const { isOpen, defaultTab, close } = useLoginModal();
+  const { isOpen, defaultTab, redirectTo, close } = useLoginModal();
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const [tab, setTab] = useState(defaultTab);
@@ -29,13 +29,16 @@ export function LoginModal() {
     if (isOpen) setTab(defaultTab);
   }, [isOpen, defaultTab]);
 
-  // Close modal when user logs in
+  // Close modal when user logs in (e.g. OAuth flow)
   useEffect(() => {
     if (!isLoading && user && isOpen) {
       close();
+      if (redirectTo) {
+        router.push(redirectTo);
+      }
       router.refresh();
     }
-  }, [isLoading, user, isOpen, close, router]);
+  }, [isLoading, user, isOpen, close, router, redirectTo]);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
@@ -59,7 +62,7 @@ export function LoginModal() {
         </DialogHeader>
 
         <div className="p-6">
-          <OAuthButtons />
+          <OAuthButtons redirectTo={redirectTo ?? undefined} />
 
           <div className="relative my-6">
             <Separator />
@@ -74,7 +77,7 @@ export function LoginModal() {
               <TabsTrigger value="register" className="cursor-pointer">Criar conta</TabsTrigger>
             </TabsList>
             <TabsContent value="login" className="mt-4">
-              <LoginForm onSuccess={() => { close(); router.refresh(); }} />
+              <LoginForm onSuccess={() => { close(); if (redirectTo) { router.push(redirectTo); } router.refresh(); }} />
             </TabsContent>
             <TabsContent value="register" className="mt-4">
               <RegisterForm />

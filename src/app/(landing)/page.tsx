@@ -300,6 +300,7 @@ export default async function LandingPage() {
             {[
               {
                 name: "Avulso",
+                slug: "avulso",
                 price: "R$ 149",
                 period: "pagamento único",
                 credits: "1 corrida em destaque",
@@ -313,6 +314,7 @@ export default async function LandingPage() {
               },
               {
                 name: "Organizador",
+                slug: "organizador",
                 price: "R$ 349",
                 period: "30 dias",
                 credits: "3 corridas em destaque",
@@ -326,6 +328,7 @@ export default async function LandingPage() {
               },
               {
                 name: "Organizador Pro",
+                slug: "organizador_pro",
                 price: "R$ 699",
                 period: "30 dias",
                 credits: "8 corridas em destaque",
@@ -378,7 +381,7 @@ export default async function LandingPage() {
                 </ul>
 
                 <Link
-                  href="/perfil/assinatura"
+                  href={`/perfil/assinatura?tier=${tier.slug}`}
                   className={`block w-full text-center py-3 px-4 rounded-lg font-semibold text-sm transition-colors ${tier.popular
                       ? "bg-[#FF4D00] text-white hover:bg-[#E04400]"
                       : "bg-[#0D1B2A] text-white hover:bg-[#1a2d42]"

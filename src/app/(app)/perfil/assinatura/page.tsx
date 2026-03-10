@@ -6,7 +6,13 @@ export const metadata = {
   title: "Plano Organizador",
 };
 
-export default function SubscriptionPage() {
+export default async function SubscriptionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tier?: string }>;
+}) {
+  const { tier } = await searchParams;
+
   return (
     <>
       <h1 className="mb-6 text-2xl font-bold">Plano Organizador</h1>
@@ -18,7 +24,7 @@ export default function SubscriptionPage() {
           </div>
         }
       >
-        <SubscriptionClient />
+        <SubscriptionClient initialTier={tier} />
       </Suspense>
     </>
   );
