@@ -603,6 +603,102 @@ export type Database = {
           },
         ]
       }
+      organizer_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          tier: "organizador" | "organizador_pro"
+          status: string
+          payment_order_id: string | null
+          amount: number
+          promotions_limit: number
+          promotions_used: number
+          current_period_start: string
+          current_period_end: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          tier: "organizador" | "organizador_pro"
+          status?: string
+          payment_order_id?: string | null
+          amount: number
+          promotions_limit: number
+          promotions_used?: number
+          current_period_start?: string
+          current_period_end: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          tier?: "organizador" | "organizador_pro"
+          status?: string
+          payment_order_id?: string | null
+          amount?: number
+          promotions_limit?: number
+          promotions_used?: number
+          current_period_start?: string
+          current_period_end?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizer_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizer_subscriptions_payment_order_id_fkey"
+            columns: ["payment_order_id"]
+            isOneToOne: false
+            referencedRelation: "payment_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_promotions: {
+        Row: {
+          id: string
+          subscription_id: string
+          race_id: string
+          promoted_at: string
+        }
+        Insert: {
+          id?: string
+          subscription_id: string
+          race_id: string
+          promoted_at?: string
+        }
+        Update: {
+          id?: string
+          subscription_id?: string
+          race_id?: string
+          promoted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_promotions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "organizer_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_promotions_race_id_fkey"
+            columns: ["race_id"]
+            isOneToOne: false
+            referencedRelation: "races"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       strava_tokens: {
         Row: {
           id: string

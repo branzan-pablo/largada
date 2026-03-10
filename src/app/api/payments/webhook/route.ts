@@ -15,6 +15,8 @@ import type {
   WebhookBillingPaidData,
   WebhookPixPaidData,
 } from "@/types/payments";
+import { createSubscription } from "@/lib/subscriptions";
+import { SUBSCRIPTION_TIERS, type SubscriptionTier } from "@/types/subscription";
 
 export async function POST(request: NextRequest) {
   let rawBody: string;
@@ -106,7 +108,7 @@ export async function POST(request: NextRequest) {
               paid_at: utcNow(),
             })
             .eq("abacatepay_id", abacatePayRefId)
-            .select("id, order_type, metadata")
+            .select("id, user_id, order_type, metadata")
             .single();
 
           let updatedOrder = updatedOrderData;
@@ -134,7 +136,7 @@ export async function POST(request: NextRequest) {
                 .eq("external_id", metaRaceId)
                 .eq("order_type", "race_promotion")
                 .eq("status", "PENDING")
-                .select("id, order_type, metadata")
+                .select("id, user_id, order_type, metadata")
                 .single();
 
               if (fallbackOrder) {
@@ -167,6 +169,26 @@ export async function POST(request: NextRequest) {
               console.info(
                 `[Webhook] Race ${raceId} promoted until ${promotedUntil}`,
               );
+            }
+          }
+
+          // Handle subscription activation
+          if (updatedOrder?.order_type === "premium_subscription") {
+            const meta = updatedOrder.metadata as Record<string, unknown> | null;
+            const tier = meta?.tier as SubscriptionTier | undefined;
+            const userId = (updatedOrder as { user_id: string }).user_id;
+
+            if (tier && userId && SUBSCRIPTION_TIERS[tier]) {
+              await createSubscription(userId, tier, updatedOrder.id);
+              console.info(
+                `[Webhook] Subscription ${tier} activated for user ${userId}`,
+              );
+            } else {
+              console.error("[Webhook] Missing tier or userId for subscription:", {
+                tier,
+                userId,
+                orderId: updatedOrder.id,
+              });
             }
           }
         }

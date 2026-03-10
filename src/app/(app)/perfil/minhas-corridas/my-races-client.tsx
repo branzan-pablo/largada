@@ -12,6 +12,7 @@ import { Trophy, CalendarDays, Star } from "lucide-react";
 import { todayInBrazil } from "@/lib/date";
 import { toast } from "sonner";
 import type { Race } from "@/types/race";
+import type { OrganizerSubscription } from "@/types/subscription";
 
 export function MyRacesClient() {
   const { user, isLoading: authLoading } = useAuth();
@@ -19,6 +20,7 @@ export function MyRacesClient() {
   const [upcoming, setUpcoming] = useState<Race[]>([]);
   const [past, setPast] = useState<Race[]>([]);
   const [created, setCreated] = useState<Race[]>([]);
+  const [subscription, setSubscription] = useState<OrganizerSubscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const supabaseRef = useRef(createClient());
   const fetchedRef = useRef(false);
@@ -29,6 +31,12 @@ export function MyRacesClient() {
     const today = todayInBrazil();
 
     try {
+      // Fetch subscription status in parallel with races
+      const subPromise = fetch("/api/subscriptions/status")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => d?.subscription ?? null)
+        .catch(() => null);
+
       const { data: rsvps, error: rsvpsError } = await supabase
         .from("rsvps")
         .select("race_id")
@@ -47,14 +55,18 @@ export function MyRacesClient() {
         .order("date", { ascending: false });
 
       if (raceIds.length === 0) {
-        const { data: createdData } = await createdQuery;
+        const [{ data: createdData }, sub] = await Promise.all([
+          createdQuery,
+          subPromise,
+        ]);
         setUpcoming([]);
         setPast([]);
         setCreated((createdData as Race[]) ?? []);
+        setSubscription(sub);
         return;
       }
 
-      const [upcomingRes, pastRes, createdRes] = await Promise.all([
+      const [upcomingRes, pastRes, createdRes, sub] = await Promise.all([
         supabase
           .from("races")
           .select("*")
@@ -68,11 +80,13 @@ export function MyRacesClient() {
           .lt("date", today)
           .order("date", { ascending: false }),
         createdQuery,
+        subPromise,
       ]);
 
       setUpcoming((upcomingRes.data as Race[]) ?? []);
       setPast((pastRes.data as Race[]) ?? []);
       setCreated((createdRes.data as Race[]) ?? []);
+      setSubscription(sub);
     } catch {
       toast.error("Erro ao carregar suas corridas.");
     } finally {
@@ -170,6 +184,7 @@ export function MyRacesClient() {
                     raceName={race.name}
                     isPromoted={race.is_promoted}
                     variant="button"
+                    subscription={subscription}
                   />
                 </div>
               </div>

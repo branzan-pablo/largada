@@ -13,7 +13,10 @@ import {
   Search,
   Award,
   UserPlus,
+  Check,
+  Star,
 } from "lucide-react";
+import Link from "next/link";
 import { Footer } from "@/components/footer/footer";
 
 export const metadata: Metadata = {
@@ -278,8 +281,125 @@ export default async function LandingPage() {
 
       <div className="h-px bg-gray-200" />
 
+      {/* ==================== Para Organizadores ==================== */}
+      <section className="relative bg-[#F7F8FA] py-16 md:py-24 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-[0.2em] mb-5">
+              Para Organizadores
+            </p>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-[#0D1B2A] tracking-tight mb-3">
+              Destaque suas corridas e alcance mais atletas
+            </h2>
+            <p className="text-lg text-[#6B7280] max-w-2xl mx-auto">
+              Coloque seus eventos no topo do calendário e seja visto por quem está procurando a próxima prova.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {[
+              {
+                name: "Avulso",
+                price: "R$ 149",
+                period: "pagamento único",
+                credits: "1 corrida em destaque",
+                discount: null,
+                popular: false,
+                benefits: [
+                  "Corrida no topo do calendário",
+                  "Badge de destaque na listagem",
+                  "Mais visibilidade para inscrições",
+                ],
+              },
+              {
+                name: "Organizador",
+                price: "R$ 349",
+                period: "30 dias",
+                credits: "3 corridas em destaque",
+                discount: "~22% de desconto",
+                popular: false,
+                benefits: [
+                  "Tudo do plano Avulso",
+                  "3 créditos para destacar corridas",
+                  "Use quando quiser dentro de 30 dias",
+                ],
+              },
+              {
+                name: "Organizador Pro",
+                price: "R$ 699",
+                period: "30 dias",
+                credits: "8 corridas em destaque",
+                discount: "~41% de desconto",
+                popular: true,
+                benefits: [
+                  "Tudo do plano Organizador",
+                  "8 créditos para destacar corridas",
+                  "Melhor custo por corrida destacada",
+                ],
+              },
+            ].map((tier) => (
+              <div
+                key={tier.name}
+                className={`relative rounded-2xl border bg-white p-6 md:p-8 flex flex-col ${tier.popular
+                    ? "border-[#FF4D00] shadow-lg ring-1 ring-[#FF4D00]/20"
+                    : "border-gray-200"
+                  }`}
+              >
+                {tier.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="inline-flex items-center gap-1 bg-[#FF4D00] text-white text-xs font-semibold px-3 py-1 rounded-full">
+                      <Star className="w-3 h-3 fill-current" />
+                      Mais popular
+                    </span>
+                  </div>
+                )}
+
+                <h3 className="text-lg font-semibold text-[#0D1B2A] mb-1">{tier.name}</h3>
+                <p className="text-sm text-[#6B7280] mb-4">{tier.credits}</p>
+
+                <div className="mb-6">
+                  <span className="text-3xl font-extrabold text-[#0D1B2A]">{tier.price}</span>
+                  <span className="text-sm text-[#6B7280] ml-1">/ {tier.period}</span>
+                </div>
+
+                {tier.discount && (
+                  <p className="text-xs font-medium text-green-600 bg-green-50 rounded-full px-3 py-1 w-fit mb-4">
+                    {tier.discount}
+                  </p>
+                )}
+
+                <ul className="space-y-3 mb-8 flex-1">
+                  {tier.benefits.map((benefit) => (
+                    <li key={benefit} className="flex items-start gap-2 text-sm text-[#6B7280]">
+                      <Check className="w-4 h-4 text-[#FF4D00] mt-0.5 shrink-0" />
+                      {benefit}
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href="/perfil/assinatura"
+                  className={`block w-full text-center py-3 px-4 rounded-lg font-semibold text-sm transition-colors ${tier.popular
+                      ? "bg-[#FF4D00] text-white hover:bg-[#E04400]"
+                      : "bg-[#0D1B2A] text-white hover:bg-[#1a2d42]"
+                    }`}
+                >
+                  Começar agora
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-xs text-[#6B7280] mt-8">
+            Pagamento único via PIX ou cartão. Sem assinatura recorrente.
+          </p>
+        </div>
+      </section>
+
+      <div className="h-px bg-gray-200" />
+
       {/* ==================== CTA Final ==================== */}
-      <section className="relative bg-[#F7F8FA] py-24 md:py-32 overflow-hidden">
+      <section className="relative bg-white py-24 md:py-32 overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-5xl font-extrabold text-[#0D1B2A] tracking-tight mb-4">
             Pronto para a largada?

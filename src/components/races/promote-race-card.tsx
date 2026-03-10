@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Star, Loader2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
+import type { OrganizerSubscription } from "@/types/subscription";
 
 interface PromoteRaceCardProps {
   raceId: string;
@@ -23,6 +25,8 @@ interface PromoteRaceCardProps {
   isOwner?: boolean;
   /** "sidebar" renders a full card; "button" renders an inline action */
   variant?: "sidebar" | "button";
+  /** Active subscription, if any. Enables "promote via plan" flow. */
+  subscription?: OrganizerSubscription | null;
 }
 
 export function PromoteRaceCard({
@@ -31,6 +35,7 @@ export function PromoteRaceCard({
   isPromoted,
   isOwner = true,
   variant = "sidebar",
+  subscription,
 }: PromoteRaceCardProps) {
   const { user, profile } = useAuth();
   const [open, setOpen] = useState(false);
@@ -41,15 +46,45 @@ export function PromoteRaceCard({
   const [cpf, setCpf] = useState("");
   const [phone, setPhone] = useState("");
 
+  const hasSubscription = !!subscription;
+  const hasCredits =
+    hasSubscription &&
+    subscription.promotions_used < subscription.promotions_limit;
+
   const handleOpen = (value: boolean) => {
     if (value) {
-      // Pre-fill from auth context when opening
       setName(profile?.full_name ?? "");
       setEmail(user?.email ?? "");
     }
     setOpen(value);
   };
 
+  // Promote via subscription (no payment needed)
+  const handlePromoteWithSubscription = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/races/${raceId}/promote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ useSubscription: true }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.error || "Erro ao destacar corrida.");
+        return;
+      }
+
+      toast.success("Corrida destacada com sucesso!");
+      window.location.reload();
+    } catch {
+      toast.error("Erro ao destacar corrida. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Promote via one-time payment
   const handlePromote = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -107,6 +142,7 @@ export function PromoteRaceCard({
     );
   }
 
+  // Payment dialog (one-time flow)
   const paymentDialog = (
     <Dialog open={open} onOpenChange={handleOpen}>
       <DialogContent>
@@ -130,7 +166,7 @@ export function PromoteRaceCard({
               </p>
             </div>
             <div className="text-right shrink-0 ml-4">
-              <span className="text-lg font-bold text-[#0D1B2A]">R$ 29,90</span>
+              <span className="text-lg font-bold text-[#0D1B2A]">R$ 149,00</span>
               <p className="text-xs text-muted-foreground">pagamento único</p>
             </div>
           </div>
@@ -214,7 +250,47 @@ export function PromoteRaceCard({
     </Dialog>
   );
 
+  // -- BUTTON VARIANT --
   if (variant === "button") {
+    // Subscription with credits: one-click promote
+    if (hasCredits) {
+      return (
+        <Button
+          size="sm"
+          variant="outline"
+          className="border-green-200 text-green-700 hover:bg-green-50"
+          onClick={handlePromoteWithSubscription}
+          disabled={loading}
+        >
+          {loading ? (
+            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Star className="mr-1.5 h-3.5 w-3.5" />
+          )}
+          Destacar (plano)
+        </Button>
+      );
+    }
+
+    // Subscription exhausted
+    if (hasSubscription && !hasCredits) {
+      return (
+        <>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-orange-200 text-[#FF4D00] hover:bg-orange-50"
+            onClick={() => handleOpen(true)}
+          >
+            <Star className="mr-1.5 h-3.5 w-3.5" />
+            Destacar (R$ 149)
+          </Button>
+          {paymentDialog}
+        </>
+      );
+    }
+
+    // No subscription
     return (
       <>
         <Button
@@ -231,7 +307,7 @@ export function PromoteRaceCard({
     );
   }
 
-  // sidebar variant — non-owner
+  // -- SIDEBAR VARIANT — non-owner --
   if (!isOwner) {
     return (
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-2">
@@ -246,7 +322,38 @@ export function PromoteRaceCard({
     );
   }
 
-  // sidebar variant — owner
+  // -- SIDEBAR VARIANT — owner with subscription credits --
+  if (hasCredits) {
+    const remaining =
+      subscription!.promotions_limit - subscription!.promotions_used;
+    return (
+      <div className="rounded-xl border border-green-200 bg-green-50 p-5 space-y-3">
+        <div className="flex items-center gap-2">
+          <Star className="h-4 w-4 text-green-600" />
+          <h3 className="font-semibold text-green-900">Destacar esta corrida</h3>
+        </div>
+        <p className="text-xs text-green-700">
+          Incluso no seu plano — {remaining} destaque{remaining !== 1 ? "s" : ""}{" "}
+          disponíve{remaining !== 1 ? "is" : "l"}.
+        </p>
+        <Button
+          className="w-full cursor-pointer"
+          variant="outline"
+          onClick={handlePromoteWithSubscription}
+          disabled={loading}
+        >
+          {loading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Star className="mr-2 h-4 w-4" />
+          )}
+          Destacar corrida
+        </Button>
+      </div>
+    );
+  }
+
+  // -- SIDEBAR VARIANT — owner, no credits / no subscription --
   return (
     <>
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-3">
@@ -258,7 +365,7 @@ export function PromoteRaceCard({
           Apareça no topo da listagem e ganhe mais visibilidade para os atletas.
         </p>
         <p className="text-sm font-semibold text-[#0D1B2A]">
-          R$ 29,90{" "}
+          R$ 149,00{" "}
           <span className="text-xs font-normal text-muted-foreground">
             por 30 dias
           </span>
@@ -267,6 +374,14 @@ export function PromoteRaceCard({
           <Star className="mr-2 h-4 w-4" />
           Destacar corrida
         </Button>
+        {!hasSubscription && (
+          <Link
+            href="/perfil/assinatura"
+            className="block text-center text-xs text-muted-foreground hover:text-[#FF4D00] transition-colors"
+          >
+            Economize com um plano de organizador &rarr;
+          </Link>
+        )}
       </div>
       {paymentDialog}
     </>

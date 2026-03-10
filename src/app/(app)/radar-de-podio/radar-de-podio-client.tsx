@@ -63,7 +63,7 @@ function buildWhatsAppUrl(form: FormData): string {
     `Faixa etária: ${form.category}`,
     `Cidade: ${form.city}`,
     "",
-    "Estou ciente que o serviço custa R$ 29,90.",
+    "Estou ciente que o serviço custa *R$ 29,90*.",
   ].join("\n");
 
   return `https://wa.me/${RADAR_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;

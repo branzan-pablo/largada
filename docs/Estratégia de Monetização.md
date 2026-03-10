@@ -39,7 +39,7 @@ Organizadores pagam para sua corrida aparecer com badge ⭐ "Destaque" e ser exi
 Clicar → Checkout AbacatePay (PIX ou Cartão) → Webhook marca `is_promoted = true`
 
 **Preço sugerido:**
-R$ 29,90 ~ R$ 49,90 por corrida (por período de destaque, ex: 30 dias)
+R$ 149,00 por corrida (por período de destaque, ex: 30 dias)
 
 ---
 

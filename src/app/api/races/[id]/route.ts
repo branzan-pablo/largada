@@ -13,7 +13,10 @@ export async function DELETE(
   if (authResult instanceof NextResponse) return authResult;
 
   const supabase = createAdminClient();
-  const { error } = await supabase.from("races").delete().eq("id", id);
+  const { error } = await supabase
+    .from("races")
+    .update({ status: "cancelled" })
+    .eq("id", id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });

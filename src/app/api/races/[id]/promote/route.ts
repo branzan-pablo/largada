@@ -8,8 +8,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createBilling } from "@/lib/payments/billing";
 import { createCustomer } from "@/lib/payments/customer";
 import { AbacatePayApiError } from "@/lib/payments/errors";
+import {
+    getActiveSubscription,
+    canPromoteWithSubscription,
+    useSubscriptionPromotion,
+} from "@/lib/subscriptions";
+import { futureUtc } from "@/lib/date";
 
-const PROMOTION_PRICE_CENTAVOS = 2990; // R$ 29,90
+const PROMOTION_PRICE_CENTAVOS = 14900; // R$ 149,00
 const PROMOTION_DAYS = 30;
 
 export async function POST(
@@ -52,8 +58,53 @@ export async function POST(
             );
         }
 
-        // 3. Parse optional customer info from body
+        // 3. Check for subscription-based promotion
         const body = await request.json().catch(() => ({}));
+
+        if (body.useSubscription) {
+            const subscription = await getActiveSubscription(user.id);
+            if (!subscription) {
+                return NextResponse.json(
+                    { error: "Nenhum plano ativo encontrado" },
+                    { status: 404 }
+                );
+            }
+            if (!canPromoteWithSubscription(subscription)) {
+                return NextResponse.json(
+                    { error: "Limite de destaques do plano atingido" },
+                    { status: 403 }
+                );
+            }
+
+            const used = await useSubscriptionPromotion(subscription.id, raceId);
+            if (!used) {
+                return NextResponse.json(
+                    { error: "Não foi possível usar crédito do plano" },
+                    { status: 409 }
+                );
+            }
+
+            const admin = createAdminClient();
+            const promotedUntil = futureUtc(PROMOTION_DAYS);
+            const { error: raceError } = await admin
+                .from("races")
+                .update({ is_promoted: true, promoted_until: promotedUntil })
+                .eq("id", raceId);
+
+            if (raceError) {
+                throw new Error(`Failed to promote race ${raceId}: ${raceError.message}`);
+            }
+
+            console.info(`[Promote Race] Race ${raceId} promoted via subscription ${subscription.tier}`);
+
+            return NextResponse.json({
+                promoted: true,
+                source: "subscription",
+                promotedUntil,
+            });
+        }
+
+        // 4. Parse optional customer info from body (one-time payment flow)
         const customerInput = body.customer as
             | { name: string; email: string; taxId: string; cellphone: string }
             | undefined;
