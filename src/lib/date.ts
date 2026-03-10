@@ -101,6 +101,22 @@ export function futureUtc(days: number): string {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 }
 
+/**
+ * Retorna um timestamp UTC ISO 8601 para N dias atrás.
+ * Útil para filtros de janela temporal (ex: rate limiting por dia).
+ */
+export function pastUtc(days: number): string {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+}
+
+/**
+ * Parse de campo DATE do banco ("2026-03-15") para Date local.
+ * Adiciona T00:00:00 para evitar deslocamento UTC.
+ */
+export function parseRaceDate(dateStr: string): Date {
+  return new Date(dateStr + "T00:00:00");
+}
+
 // ─── Parsing seguro ──────────────────────────────────────
 
 /**

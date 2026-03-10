@@ -66,14 +66,21 @@ export async function POST(request: NextRequest) {
                 abacatepayCustomerId = customerResult.data.id;
 
                 // Persist customer mapping
-                await admin.from("payment_customers").insert({
-                    user_id: user.id,
-                    abacatepay_id: customerResult.data.id,
-                    email: input.customer.email,
-                    name: input.customer.name,
-                    cellphone: input.customer.cellphone,
-                    tax_id: input.customer.taxId,
-                });
+                const { error: customerInsertError } = await admin
+                    .from("payment_customers")
+                    .insert({
+                        user_id: user.id,
+                        abacatepay_id: customerResult.data.id,
+                        email: input.customer.email,
+                        name: input.customer.name,
+                        cellphone: input.customer.cellphone,
+                        tax_id: input.customer.taxId,
+                    });
+
+                if (customerInsertError) {
+                    // Log but don't fail — customer was created on AbacatePay
+                    console.error("[Payments] Failed to persist customer mapping:", customerInsertError);
+                }
             }
         }
 

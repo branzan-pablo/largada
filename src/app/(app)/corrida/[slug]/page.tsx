@@ -28,7 +28,7 @@ import {
   Trophy,
   Banknote,
 } from "lucide-react";
-import { formatDateFull, formatTime, todayInBrazil, utcNow } from "@/lib/date";
+import { formatDateFull, formatTime, todayInBrazil, utcNow, futureUtc } from "@/lib/date";
 import { PRIZE_TYPES } from "@/lib/constants";
 import type { Race, RegistrationBatch } from "@/types/race";
 import type { Metadata } from "next";
@@ -116,9 +116,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
       if (pendingOrder?.abacatepay_id) {
         const billing = await getBillingById(pendingOrder.abacatepay_id);
         if (billing?.status === "PAID") {
-          const promotedUntil = new Date(
-            Date.now() + 30 * 24 * 60 * 60 * 1000
-          ).toISOString();
+          const promotedUntil = futureUtc(30);
 
           await Promise.all([
             admin

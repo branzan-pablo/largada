@@ -33,12 +33,17 @@ export async function POST(request: NextRequest) {
 
   try {
     // 2. Verify webhook security (secret + HMAC)
-    const secretParam = request.nextUrl.searchParams.get("webhookSecret");
+    // Accept secret from Authorization header (preferred) or query param (legacy)
+    const authHeader = request.headers.get("authorization");
+    const secretParam =
+      (authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null) ||
+      request.nextUrl.searchParams.get("webhookSecret");
     const signatureHeader = request.headers.get("x-webhook-signature");
 
     console.info("[Webhook] Incoming request —", {
       method: request.method,
       hasSecret: !!secretParam,
+      secretSource: authHeader?.startsWith("Bearer ") ? "header" : "query",
       hasSignature: !!signatureHeader,
       contentType: request.headers.get("content-type"),
       bodyLength: rawBody.length,
@@ -118,6 +123,7 @@ export async function POST(request: NextRequest) {
           }
 
           // Fallback: if order not found by abacatepay_id, try metadata match
+          // Constrained by order_type + status + external_id to avoid race conditions
           if (!updatedOrder) {
             const webhookMeta = payload.data as unknown as Record<string, unknown>;
             const billingMeta = webhookMeta.billing as Record<string, unknown> | undefined;
@@ -136,6 +142,8 @@ export async function POST(request: NextRequest) {
                 .eq("external_id", metaRaceId)
                 .eq("order_type", "race_promotion")
                 .eq("status", "PENDING")
+                .order("created_at", { ascending: false })
+                .limit(1)
                 .select("id, user_id, order_type, metadata")
                 .single();
 
@@ -159,16 +167,25 @@ export async function POST(request: NextRequest) {
             const raceId = meta?.raceId as string | undefined;
             if (raceId) {
               const promotedUntil = futureUtc(30);
-              const { error: raceError } = await admin
+              const { data: promotedRace, error: raceError } = await admin
                 .from("races")
                 .update({ is_promoted: true, promoted_until: promotedUntil })
-                .eq("id", raceId);
+                .eq("id", raceId)
+                .eq("created_by", updatedOrder.user_id)
+                .select("id")
+                .maybeSingle();
               if (raceError) {
                 throw new Error(`Failed to promote race ${raceId}: ${raceError.message}`);
               }
-              console.info(
-                `[Webhook] Race ${raceId} promoted until ${promotedUntil}`,
-              );
+              if (!promotedRace) {
+                console.error(
+                  `[Webhook] Race promotion blocked — user ${updatedOrder.user_id} is not the creator of race ${raceId}`,
+                );
+              } else {
+                console.info(
+                  `[Webhook] Race ${raceId} promoted until ${promotedUntil}`,
+                );
+              }
             }
           }
 
@@ -179,10 +196,20 @@ export async function POST(request: NextRequest) {
             const userId = (updatedOrder as { user_id: string }).user_id;
 
             if (tier && userId && SUBSCRIPTION_TIERS[tier]) {
-              await createSubscription(userId, tier, updatedOrder.id);
-              console.info(
-                `[Webhook] Subscription ${tier} activated for user ${userId}`,
-              );
+              try {
+                await createSubscription(userId, tier, updatedOrder.id);
+                console.info(
+                  `[Webhook] Subscription ${tier} activated for user ${userId}`,
+                );
+              } catch (subError) {
+                console.error("[Webhook] Failed to create subscription:", {
+                  error: subError,
+                  tier,
+                  userId,
+                  orderId: updatedOrder.id,
+                });
+                // Don't throw — order is already PAID. Log for manual recovery.
+              }
             } else {
               console.error("[Webhook] Missing tier or userId for subscription:", {
                 tier,

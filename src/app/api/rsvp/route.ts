@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     .select("id")
     .eq("user_id", user.id)
     .eq("race_id", raceId)
-    .single();
+    .maybeSingle();
 
   if (existing) {
     // Remove RSVP

@@ -3,7 +3,7 @@ import { SUGGESTION_DAILY_LIMIT } from "@/lib/constants";
 import { notifyNewSuggestion } from "@/lib/notifications";
 import { suggestionSchema } from "@/lib/validations";
 import { requireAuth, requireAdmin } from "@/lib/auth";
-import { utcNow } from "@/lib/date";
+import { utcNow, pastUtc } from "@/lib/date";
 import { z } from "zod/v4";
 
 export async function POST(request: Request) {
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   const { user, supabase } = authResult;
 
   // Rate limiting: max 5 suggestions per day
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const oneDayAgo = pastUtc(1);
   const { count } = await supabase
     .from("race_suggestions")
     .select("id", { count: "exact", head: true })
@@ -123,7 +123,7 @@ export async function DELETE(request: Request) {
     .from("race_suggestions")
     .select("user_id, status")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
   if (!suggestion) {
     return NextResponse.json({ error: "Sugestão não encontrada" }, { status: 404 });

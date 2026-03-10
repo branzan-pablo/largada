@@ -5,7 +5,7 @@
 // ============================================================================
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { futureUtc } from "@/lib/date";
+import { futureUtc, utcNow } from "@/lib/date";
 import {
   SUBSCRIPTION_TIERS,
   type SubscriptionTier,
@@ -26,7 +26,7 @@ export async function getActiveSubscription(
     .select("*")
     .eq("user_id", userId)
     .eq("status", "active")
-    .gt("current_period_end", new Date().toISOString())
+    .gt("current_period_end", utcNow())
     .maybeSingle();
 
   return (data as OrganizerSubscription) ?? null;
@@ -116,7 +116,7 @@ export async function createSubscription(
       amount: config.priceInCentavos,
       promotions_limit: config.promotionsPerMonth,
       promotions_used: 0,
-      current_period_start: new Date().toISOString(),
+      current_period_start: utcNow(),
       current_period_end: periodEnd,
     },
     { onConflict: "user_id" }

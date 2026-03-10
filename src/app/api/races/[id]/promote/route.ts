@@ -113,7 +113,6 @@ export async function POST(
 
         // 4. Resolve or create AbacatePay customer
         let abacatepayCustomerId: string | undefined;
-        let internalCustomerId: string | undefined;
 
         const { data: existingCustomer } = await admin
             .from("payment_customers")
@@ -123,7 +122,6 @@ export async function POST(
 
         if (existingCustomer) {
             abacatepayCustomerId = existingCustomer.abacatepay_id;
-            internalCustomerId = existingCustomer.id;
         } else if (customerInput?.name && customerInput?.email && customerInput?.taxId && customerInput?.cellphone) {
             const customerResult = await createCustomer(customerInput);
             if (customerResult.error) {
@@ -133,7 +131,7 @@ export async function POST(
                 );
             }
             abacatepayCustomerId = customerResult.data.id;
-            const { data: newCustomer } = await admin
+            await admin
                 .from("payment_customers")
                 .insert({
                     user_id: user.id,
@@ -142,10 +140,7 @@ export async function POST(
                     name: customerInput.name,
                     cellphone: customerInput.cellphone,
                     tax_id: customerInput.taxId,
-                })
-                .select("id")
-                .single();
-            internalCustomerId = newCustomer?.id;
+                });
         } else {
             return NextResponse.json(
                 { error: "Dados do cliente obrigatórios (nome, e-mail, CPF, celular)" },
@@ -207,15 +202,12 @@ export async function POST(
         });
 
         // 7. Persist order in database
-        const promotionExpiresAt = new Date(
-            Date.now() + PROMOTION_DAYS * 24 * 60 * 60 * 1000
-        ).toISOString();
+        const promotionExpiresAt = futureUtc(PROMOTION_DAYS);
 
-        const { data: order } = await admin
+        const { data: order, error: orderInsertError } = await admin
             .from("payment_orders")
             .insert({
                 user_id: user.id,
-                customer_id: internalCustomerId ?? null,
                 abacatepay_id: billing.id,
                 payment_url: billing.url,
                 payment_method: billing.methods,
@@ -238,6 +230,11 @@ export async function POST(
             })
             .select("id")
             .single();
+
+        if (orderInsertError) {
+            console.error("[Promote Race] Failed to persist order:", orderInsertError);
+            // Still return billing URL — payment was created on AbacatePay
+        }
 
         return NextResponse.json({
             orderId: order?.id ?? null,

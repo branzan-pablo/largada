@@ -4,8 +4,10 @@ const rateMap = new Map<string, { count: number; resetAt: number }>();
  * Simple in-memory rate limiter for API routes.
  * Returns { limited: true } if the caller exceeded `max` requests within `windowMs`.
  *
- * NOTE: Works per-instance — resets on redeploy / cold-start.
- * For production at scale, swap with @upstash/ratelimit + Redis.
+ * KNOWN LIMITATION: Works per-instance — resets on redeploy / cold-start.
+ * On Vercel with auto-scaling, each serverless instance has its own Map,
+ * so limits are not shared across instances. This provides best-effort
+ * protection only. For strict enforcement, migrate to @upstash/ratelimit + Redis.
  */
 export function rateLimit(
   key: string,

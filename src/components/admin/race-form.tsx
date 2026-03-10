@@ -21,6 +21,7 @@ import { DEFAULT_DISTANCES } from "@/lib/constants";
 import { raceSchema } from "@/lib/validations";
 import { toast } from "sonner";
 import type { Race, RegistrationBatch } from "@/types/race";
+import { todayInBrazil } from "@/lib/date";
 
 interface RaceFormProps {
   race?: Race;
@@ -362,7 +363,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                 id="date"
                 type="date"
                 value={date}
-                min={new Date().toISOString().split("T")[0]}
+                min={todayInBrazil()}
                 onChange={(e) => setDate(e.target.value)}
                 className={errors.date ? "border-destructive" : ""}
               />

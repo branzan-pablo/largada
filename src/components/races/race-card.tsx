@@ -5,12 +5,11 @@ import { RacePrizeBadge } from "./race-prize-badge";
 import { MapPin, Users, Star, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { formatTime } from "@/lib/date";
+import { formatTime, parseRaceDate } from "@/lib/date";
 import type { Race } from "@/types/race";
 
 export function RaceCard({ race }: { race: Race }) {
-  // DATE field ("2026-03-15") — append T00:00:00 to interpret as local midnight
-  const raceDate = new Date(race.date + "T00:00:00");
+  const raceDate = parseRaceDate(race.date);
   const day = format(raceDate, "dd");
   const month = format(raceDate, "MMM", { locale: ptBR }).toUpperCase();
   const formattedDate = format(raceDate, "dd 'de' MMM, yyyy", { locale: ptBR });

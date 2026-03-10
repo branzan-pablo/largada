@@ -33,13 +33,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/corridas?error=auth`);
   }
 
-  // Validate CSRF state against cookie
-  const cookieHeader = request.headers.get("cookie") ?? "";
-  const stateCookie = cookieHeader
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith("strava_oauth_state="));
-  const expectedState = stateCookie?.split("=")[1];
+  // Validate CSRF state against cookie (use Next.js cookie API for safe parsing)
+  const expectedState = request.cookies.get("strava_oauth_state")?.value;
 
   if (!expectedState || state !== expectedState) {
     return NextResponse.redirect(`${origin}/corridas?error=auth`);
@@ -111,7 +106,7 @@ export async function GET(request: NextRequest) {
         // Fallback: user exists but strava_athlete_id not yet set (pre-migration users)
         // Search by email — check both current and legacy email formats
         const legacyEmail = `strava_${athlete.id}@strava.largada.app`;
-        const MAX_PAGES = 20;
+        const MAX_PAGES = 3;
         let page = 1;
         const perPage = 50;
         while (page <= MAX_PAGES) {

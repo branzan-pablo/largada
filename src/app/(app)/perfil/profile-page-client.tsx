@@ -244,22 +244,22 @@ export function ProfilePageClient() {
       {/* Navigation links */}
       <div className="space-y-1">
         <Link
+          href="/perfil/assinatura"
+          className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"
+        >
+          <div className="flex items-center gap-2">
+            <Star className="h-4 w-4 fill-[#FF4D00] text-[#FF4D00]" />
+            <span className="text-sm font-medium">Plano Organizador</span>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </Link>
+        <Link
           href="/perfil/minhas-corridas"
           className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"
         >
           <div className="flex items-center gap-2">
             <Heart className="h-4 w-4" />
             <span className="text-sm font-medium">Minhas Corridas</span>
-          </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        </Link>
-        <Link
-          href="/perfil/assinatura"
-          className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"
-        >
-          <div className="flex items-center gap-2">
-            <Star className="h-4 w-4" />
-            <span className="text-sm font-medium">Plano Organizador</span>
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </Link>

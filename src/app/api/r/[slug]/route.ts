@@ -42,7 +42,9 @@ export async function GET(
     try {
       const url = new URL(targetUrl);
       const hostname = url.hostname.replace(/^www\./, "");
-      const match = rules.find((r) => hostname.includes(r.domain));
+      const match = rules.find(
+        (r) => hostname === r.domain || hostname.endsWith("." + r.domain)
+      );
       if (match) {
         url.searchParams.set(match.param_key, match.param_value);
         targetUrl = url.toString();

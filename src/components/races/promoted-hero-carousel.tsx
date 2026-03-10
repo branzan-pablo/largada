@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight, MapPin, Users, CalendarDays, Star } from "lu
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Race } from "@/types/race";
+import { parseRaceDate } from "@/lib/date";
 
 const MAX_SLIDES = 10;
 const AUTO_ROTATE_MS = 5000;
@@ -123,7 +124,7 @@ export function PromotedHeroCarousel({ races }: { races: Race[] }) {
 }
 
 function HeroSlide({ race }: { race: Race }) {
-  const raceDate = new Date(race.date + "T00:00:00");
+  const raceDate = parseRaceDate(race.date);
   const formattedDate = format(raceDate, "dd 'de' MMM, yyyy", { locale: ptBR });
 
   return (
