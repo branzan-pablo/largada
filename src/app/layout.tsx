@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Inter, Bebas_Neue } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "@/contexts/auth-context";
 import { LoginModalProvider, LoginModalUrlHandler } from "@/contexts/login-modal-context";
 import { ClientLoginModal, ClientToaster } from "@/components/layout/client-shell";
@@ -79,6 +80,7 @@ export default function RootLayout({
         <SwRegister />
         <WhatsAppFab />
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
