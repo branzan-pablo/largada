@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -125,7 +126,14 @@ export function SubscriptionClient({ initialTier }: { initialTier?: string }) {
     }
   };
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Skeleton className="h-64 rounded-lg" />
+        <Skeleton className="h-64 rounded-lg" />
+      </div>
+    );
+  }
 
   // Active subscription view
   if (subscription) {
