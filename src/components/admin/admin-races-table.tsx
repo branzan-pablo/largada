@@ -170,12 +170,19 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
           </button>
         </div>
 
-        <Button asChild size="sm" className="self-end sm:self-auto">
+        <div className="flex items-center gap-3 self-end sm:self-auto">
+          <span className="text-xs text-muted-foreground">
+            {statusFilter !== "all" || originFilter !== "all" || coordsFilter || outsideFilter || removedIds.size > 0
+              ? `${filtered.length} de ${races.length} corridas`
+              : `${filtered.length} corridas`}
+          </span>
+          <Button asChild size="sm">
           <Link href="/admin/corridas/nova">
             <Plus className="mr-2 h-4 w-4" />
             Nova Corrida
           </Link>
         </Button>
+        </div>
       </div>
 
       <div className="rounded-md border overflow-x-auto">
