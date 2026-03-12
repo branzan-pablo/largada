@@ -249,7 +249,7 @@ export function ProfilePageClient() {
         >
           <div className="flex items-center gap-2">
             <Star className="h-4 w-4 fill-[#FF4D00] text-[#FF4D00]" />
-            <span className="text-sm font-medium">Plano Organizador</span>
+            <span className="text-sm font-medium">Pacotes de Destaque</span>
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </Link>

@@ -1,6 +1,6 @@
 // POST /api/subscriptions/create
 // Creates a billing charge for an organizer subscription package.
-// Follows the same pattern as /api/races/[id]/promote.
+// If user has no payment_customers record, requires customer data (returns 422 if missing).
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
@@ -57,14 +57,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Parse customer info
-    const customerInput = body.customer as
-      | { name: string; email: string; taxId: string; cellphone: string }
-      | undefined;
-
     const admin = createAdminClient();
 
-    // 5. Resolve or create AbacatePay customer
+    // 4. Resolve or create AbacatePay customer
     let abacatepayCustomerId: string | undefined;
     let internalCustomerId: string | undefined;
 
@@ -77,12 +72,24 @@ export async function POST(request: NextRequest) {
     if (existingCustomer) {
       abacatepayCustomerId = existingCustomer.abacatepay_id;
       internalCustomerId = existingCustomer.id;
-    } else if (
-      customerInput?.name &&
-      customerInput?.email &&
-      customerInput?.taxId &&
-      customerInput?.cellphone
-    ) {
+    } else {
+      // No existing customer — need customer data from client
+      const customerInput = body.customer as
+        | { name: string; email: string; taxId: string; cellphone: string }
+        | undefined;
+
+      if (
+        !customerInput?.name ||
+        !customerInput?.email ||
+        !customerInput?.taxId ||
+        !customerInput?.cellphone
+      ) {
+        return NextResponse.json(
+          { error: "customer_required" },
+          { status: 422 }
+        );
+      }
+
       const customerResult = await createCustomer(customerInput);
       if (customerResult.error) {
         return NextResponse.json(
@@ -107,17 +114,9 @@ export async function POST(request: NextRequest) {
         .select("id")
         .single();
       internalCustomerId = newCustomer?.id;
-    } else {
-      return NextResponse.json(
-        {
-          error:
-            "Dados do cliente obrigatórios (nome, e-mail, CPF, celular)",
-        },
-        { status: 400 }
-      );
     }
 
-    // 6. Build URLs
+    // 5. Build URLs
     const config = SUBSCRIPTION_TIERS[tier];
     const appUrl =
       process.env.NEXT_PUBLIC_APP_URL || "https://largada.app";
@@ -131,7 +130,7 @@ export async function POST(request: NextRequest) {
       customerId: abacatepayCustomerId,
     });
 
-    // 7. Create billing on AbacatePay (ONE_TIME — no auto-charge)
+    // 6. Create billing on AbacatePay (ONE_TIME — no auto-charge)
     const billingResult = await createBilling({
       frequency: "ONE_TIME",
       methods: ["PIX", "CARD"],
@@ -169,7 +168,7 @@ export async function POST(request: NextRequest) {
       url: billing.url,
     });
 
-    // 8. Persist order
+    // 7. Persist order
     const { data: order } = await admin
       .from("payment_orders")
       .insert({
@@ -206,6 +205,7 @@ export async function POST(request: NextRequest) {
       console.error("[Subscription] AbacatePay API error:", {
         status: error.statusCode,
         message: error.message,
+        body: error.responseBody,
       });
       return NextResponse.json(
         { error: "Erro no gateway de pagamento", details: error.message },

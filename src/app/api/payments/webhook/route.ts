@@ -158,6 +158,39 @@ export async function POST(request: NextRequest) {
 
           orderId = updatedOrder?.id ?? null;
 
+          // Persist payment_customers if user doesn't have one yet
+          if (updatedOrder?.user_id && "billing" in data) {
+            const billingData = data as WebhookBillingPaidData;
+            const customer = billingData.billing.customer;
+            if (customer?.id && customer?.metadata) {
+              const { data: existingPc } = await admin
+                .from("payment_customers")
+                .select("id")
+                .eq("user_id", updatedOrder.user_id)
+                .maybeSingle();
+
+              if (!existingPc) {
+                const { error: pcError } = await admin
+                  .from("payment_customers")
+                  .insert({
+                    user_id: updatedOrder.user_id,
+                    abacatepay_id: customer.id,
+                    email: customer.metadata.email,
+                    name: customer.metadata.name,
+                    cellphone: customer.metadata.cellphone,
+                    tax_id: customer.metadata.taxId,
+                  });
+                if (pcError) {
+                  console.error("[Webhook] Failed to create payment_customers:", pcError);
+                } else {
+                  console.info(
+                    `[Webhook] Created payment_customers for user ${updatedOrder.user_id} from billing.paid`,
+                  );
+                }
+              }
+            }
+          }
+
           // Handle race promotion: mark race as promoted with expiry
           if (updatedOrder?.order_type === "race_promotion") {
             const meta = updatedOrder.metadata as Record<

@@ -49,7 +49,7 @@ export const REGION_CITIES = [
   { name: "Araraquara", state: "SP", lat: -21.7946, lng: -48.1756 },
 ] as const;
 
-export const RADAR_WHATSAPP_NUMBER = "5517988282542";
+export const RADAR_WHATSAPP_NUMBER = "5517996418555";
 
 export const RADAR_AGE_CATEGORIES = [
   "16-19",

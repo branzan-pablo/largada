@@ -6,7 +6,13 @@ export const metadata = {
   title: "Minhas Corridas",
 };
 
-export default function MyRacesPage() {
+export default async function MyRacesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const { tab } = await searchParams;
+
   return (
     <>
       <h1 className="mb-6 text-2xl font-bold">Minhas Corridas</h1>
@@ -19,7 +25,7 @@ export default function MyRacesPage() {
           </div>
         }
       >
-        <MyRacesClient />
+        <MyRacesClient initialTab={tab} />
       </Suspense>
     </>
   );
