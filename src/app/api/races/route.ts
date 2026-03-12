@@ -39,8 +39,8 @@ export async function GET(request: Request) {
     query = query.gte("date", today);
   }
 
-  // Hide races with closed registrations
-  query = query.gte("registration_deadline", today);
+  // Hide races with closed registrations (but keep promoted races visible)
+  query = query.or(`registration_deadline.gte.${today},is_promoted.eq.true`);
 
   if (city) {
     query = query.eq("city", city);
@@ -103,6 +103,7 @@ export async function GET(request: Request) {
     const userLng = parseFloat(lng);
     const maxRadius = parseFloat(radius);
     filteredData = filteredData.filter((race) => {
+      if (race.is_promoted) return true;
       const raceLat = race.latitude || race.cities?.latitude || 0;
       const raceLng = race.longitude || race.cities?.longitude || 0;
       // Include races with no coordinates (0,0) rather than silently excluding them

@@ -1,6 +1,7 @@
 // POST /api/races/[id]/promote
 // Creates a billing charge to promote a race.
 // Only the race creator can promote their own race.
+// If user has no payment_customers record, requires customer data (returns 422 if missing).
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
@@ -13,7 +14,7 @@ import {
     canPromoteWithSubscription,
     useSubscriptionPromotion,
 } from "@/lib/subscriptions";
-import { futureUtc } from "@/lib/date";
+import { futureUtc, todayInBrazil } from "@/lib/date";
 
 const PROMOTION_PRICE_CENTAVOS = 14900; // R$ 149,00
 const PROMOTION_DAYS = 30;
@@ -39,7 +40,7 @@ export async function POST(
         // 2. Fetch race and verify ownership
         const { data: race } = await supabase
             .from("races")
-            .select("id, name, slug, created_by, is_promoted")
+            .select("id, name, slug, created_by, is_promoted, registration_deadline")
             .eq("id", raceId)
             .single();
 
@@ -54,6 +55,13 @@ export async function POST(
         if (race.is_promoted) {
             return NextResponse.json(
                 { error: "Esta corrida já está em destaque" },
+                { status: 409 }
+            );
+        }
+
+        if (race.registration_deadline && race.registration_deadline < todayInBrazil()) {
+            return NextResponse.json(
+                { error: "Inscrições encerradas para esta corrida" },
                 { status: 409 }
             );
         }
@@ -104,14 +112,8 @@ export async function POST(
             });
         }
 
-        // 4. Parse optional customer info from body (one-time payment flow)
-        const customerInput = body.customer as
-            | { name: string; email: string; taxId: string; cellphone: string }
-            | undefined;
-
+        // 4. One-time payment flow — resolve or create customer
         const admin = createAdminClient();
-
-        // 4. Resolve or create AbacatePay customer
         let abacatepayCustomerId: string | undefined;
 
         const { data: existingCustomer } = await admin
@@ -122,7 +124,24 @@ export async function POST(
 
         if (existingCustomer) {
             abacatepayCustomerId = existingCustomer.abacatepay_id;
-        } else if (customerInput?.name && customerInput?.email && customerInput?.taxId && customerInput?.cellphone) {
+        } else {
+            // No existing customer — need customer data from client
+            const customerInput = body.customer as
+                | { name: string; email: string; taxId: string; cellphone: string }
+                | undefined;
+
+            if (
+                !customerInput?.name ||
+                !customerInput?.email ||
+                !customerInput?.taxId ||
+                !customerInput?.cellphone
+            ) {
+                return NextResponse.json(
+                    { error: "customer_required" },
+                    { status: 422 }
+                );
+            }
+
             const customerResult = await createCustomer(customerInput);
             if (customerResult.error) {
                 return NextResponse.json(
@@ -141,11 +160,6 @@ export async function POST(
                     cellphone: customerInput.cellphone,
                     tax_id: customerInput.taxId,
                 });
-        } else {
-            return NextResponse.json(
-                { error: "Dados do cliente obrigatórios (nome, e-mail, CPF, celular)" },
-                { status: 400 }
-            );
         }
 
         // 5. Build URLs
@@ -233,7 +247,6 @@ export async function POST(
 
         if (orderInsertError) {
             console.error("[Promote Race] Failed to persist order:", orderInsertError);
-            // Still return billing URL — payment was created on AbacatePay
         }
 
         return NextResponse.json({

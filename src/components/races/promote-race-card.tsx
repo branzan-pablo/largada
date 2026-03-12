@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
+import { todayInBrazil } from "@/lib/date";
 import type { OrganizerSubscription } from "@/types/subscription";
 
 interface PromoteRaceCardProps {
@@ -27,6 +28,8 @@ interface PromoteRaceCardProps {
   variant?: "sidebar" | "button";
   /** Active subscription, if any. Enables "promote via plan" flow. */
   subscription?: OrganizerSubscription | null;
+  /** Registration deadline (YYYY-MM-DD). Used to disable promotion for expired races. */
+  registrationDeadline?: string;
 }
 
 export function PromoteRaceCard({
@@ -36,28 +39,19 @@ export function PromoteRaceCard({
   isOwner = true,
   variant = "sidebar",
   subscription,
+  registrationDeadline,
 }: PromoteRaceCardProps) {
   const { user, profile } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [phone, setPhone] = useState("");
+  const [needsCustomer, setNeedsCustomer] = useState(false);
+  const [taxId, setTaxId] = useState("");
+  const [cellphone, setCellphone] = useState("");
 
   const hasSubscription = !!subscription;
   const hasCredits =
     hasSubscription &&
     subscription.promotions_used < subscription.promotions_limit;
-
-  const handleOpen = (value: boolean) => {
-    if (value) {
-      setName(profile?.full_name ?? "");
-      setEmail(user?.email ?? "");
-    }
-    setOpen(value);
-  };
 
   // Promote via subscription (no payment needed)
   const handlePromoteWithSubscription = async () => {
@@ -84,23 +78,21 @@ export function PromoteRaceCard({
     }
   };
 
-  // Promote via one-time payment
-  const handlePromote = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Promote via one-time payment (redirect to AbacatePay)
+  const handlePromote = async (customer?: { name: string; email: string; taxId: string; cellphone: string }) => {
     setLoading(true);
     try {
       const res = await fetch(`/api/races/${raceId}/promote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customer: {
-            name: name.trim(),
-            email: email.trim(),
-            taxId: cpf.replace(/\D/g, ""),
-            cellphone: phone.replace(/\D/g, ""),
-          },
-        }),
+        body: JSON.stringify(customer ? { customer } : {}),
       });
+
+      if (res.status === 422) {
+        // Customer data needed — show form fields in the dialog
+        setNeedsCustomer(true);
+        return;
+      }
 
       if (!res.ok) {
         const err = await res.json();
@@ -117,6 +109,19 @@ export function PromoteRaceCard({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePromoteWithCustomer = async () => {
+    if (!taxId.trim() || !cellphone.trim()) {
+      toast.error("Preencha CPF/CNPJ e celular.");
+      return;
+    }
+    await handlePromote({
+      name: profile?.full_name || "",
+      email: user?.email || "",
+      taxId: taxId.trim(),
+      cellphone: cellphone.trim(),
+    });
   };
 
   // Already promoted
@@ -142,19 +147,50 @@ export function PromoteRaceCard({
     );
   }
 
-  // Payment dialog (one-time flow)
+  // Registration closed — disable promotion
+  const isExpired = registrationDeadline ? registrationDeadline < todayInBrazil() : false;
+  if (isExpired) {
+    if (variant === "button") {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-500">
+          Inscrições encerradas
+        </span>
+      );
+    }
+    return (
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-2">
+        <div className="flex items-center gap-2">
+          <Star className="h-4 w-4 text-gray-400" />
+          <h3 className="font-semibold text-gray-600">Inscrições encerradas</h3>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Não é possível destacar uma corrida com inscrições encerradas.
+        </p>
+      </div>
+    );
+  }
+
+  // Confirmation dialog with optional customer form
   const paymentDialog = (
-    <Dialog open={open} onOpenChange={handleOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) {
+        setNeedsCustomer(false);
+        setTaxId("");
+        setCellphone("");
+      }
+    }}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Destacar corrida</DialogTitle>
           <DialogDescription>
-            Sua corrida aparecerá com o badge ⭐ Destaque e será exibida no
-            topo da listagem por 30 dias.
+            {needsCustomer
+              ? "Precisamos do seu CPF/CNPJ e celular para processar o pagamento."
+              : "Sua corrida aparecerá com o badge ⭐ Destaque e será exibida no topo da listagem por 30 dias."}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handlePromote} className="space-y-4">
+        <div className="space-y-4">
           {/* Race + price summary */}
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 flex items-center justify-between">
             <div>
@@ -171,68 +207,41 @@ export function PromoteRaceCard({
             </div>
           </div>
 
-          {/* Customer data */}
-          <div className="space-y-3">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              Dados para cobrança
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="sm:col-span-2 space-y-1">
-                <Label htmlFor="promo-name">Nome completo</Label>
+          {needsCustomer && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="promote-taxId">CPF/CNPJ</Label>
                 <Input
-                  id="promo-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Seu nome"
-                  required
-                />
-              </div>
-
-              <div className="sm:col-span-2 space-y-1">
-                <Label htmlFor="promo-email">E-mail</Label>
-                <Input
-                  id="promo-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="promo-cpf">CPF</Label>
-                <Input
-                  id="promo-cpf"
-                  value={cpf}
-                  onChange={(e) => setCpf(e.target.value)}
+                  id="promote-taxId"
                   placeholder="000.000.000-00"
-                  required
-                  minLength={11}
+                  value={taxId}
+                  onChange={(e) => setTaxId(e.target.value)}
                 />
               </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="promo-phone">Celular</Label>
+              <div className="space-y-2">
+                <Label htmlFor="promote-cellphone">Celular</Label>
                 <Input
-                  id="promo-phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  id="promote-cellphone"
                   placeholder="(11) 99999-9999"
-                  required
-                  minLength={10}
+                  value={cellphone}
+                  onChange={(e) => setCellphone(e.target.value)}
                 />
               </div>
-            </div>
-          </div>
+            </>
+          )}
 
-          <p className="text-xs text-muted-foreground">
-            Você será redirecionado para a página de pagamento seguro. Aceitamos
-            PIX e cartão de crédito.
-          </p>
+          {!needsCustomer && (
+            <p className="text-xs text-muted-foreground">
+              Você será redirecionado para a página de pagamento seguro. Aceitamos
+              PIX e cartão de crédito.
+            </p>
+          )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button
+            className="w-full"
+            onClick={needsCustomer ? handlePromoteWithCustomer : () => handlePromote()}
+            disabled={loading}
+          >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -240,12 +249,12 @@ export function PromoteRaceCard({
               </>
             ) : (
               <>
-                Ir para pagamento
+                {needsCustomer ? "Continuar para pagamento" : "Ir para pagamento"}
                 <ExternalLink className="ml-2 h-4 w-4" />
               </>
             )}
           </Button>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -280,7 +289,7 @@ export function PromoteRaceCard({
             size="sm"
             variant="outline"
             className="border-orange-200 text-[#FF4D00] hover:bg-orange-50"
-            onClick={() => handleOpen(true)}
+            onClick={() => setOpen(true)}
           >
             <Star className="mr-1.5 h-3.5 w-3.5" />
             Destacar (R$ 149)
@@ -297,7 +306,7 @@ export function PromoteRaceCard({
           size="sm"
           variant="outline"
           className="border-orange-200 text-[#FF4D00] hover:bg-orange-50"
-          onClick={() => handleOpen(true)}
+          onClick={() => setOpen(true)}
         >
           <Star className="mr-1.5 h-3.5 w-3.5" />
           Destacar
@@ -370,7 +379,7 @@ export function PromoteRaceCard({
             por 30 dias
           </span>
         </p>
-        <Button className="w-full cursor-pointer" variant="outline" onClick={() => handleOpen(true)}>
+        <Button className="w-full cursor-pointer" variant="outline" onClick={() => setOpen(true)}>
           <Star className="mr-2 h-4 w-4" />
           Destacar corrida
         </Button>

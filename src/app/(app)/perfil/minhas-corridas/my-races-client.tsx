@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import type { Race } from "@/types/race";
 import type { OrganizerSubscription } from "@/types/subscription";
 
-export function MyRacesClient() {
+export function MyRacesClient({ initialTab }: { initialTab?: string }) {
   const { user, isLoading: authLoading } = useAuth();
   const { openLogin } = useLoginModal();
   const [upcoming, setUpcoming] = useState<Race[]>([]);
@@ -119,7 +119,7 @@ export function MyRacesClient() {
   }
 
   return (
-    <Tabs defaultValue="upcoming">
+    <Tabs defaultValue={initialTab === "created" ? "created" : "upcoming"}>
       <TabsList className="w-full">
         <TabsTrigger value="upcoming">
           <CalendarDays className="mr-1.5 hidden h-4 w-4 sm:inline-block" />
@@ -183,6 +183,7 @@ export function MyRacesClient() {
                     raceId={race.id}
                     raceName={race.name}
                     isPromoted={race.is_promoted}
+                    registrationDeadline={race.registration_deadline}
                     variant="button"
                     subscription={subscription}
                   />

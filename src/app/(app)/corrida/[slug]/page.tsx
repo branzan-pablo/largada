@@ -386,6 +386,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
                 raceName={typedRace.name}
                 isPromoted={isPromoted}
                 isOwner={isOwner}
+                registrationDeadline={typedRace.registration_deadline}
               />
             )}
           </aside>
