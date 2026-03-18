@@ -83,7 +83,7 @@ export async function sendToSubscriptions({
 
 /**
  * Notify users when a new race is created.
- * Uses radius-based matching via PostGIS if race has city_id,
+ * Uses radius-based matching via Haversine if race has city_id,
  * falls back to exact city string match otherwise.
  */
 export async function notifyNewRace(raceId: string) {
@@ -98,7 +98,7 @@ export async function notifyNewRace(raceId: string) {
   if (!race) return;
 
   if (race.city_id) {
-    // Radius-based matching via PostGIS
+    // Radius-based matching via Haversine
     const { data: recipients } = await supabase.rpc(
       "get_race_notification_recipients",
       { p_race_city_id: race.city_id },
