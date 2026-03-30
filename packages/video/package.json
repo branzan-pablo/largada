@@ -5,6 +5,7 @@
   "scripts": {
     "studio": "remotion studio src/index.ts",
     "render": "remotion render src/index.ts LargadaDemo out/demo.mp4",
+    "render:promo": "remotion render src/index.ts LargadaPromo out/promo.mp4",
     "render:gif": "remotion render src/index.ts LargadaDemo out/demo.gif --image-format png"
   },
   "dependencies": {

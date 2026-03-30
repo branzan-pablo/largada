@@ -4,11 +4,23 @@ import {
   RaceAnnouncement,
   RACE_ANNOUNCEMENT_DURATION,
 } from "./compositions/RaceAnnouncement";
+import {
+  LargadaPromo,
+  PROMO_TOTAL_DURATION,
+} from "./compositions/LargadaPromo";
 import { VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_FPS } from "./lib/theme";
 
 export function RemotionRoot() {
   return (
     <>
+      <Composition
+        id="LargadaPromo"
+        component={LargadaPromo}
+        durationInFrames={PROMO_TOTAL_DURATION}
+        fps={VIDEO_FPS}
+        width={VIDEO_WIDTH}
+        height={VIDEO_HEIGHT}
+      />
       <Composition
         id="LargadaDemo"
         component={LargadaDemo}
