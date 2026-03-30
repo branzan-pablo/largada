@@ -81,7 +81,20 @@
       "WebFetch(domain:tvcomrunning.com.br)",
       "WebFetch(domain:www.alcer.esp.br)",
       "Bash(git pull:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(ls -la \"/c/Users/pablo/Development/MVP/src/app/\\(app\\)/reset-password/\")",
+      "Bash(ls -la \"/c/Users/pablo/Development/MVP/src/app/\\(landing\\)/\" | head -20)",
+      "Bash(find \"/c/Users/pablo/Development/MVP/src/app/\\(landing\\)\" -type f -name \"*.tsx\" -o -name \"*.ts\" | head -20)",
+      "Bash(find \"C:/Users/pablo/Development/MVP/src/app/\\(app\\)/perfil/minhas-corridas\" -type f)",
+      "Bash(npx vitest:*)",
+      "WebFetch(domain:incentivoesporte.com.br)",
+      "Bash(cd \"C:/Users/pablo/Development/MVP\" && npx tsx -e \"\nimport { incentivoEsporteScraper } from './src/lib/scrapers/incentivo-esporte';\nconst races = await incentivoEsporteScraper.scrape\\(\\);\nconsole.log\\('Total races:', races.length\\);\nif \\(races[0]\\) {\n  console.log\\('First race:', JSON.stringify\\(races[0], null, 2\\)\\);\n}\nif \\(races.length > 1\\) {\n  console.log\\('Second race:', JSON.stringify\\(races[1], null, 2\\)\\);\n}\n\" 2>&1 | head -80)",
+      "Bash(npm -v)",
+      "WebFetch(domain:www.remotion.dev)",
+      "Bash(pnpm install:*)",
+      "Bash(pkill -f \"remotion studio\")",
+      "Bash(npx remotion:*)",
+      "Bash(pkill -f \"remotion\")"
     ]
   }
 }
