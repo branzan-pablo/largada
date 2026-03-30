@@ -1,0 +1,10 @@
+{
+  "servers": {
+    "mcp-remotion": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@remotion/mcp@latest"]
+    }
+  },
+  "inputs": []
+}

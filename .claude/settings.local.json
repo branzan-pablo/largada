@@ -94,7 +94,9 @@
       "Bash(pnpm install:*)",
       "Bash(pkill -f \"remotion studio\")",
       "Bash(npx remotion:*)",
-      "Bash(pkill -f \"remotion\")"
+      "Bash(pkill -f \"remotion\")",
+      "Bash(claude mcp:*)",
+      "Bash(npm run:*)"
     ]
   }
 }
