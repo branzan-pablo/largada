@@ -1,5 +1,6 @@
 import {
   AbsoluteFill,
+  Easing,
   Img,
   interpolate,
   spring,
@@ -9,51 +10,55 @@ import {
 } from "remotion";
 import { theme } from "../../lib/theme";
 
-export const LANDING_LOGO_DURATION = 75; // 2.5s at 30fps
+export const LANDING_LOGO_DURATION = 90; // 3s at 30fps
+
+// Pre-computed particle positions (orange dots that converge into a ring)
+const PARTICLES = Array.from({ length: 24 }, (_, i) => {
+  const angle = (i / 24) * Math.PI * 2;
+  const finalX = Math.cos(angle) * 120;
+  const finalY = Math.sin(angle) * 120;
+  // Random scatter positions
+  const startX = (Math.cos(angle + i) * 500 + Math.sin(i * 7) * 200) | 0;
+  const startY = (Math.sin(angle + i) * 600 + Math.cos(i * 5) * 300) | 0;
+  return { startX, startY, finalX, finalY, delay: (i * 0.7) | 0 };
+});
+
+const BRAND_LETTERS = "LARGADA".split("");
 
 export function LandingLogoScene() {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Logo spring scale-in
-  const logoScale = spring({
+  // Phase 1: Particles converge (frames 0-30)
+  const particleProgress = interpolate(frame, [0, 28], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.cubic),
+  });
+
+  // Phase 2: Logo snaps in (frame 25+)
+  const logoSpring = spring({
     frame,
     fps,
-    config: { damping: 10, stiffness: 80 },
+    delay: 22,
+    config: { damping: 8, stiffness: 150, mass: 0.6 },
   });
 
-  // Pulsing glow ring behind logo
-  const glowScale =
-    frame > 5 ? 1 + 0.06 * Math.sin(((frame - 5) / 40) * Math.PI * 2) : 1;
+  // Phase 3: Letters type in one by one (frame 35+)
+  // Phase 4: Tagline + divider
 
-  // "LARGADA" text slides up
-  const brandOpacity = interpolate(frame, [10, 25], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const brandY = interpolate(frame, [10, 25], [40, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  // Tagline "Corridas de Rua"
-  const taglineOpacity = interpolate(frame, [20, 35], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const taglineY = interpolate(frame, [20, 35], [30, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  // Orange divider grows
-  const dividerWidth = interpolate(frame, [25, 42], [0, 200], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  // Cursor blink
+  const cursorVisible = Math.floor((frame - 35) / 8) % 2 === 0;
 
   // Fade out
-  const fadeOut = interpolate(frame, [60, 75], [1, 0], {
+  const fadeOut = interpolate(frame, [72, 90], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.cubic),
+  });
+
+  // Tagline
+  const taglineOpacity = interpolate(frame, [58, 68], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -65,91 +70,162 @@ export function LandingLogoScene() {
         justifyContent: "center",
         alignItems: "center",
         opacity: fadeOut,
+        overflow: "hidden",
       }}
     >
-      {/* Background radial glow */}
+      {/* Animated background gradient — rotates */}
       <div
         style={{
           position: "absolute",
-          inset: 0,
-          background: `radial-gradient(ellipse at 50% 40%, ${theme.colors.primary}18 0%, transparent 55%)`,
+          inset: -200,
+          background: `conic-gradient(from ${frame * 2}deg at 50% 50%, transparent 0deg, ${theme.colors.primary}08 90deg, transparent 180deg, ${theme.colors.primary}06 270deg, transparent 360deg)`,
         }}
       />
 
+      {/* Converging particles */}
+      {PARTICLES.map((p, i) => {
+        const px = interpolate(
+          particleProgress,
+          [0, 1],
+          [p.startX, p.finalX]
+        );
+        const py = interpolate(
+          particleProgress,
+          [0, 1],
+          [p.startY, p.finalY]
+        );
+        const particleSize = interpolate(
+          particleProgress,
+          [0, 0.5, 1],
+          [3, 6, 4]
+        );
+        const particleOpacity = interpolate(
+          frame,
+          [p.delay, p.delay + 5, 28, 35],
+          [0, 0.8, 0.8, 0],
+          { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+        );
+
+        return (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "43%",
+              width: particleSize,
+              height: particleSize,
+              borderRadius: "50%",
+              backgroundColor: theme.colors.primary,
+              transform: `translate(${px}px, ${py}px)`,
+              opacity: particleOpacity,
+              boxShadow: `0 0 ${particleSize * 2}px ${theme.colors.primary}`,
+            }}
+          />
+        );
+      })}
+
+      {/* Logo — snaps in after particles converge */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 20,
           position: "relative",
         }}
       >
-        {/* Glow ring behind logo */}
+        {/* Glowing ring behind logo */}
         <div
           style={{
             position: "absolute",
-            top: -50,
-            width: 300,
-            height: 300,
+            top: -25,
+            width: 240,
+            height: 240,
             borderRadius: "50%",
-            background: `radial-gradient(circle, ${theme.colors.primary}22 0%, transparent 70%)`,
-            transform: `scale(${glowScale})`,
+            border: `2px solid ${theme.colors.primary}${Math.round(logoSpring * 40).toString(16).padStart(2, "0")}`,
+            opacity: logoSpring,
+            transform: `scale(${0.8 + logoSpring * 0.2})`,
           }}
         />
 
-        {/* Logo */}
         <Img
           src={staticFile("logo_120.png")}
           style={{
-            width: 180,
-            height: 180,
-            transform: `scale(${logoScale})`,
-            position: "relative",
+            width: 190,
+            height: 190,
+            transform: `scale(${logoSpring}) rotate(${(1 - logoSpring) * -90}deg)`,
+            opacity: logoSpring,
           }}
         />
 
-        {/* Brand name */}
+        {/* Typed brand name — letters appear one by one */}
         <div
           style={{
-            fontFamily: theme.fonts.logo,
-            fontSize: 120,
-            color: theme.colors.white,
-            letterSpacing: "0.05em",
-            lineHeight: 1,
-            opacity: brandOpacity,
-            transform: `translateY(${brandY}px)`,
+            display: "flex",
+            alignItems: "center",
+            marginTop: 28,
+            height: 120,
           }}
         >
-          LARGADA
+          {BRAND_LETTERS.map((letter, i) => {
+            const letterDelay = 35 + i * 3;
+            const letterSpring = spring({
+              frame,
+              fps,
+              delay: letterDelay,
+              config: { damping: 15, stiffness: 200, mass: 0.5 },
+            });
+            const letterRotation = interpolate(letterSpring, [0, 1], [-90, 0]);
+
+            return (
+              <div
+                key={i}
+                style={{
+                  fontFamily: theme.fonts.logo,
+                  fontSize: 120,
+                  color: theme.colors.white,
+                  letterSpacing: "0.06em",
+                  lineHeight: 1,
+                  opacity: letterSpring,
+                  transform: `perspective(400px) rotateY(${letterRotation}deg)`,
+                  display: "inline-block",
+                }}
+              >
+                {letter}
+              </div>
+            );
+          })}
+
+          {/* Typing cursor */}
+          {frame >= 35 && frame < 62 && (
+            <div
+              style={{
+                width: 4,
+                height: 90,
+                backgroundColor: theme.colors.primary,
+                marginLeft: 4,
+                opacity: cursorVisible ? 1 : 0,
+                borderRadius: 2,
+              }}
+            />
+          )}
         </div>
 
-        {/* Tagline */}
+        {/* Tagline slides up */}
         <div
           style={{
             fontFamily: theme.fonts.body,
-            fontSize: 28,
+            fontSize: 30,
             fontWeight: 600,
             color: theme.colors.text,
-            letterSpacing: "0.15em",
+            letterSpacing: "0.2em",
             textTransform: "uppercase",
             opacity: taglineOpacity,
-            transform: `translateY(${taglineY}px)`,
+            marginTop: 8,
           }}
         >
           Corridas de Rua
         </div>
-
-        {/* Divider */}
-        <div
-          style={{
-            width: dividerWidth,
-            height: 3,
-            backgroundColor: `${theme.colors.primary}60`,
-            marginTop: 16,
-            borderRadius: 2,
-          }}
-        />
       </div>
     </AbsoluteFill>
   );

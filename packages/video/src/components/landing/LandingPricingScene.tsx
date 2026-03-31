@@ -1,7 +1,7 @@
 import {
   AbsoluteFill,
+  Easing,
   interpolate,
-  interpolateColors,
   spring,
   useCurrentFrame,
   useVideoConfig,
@@ -13,42 +13,41 @@ export const LANDING_PRICING_DURATION = 150; // 5s at 30fps
 const plans = [
   {
     name: "Avulso",
-    price: "R$ 149",
+    price: 149,
     period: "pagamento único",
-    features: [
-      "1 corrida em destaque",
-      "Corrida no topo do calendário",
-      "Badge de destaque no listagem",
-      "Mais visibilidade para inscrições",
-    ],
+    subtitle: "1 corrida em destaque",
+    features: ["Topo do calendário", "Badge verificado", "Painel básico"],
     highlighted: false,
+    height: 70,
   },
   {
     name: "Organizador",
-    price: "R$ 349",
+    price: 349,
     period: "pagamento único",
-    discount: "-21% de desconto",
+    subtitle: "3 corridas em destaque",
+    discount: "-21%",
     badge: "Mais popular",
     features: [
-      "3 corridas em destaque",
-      "Tudo do plano Avulso",
-      "3 créditos para destacar corridas",
-      "Créditos válidos por 30 dias",
+      "Tudo do Avulso",
+      "3 créditos",
+      "Válidos 30 dias",
     ],
     highlighted: true,
+    height: 85,
   },
   {
     name: "Organizador Pro",
-    price: "R$ 699",
+    price: 699,
     period: "pagamento único",
-    discount: "-47% de desconto",
+    subtitle: "6 corridas em destaque",
+    discount: "-47%",
     features: [
-      "6 corridas em destaque",
-      "Tudo do plano Organizador",
-      "6 créditos para destacar corridas",
-      "Créditos válidos por 30 dias",
+      "Tudo do Organizador",
+      "6 créditos",
+      "Válidos 30 dias",
     ],
     highlighted: false,
+    height: 78,
   },
 ];
 
@@ -56,20 +55,15 @@ export function LandingPricingScene() {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Label
-  const labelOpacity = interpolate(frame, [0, 12], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
   // Title
-  const titleOpacity = interpolate(frame, [8, 22], [0, 1], {
+  const titleOpacity = interpolate(frame, [0, 15], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const titleY = interpolate(frame, [8, 22], [25, 0], {
+  const titleScale = interpolate(frame, [0, 15], [0.85, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
+    easing: Easing.out(Easing.cubic),
   });
 
   // Fade out
@@ -77,311 +71,364 @@ export function LandingPricingScene() {
     frame,
     [LANDING_PRICING_DURATION - 15, LANDING_PRICING_DURATION],
     [1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.inOut(Easing.cubic),
+    }
   );
 
-  const cardStarts = [25, 38, 51];
+  const colDelays = [28, 22, 34]; // Middle first
 
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: theme.colors.bgLight,
-        padding: "60px 56px",
+        backgroundColor: theme.colors.dark,
         opacity: fadeOut,
+        overflow: "hidden",
       }}
     >
-      {/* Section label */}
+      {/* Spotlight on center */}
       <div
         style={{
-          fontFamily: theme.fonts.body,
-          fontSize: 20,
-          fontWeight: 600,
-          color: theme.colors.text,
-          textTransform: "uppercase",
-          letterSpacing: "0.2em",
-          textAlign: "center",
-          marginTop: 80,
-          opacity: labelOpacity,
+          position: "absolute",
+          top: "30%",
+          left: "50%",
+          width: 500,
+          height: 800,
+          transform: "translate(-50%, -20%)",
+          background: `radial-gradient(ellipse, ${theme.colors.primary}10 0%, transparent 60%)`,
         }}
-      >
-        Para Organizadores
-      </div>
+      />
 
       {/* Title */}
       <div
         style={{
-          fontFamily: theme.fonts.body,
-          fontSize: 44,
-          fontWeight: 900,
-          color: theme.colors.dark,
           textAlign: "center",
-          marginTop: 16,
-          lineHeight: 1.2,
+          marginTop: 100,
+          padding: "0 60px",
           opacity: titleOpacity,
-          transform: `translateY(${titleY}px)`,
+          transform: `scale(${titleScale})`,
+          position: "relative",
         }}
       >
-        Destaque suas corridas e
-        <br />
-        alcance mais atletas
+        <div
+          style={{
+            fontFamily: theme.fonts.body,
+            fontSize: 20,
+            fontWeight: 600,
+            color: theme.colors.primary,
+            textTransform: "uppercase",
+            letterSpacing: "0.25em",
+            marginBottom: 12,
+          }}
+        >
+          Para Organizadores
+        </div>
+        <div
+          style={{
+            fontFamily: theme.fonts.body,
+            fontSize: 42,
+            fontWeight: 900,
+            color: theme.colors.white,
+            lineHeight: 1.25,
+          }}
+        >
+          Destaque suas corridas
+        </div>
       </div>
 
-      {/* Subtitle */}
-      <div
-        style={{
-          fontFamily: theme.fonts.body,
-          fontSize: 24,
-          color: theme.colors.text,
-          textAlign: "center",
-          marginTop: 12,
-          opacity: titleOpacity,
-        }}
-      >
-        Coloque seus eventos no topo do calendário e seja visto por quem está
-        procurando a próxima prova.
-      </div>
-
-      {/* Pricing cards */}
+      {/* Rising column cards — perspective view */}
       <div
         style={{
           display: "flex",
-          flexDirection: "column",
-          gap: 20,
-          marginTop: 40,
-          flex: 1,
           justifyContent: "center",
+          alignItems: "flex-end",
+          gap: 20,
+          marginTop: 60,
+          flex: 1,
+          padding: "0 40px 120px",
+          perspective: "800px",
         }}
       >
         {plans.map((plan, i) => {
-          const start = cardStarts[i];
-          const isHighlighted = plan.highlighted;
+          const delay = colDelays[i];
+          const isHL = plan.highlighted;
 
-          const cardSpring = spring({
-            frame: frame - start,
-            fps,
-            config: {
-              damping: isHighlighted ? 10 : 14,
-              stiffness: 80,
-            },
-          });
-          const cardOpacity = interpolate(
+          // Column rises from bottom
+          const riseProgress = interpolate(
             frame,
-            [start, start + 12],
+            [delay, delay + 25],
             [0, 1],
-            { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: Easing.out(Easing.cubic),
+            }
           );
 
-          // Border color for highlighted card
-          const borderColor = isHighlighted
-            ? interpolateColors(
-                frame,
-                [start, start + 25],
-                ["#E5E7EB", theme.colors.primary]
-              )
-            : "#E5E7EB";
+          // 3D tilt — columns tilt then straighten
+          const tiltX = interpolate(
+            frame,
+            [delay, delay + 15, delay + 30],
+            [25, 5, 0],
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: Easing.out(Easing.cubic),
+            }
+          );
 
-          // Button pulse for highlighted
+          // Badge spring
+          const badgeSpring = isHL
+            ? spring({
+                frame,
+                fps,
+                delay: delay + 18,
+                config: { damping: 8, stiffness: 150, mass: 0.5 },
+              })
+            : 0;
+
+          // Animated price counter
+          const priceProgress = interpolate(
+            frame,
+            [delay + 10, delay + 30],
+            [0, 1],
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: Easing.out(Easing.cubic),
+            }
+          );
+          const displayPrice = Math.round(priceProgress * plan.price);
+
+          // Button pulse
           const btnPulse =
-            isHighlighted && frame > 90
-              ? 1 + 0.03 * Math.sin(((frame - 90) / 25) * Math.PI * 2)
+            isHL && frame > 80
+              ? 1 + 0.03 * Math.sin(((frame - 80) / 22) * Math.PI * 2)
               : 1;
 
-          // Feature items stagger for highlighted card
-          const featureBaseStart = isHighlighted ? start + 25 : start + 15;
+          // Column height based on plan
+          const colHeight = plan.height;
 
           return (
             <div
               key={i}
               style={{
+                width: "30%",
+                maxWidth: 300,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "stretch",
+                opacity: riseProgress,
+                transform: `translateY(${(1 - riseProgress) * 400}px) rotateX(${tiltX}deg)`,
+                transformOrigin: "bottom center",
                 position: "relative",
-                backgroundColor: theme.colors.white,
-                borderRadius: 24,
-                padding: "28px 32px",
-                border: `2px solid`,
-                borderColor,
-                borderTopWidth: isHighlighted ? 4 : 2,
-                borderTopColor: isHighlighted
-                  ? theme.colors.primary
-                  : borderColor,
-                opacity: cardOpacity,
-                transform: `scale(${cardSpring})`,
-                boxShadow: isHighlighted
-                  ? `0 8px 32px ${theme.colors.primary}18`
-                  : "0 2px 8px rgba(0,0,0,0.04)",
               }}
             >
-              {/* Badge for highlighted */}
+              {/* Badge */}
               {plan.badge && (
                 <div
                   style={{
                     position: "absolute",
-                    top: -16,
-                    right: 28,
+                    top: -18,
+                    left: "50%",
+                    transform: `translateX(-50%) scale(${badgeSpring})`,
                     backgroundColor: theme.colors.primary,
                     color: theme.colors.white,
                     fontFamily: theme.fonts.body,
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: 700,
-                    padding: "6px 20px",
+                    padding: "5px 18px",
                     borderRadius: 100,
-                    boxShadow: `0 4px 16px ${theme.colors.primary}40`,
+                    whiteSpace: "nowrap",
+                    boxShadow: `0 4px 16px ${theme.colors.primary}50`,
                   }}
                 >
                   {plan.badge}
                 </div>
               )}
 
-              {/* Plan name */}
+              {/* Card body */}
               <div
                 style={{
-                  fontFamily: theme.fonts.body,
-                  fontSize: 26,
-                  fontWeight: 700,
-                  color: theme.colors.dark,
-                  marginBottom: 8,
-                }}
-              >
-                {plan.name}
-              </div>
-
-              {/* Price row */}
-              <div
-                style={{
+                  backgroundColor: isHL
+                    ? "rgba(255,77,0,0.08)"
+                    : "rgba(255,255,255,0.04)",
+                  borderRadius: 24,
+                  padding: "28px 24px",
+                  border: `2px solid ${isHL ? theme.colors.primary : "rgba(255,255,255,0.08)"}`,
+                  borderTopWidth: isHL ? 4 : 2,
+                  minHeight: `${colHeight}%`,
                   display: "flex",
-                  alignItems: "baseline",
-                  gap: 8,
-                  marginBottom: 4,
+                  flexDirection: "column",
+                  boxShadow: isHL
+                    ? `0 0 40px ${theme.colors.primary}15, 0 20px 60px rgba(0,0,0,0.3)`
+                    : "0 10px 40px rgba(0,0,0,0.2)",
                 }}
               >
-                <span
-                  style={{
-                    fontFamily: theme.fonts.logo,
-                    fontSize: 52,
-                    color: isHighlighted
-                      ? theme.colors.primary
-                      : theme.colors.dark,
-                    lineHeight: 1,
-                  }}
-                >
-                  {plan.price}
-                </span>
-                <span
+                {/* Plan name */}
+                <div
                   style={{
                     fontFamily: theme.fonts.body,
-                    fontSize: 20,
-                    color: theme.colors.text,
+                    fontSize: 24,
+                    fontWeight: 700,
+                    color: theme.colors.white,
+                    marginBottom: 4,
                   }}
                 >
-                  / {plan.period}
-                </span>
-              </div>
-
-              {/* Discount */}
-              {plan.discount && (
+                  {plan.name}
+                </div>
                 <div
                   style={{
                     fontFamily: theme.fonts.body,
                     fontSize: 18,
-                    fontWeight: 600,
-                    color: theme.colors.success,
+                    color: "rgba(255,255,255,0.5)",
+                    marginBottom: 12,
+                  }}
+                >
+                  {plan.subtitle}
+                </div>
+
+                {/* Price — animated counter */}
+                <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                  <span
+                    style={{
+                      fontFamily: theme.fonts.logo,
+                      fontSize: 52,
+                      color: isHL
+                        ? theme.colors.primary
+                        : theme.colors.white,
+                      lineHeight: 1,
+                    }}
+                  >
+                    R$ {displayPrice}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    fontFamily: theme.fonts.body,
+                    fontSize: 16,
+                    color: "rgba(255,255,255,0.4)",
                     marginBottom: 8,
                   }}
                 >
-                  {plan.discount}
+                  / {plan.period}
                 </div>
-              )}
 
-              {/* Feature list */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 8,
-                  marginTop: 12,
-                }}
-              >
-                {plan.features.map((feat, j) => {
-                  const featStart = featureBaseStart + j * 6;
-                  const featOpacity = interpolate(
-                    frame,
-                    [featStart, featStart + 10],
-                    [0, 1],
-                    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-                  );
+                {/* Discount */}
+                {plan.discount && (
+                  <div
+                    style={{
+                      fontFamily: theme.fonts.body,
+                      fontSize: 16,
+                      fontWeight: 700,
+                      color: theme.colors.success,
+                      marginBottom: 12,
+                    }}
+                  >
+                    {plan.discount} de desconto
+                  </div>
+                )}
 
-                  return (
-                    <div
-                      key={j}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        opacity: featOpacity,
-                      }}
-                    >
-                      <span
+                {/* Features */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                    flex: 1,
+                    marginTop: 8,
+                  }}
+                >
+                  {plan.features.map((feat, j) => {
+                    const fDelay = delay + 20 + j * 5;
+                    const fOp = interpolate(
+                      frame,
+                      [fDelay, fDelay + 8],
+                      [0, 1],
+                      {
+                        extrapolateLeft: "clamp",
+                        extrapolateRight: "clamp",
+                      }
+                    );
+                    return (
+                      <div
+                        key={j}
                         style={{
-                          color: theme.colors.primary,
-                          fontSize: 20,
-                          fontWeight: 700,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          opacity: fOp,
                         }}
                       >
-                        ✓
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: theme.fonts.body,
-                          fontSize: 22,
-                          color: theme.colors.text,
-                        }}
-                      >
-                        {feat}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+                        <span
+                          style={{
+                            color: theme.colors.primary,
+                            fontSize: 18,
+                            fontWeight: 700,
+                          }}
+                        >
+                          ✓
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: theme.fonts.body,
+                            fontSize: 18,
+                            color: "rgba(255,255,255,0.7)",
+                          }}
+                        >
+                          {feat}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
 
-              {/* CTA button */}
-              <div
-                style={{
-                  marginTop: 20,
-                  backgroundColor: isHighlighted
-                    ? theme.colors.primary
-                    : "transparent",
-                  color: isHighlighted
-                    ? theme.colors.white
-                    : theme.colors.dark,
-                  border: isHighlighted
-                    ? "none"
-                    : `2px solid ${theme.colors.dark}`,
-                  fontFamily: theme.fonts.body,
-                  fontSize: 24,
-                  fontWeight: 700,
-                  padding: "16px 0",
-                  borderRadius: 12,
-                  textAlign: "center",
-                  transform: `scale(${btnPulse})`,
-                  boxShadow: isHighlighted
-                    ? `0 4px 20px ${theme.colors.primary}30`
-                    : "none",
-                }}
-              >
-                Começar agora
+                {/* CTA button */}
+                <div
+                  style={{
+                    marginTop: 20,
+                    backgroundColor: isHL
+                      ? theme.colors.primary
+                      : "transparent",
+                    color: isHL
+                      ? theme.colors.white
+                      : "rgba(255,255,255,0.8)",
+                    border: isHL
+                      ? "none"
+                      : "1px solid rgba(255,255,255,0.2)",
+                    fontFamily: theme.fonts.body,
+                    fontSize: 20,
+                    fontWeight: 700,
+                    padding: "12px 0",
+                    borderRadius: 12,
+                    textAlign: "center",
+                    transform: `scale(${btnPulse})`,
+                    boxShadow: isHL
+                      ? `0 4px 20px ${theme.colors.primary}35`
+                      : "none",
+                  }}
+                >
+                  Começar agora
+                </div>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Payment note */}
+      {/* Bottom note */}
       <div
         style={{
+          position: "absolute",
+          bottom: 60,
+          left: 0,
+          right: 0,
+          textAlign: "center",
           fontFamily: theme.fonts.body,
           fontSize: 18,
-          color: theme.colors.text,
-          textAlign: "center",
-          marginTop: 20,
+          color: "rgba(255,255,255,0.3)",
           opacity: titleOpacity,
         }}
       >

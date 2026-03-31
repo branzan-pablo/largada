@@ -1,5 +1,6 @@
 import {
   AbsoluteFill,
+  Easing,
   interpolate,
   spring,
   useCurrentFrame,
@@ -10,39 +11,41 @@ import { theme } from "../../lib/theme";
 export const LANDING_STEPS_DURATION = 135; // 4.5s at 30fps
 
 const steps = [
+  { title: "Crie sua conta", desc: "Rápido, grátis, sem cartão de crédito." },
   {
-    number: "1",
-    title: "Crie sua conta",
-    desc: "Cadastre com email, Google ou Strava. Selecione sua cidade e o quanto você topa viajar para uma prova.",
+    title: "Encontre sua prova",
+    desc: "Filtre por distância, data e localização.",
   },
   {
-    number: "2",
-    title: "Encontre sua próxima prova",
-    desc: "Use os filtros para achar provas na distância certa, com o nível de premiação que você quer ser visto por dezenas de irrelevantes.",
-  },
-  {
-    number: "3",
     title: "Marque e deixa com a gente",
-    desc: 'Clique em "Vou Nessa", veja quem da sua rede também vai correr e deixa o Largada te avisar quando o prazo de inscrição estiver chegando.',
+    desc: "Lembrete antes do prazo de inscrição fechar.",
   },
 ];
 
-const STEP_SPACING = 280;
-const CIRCLE_SIZE = 56;
-const LINE_HEIGHT_PX = STEP_SPACING - CIRCLE_SIZE - 24;
+// Animated progress road config
+const ROAD_WIDTH = 800;
+const NODE_SIZE = 60;
 
 export function LandingStepsScene() {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   // Title
-  const titleOpacity = interpolate(frame, [0, 15], [0, 1], {
+  const titleSpring = spring({
+    frame,
+    fps,
+    config: { damping: 12, stiffness: 90, mass: 0.8 },
+  });
+  const titleOpacity = interpolate(frame, [0, 12], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const titleY = interpolate(frame, [0, 15], [30, 0], {
+
+  // Road fill progress — left to right
+  const roadFill = interpolate(frame, [18, 95], [0, 100], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
+    easing: Easing.out(Easing.quad),
   });
 
   // Fade out
@@ -50,54 +53,60 @@ export function LandingStepsScene() {
     frame,
     [LANDING_STEPS_DURATION - 15, LANDING_STEPS_DURATION],
     [1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.inOut(Easing.cubic),
+    }
   );
 
-  const stepStarts = [18, 43, 68];
+  const stepActivationFrames = [25, 52, 78];
 
   return (
     <AbsoluteFill
       style={{
         backgroundColor: theme.colors.dark,
-        padding: "80px 72px",
+        padding: "80px 60px",
         opacity: fadeOut,
+        overflow: "hidden",
       }}
     >
-      {/* Background glow */}
+      {/* Background accent */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          background: `radial-gradient(ellipse at 50% 50%, ${theme.colors.primary}10 0%, transparent 55%)`,
+          background: `radial-gradient(ellipse at 50% 65%, ${theme.colors.primary}0A 0%, transparent 60%)`,
         }}
       />
 
-      {/* Title area */}
+      {/* Title */}
       <div
         style={{
           textAlign: "center",
-          marginTop: 140,
-          marginBottom: 60,
+          marginTop: 120,
           opacity: titleOpacity,
-          transform: `translateY(${titleY}px)`,
+          transform: `scale(${titleSpring})`,
           position: "relative",
         }}
       >
         <div
           style={{
             fontFamily: theme.fonts.body,
-            fontSize: 48,
+            fontSize: 46,
             fontWeight: 900,
             color: theme.colors.white,
             lineHeight: 1.3,
           }}
         >
-          Três minutos. Uma conta.
+          Três minutos.
+          <br />
+          Uma conta.
         </div>
         <div
           style={{
             fontFamily: theme.fonts.body,
-            fontSize: 48,
+            fontSize: 46,
             fontWeight: 900,
             color: theme.colors.primary,
             lineHeight: 1.3,
@@ -105,171 +114,189 @@ export function LandingStepsScene() {
         >
           Nenhuma corrida perdida.
         </div>
-        <div
-          style={{
-            fontFamily: theme.fonts.body,
-            fontSize: 26,
-            color: theme.colors.text,
-            marginTop: 16,
-          }}
-        >
-          Sem tutorial, sem configuração complicada.
-        </div>
       </div>
 
-      {/* Steps */}
+      {/* Horizontal progress road */}
       <div
         style={{
+          position: "relative",
+          marginTop: 100,
+          width: "100%",
           display: "flex",
           flexDirection: "column",
-          gap: 0,
-          position: "relative",
-          flex: 1,
-          justifyContent: "center",
+          alignItems: "center",
         }}
       >
-        {steps.map((step, i) => {
-          const start = stepStarts[i];
+        {/* Road track background */}
+        <div
+          style={{
+            width: ROAD_WIDTH,
+            height: 6,
+            backgroundColor: "rgba(255,255,255,0.08)",
+            borderRadius: 3,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Orange fill */}
+          <div
+            style={{
+              width: `${roadFill}%`,
+              height: "100%",
+              background: `linear-gradient(90deg, ${theme.colors.primary}, ${theme.colors.primary}CC)`,
+              borderRadius: 3,
+              boxShadow: `0 0 20px ${theme.colors.primary}40`,
+            }}
+          />
+        </div>
 
-          // Circle spring
-          const circleSpring = spring({
-            frame: frame - start,
-            fps,
-            config: { damping: 12, stiffness: 100 },
-          });
-          const circleOpacity = interpolate(
-            frame,
-            [start, start + 10],
-            [0, 1],
-            { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-          );
+        {/* Step nodes along the road */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: ROAD_WIDTH,
+            marginTop: -33,
+            position: "relative",
+          }}
+        >
+          {steps.map((step, i) => {
+            const activationFrame = stepActivationFrames[i];
+            const isActive = roadFill >= ((i + 0.3) / 3) * 100;
 
-          // Text slide
-          const textOpacity = interpolate(
-            frame,
-            [start + 5, start + 18],
-            [0, 1],
-            { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-          );
-          const textX = interpolate(
-            frame,
-            [start + 5, start + 18],
-            [-40, 0],
-            { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-          );
+            // Node spring — number flips with 3D rotateX
+            const nodeSpring = spring({
+              frame,
+              fps,
+              delay: activationFrame,
+              config: { damping: 10, stiffness: 120, mass: 0.6 },
+            });
 
-          // Connecting line grows (not for last step)
-          const lineHeight =
-            i < steps.length - 1
-              ? interpolate(
-                  frame,
-                  [start + 12, start + 30],
-                  [0, LINE_HEIGHT_PX],
-                  { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-                )
-              : 0;
+            // 3D flip
+            const flipAngle = interpolate(nodeSpring, [0, 1], [90, 0]);
 
-          // Check flash after all steps
-          const flashStart = 95 + i * 10;
-          const flashScale = interpolate(
-            frame,
-            [flashStart, flashStart + 6, flashStart + 12],
-            [1, 1.18, 1],
-            { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-          );
+            // Text appears below
+            const textOpacity = interpolate(
+              frame,
+              [activationFrame + 8, activationFrame + 20],
+              [0, 1],
+              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+            );
+            const textY = interpolate(
+              frame,
+              [activationFrame + 8, activationFrame + 20],
+              [15, 0],
+              {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+                easing: Easing.out(Easing.cubic),
+              }
+            );
 
-          return (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 28,
-                marginBottom: i < steps.length - 1 ? 40 : 0,
-                position: "relative",
-              }}
-            >
-              {/* Circle + connecting line */}
+            // Pulse ring when activated
+            const pulseRing = interpolate(
+              frame,
+              [
+                activationFrame + 5,
+                activationFrame + 20,
+                activationFrame + 35,
+              ],
+              [0, 1, 0],
+              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+            );
+
+            return (
               <div
+                key={i}
                 style={{
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  flexShrink: 0,
+                  width: 260,
                 }}
               >
-                {/* Numbered circle */}
+                {/* Pulse ring */}
                 <div
                   style={{
-                    width: CIRCLE_SIZE,
-                    height: CIRCLE_SIZE,
+                    position: "absolute",
+                    width: NODE_SIZE + 30,
+                    height: NODE_SIZE + 30,
                     borderRadius: "50%",
-                    backgroundColor: `${theme.colors.primary}20`,
                     border: `2px solid ${theme.colors.primary}`,
+                    transform: `scale(${1 + pulseRing * 0.5})`,
+                    opacity: pulseRing * 0.5,
+                    marginTop: -15,
+                  }}
+                />
+
+                {/* Node circle — 3D flip */}
+                <div
+                  style={{
+                    width: NODE_SIZE,
+                    height: NODE_SIZE,
+                    borderRadius: "50%",
+                    backgroundColor: isActive
+                      ? theme.colors.primary
+                      : "rgba(255,255,255,0.08)",
+                    border: `3px solid ${isActive ? theme.colors.primary : "rgba(255,255,255,0.15)"}`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontFamily: theme.fonts.logo,
-                    fontSize: 28,
-                    color: theme.colors.primary,
-                    opacity: circleOpacity,
-                    transform: `scale(${circleSpring * flashScale})`,
-                    boxShadow:
-                      flashScale > 1.05
-                        ? `0 0 20px ${theme.colors.primary}60`
-                        : "none",
+                    transform: `perspective(200px) rotateX(${flipAngle}deg)`,
+                    boxShadow: isActive
+                      ? `0 0 20px ${theme.colors.primary}50`
+                      : "none",
                   }}
                 >
-                  {step.number}
+                  <span
+                    style={{
+                      fontFamily: theme.fonts.logo,
+                      fontSize: 28,
+                      color: isActive
+                        ? theme.colors.white
+                        : "rgba(255,255,255,0.3)",
+                    }}
+                  >
+                    {i + 1}
+                  </span>
                 </div>
 
-                {/* Connecting line */}
-                {i < steps.length - 1 && (
+                {/* Step text below */}
+                <div
+                  style={{
+                    marginTop: 20,
+                    textAlign: "center",
+                    opacity: textOpacity,
+                    transform: `translateY(${textY}px)`,
+                  }}
+                >
                   <div
                     style={{
-                      width: 2,
-                      height: lineHeight,
-                      backgroundColor: `${theme.colors.primary}30`,
-                      marginTop: 8,
+                      fontFamily: theme.fonts.body,
+                      fontSize: 26,
+                      fontWeight: 700,
+                      color: theme.colors.white,
+                      lineHeight: 1.2,
+                      marginBottom: 8,
                     }}
-                  />
-                )}
-              </div>
-
-              {/* Text content */}
-              <div
-                style={{
-                  opacity: textOpacity,
-                  transform: `translateX(${textX}px)`,
-                  paddingTop: 8,
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: theme.fonts.body,
-                    fontSize: 32,
-                    fontWeight: 700,
-                    color: theme.colors.white,
-                    lineHeight: 1.2,
-                    marginBottom: 8,
-                  }}
-                >
-                  {step.title}
-                </div>
-                <div
-                  style={{
-                    fontFamily: theme.fonts.body,
-                    fontSize: 24,
-                    color: "rgba(255,255,255,0.6)",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {step.desc}
+                  >
+                    {step.title}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: theme.fonts.body,
+                      fontSize: 22,
+                      color: "rgba(255,255,255,0.5)",
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {step.desc}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </AbsoluteFill>
   );

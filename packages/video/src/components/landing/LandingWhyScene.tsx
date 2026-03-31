@@ -1,8 +1,10 @@
 import {
   AbsoluteFill,
+  Easing,
   interpolate,
-  interpolateColors,
+  spring,
   useCurrentFrame,
+  useVideoConfig,
 } from "remotion";
 import { theme } from "../../lib/theme";
 
@@ -11,42 +13,32 @@ export const LANDING_WHY_DURATION = 150; // 5s at 30fps
 const problems = [
   {
     icon: "🔍",
-    title: "Corrida boa é aquela que você fica sabendo a tempo.",
-    desc: "Eventos divulgados em grupos de WhatsApp, perfis de Instagram e sites de organizadores. Você precisa acompanhar tudo e ainda assim perde corrida.",
+    text: "Corrida boa é aquela que você fica sabendo a tempo.",
+    detail:
+      "Você precisa acompanhar tudo e ainda assim perde corrida.",
   },
   {
     icon: "⏰",
-    title: "Abriu inscrição. Você ficou sabendo 1 semana depois.",
-    desc: "Quando a corrida aparece no feed, o primeiro lote já fechou e o valor subiu. O Largada te avisa antes disso acontecer.",
+    text: "Abriu inscrição. Você ficou sabendo 1 semana depois.",
+    detail: "O primeiro lote já fechou e o valor subiu.",
   },
   {
     icon: "👥",
-    title: "Correr com a turma é diferente de correr sozinho.",
-    desc: "Antes de se inscrever, veja quem da sua rede vai. O Largada mostra quem confirmou participação sem precisar perguntar em cada grupo.",
+    text: "Correr com a turma é diferente de correr sozinho.",
+    detail:
+      "Veja quem da sua rede vai sem perguntar em cada grupo.",
   },
 ];
 
 export function LandingWhyScene() {
   const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
 
-  // Section label
-  const labelOpacity = interpolate(frame, [0, 12], [0, 1], {
+  // Title wipe — horizontal bar reveals text
+  const titleReveal = interpolate(frame, [0, 20], [0, 100], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-  });
-  const labelY = interpolate(frame, [0, 12], [20, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  // Title
-  const titleOpacity = interpolate(frame, [8, 22], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const titleY = interpolate(frame, [8, 22], [25, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.cubic),
   });
 
   // Fade out
@@ -54,102 +46,131 @@ export function LandingWhyScene() {
     frame,
     [LANDING_WHY_DURATION - 15, LANDING_WHY_DURATION],
     [1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.inOut(Easing.cubic),
+    }
   );
 
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: theme.colors.white,
-        padding: 72,
+        backgroundColor: theme.colors.dark,
         opacity: fadeOut,
+        overflow: "hidden",
       }}
     >
-      {/* Section label */}
+      {/* Diagonal orange accent stripe */}
       <div
         style={{
-          fontFamily: theme.fonts.body,
-          fontSize: 22,
-          fontWeight: 600,
-          color: theme.colors.text,
-          textTransform: "uppercase",
-          letterSpacing: "0.2em",
-          textAlign: "center",
-          marginTop: 160,
-          opacity: labelOpacity,
-          transform: `translateY(${labelY}px)`,
+          position: "absolute",
+          top: -100,
+          right: -200,
+          width: 600,
+          height: 1200,
+          background: `linear-gradient(135deg, ${theme.colors.primary}06 0%, ${theme.colors.primary}12 50%, transparent 100%)`,
+          transform: "rotate(15deg)",
         }}
-      >
-        Por que?
-      </div>
+      />
 
-      {/* Title */}
+      {/* Title area */}
       <div
         style={{
-          fontFamily: theme.fonts.body,
-          fontSize: 52,
-          fontWeight: 900,
-          color: theme.colors.dark,
-          textAlign: "center",
-          marginTop: 20,
-          lineHeight: 1.2,
-          opacity: titleOpacity,
-          transform: `translateY(${titleY}px)`,
+          padding: "0 72px",
+          marginTop: 180,
+          position: "relative",
         }}
       >
-        Por que o Largada existe
+        {/* Orange bar that reveals the title */}
+        <div
+          style={{
+            position: "absolute",
+            left: 72,
+            top: 0,
+            width: 5,
+            height: `${titleReveal}%`,
+            backgroundColor: theme.colors.primary,
+            borderRadius: 3,
+            maxHeight: 100,
+          }}
+        />
+
+        <div style={{ paddingLeft: 28 }}>
+          <div
+            style={{
+              fontFamily: theme.fonts.body,
+              fontSize: 22,
+              fontWeight: 600,
+              color: theme.colors.primary,
+              textTransform: "uppercase",
+              letterSpacing: "0.25em",
+              opacity: interpolate(frame, [5, 15], [0, 1], {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+              }),
+            }}
+          >
+            Por que o Largada existe
+          </div>
+          <div
+            style={{
+              fontFamily: theme.fonts.body,
+              fontSize: 48,
+              fontWeight: 900,
+              color: theme.colors.white,
+              lineHeight: 1.25,
+              marginTop: 12,
+              clipPath: `inset(0 ${100 - titleReveal}% 0 0)`,
+            }}
+          >
+            Corridas espalhadas.
+            <br />
+            <span style={{ color: theme.colors.primary }}>Inscrições perdidas.</span>
+          </div>
+        </div>
       </div>
 
-      {/* Subtitle */}
-      <div
-        style={{
-          fontFamily: theme.fonts.body,
-          fontSize: 28,
-          color: theme.colors.text,
-          textAlign: "center",
-          marginTop: 16,
-          opacity: titleOpacity,
-        }}
-      >
-        Corridas espalhadas, inscrições encerradas, turma sem avisar. Sua
-        familiar?
-      </div>
-
-      {/* Problem cards */}
+      {/* Problem strips — full-width bands from alternating sides */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: 24,
-          marginTop: 60,
+          gap: 0,
+          marginTop: 80,
           flex: 1,
           justifyContent: "center",
         }}
       >
         {problems.map((problem, i) => {
-          const start = 28 + i * 22;
+          const delay = 30 + i * 25;
+          const fromLeft = i % 2 === 0;
 
-          const cardOpacity = interpolate(frame, [start, start + 15], [0, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          });
-          const cardX = interpolate(frame, [start, start + 15], [-80, 0], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          });
-
-          // Border color animation
-          const borderColor = interpolateColors(
+          // Strip slides in
+          const stripX = interpolate(
             frame,
-            [start + 10, start + 30, start + 55],
-            ["#E5E7EB", theme.colors.primary, "#E5E7EB"]
+            [delay, delay + 18],
+            [fromLeft ? -1100 : 1100, 0],
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: Easing.out(Easing.cubic),
+            }
           );
 
-          // Glow intensity
-          const glowIntensity = interpolate(
+          // Icon spring
+          const iconSpring = spring({
             frame,
-            [start + 15, start + 30, start + 50],
-            [0, 0.35, 0],
+            fps,
+            delay: delay + 12,
+            config: { damping: 8, stiffness: 150, mass: 0.5 },
+          });
+
+          // Detail text fades in after strip arrives
+          const detailOpacity = interpolate(
+            frame,
+            [delay + 18, delay + 30],
+            [0, 1],
             { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
           );
 
@@ -157,64 +178,78 @@ export function LandingWhyScene() {
             <div
               key={i}
               style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 24,
-                backgroundColor: theme.colors.white,
-                borderRadius: 24,
-                padding: "28px 32px",
-                border: "2px solid",
-                borderColor,
-                transform: `translateX(${cardX}px)`,
-                opacity: cardOpacity,
-                boxShadow:
-                  glowIntensity > 0
-                    ? `0 0 35px ${theme.colors.primary}${Math.round(glowIntensity * 255)
-                        .toString(16)
-                        .padStart(2, "0")}`
-                    : "0 2px 12px rgba(0,0,0,0.04)",
+                transform: `translateX(${stripX}px)`,
+                backgroundColor:
+                  i % 2 === 0
+                    ? "rgba(255,255,255,0.03)"
+                    : "rgba(255,255,255,0.06)",
+                padding: "28px 72px",
+                borderLeft:
+                  i % 2 === 0
+                    ? `4px solid ${theme.colors.primary}`
+                    : "4px solid transparent",
+                borderRight:
+                  i % 2 !== 0
+                    ? `4px solid ${theme.colors.primary}`
+                    : "4px solid transparent",
               }}
             >
-              {/* Orange circle icon */}
               <div
                 style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: "50%",
-                  backgroundColor: `${theme.colors.primary}15`,
-                  border: `2px solid ${theme.colors.primary}30`,
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 28,
-                  flexShrink: 0,
+                  gap: 24,
+                  flexDirection: i % 2 === 0 ? "row" : "row-reverse",
                 }}
               >
-                {problem.icon}
-              </div>
-
-              <div style={{ flex: 1 }}>
+                {/* Icon with bounce */}
                 <div
                   style={{
-                    fontFamily: theme.fonts.body,
-                    fontSize: 30,
-                    fontWeight: 700,
-                    color: theme.colors.dark,
-                    lineHeight: 1.3,
-                    marginBottom: 8,
+                    width: 64,
+                    height: 64,
+                    borderRadius: "50%",
+                    backgroundColor: `${theme.colors.primary}20`,
+                    border: `2px solid ${theme.colors.primary}50`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 32,
+                    flexShrink: 0,
+                    transform: `scale(${iconSpring}) rotate(${(1 - iconSpring) * 180}deg)`,
                   }}
                 >
-                  {problem.title}
+                  {problem.icon}
                 </div>
+
                 <div
                   style={{
-                    fontFamily: theme.fonts.body,
-                    fontSize: 24,
-                    color: theme.colors.text,
-                    lineHeight: 1.4,
+                    flex: 1,
+                    textAlign: i % 2 === 0 ? "left" : "right",
                   }}
                 >
-                  {problem.desc}
+                  <div
+                    style={{
+                      fontFamily: theme.fonts.body,
+                      fontSize: 30,
+                      fontWeight: 700,
+                      color: theme.colors.white,
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {problem.text}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: theme.fonts.body,
+                      fontSize: 24,
+                      color: "rgba(255,255,255,0.5)",
+                      lineHeight: 1.4,
+                      marginTop: 6,
+                      opacity: detailOpacity,
+                    }}
+                  >
+                    {problem.detail}
+                  </div>
                 </div>
               </div>
             </div>
