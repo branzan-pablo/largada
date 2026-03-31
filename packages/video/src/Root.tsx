@@ -8,11 +8,23 @@ import {
   LargadaPromo,
   PROMO_TOTAL_DURATION,
 } from "./compositions/LargadaPromo";
+import {
+  LargadaLanding,
+  LANDING_TOTAL_DURATION,
+} from "./compositions/LargadaLanding";
 import { VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_FPS } from "./lib/theme";
 
 export function RemotionRoot() {
   return (
     <>
+      <Composition
+        id="LargadaLanding"
+        component={LargadaLanding}
+        durationInFrames={LANDING_TOTAL_DURATION}
+        fps={VIDEO_FPS}
+        width={VIDEO_WIDTH}
+        height={VIDEO_HEIGHT}
+      />
       <Composition
         id="LargadaPromo"
         component={LargadaPromo}
