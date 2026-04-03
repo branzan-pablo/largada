@@ -26,7 +26,7 @@ export const profileUpdateSchema = z.object({
 });
 
 const registrationBatchItemSchema = z.object({
-  label: z.string().min(1, "Nome do item é obrigatório"),
+  label: z.string().optional().default(""),
   price: z.string().min(1, "Preço é obrigatório"),
 });
 

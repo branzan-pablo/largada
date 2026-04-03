@@ -622,8 +622,8 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                               )
                             )
                           }
-                          placeholder="Kit / modalidade (ex: Kit Premium 5K)"
-                          className="h-8 text-sm flex-1"
+                          placeholder="Ex: Kit Premium 5K (opcional)"
+                          className="h-8 text-sm flex-1 placeholder:text-muted-foreground/60 placeholder:italic"
                         />
                         <Input
                           value={item.price}
@@ -642,7 +642,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                             )
                           }
                           placeholder="R$ 99,00"
-                          className="h-8 text-sm w-32"
+                          className="h-8 text-sm w-32 placeholder:text-muted-foreground/60 placeholder:italic"
                         />
                         {batch.items.length > 1 && (
                           <button
