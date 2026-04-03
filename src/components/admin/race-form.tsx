@@ -169,7 +169,9 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       toast.error("Corrija os campos destacados antes de salvar");
       // Scroll to first field with error
       requestAnimationFrame(() => {
-        const firstErrorEl = document.querySelector(".border-destructive");
+        const firstErrorEl =
+          document.querySelector(".border-destructive") ??
+          document.querySelector(".text-destructive");
         firstErrorEl?.scrollIntoView({ behavior: "smooth", block: "center" });
       });
       return;
@@ -209,7 +211,9 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           setErrors(fieldErrors);
           toast.error("Corrija os campos destacados antes de salvar");
           requestAnimationFrame(() => {
-            const firstErrorEl = document.querySelector(".border-destructive");
+            const firstErrorEl =
+              document.querySelector(".border-destructive") ??
+              document.querySelector(".text-destructive");
             firstErrorEl?.scrollIntoView({ behavior: "smooth", block: "center" });
           });
           return;
@@ -335,6 +339,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                         ? suggestionData.city
                         : undefined
                 }
+                inputClassName={errors.city ? "border-destructive" : ""}
               />
               {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
             </div>
@@ -408,7 +413,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           {/* Distances */}
           <div className="space-y-2">
             <Label>Distâncias <span className="text-destructive">*</span></Label>
-            <div className="flex flex-wrap gap-3 sm:gap-4">
+            <div className={`flex flex-wrap gap-3 sm:gap-4 ${errors.distances ? "rounded border border-destructive p-2" : ""}`}>
               {DEFAULT_DISTANCES.map((d) => (
                 <label key={d} className="flex items-center gap-2 text-sm">
                   <Checkbox
@@ -693,7 +698,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                 value={registrationPrice}
                 onChange={(e) => setRegistrationPrice(e.target.value)}
                 placeholder="Ex: 1º lote até 15/01, desconto para idosos, PcD..."
-                className="min-h-[60px]"
+                className={`min-h-[60px] ${errors.registrationPrice ? "border-destructive" : ""}`}
                 rows={2}
               />
             </div>
