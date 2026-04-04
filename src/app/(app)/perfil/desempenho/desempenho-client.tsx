@@ -30,49 +30,13 @@ import type {
   StravaAthleteStats,
   CachedAthleteData,
 } from "@/lib/strava";
-
-// ─── Helpers ─────────────────────────────────────────────
-
-function metersToKm(m: number): string {
-  return (m / 1000).toFixed(1);
-}
-
-function formatPace(speedMs: number): string {
-  if (!speedMs || speedMs <= 0) return "--:--";
-  const paceSeconds = 1000 / speedMs; // seconds per km
-  const minutes = Math.floor(paceSeconds / 60);
-  const seconds = Math.round(paceSeconds % 60);
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-}
-
-function formatDurationShort(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return `${h}h${m > 0 ? m + "m" : ""}`;
-  return `${m}m`;
-}
-
-function getWorkoutLabel(workoutType?: number): string | null {
-  switch (workoutType) {
-    case 1:
-      return "Prova";
-    case 2:
-      return "Longão";
-    case 3:
-      return "Treino";
-    default:
-      return null;
-  }
-}
-
-function getDistanceBucket(distanceKm: number): string {
-  if (distanceKm < 3) return "< 3K";
-  if (distanceKm < 7) return "5K";
-  if (distanceKm < 14) return "10K";
-  if (distanceKm < 25) return "21K";
-  if (distanceKm < 35) return "30K";
-  return "42K";
-}
+import {
+  metersToKm,
+  formatPace,
+  formatDurationShort,
+  getWorkoutLabel,
+  getDistanceBucket,
+} from "@/lib/strava-utils";
 
 // ─── Types ───────────────────────────────────────────────
 
