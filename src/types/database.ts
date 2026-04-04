@@ -699,6 +699,44 @@ export type Database = {
           },
         ]
       }
+      strava_athlete_cache: {
+        Row: {
+          id: string
+          user_id: string
+          activities: Json
+          stats: Json
+          synced_at: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          activities?: Json
+          stats?: Json
+          synced_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          activities?: Json
+          stats?: Json
+          synced_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strava_athlete_cache_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       strava_tokens: {
         Row: {
           id: string

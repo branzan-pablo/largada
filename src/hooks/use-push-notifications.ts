@@ -49,6 +49,12 @@ export function usePushNotifications() {
 
       const reg = await navigator.serviceWorker.ready;
 
+      // Remove stale subscription with a different VAPID key (e.g. leftover from Firebase)
+      const existingSub = await reg.pushManager.getSubscription();
+      if (existingSub) {
+        await existingSub.unsubscribe();
+      }
+
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(

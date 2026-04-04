@@ -27,7 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { LogOut, Loader2, Mail, MapPin, Bell, Heart, MessageSquarePlus, Star, ChevronRight, Unlink, ExternalLink, Trash2 } from "lucide-react";
+import { LogOut, Loader2, Mail, MapPin, Bell, Heart, MessageSquarePlus, Star, ChevronRight, Unlink, ExternalLink, Trash2, TrendingUp } from "lucide-react";
 
 export function ProfilePageClient() {
   const { user, profile, isLoading, signOut, updateProfile } = useAuth();
@@ -273,6 +273,18 @@ export function ProfilePageClient() {
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </Link>
+        {user.user_metadata?.provider === "strava" && (
+          <Link
+            href="/perfil/desempenho"
+            className="flex items-center justify-between rounded-lg border border-[#FC5200]/20 bg-[#FC5200]/5 p-4 hover:bg-[#FC5200]/10"
+          >
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-[#FC5200]" />
+              <span className="text-sm font-medium">Meu Desempenho</span>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </Link>
+        )}
       </div>
 
       {user.user_metadata?.provider === "strava" && (

@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
         access_token: tokenData.access_token,
         refresh_token: tokenData.refresh_token,
         expires_at: tokenData.expires_at,
-        scope: "read,profile:read_all",
+        scope: "read,profile:read_all,activity:read",
       },
       { onConflict: "user_id" },
     );

@@ -36,7 +36,7 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
     const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
     const siteUrl = window.location.origin;
     const redirectUri = `${siteUrl}/auth/strava/callback`;
-    const scope = "read,profile:read_all";
+    const scope = "read,profile:read_all,activity:read";
     const state = crypto.randomUUID();
     // Store state in cookie for server-side CSRF validation
     document.cookie = `strava_oauth_state=${state}; path=/; max-age=600; SameSite=Lax`;
