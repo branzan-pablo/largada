@@ -248,7 +248,7 @@ export function ProfilePageClient() {
           className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"
         >
           <div className="flex items-center gap-2">
-            <Star className="h-4 w-4 fill-[#FF4D00] text-[#FF4D00]" />
+            <Star className="h-4 w-4" />
             <span className="text-sm font-medium">Pacotes de Destaque</span>
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -276,10 +276,10 @@ export function ProfilePageClient() {
         {user.user_metadata?.provider === "strava" && (
           <Link
             href="/perfil/desempenho"
-            className="flex items-center justify-between rounded-lg border border-[#FC5200]/20 bg-[#FC5200]/5 p-4 hover:bg-[#FC5200]/10"
+            className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"
           >
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-[#FC5200]" />
+              <TrendingUp className="h-4 w-4" />
               <span className="text-sm font-medium">Meu Desempenho</span>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
