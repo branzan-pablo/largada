@@ -79,6 +79,158 @@ export function parseDistanceKm(distStr: string): number | null {
 
 // ─── Geo ─────────────────────────────────────────────────
 
+// ─── Performance analysis ───────────────────────────────
+
+/** Pace thresholds in seconds/km for each distance bucket */
+const paceThresholds: Record<string, { elite: number; avancado: number; intermediario: number }> = {
+  "5K":  { elite: 240, avancado: 300, intermediario: 360 },  // 4:00, 5:00, 6:00
+  "10K": { elite: 270, avancado: 330, intermediario: 390 },  // 4:30, 5:30, 6:30
+  "21K": { elite: 300, avancado: 360, intermediario: 420 },  // 5:00, 6:00, 7:00
+  "42K": { elite: 300, avancado: 360, intermediario: 420 },  // 5:00, 6:00, 7:00
+};
+
+export type RunnerLevel = "elite" | "avancado" | "intermediario" | "iniciante";
+
+const levelLabels: Record<RunnerLevel, string> = {
+  elite: "Elite",
+  avancado: "Avançado",
+  intermediario: "Intermediário",
+  iniciante: "Iniciante",
+};
+
+export function getLevelLabel(level: RunnerLevel): string {
+  return levelLabels[level];
+}
+
+/** Classify runner level based on average pace (seconds/km) for a distance bucket */
+export function classifyRunnerLevel(bucket: string, paceSecondsPerKm: number): RunnerLevel {
+  const thresholds = paceThresholds[bucket];
+  if (!thresholds) return "intermediario";
+  if (paceSecondsPerKm <= thresholds.elite) return "elite";
+  if (paceSecondsPerKm <= thresholds.avancado) return "avancado";
+  if (paceSecondsPerKm <= thresholds.intermediario) return "intermediario";
+  return "iniciante";
+}
+
+/** Next distance progression map */
+const nextDistanceMap: Record<string, string> = {
+  "< 3K": "5K",
+  "5K": "10K",
+  "10K": "21K",
+  "21K": "42K",
+};
+
+/** Minimum weekly volume (km) recommended before attempting each distance */
+const minWeeklyVolumeForDistance: Record<string, number> = {
+  "5K": 10,
+  "10K": 20,
+  "21K": 30,
+  "42K": 50,
+};
+
+export interface PerformanceProfile {
+  /** Average pace in seconds/km per distance bucket */
+  paceByDistance: Record<string, number>;
+  /** Runner level per distance bucket */
+  levelByDistance: Record<string, RunnerLevel>;
+  /** Overall runner level (from most-run distance) */
+  overallLevel: RunnerLevel;
+  /** Average weekly volume in km (last 8 weeks) */
+  weeklyVolumeKm: number;
+  /** Top distance bucket the runner is ready for next */
+  nextChallenge: string | null;
+  /** Whether the runner's pace trend is improving */
+  trend: "improving" | "stable" | "declining";
+  /** Preferred distances (top 2 by count) */
+  preferredDistances: string[];
+}
+
+/** Build a full performance profile from Strava activities */
+export function buildPerformanceProfile(
+  activities: { distance: number; average_speed: number; start_date_local: string }[]
+): PerformanceProfile {
+  // Count and accumulate pace per bucket
+  const bucketCounts = new Map<string, number>();
+  const bucketPaceSum = new Map<string, number>();
+
+  for (const a of activities) {
+    const km = a.distance / 1000;
+    if (km < 1) continue; // skip very short activities
+    const bucket = getDistanceBucket(km);
+    bucketCounts.set(bucket, (bucketCounts.get(bucket) ?? 0) + 1);
+    const paceSeconds = 1000 / a.average_speed; // seconds per km
+    bucketPaceSum.set(bucket, (bucketPaceSum.get(bucket) ?? 0) + paceSeconds);
+  }
+
+  // Pace per distance
+  const paceByDistance: Record<string, number> = {};
+  const levelByDistance: Record<string, RunnerLevel> = {};
+  for (const [bucket, count] of bucketCounts) {
+    const avgPace = (bucketPaceSum.get(bucket) ?? 0) / count;
+    paceByDistance[bucket] = Math.round(avgPace);
+    levelByDistance[bucket] = classifyRunnerLevel(bucket, avgPace);
+  }
+
+  // Preferred distances (top 2)
+  const preferredDistances = [...bucketCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([bucket]) => bucket);
+
+  // Overall level from most-run distance
+  const overallLevel = preferredDistances.length > 0
+    ? (levelByDistance[preferredDistances[0]] ?? "intermediario")
+    : "intermediario";
+
+  // Weekly volume (last 8 weeks)
+  const eightWeeksAgo = new Date();
+  eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 56);
+  const recentKm = activities
+    .filter((a) => new Date(a.start_date_local) >= eightWeeksAgo)
+    .reduce((sum, a) => sum + a.distance / 1000, 0);
+  const weeklyVolumeKm = Math.round((recentKm / 8) * 10) / 10;
+
+  // Next challenge
+  const topBucket = preferredDistances[0] ?? "5K";
+  const nextDist = nextDistanceMap[topBucket] ?? null;
+  const minVolume = nextDist ? (minWeeklyVolumeForDistance[nextDist] ?? 0) : Infinity;
+  const nextChallenge = nextDist && weeklyVolumeKm >= minVolume ? nextDist : null;
+
+  // Trend (compare first half vs second half of last 12 runs)
+  const recentRuns = activities
+    .filter((a) => a.distance > 1000)
+    .slice(0, 12);
+  let trend: "improving" | "stable" | "declining" = "stable";
+  if (recentRuns.length >= 6) {
+    const firstHalf = recentRuns.slice(Math.floor(recentRuns.length / 2));
+    const secondHalf = recentRuns.slice(0, Math.floor(recentRuns.length / 2));
+    const avgFirst = firstHalf.reduce((s, a) => s + 1000 / a.average_speed, 0) / firstHalf.length;
+    const avgSecond = secondHalf.reduce((s, a) => s + 1000 / a.average_speed, 0) / secondHalf.length;
+    const diff = avgFirst - avgSecond; // positive = second half is faster (improving)
+    if (diff > 5) trend = "improving";
+    else if (diff < -5) trend = "declining";
+  }
+
+  return {
+    paceByDistance,
+    levelByDistance,
+    overallLevel,
+    weeklyVolumeKm,
+    nextChallenge,
+    trend,
+    preferredDistances,
+  };
+}
+
+/** Format pace from seconds/km to "M:SS" string */
+export function formatPaceFromSeconds(paceSeconds: number): string {
+  const minutes = Math.floor(paceSeconds / 60);
+  const seconds = Math.round(paceSeconds % 60);
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+// ─── Geo ─────────────────────────────────────────────────
+
 /** Haversine distance between two lat/lng points in kilometers */
 export function haversineKm(
   lat1: number,

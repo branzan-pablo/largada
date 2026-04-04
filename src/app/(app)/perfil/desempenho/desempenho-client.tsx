@@ -36,6 +36,10 @@ import {
   formatDurationShort,
   getWorkoutLabel,
   getDistanceBucket,
+  buildPerformanceProfile,
+  getLevelLabel,
+  formatPaceFromSeconds,
+  type PerformanceProfile,
 } from "@/lib/strava-utils";
 
 // ─── Types ───────────────────────────────────────────────
@@ -49,6 +53,7 @@ interface RaceSuggestion {
   distances: string[];
   slug: string;
   matchReason: string;
+  matchReasons?: string[];
 }
 
 // ─── Component ───────────────────────────────────────────
@@ -59,6 +64,7 @@ export function DesempenhoClient() {
 
   const [data, setData] = useState<CachedAthleteData | null>(null);
   const [suggestions, setSuggestions] = useState<RaceSuggestion[]>([]);
+  const [perfProfile, setPerfProfile] = useState<PerformanceProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,23 +104,20 @@ export function DesempenhoClient() {
 
   const fetchSuggestions = async (activities: StravaActivity[]) => {
     try {
-      // Determine athlete's preferred distances
-      const distanceCounts = new Map<string, number>();
-      for (const a of activities) {
-        const bucket = getDistanceBucket(a.distance / 1000);
-        distanceCounts.set(bucket, (distanceCounts.get(bucket) ?? 0) + 1);
-      }
-
-      // Get top 2 distance buckets
-      const topBuckets = [...distanceCounts.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 2)
-        .map(([bucket]) => bucket);
+      const profile = buildPerformanceProfile(activities);
+      setPerfProfile(profile);
 
       const res = await fetch("/api/strava/suggestions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ preferredDistances: topBuckets }),
+        body: JSON.stringify({
+          preferredDistances: profile.preferredDistances,
+          nextChallenge: profile.nextChallenge,
+          weeklyVolumeKm: profile.weeklyVolumeKm,
+          overallLevel: profile.overallLevel,
+          paceByDistance: profile.paceByDistance,
+          trend: profile.trend,
+        }),
       });
 
       if (res.ok) {
@@ -282,6 +285,9 @@ export function DesempenhoClient() {
       {activities.length >= 3 && (
         <DistanceDistribution activities={activities} />
       )}
+
+      {/* Runner level & next challenge */}
+      {perfProfile && <RunnerLevelCard profile={perfProfile} />}
 
       {/* Race suggestions */}
       {suggestions.length > 0 && (
@@ -541,6 +547,82 @@ function DistanceDistribution({
   );
 }
 
+function RunnerLevelCard({ profile }: { profile: PerformanceProfile }) {
+  const levelColors: Record<string, string> = {
+    elite: "bg-yellow-100 text-yellow-800 border-yellow-300",
+    avancado: "bg-blue-100 text-blue-800 border-blue-300",
+    intermediario: "bg-green-100 text-green-800 border-green-300",
+    iniciante: "bg-gray-100 text-gray-800 border-gray-300",
+  };
+
+  const entries = Object.entries(profile.levelByDistance).filter(
+    ([bucket]) => bucket !== "< 3K"
+  );
+
+  if (entries.length === 0) return null;
+
+  return (
+    <Card className="py-4">
+      <CardContent className="space-y-3 px-4">
+        <div className="flex items-center gap-1.5">
+          <Target className="h-4 w-4 text-[#FC5200]" />
+          <span className="text-sm font-semibold">Seu Nível</span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {entries.map(([bucket, level]) => (
+            <div
+              key={bucket}
+              className={`rounded-lg border px-3 py-2 text-center ${levelColors[level] ?? levelColors.intermediario}`}
+            >
+              <p className="text-xs font-medium opacity-70">{bucket}</p>
+              <p className="text-sm font-bold">{getLevelLabel(level)}</p>
+              {profile.paceByDistance[bucket] && (
+                <p className="text-[10px] opacity-60">
+                  {formatPaceFromSeconds(profile.paceByDistance[bucket])}/km
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Next challenge recommendation */}
+        {profile.nextChallenge && (
+          <div className="flex items-start gap-2 rounded-lg bg-[#FC5200]/5 border border-[#FC5200]/20 p-3">
+            <Zap className="mt-0.5 h-4 w-4 shrink-0 text-[#FC5200]" />
+            <div>
+              <p className="text-sm font-medium text-[#FC5200]">
+                Pronto para {profile.nextChallenge}!
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Seu volume semanal de {profile.weeklyVolumeKm}km e nível{" "}
+                {getLevelLabel(profile.overallLevel).toLowerCase()} indicam que
+                você está preparado para encarar uma prova de{" "}
+                {profile.nextChallenge}.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!profile.nextChallenge && profile.trend === "improving" && (
+          <div className="flex items-start gap-2 rounded-lg bg-green-50 border border-green-200 p-3">
+            <TrendingUp className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
+            <div>
+              <p className="text-sm font-medium text-green-700">
+                Pace melhorando!
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Continue assim — seu ritmo está evoluindo. Aumente o volume
+                semanal para desbloquear novos desafios.
+              </p>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function RaceSuggestions({
   suggestions,
 }: {
@@ -554,7 +636,7 @@ function RaceSuggestions({
           <span className="text-sm font-semibold">Corridas ideais pra você</span>
         </div>
         <p className="text-xs text-muted-foreground">
-          Baseado nas distâncias que você mais corre e na sua localização.
+          Baseado no seu desempenho, distâncias favoritas e localização.
         </p>
 
         <div className="space-y-2">
@@ -575,9 +657,11 @@ function RaceSuggestions({
                     {race.city}/{race.state}
                   </span>
                 </div>
-                <p className="mt-0.5 text-xs text-[#FC5200]">
-                  {race.matchReason}
-                </p>
+                {(race.matchReasons ?? [race.matchReason]).map((reason, i) => (
+                  <p key={i} className="mt-0.5 text-xs text-[#FC5200]">
+                    {reason}
+                  </p>
+                ))}
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
             </Link>
