@@ -158,6 +158,41 @@ export async function notifyNewRace(raceId: string) {
 }
 
 /**
+ * Send a personalized race recommendation push to a specific user.
+ * Used by the race-recommendations cron job.
+ */
+export async function notifyPersonalizedRace(
+  userId: string,
+  race: { id: string; name: string; city: string; slug: string },
+  matchReason: string,
+) {
+  const supabase = createAdminClient();
+
+  const { data: subs } = await supabase
+    .from("push_subscriptions")
+    .select("endpoint, p256dh, auth")
+    .eq("user_id", userId);
+
+  if (!subs || subs.length === 0) return { sent: 0 };
+
+  const result = await sendToSubscriptions({
+    title: "Corrida ideal pra você!",
+    body: `${race.name} em ${race.city} — ${matchReason}`,
+    url: `/corrida/${race.slug}`,
+    subscriptions: subs,
+  });
+
+  // Log for dedup
+  if (result.sent > 0) {
+    await supabase
+      .from("race_recommendation_logs")
+      .upsert({ user_id: userId, race_id: race.id }, { onConflict: "user_id,race_id" });
+  }
+
+  return result;
+}
+
+/**
  * Notify all admins when a new suggestion is submitted
  */
 export async function notifyNewSuggestion(

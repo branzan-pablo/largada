@@ -222,6 +222,103 @@ export function buildPerformanceProfile(
   };
 }
 
+// ─── Race scoring ───────────────────────────────────────
+
+export interface RaceCandidate {
+  id: string;
+  distances: string[];
+  latitude: number | null;
+  longitude: number | null;
+  state: string | null;
+  is_promoted: boolean;
+}
+
+export interface UserLocation {
+  latitude: number | null;
+  longitude: number | null;
+  state: string | null;
+}
+
+export interface RaceScore {
+  score: number;
+  reason: string;
+}
+
+/**
+ * Score a race for a user based on their performance profile and location.
+ * Pure function — no DB or network calls.
+ */
+export function scoreRaceForUser(
+  perfProfile: PerformanceProfile,
+  userLocation: UserLocation,
+  race: RaceCandidate,
+): RaceScore {
+  let score = 0;
+  const reasons: string[] = [];
+
+  // Distance match
+  for (const raceDistStr of race.distances) {
+    const raceDistKm = parseDistanceKm(raceDistStr);
+    if (raceDistKm === null) continue;
+
+    for (const pref of perfProfile.preferredDistances) {
+      const range = distanceRanges[pref];
+      if (range && raceDistKm >= range[0] && raceDistKm <= range[1]) {
+        score += 10;
+        const pace = perfProfile.paceByDistance[pref];
+        if (pace) {
+          reasons.push(
+            `seu pace de ${formatPaceFromSeconds(pace)}/km é ideal`,
+          );
+        } else {
+          reasons.push("sua distância favorita");
+        }
+        break;
+      }
+    }
+  }
+
+  // Next challenge match
+  if (perfProfile.nextChallenge) {
+    for (const raceDistStr of race.distances) {
+      const raceDistKm = parseDistanceKm(raceDistStr);
+      if (raceDistKm === null) continue;
+      const range = distanceRanges[perfProfile.nextChallenge];
+      if (range && raceDistKm >= range[0] && raceDistKm <= range[1]) {
+        score += 8;
+        reasons.push(`próximo desafio: ${raceDistStr}`);
+        break;
+      }
+    }
+  }
+
+  // Location proximity
+  if (
+    userLocation.latitude &&
+    userLocation.longitude &&
+    race.latitude &&
+    race.longitude
+  ) {
+    const dist = haversineKm(
+      userLocation.latitude,
+      userLocation.longitude,
+      race.latitude,
+      race.longitude,
+    );
+    if (dist < 50) {
+      score += 5;
+    } else if (dist < 150) {
+      score += 2;
+    }
+  } else if (userLocation.state && race.state === userLocation.state) {
+    score += 3;
+  }
+
+  if (race.is_promoted) score += 1;
+
+  return { score, reason: reasons[0] ?? "corrida próxima" };
+}
+
 /** Format pace from seconds/km to "M:SS" string */
 export function formatPaceFromSeconds(paceSeconds: number): string {
   const minutes = Math.floor(paceSeconds / 60);

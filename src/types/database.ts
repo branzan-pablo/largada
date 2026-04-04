@@ -737,6 +737,42 @@ export type Database = {
           },
         ]
       }
+      race_recommendation_logs: {
+        Row: {
+          id: string
+          user_id: string
+          race_id: string
+          sent_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          race_id: string
+          sent_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          race_id?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "race_recommendation_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "race_recommendation_logs_race_id_fkey"
+            columns: ["race_id"]
+            isOneToOne: false
+            referencedRelation: "races"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       strava_tokens: {
         Row: {
           id: string
