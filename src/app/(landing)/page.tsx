@@ -280,6 +280,11 @@ export default async function LandingPage() {
       <section className="relative bg-[#F7F8FA] py-16 md:py-24 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-14">
+            <div className="inline-block bg-[#0D1B2A] text-white rounded-xl px-5 py-3 mb-10 shadow-sm border border-[#1a2d42]">
+              <p className="text-sm font-medium">
+                ✌️ O Largada é 100% gratuito para corredores. A seção abaixo é exclusiva para organizadores de eventos.
+              </p>
+            </div>
             <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-[0.2em] mb-5">
               Para Organizadores
             </p>
@@ -394,7 +399,7 @@ export default async function LandingPage() {
                       : "bg-[#0D1B2A] text-white hover:bg-[#1a2d42]"
                   }`}
                 >
-                  Começar agora
+                  Destacar meu evento
                 </Link>
               </div>
             ))}
