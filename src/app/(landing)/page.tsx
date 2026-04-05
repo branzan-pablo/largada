@@ -441,16 +441,35 @@ export default async function LandingPage() {
       <div className="h-px bg-gray-200" />
 
       {/* ==================== CTA Final ==================== */}
-      <section className="relative bg-[#F7F8FA] py-24 md:py-32 overflow-hidden">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-5xl font-extrabold text-[#0D1B2A] tracking-tight mb-4">
-            Pronto para a largada?
-          </h2>
-          <p className="text-[#6B7280] mb-10 max-w-md mx-auto">
-            Crie sua conta em menos de 2 minutos. Gratuito. Sem cartão de
-            crédito. Sem pegadinha.
-          </p>
-          <CtaButtons />
+      <section className="relative bg-[#F7F8FA] py-24 md:py-32 overflow-hidden border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-6 relative z-10">
+          <div className="rounded-[2.5rem] bg-white border border-gray-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] p-12 md:p-20 text-center relative overflow-hidden">
+            {/* Gradientes Premium Sutis */}
+            <div className="absolute -top-32 -right-32 w-96 h-96 bg-linear-to-bl from-[#FF4D00]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-linear-to-tr from-[#0D1B2A]/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10">
+              <span className="inline-block py-1.5 px-4 rounded-full bg-orange-50 text-[#FF4D00] border border-orange-100 text-xs font-bold uppercase tracking-widest mb-6">
+                Comece a usar grátis
+              </span>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-[#0D1B2A] tracking-tight mb-5">
+                Pronto para a largada?
+              </h2>
+              <p className="text-[#6B7280] font-medium mb-10 max-w-xl mx-auto text-lg leading-relaxed">
+                Crie sua conta no Largada agora e centralize todo o seu calendário de corridas em um só lugar.
+              </p>
+              
+              <div className="flex flex-col items-center justify-center">
+                <CtaButtons swapActions />
+              </div>
+
+              <div className="mt-10 flex items-center justify-center gap-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-green-500" /> Gratuito para Atletas</span>
+                <span className="hidden sm:inline">•</span>
+                <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-green-500" /> Sem Cadastro de Cartão</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
