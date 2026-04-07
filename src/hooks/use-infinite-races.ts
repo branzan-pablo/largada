@@ -4,11 +4,38 @@ import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import type { Race, RaceFilters } from "@/types/race";
 import { ITEMS_PER_PAGE } from "@/lib/constants";
 
+const CACHE_KEY = "race-list-cache";
+
+interface CachedState {
+  races: Race[];
+  page: number;
+  hasMore: boolean;
+  filterKey: string;
+}
+
+function saveCache(state: CachedState) {
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(state));
+  } catch { /* quota exceeded — ignore */ }
+}
+
+function loadCache(filterKey: string): CachedState | null {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const cached: CachedState = JSON.parse(raw);
+    return cached.filterKey === filterKey ? cached : null;
+  } catch {
+    return null;
+  }
+}
+
 interface UseInfiniteRacesResult {
   races: Race[];
   isLoading: boolean;
   isLoadingMore: boolean;
   hasMore: boolean;
+  restoredFromCache: boolean;
   loadMore: () => void;
   sentinelRef: (node: HTMLDivElement | null) => void;
 }
@@ -42,6 +69,7 @@ export function useInfiniteRaces(
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [restoredFromCache, setRestoredFromCache] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   // Stable serialized key that only changes when filter values actually change
@@ -67,21 +95,36 @@ export function useInfiniteRaces(
   filtersRef.current = filters;
   searchRef.current = debouncedSearch;
 
-  // Reset and fetch on filter change
+  // Reset and fetch on filter change (or restore from cache)
   useEffect(() => {
     let cancelled = false;
+
+    // Try to restore from sessionStorage cache
+    const cached = loadCache(filterKey);
+    if (cached) {
+      setRaces(cached.races);
+      setPage(cached.page);
+      setHasMore(cached.hasMore);
+      setIsLoading(false);
+      setRestoredFromCache(true);
+      return;
+    }
 
     setPage(1);
     setHasMore(true);
     setIsLoading(true);
+    setRestoredFromCache(false);
 
     const fetchInitial = async () => {
       try {
         const res = await fetch(buildUrl(filtersRef.current, searchRef.current, 1));
         const json = await res.json();
         if (!cancelled) {
-          setRaces(json.data ?? []);
-          setHasMore(json.hasMore ?? false);
+          const data = json.data ?? [];
+          const more = json.hasMore ?? false;
+          setRaces(data);
+          setHasMore(more);
+          saveCache({ races: data, page: 1, hasMore: more, filterKey });
         }
       } catch {
         if (!cancelled) setRaces([]);
@@ -97,6 +140,9 @@ export function useInfiniteRaces(
     };
   }, [filterKey]);
 
+  const filterKeyRef = useRef(filterKey);
+  filterKeyRef.current = filterKey;
+
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
@@ -105,8 +151,14 @@ export function useInfiniteRaces(
     try {
       const res = await fetch(buildUrl(filtersRef.current, searchRef.current, nextPage));
       const json = await res.json();
-      setRaces((prev) => [...prev, ...(json.data ?? [])]);
-      setHasMore(json.hasMore ?? false);
+      const newData = json.data ?? [];
+      const more = json.hasMore ?? false;
+      setRaces((prev) => {
+        const updated = [...prev, ...newData];
+        saveCache({ races: updated, page: nextPage, hasMore: more, filterKey: filterKeyRef.current });
+        return updated;
+      });
+      setHasMore(more);
       setPage(nextPage);
     } catch {
       // ignore
@@ -134,5 +186,5 @@ export function useInfiniteRaces(
     [hasMore, isLoadingMore, loadMore]
   );
 
-  return { races, isLoading, isLoadingMore, hasMore, loadMore, sentinelRef };
+  return { races, isLoading, isLoadingMore, hasMore, restoredFromCache, loadMore, sentinelRef };
 }

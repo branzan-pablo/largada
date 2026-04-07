@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useInfiniteRaces } from "@/hooks/use-infinite-races";
@@ -83,8 +83,40 @@ export function RaceList() {
       : {}),
   };
 
-  const { races, isLoading, isLoadingMore, hasMore, loadMore, sentinelRef } =
+  const { races, isLoading, isLoadingMore, hasMore, restoredFromCache, loadMore, sentinelRef } =
     useInfiniteRaces(enrichedFilters, debouncedSearch);
+
+  // Save scroll position on scroll (throttled)
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleScroll = useCallback(() => {
+    if (scrollTimeoutRef.current) return;
+    scrollTimeoutRef.current = setTimeout(() => {
+      scrollTimeoutRef.current = null;
+      try {
+        sessionStorage.setItem("race-list-scroll", String(window.scrollY));
+      } catch { /* ignore */ }
+    }, 200);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, [handleScroll]);
+
+  // Restore scroll position after cache restore
+  useEffect(() => {
+    if (!restoredFromCache || races.length === 0) return;
+    const saved = sessionStorage.getItem("race-list-scroll");
+    if (!saved) return;
+    const scrollY = Number(saved);
+    if (Number.isNaN(scrollY) || scrollY === 0) return;
+    requestAnimationFrame(() => {
+      window.scrollTo(0, scrollY);
+    });
+  }, [restoredFromCache, races.length]);
 
   const promotedRaces = useMemo(
     () => races.filter((r) => r.is_promoted),
