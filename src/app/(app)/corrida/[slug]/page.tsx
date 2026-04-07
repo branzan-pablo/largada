@@ -5,7 +5,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getBillingById } from "@/lib/payments/billing";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { RaceDistanceBadges } from "@/components/races/race-distance-badges";
 import { RacePrizeBadge } from "@/components/races/race-prize-badge";
 import { RaceStatusBadge } from "@/components/races/race-status-badge";
@@ -19,11 +18,13 @@ import {
 } from "./race-detail-client";
 import { PromoteRaceCard } from "@/components/races/promote-race-card";
 import {
+  Building2,
   CalendarDays,
   ChevronLeft,
   Clock,
-  MapPin,
   ExternalLink,
+  Info,
+  MapPin,
   Route,
   Trophy,
   Banknote,
@@ -271,18 +272,45 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
         initialCount={typedRace.rsvp_count}
         initialParticipants={participants}
       >
-        {/* Info summary — compact location + distances */}
-        <div className="mb-6 flex flex-col md:flex-row md:items-center gap-3 md:gap-6 text-sm">
-          <div className="flex items-start gap-2 text-muted-foreground">
-            <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{typedRace.address}</span>
+        {/* Quick Info Strip */}
+        <div className="mb-6 rounded-xl border border-gray-200 bg-card p-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="space-y-1">
+              <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <CalendarDays className="h-3.5 w-3.5" />
+                Data
+              </span>
+              <p className="font-semibold text-[#0D1B2A]">{formatDateFull(typedRace.date)}</p>
+            </div>
+            <div className="space-y-1">
+              <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <Clock className="h-3.5 w-3.5" />
+                Horário
+              </span>
+              <p className="font-semibold text-[#0D1B2A]">{formatTime(typedRace.start_time)}</p>
+            </div>
+            <div className="space-y-1">
+              <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5" />
+                Local
+              </span>
+              <p className="font-semibold text-[#0D1B2A]">{typedRace.city}/{typedRace.state}</p>
+            </div>
+            <div className="space-y-1.5">
+              <span className="text-xs font-medium text-muted-foreground">Distâncias</span>
+              <RaceDistanceBadges distances={typedRace.distances} />
+            </div>
           </div>
-          <div className="hidden md:block h-4 w-px bg-gray-300" />
-          <RaceDistanceBadges distances={typedRace.distances} />
+          {typedRace.address && typedRace.address !== `${typedRace.city}/${typedRace.state}` && (
+            <p className="mt-3 pt-3 border-t border-gray-100 text-xs text-muted-foreground flex items-start gap-1.5">
+              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              {typedRace.address}
+            </p>
+          )}
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {/* Sidebar — after main content on mobile */}
+          {/* Sidebar */}
           <aside className="order-2 md:order-2 md:col-start-3 space-y-4">
             {/* Registration Card */}
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-4">
@@ -392,71 +420,94 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
           </aside>
 
           {/* Main Content */}
-          <div className="order-1 md:order-1 md:col-span-2 space-y-8">
+          <div className="order-1 md:order-1 md:col-span-2 space-y-5">
             {/* Description */}
             {typedRace.description && (
-              <section>
-                <h2 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              <section className="rounded-xl border border-gray-200 bg-card p-5">
+                <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                   Sobre a corrida
                 </h2>
                 <ExpandableDescription text={typedRace.description} />
               </section>
             )}
 
-            {/* Prize Details */}
-            {typedRace.prize_type !== "none" && typedRace.description && <Separator />}
-            {typedRace.prize_type !== "none" && (
-              <section>
-                <h2 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  Premiação
+            {/* Details Card — consolidated organizer, route, notes, link */}
+            {(typedRace.organizer || typedRace.route_description || typedRace.notes || typedRace.link) && (
+              <section className="rounded-xl border border-gray-200 bg-card p-5">
+                <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  Detalhes
                 </h2>
-                <div className="flex items-start gap-2">
-                  {typedRace.prize_type === "money" || typedRace.prize_type === "both" ? (
-                    <Banknote className="mt-0.5 h-4 w-4 text-green-600" />
-                  ) : (
-                    <Trophy className="mt-0.5 h-4 w-4 text-yellow-600" />
+                <div className="space-y-3">
+                  {typedRace.organizer && (
+                    <div className="flex items-start gap-3">
+                      <Building2 className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Organizador</p>
+                        <p className="text-sm font-medium text-[#0D1B2A]">{typedRace.organizer}</p>
+                      </div>
+                    </div>
                   )}
-                  <div>
-                    <p className="font-medium">
-                      {PRIZE_TYPES[typedRace.prize_type as keyof typeof PRIZE_TYPES]}
-                    </p>
-                    {typedRace.prize_details && (
-                      <p className="mt-1 text-sm text-muted-foreground whitespace-pre-line">
-                        {typedRace.prize_details}
-                      </p>
-                    )}
-                  </div>
+                  {typedRace.route_description && (
+                    <div className="flex items-start gap-3">
+                      <Route className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Percurso</p>
+                        <p className="text-sm text-[#0D1B2A]">{typedRace.route_description}</p>
+                      </div>
+                    </div>
+                  )}
+                  {typedRace.notes && (
+                    <div className="flex items-start gap-3">
+                      <Info className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Observações</p>
+                        <p className="text-sm text-[#0D1B2A]">{typedRace.notes}</p>
+                      </div>
+                    </div>
+                  )}
+                  {typedRace.link && (
+                    <div className="flex items-start gap-3">
+                      <ExternalLink className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Site oficial</p>
+                        <a
+                          href={typedRace.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-primary hover:underline"
+                        >
+                          Acessar
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </section>
             )}
 
-            {/* Route */}
-            {typedRace.route_description && (typedRace.description || typedRace.prize_type !== "none") && <Separator />}
-            {typedRace.route_description && (
-              <section>
-                <h2 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  Percurso
-                </h2>
-                <div className="flex items-start gap-2">
-                  <Route className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                  <p>{typedRace.route_description}</p>
+            {/* Prize Details */}
+            {typedRace.prize_type !== "none" && (
+              <section className="rounded-xl border border-gray-200 bg-card p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  {typedRace.prize_type === "money" || typedRace.prize_type === "both" ? (
+                    <Banknote className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <Trophy className="h-4 w-4 text-yellow-600" />
+                  )}
+                  <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    Premiação
+                  </h2>
+                  <Badge variant="secondary" className="text-xs">
+                    {PRIZE_TYPES[typedRace.prize_type as keyof typeof PRIZE_TYPES]}
+                  </Badge>
                 </div>
+                {typedRace.prize_details && (
+                  <ExpandableDescription text={typedRace.prize_details} maxLines={3} />
+                )}
               </section>
             )}
 
-            {/* Organizer */}
-            {typedRace.organizer && <Separator />}
-            {typedRace.organizer && (
-              <section>
-                <h2 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  Organizador
-                </h2>
-                <p>{typedRace.organizer}</p>
-              </section>
-            )}
-
-            {/* Participants */}
-            <Separator />
+            {/* Participants — only shown when there are participants */}
             <ParticipantsSection />
           </div>
         </div>

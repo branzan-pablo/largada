@@ -129,12 +129,14 @@ export function ParticipantsSection() {
   const hasMore = participants.length > maxCollapsed;
   const visibleParticipants = showAll ? participants : participants.slice(0, maxCollapsed);
 
+  if (count === 0) return null;
+
   return (
-    <section>
+    <section className="rounded-xl border border-gray-200 bg-card p-5">
       <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
         Participantes ({count})
       </h2>
-      {participants.length > 0 ? (
+      {participants.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <AvatarGroup>
@@ -182,10 +184,6 @@ export function ParticipantsSection() {
             </button>
           )}
         </div>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          Ninguém confirmou presença ainda. Seja o primeiro!
-        </p>
       )}
     </section>
   );
@@ -279,15 +277,18 @@ export function StickyActionBar({ registrationSlug, deadlinePassed }: StickyActi
 
 interface ExpandableDescriptionProps {
   text: string;
+  maxLines?: number;
 }
 
-export function ExpandableDescription({ text }: ExpandableDescriptionProps) {
+export function ExpandableDescription({ text, maxLines = 4 }: ExpandableDescriptionProps) {
   const [expanded, setExpanded] = useState(false);
   const isLong = text.length > 200;
 
+  const clampClass = maxLines === 3 ? "line-clamp-3" : "line-clamp-4";
+
   return (
     <div>
-      <p className={`text-muted-foreground whitespace-pre-line ${!expanded && isLong ? "line-clamp-4" : ""}`}>
+      <p className={`text-muted-foreground whitespace-pre-line ${!expanded && isLong ? clampClass : ""}`}>
         {text}
       </p>
       {isLong && (
