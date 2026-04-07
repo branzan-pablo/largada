@@ -29,6 +29,10 @@
       "schedule": "20 12 * * *"
     },
     {
+      "path": "/api/cron/scrape-alcer",
+      "schedule": "25 12 * * *"
+    },
+    {
       "path": "/api/cron/race-recommendations",
       "schedule": "0 11 * * 1,4"
     }

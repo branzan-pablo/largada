@@ -5,10 +5,12 @@ import { raxEventosScraper } from "./rax-eventos";
 import { tnvTeamScraper } from "./tnv-team";
 import { tvcomRunningScraper } from "./tvcom-running";
 import { wxEsportesScraper } from "./wx-esportes";
+import { alcerScraper } from "./alcer";
 
 export type { ScrapedRace } from "./types";
 
 const scrapers: Scraper[] = [
+  alcerScraper,
   equilibrioScraper,
   incentivoEsporteScraper,
   raxEventosScraper,
