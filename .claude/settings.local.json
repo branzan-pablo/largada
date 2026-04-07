@@ -100,7 +100,8 @@
       "mcp__remotion__remotion-documentation",
       "Bash(git rebase:*)",
       "Bash(ls -la \"C:\\\\Users\\\\pablo\\\\Development\\\\MVP\\\\src\\\\app\\\\\\(app\\)\")",
-      "Bash(ls -la \"C:\\\\Users\\\\pablo\\\\Development\\\\MVP\\\\src\\\\app\\\\\\(landing\\)\")"
+      "Bash(ls -la \"C:\\\\Users\\\\pablo\\\\Development\\\\MVP\\\\src\\\\app\\\\\\(landing\\)\")",
+      "Bash(pnpm test:*)"
     ]
   }
 }

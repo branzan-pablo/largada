@@ -99,10 +99,13 @@ describe("verifyWebhook", () => {
         expect(() => verifyWebhook(body, sig, "test-webhook-secret-123")).not.toThrow();
     });
 
-    it("succeeds when secret is valid and signature header is null (dev mode)", () => {
+    it("throws when secret is valid but signature header is null (HMAC is mandatory)", () => {
         expect(() =>
             verifyWebhook('{"event":"test"}', null, "test-webhook-secret-123")
-        ).not.toThrow();
+        ).toThrow(AbacatePayWebhookError);
+        expect(() =>
+            verifyWebhook('{"event":"test"}', null, "test-webhook-secret-123")
+        ).toThrow("Missing X-Webhook-Signature header");
     });
 
     it("throws when secret is wrong (even if signature is valid)", () => {

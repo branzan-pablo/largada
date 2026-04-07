@@ -33,17 +33,14 @@ export async function POST(request: NextRequest) {
 
   try {
     // 2. Verify webhook security (secret + HMAC)
-    // Accept secret from Authorization header (preferred) or query param (legacy)
+    // Secret must be in Authorization: Bearer header (query param no longer accepted)
     const authHeader = request.headers.get("authorization");
-    const secretParam =
-      (authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null) ||
-      request.nextUrl.searchParams.get("webhookSecret");
+    const secretParam = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
     const signatureHeader = request.headers.get("x-webhook-signature");
 
     console.info("[Webhook] Incoming request —", {
       method: request.method,
       hasSecret: !!secretParam,
-      secretSource: authHeader?.startsWith("Bearer ") ? "header" : "query",
       hasSignature: !!signatureHeader,
       contentType: request.headers.get("content-type"),
       bodyLength: rawBody.length,
@@ -104,7 +101,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (abacatePayRefId) {
-          // Update order status
+          // Update order status — only transition PENDING → PAID (C3 fix)
           const { data: updatedOrderData, error: orderError } = await admin
             .from("payment_orders")
             .update({
@@ -113,13 +110,26 @@ export async function POST(request: NextRequest) {
               paid_at: utcNow(),
             })
             .eq("abacatepay_id", abacatePayRefId)
-            .select("id, user_id, order_type, metadata")
+            .eq("status", "PENDING")
+            .select("id, user_id, order_type, metadata, amount")
             .single();
 
           let updatedOrder = updatedOrderData;
 
           if (orderError && orderError.code !== "PGRST116") {
             console.error("[Webhook] Failed to update order:", orderError);
+          }
+
+          // C4 fix: Validate paid amount against expected order amount
+          if (updatedOrder && typeof updatedOrder.amount === "number" && paidAmount !== undefined) {
+            if (paidAmount < updatedOrder.amount) {
+              console.error("[Webhook] AMOUNT MISMATCH — paid less than expected", {
+                orderId: updatedOrder.id,
+                expectedAmount: updatedOrder.amount,
+                paidAmount,
+                difference: updatedOrder.amount - paidAmount,
+              });
+            }
           }
 
           // Fallback: if order not found by abacatepay_id, try metadata match
@@ -144,7 +154,7 @@ export async function POST(request: NextRequest) {
                 .eq("status", "PENDING")
                 .order("created_at", { ascending: false })
                 .limit(1)
-                .select("id, user_id, order_type, metadata")
+                .select("id, user_id, order_type, metadata, amount")
                 .single();
 
               if (fallbackOrder) {
@@ -158,8 +168,14 @@ export async function POST(request: NextRequest) {
 
           orderId = updatedOrder?.id ?? null;
 
+          // C5 fix: Only proceed with side-effects if order was successfully updated
+          if (!updatedOrder) {
+            console.warn("[Webhook] No order updated for abacatepay_id:", abacatePayRefId);
+            break;
+          }
+
           // Persist payment_customers if user doesn't have one yet
-          if (updatedOrder?.user_id && "billing" in data) {
+          if (updatedOrder.user_id && "billing" in data) {
             const billingData = data as WebhookBillingPaidData;
             const customer = billingData.billing.customer;
             if (customer?.id && customer?.metadata) {
@@ -192,7 +208,7 @@ export async function POST(request: NextRequest) {
           }
 
           // Handle race promotion: mark race as promoted with expiry
-          if (updatedOrder?.order_type === "race_promotion") {
+          if (updatedOrder.order_type === "race_promotion") {
             const meta = updatedOrder.metadata as Record<
               string,
               unknown
@@ -223,7 +239,7 @@ export async function POST(request: NextRequest) {
           }
 
           // Handle subscription activation
-          if (updatedOrder?.order_type === "premium_subscription") {
+          if (updatedOrder.order_type === "premium_subscription") {
             const meta = updatedOrder.metadata as Record<string, unknown> | null;
             const tier = meta?.tier as SubscriptionTier | undefined;
             const userId = (updatedOrder as { user_id: string }).user_id;

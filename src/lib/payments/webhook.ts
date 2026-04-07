@@ -64,9 +64,8 @@ export function verifyWebhookSignature(
  * Runs both verification layers on a webhook request.
  *
  * Layer 1 (URL secret) is always enforced — mandatory.
- * Layer 2 (HMAC signature) is enforced only when the header is present.
- * AbacatePay may omit the signature header in dev/simulation mode.
- * A warning is logged so missing signatures are always visible in logs.
+ * Layer 2 (HMAC signature) is always enforced — mandatory.
+ * Both layers must pass for the webhook to be accepted.
  */
 export function verifyWebhook(
   rawBody: string,
@@ -74,10 +73,5 @@ export function verifyWebhook(
   secretParam: string | null,
 ): void {
   verifyWebhookSecret(secretParam);
-
-  if (!signatureHeader) {
-    return;
-  }
-
   verifyWebhookSignature(rawBody, signatureHeader);
 }

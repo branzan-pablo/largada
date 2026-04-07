@@ -9,13 +9,13 @@ export function normalizeUrl(val: string): string {
 
 export const loginSchema = z.object({
   email: z.email("Email inválido"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
 });
 
 export const registerSchema = z.object({
   fullName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   email: z.email("Email inválido"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
   city: z.string().min(1, "Selecione sua cidade"),
 });
 

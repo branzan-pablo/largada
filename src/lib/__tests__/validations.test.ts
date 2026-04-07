@@ -44,7 +44,7 @@ describe("loginSchema", () => {
     it("accepts valid credentials", () => {
         const result = loginSchema.safeParse({
             email: "user@example.com",
-            password: "123456",
+            password: "12345678",
         });
         expect(result.success).toBe(true);
     });
@@ -52,15 +52,15 @@ describe("loginSchema", () => {
     it("rejects invalid email", () => {
         const result = loginSchema.safeParse({
             email: "not-an-email",
-            password: "123456",
+            password: "12345678",
         });
         expect(result.success).toBe(false);
     });
 
-    it("rejects short password (< 6 chars)", () => {
+    it("rejects short password (< 8 chars)", () => {
         const result = loginSchema.safeParse({
             email: "user@example.com",
-            password: "12345",
+            password: "1234567",
         });
         expect(result.success).toBe(false);
     });
