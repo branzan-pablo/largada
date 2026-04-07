@@ -75,7 +75,7 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
           Container bg matches SVG's internal fill (white) to extend the button to full width. */}
       <button
         type="button"
-        className="cursor-pointer relative flex h-12 w-full items-center justify-center overflow-hidden rounded-md border bg-white disabled:opacity-50"
+        className="cursor-pointer relative flex h-12 w-full items-center justify-center overflow-hidden rounded-full border bg-white disabled:opacity-50"
         onClick={handleStravaLogin}
         disabled={isAnyLoading}
       >

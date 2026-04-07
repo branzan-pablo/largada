@@ -118,7 +118,7 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
                 <button
                   key={f.value}
                   onClick={() => setStatusFilter(f.value)}
-                  className={`shrink-0 rounded-md px-3 py-1 text-xs font-medium transition-colors ${statusFilter === f.value
+                  className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${statusFilter === f.value
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                     }`}
@@ -136,7 +136,7 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
                 <button
                   key={f.value}
                   onClick={() => setOriginFilter(f.value)}
-                  className={`shrink-0 rounded-md px-3 py-1 text-xs font-medium transition-colors ${originFilter === f.value
+                  className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${originFilter === f.value
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                     }`}
@@ -149,7 +149,7 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
           {/* Missing coords filter */}
           <button
             onClick={() => setCoordsFilter((v) => !v)}
-            className={`flex items-center gap-1 rounded-md px-3 py-1 text-xs font-medium transition-colors ${coordsFilter
+            className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors ${coordsFilter
               ? "bg-amber-100 text-amber-800"
               : "text-muted-foreground hover:text-foreground"
               }`}
@@ -160,7 +160,7 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
           {/* Outside region filter */}
           <button
             onClick={() => setOutsideFilter((v) => !v)}
-            className={`flex items-center gap-1 rounded-md px-3 py-1 text-xs font-medium transition-colors ${outsideFilter
+            className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors ${outsideFilter
               ? "bg-red-100 text-red-800"
               : "text-muted-foreground hover:text-foreground"
               }`}

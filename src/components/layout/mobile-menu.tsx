@@ -142,7 +142,7 @@ export function MobileMenu({ variant }: MobileMenuProps) {
     <div className="md:hidden">
       <button
         onClick={() => setOpen(true)}
-        className="flex h-9 w-9 items-center justify-center rounded-lg text-[#6B7280] transition-colors hover:bg-gray-100 hover:text-[#0D1B2A]"
+        className="flex h-9 w-9 items-center justify-center rounded-full text-[#6B7280] transition-colors hover:bg-gray-100 hover:text-[#0D1B2A]"
         aria-label="Abrir menu"
       >
         <Menu className="h-5 w-5" />

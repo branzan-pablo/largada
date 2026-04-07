@@ -347,19 +347,19 @@ function TierCard({
   isSubmitting: boolean;
   onSelect: () => void;
 }) {
-  const isPro = config.tier === "organizador_pro";
+  const isPopular = config.tier === "organizador";
   const savingsPercent = Math.round(
     (1 - config.priceInCentavos / (14900 * config.promotionsPerMonth)) * 100
   );
 
   return (
     <div
-      className={`rounded-xl border p-6 space-y-4 ${isPro
+      className={`rounded-xl border p-6 space-y-4 ${isPopular
         ? "border-[#FF4D00] bg-orange-50/50"
         : "border-gray-200 bg-white"
         }`}
     >
-      {isPro && (
+      {isPopular && (
         <span className="inline-block rounded-full bg-[#FF4D00] px-2.5 py-0.5 text-xs font-semibold text-white">
           Mais popular
         </span>
@@ -402,7 +402,7 @@ function TierCard({
 
       <Button
         className="w-full cursor-pointer"
-        variant={isPro ? "default" : "outline"}
+        variant={isPopular ? "default" : "outline"}
         onClick={onSelect}
         disabled={isSubmitting}
       >
