@@ -48,10 +48,17 @@ export function CtaButtons({
             Criar minha conta grátis
           </button>
         )}
-        <Link href="/corridas" className={resolvedSecondaryClass}>
-          <Footprints className="w-5 h-5" />
-          Ver as corridas
-        </Link>
+        {user ? (
+          <Link href="/sugerir" className={resolvedSecondaryClass}>
+            <CirclePlus className="w-5 h-5" />
+            Sugerir Evento
+          </Link>
+        ) : (
+          <Link href="/corridas" className={resolvedSecondaryClass}>
+            <Footprints className="w-5 h-5" />
+            Ver as corridas
+          </Link>
+        )}
       </div>
     );
   }
@@ -69,7 +76,11 @@ export function CtaButtons({
           Sugerir Evento
         </Link>
       ) : (
-        <button type="button" onClick={openRegister} className={resolvedSecondaryClass}>
+        <button
+          type="button"
+          onClick={openRegister}
+          className={resolvedSecondaryClass}
+        >
           <UserPlus className="w-5 h-5" />
           Criar conta grátis
         </button>
