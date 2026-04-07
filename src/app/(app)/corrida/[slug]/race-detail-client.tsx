@@ -124,7 +124,10 @@ function getInitials(name: string | null): string {
 
 export function ParticipantsSection() {
   const { count, participants } = useRsvpContext();
-  const maxVisible = 8;
+  const [showAll, setShowAll] = useState(false);
+  const maxCollapsed = 3;
+  const hasMore = participants.length > maxCollapsed;
+  const visibleParticipants = showAll ? participants : participants.slice(0, maxCollapsed);
 
   return (
     <section>
@@ -132,17 +135,53 @@ export function ParticipantsSection() {
         Participantes ({count})
       </h2>
       {participants.length > 0 ? (
-        <AvatarGroup>
-          {participants.slice(0, maxVisible).map((p) => (
-            <Avatar key={p.id} size="default">
-              {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.full_name ?? "Corredor"} />}
-              <AvatarFallback>{getInitials(p.full_name)}</AvatarFallback>
-            </Avatar>
-          ))}
-          {count > maxVisible && (
-            <AvatarGroupCount>+{count - maxVisible}</AvatarGroupCount>
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <AvatarGroup>
+              {participants.slice(0, 5).map((p) => (
+                <Avatar key={p.id} size="default">
+                  {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.full_name ?? "Corredor"} />}
+                  <AvatarFallback>{getInitials(p.full_name)}</AvatarFallback>
+                </Avatar>
+              ))}
+              {count > 5 && <AvatarGroupCount>+{count - 5}</AvatarGroupCount>}
+            </AvatarGroup>
+            <span className="text-sm text-muted-foreground">
+              {count === 1 ? "1 confirmado" : `${count} confirmados`}
+            </span>
+          </div>
+          <div className={showAll && hasMore ? "max-h-60 overflow-y-auto" : ""}>
+            {visibleParticipants.map((p) => (
+              <div key={p.id} className="flex items-center gap-2 py-1.5">
+                <Avatar size="sm">
+                  {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.full_name ?? "Corredor"} />}
+                  <AvatarFallback>{getInitials(p.full_name)}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium text-[#0D1B2A] truncate">
+                  {p.full_name ?? "Corredor"}
+                </span>
+              </div>
+            ))}
+          </div>
+          {hasMore && (
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline cursor-pointer"
+            >
+              {showAll ? (
+                <>
+                  Ver menos
+                  <ChevronUp className="h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Ver todos ({count})
+                  <ChevronDown className="h-4 w-4" />
+                </>
+              )}
+            </button>
           )}
-        </AvatarGroup>
+        </div>
       ) : (
         <p className="text-sm text-muted-foreground">
           Ninguém confirmou presença ainda. Seja o primeiro!
@@ -152,29 +191,20 @@ export function ParticipantsSection() {
   );
 }
 
-function socialProofText(participants: Participant[], count: number): string {
-  if (count === 0) return "Seja o primeiro a confirmar presença!";
-  const names = participants
-    .slice(0, 3)
-    .map((p) => p.full_name?.split(" ")[0] ?? "Corredor");
-  const remaining = count - names.length;
-  if (remaining > 0) {
-    return `${names.join(", ")} e mais ${remaining}`;
-  }
-  if (names.length === 1) return `${names[0]} confirmou presença`;
-  const last = names.pop();
-  return `${names.join(", ")} e ${last}`;
-}
 
 export function RsvpCard({ deadlinePassed = false }: { deadlinePassed?: boolean }) {
-  const { rsvped, count, participants, isToggling, toggle } = useRsvpContext();
+  const { rsvped, count, isToggling, toggle } = useRsvpContext();
 
   return (
     <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-3">
-      <h3 className="font-semibold text-[#0D1B2A]">Vou nessa!</h3>
-      <p className="text-sm text-muted-foreground">
-        {socialProofText(participants, count)}
-      </p>
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-[#0D1B2A]">Vou nessa!</h3>
+        {count > 0 && (
+          <span className="text-sm text-muted-foreground">
+            {count === 1 ? "1 confirmado" : `${count} confirmados`}
+          </span>
+        )}
+      </div>
       <Button
         onClick={toggle}
         disabled={isToggling || deadlinePassed}
