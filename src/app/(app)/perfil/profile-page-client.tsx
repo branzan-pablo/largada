@@ -274,16 +274,16 @@ export function ProfilePageClient() {
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </Link>
         {user.user_metadata?.provider === "strava" && (
-          <Link
-            href="/perfil/desempenho"
-            className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"
-          >
+          <div className="flex items-center justify-between rounded-lg border p-4 opacity-50 cursor-not-allowed">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              <span className="text-sm font-medium">Meu Desempenho</span>
+              <div>
+                <span className="text-sm font-medium">Meu Desempenho</span>
+                <p className="text-xs text-muted-foreground">Em atualização</p>
+              </div>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </Link>
+          </div>
         )}
       </div>
 
