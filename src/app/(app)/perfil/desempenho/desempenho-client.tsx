@@ -29,14 +29,18 @@ import type {
   StravaActivity,
   StravaAthleteStats,
   CachedAthleteData,
+  StravaBestEffort,
 } from "@/lib/strava";
+import { BEST_EFFORT_DISTANCES } from "@/lib/strava";
 import {
   metersToKm,
   formatPace,
   formatDurationShort,
+  formatDurationHMS,
   getWorkoutLabel,
   getDistanceBucket,
   buildPerformanceProfile,
+  enhanceProfileWithBestEfforts,
   getLevelLabel,
   formatPaceFromSeconds,
   type PerformanceProfile,
@@ -92,7 +96,7 @@ export function DesempenhoClient() {
 
       // Fetch race suggestions if we have activities
       if (athleteData.activities.length > 0) {
-        await fetchSuggestions(athleteData.activities);
+        await fetchSuggestions(athleteData.activities, athleteData.personal_records);
       }
     } catch {
       setError("Erro ao carregar dados do Strava.");
@@ -102,9 +106,12 @@ export function DesempenhoClient() {
     }
   }, []);
 
-  const fetchSuggestions = async (activities: StravaActivity[]) => {
+  const fetchSuggestions = async (activities: StravaActivity[], bestEfforts?: StravaBestEffort[]) => {
     try {
-      const profile = buildPerformanceProfile(activities);
+      let profile = buildPerformanceProfile(activities);
+      if (bestEfforts && bestEfforts.length > 0) {
+        profile = enhanceProfileWithBestEfforts(profile, bestEfforts);
+      }
       setPerfProfile(profile);
 
       const res = await fetch("/api/strava/suggestions", {
@@ -286,6 +293,14 @@ export function DesempenhoClient() {
         <DistanceDistribution activities={activities} />
       )}
 
+      {/* Personal records */}
+      {perfProfile && (
+        <PersonalRecordsCard
+          profile={perfProfile}
+          bestEfforts={data?.personal_records}
+        />
+      )}
+
       {/* Runner level & next challenge */}
       {perfProfile && <RunnerLevelCard profile={perfProfile} />}
 
@@ -331,16 +346,15 @@ function StatsCards({
     const totalRuns = stats?.all_run_totals?.count ?? activities.length;
     const totalDistanceKm =
       (stats?.all_run_totals?.distance ?? activities.reduce((s, a) => s + a.distance, 0)) / 1000;
-    const avgPace =
+    const bestPace =
       activities.length > 0
-        ? activities.reduce((s, a) => s + a.average_speed, 0) /
-          activities.length
+        ? Math.max(...activities.map(a => a.average_speed))
         : 0;
     const totalElevation =
       stats?.all_run_totals?.elevation_gain ??
       activities.reduce((s, a) => s + a.total_elevation_gain, 0);
 
-    return { totalRuns, totalDistanceKm, avgPace, totalElevation };
+    return { totalRuns, totalDistanceKm, bestPace, totalElevation };
   }, [activities, stats]);
 
   return (
@@ -357,8 +371,8 @@ function StatsCards({
       />
       <StatCard
         icon={<Timer className="h-4 w-4 text-[#FC5200]" />}
-        label="Pace médio"
-        value={`${formatPace(computed.avgPace)} /km`}
+        label="Melhor pace"
+        value={`${formatPace(computed.bestPace)} /km`}
       />
       <StatCard
         icon={<Mountain className="h-4 w-4 text-[#FC5200]" />}
@@ -539,6 +553,93 @@ function DistanceDistribution({
               <span className="w-10 text-xs text-muted-foreground">
                 {d.pct}%
               </span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PersonalRecordsCard({
+  profile,
+  bestEfforts,
+}: {
+  profile: PerformanceProfile;
+  bestEfforts?: StravaBestEffort[];
+}) {
+  const records = useMemo(() => {
+    // If we have best_efforts from Strava API, use those (100% accurate)
+    if (bestEfforts && bestEfforts.length > 0) {
+      const ordered = ["1K", "5K", "10K", "21K", "30K", "42K"];
+      const effortMap = new Map<string, StravaBestEffort>();
+      for (const e of bestEfforts) {
+        const bucket = BEST_EFFORT_DISTANCES[e.name];
+        if (bucket) effortMap.set(bucket, e);
+      }
+      return ordered
+        .filter((bucket) => effortMap.has(bucket))
+        .map((bucket) => {
+          const e = effortMap.get(bucket)!;
+          const paceSecondsPerKm = e.moving_time / (e.distance / 1000);
+          return {
+            bucket,
+            paceSecondsPerKm: Math.round(paceSecondsPerKm),
+            movingTime: e.moving_time,
+            date: e.start_date_local,
+            isRace: false,
+            isStravaPR: true,
+          };
+        });
+    }
+
+    // Fallback to profile-based PRs (best activity pace per bucket)
+    const ordered = ["5K", "10K", "21K", "30K", "42K"];
+    return ordered
+      .filter((bucket) => profile.bestPRByDistance[bucket])
+      .map((bucket) => ({
+        bucket,
+        ...profile.bestPRByDistance[bucket],
+        isStravaPR: false,
+      }));
+  }, [profile, bestEfforts]);
+
+  if (records.length === 0) return null;
+
+  return (
+    <Card className="py-4">
+      <CardContent className="space-y-3 px-4">
+        <div className="flex items-center gap-1.5">
+          <Trophy className="h-4 w-4 text-[#FC5200]" />
+          <span className="text-sm font-semibold">Records Pessoais</span>
+        </div>
+
+        <div className="space-y-2">
+          {records.map((r) => (
+            <div
+              key={r.bucket}
+              className="flex items-center justify-between rounded-lg border p-3"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold">{r.bucket}</span>
+                {r.isRace && (
+                  <Badge
+                    variant="secondary"
+                    className="bg-[#FC5200]/10 text-[#FC5200] text-[10px]"
+                  >
+                    Prova
+                  </Badge>
+                )}
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-bold">
+                  {formatPaceFromSeconds(r.paceSecondsPerKm)}/km
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {formatDurationHMS(r.movingTime)} &middot;{" "}
+                  {formatDateShort(r.date)}
+                </p>
+              </div>
             </div>
           ))}
         </div>

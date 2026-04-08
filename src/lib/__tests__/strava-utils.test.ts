@@ -321,13 +321,17 @@ describe("buildPerformanceProfile", () => {
     distanceKm: number,
     paceSecondsPerKm: number,
     daysAgo: number = 0,
+    workoutType?: number,
   ) {
     const date = new Date();
     date.setDate(date.getDate() - daysAgo);
+    const movingTime = distanceKm * paceSecondsPerKm;
     return {
       distance: distanceKm * 1000,
       average_speed: 1000 / paceSecondsPerKm,
+      moving_time: movingTime,
       start_date_local: date.toISOString(),
+      workout_type: workoutType,
     };
   }
 
@@ -339,7 +343,7 @@ describe("buildPerformanceProfile", () => {
     ];
     const profile = buildPerformanceProfile(activities);
 
-    expect(profile.paceByDistance["5K"]).toBe(330); // avg of 320 and 340
+    expect(profile.paceByDistance["5K"]).toBe(320); // best of 320 and 340
     expect(profile.paceByDistance["10K"]).toBe(350);
   });
 
@@ -496,6 +500,58 @@ describe("buildPerformanceProfile", () => {
     expect(profile.weeklyVolumeKm).toBe(0);
     expect(profile.nextChallenge).toBeNull();
     expect(profile.trend).toBe("stable");
+    expect(profile.bestPRByDistance).toEqual({});
+  });
+
+  it("populates bestPRByDistance with correct PR details", () => {
+    const activities = [
+      makeActivity(5, 320, 1),
+      makeActivity(5, 340, 3),
+      makeActivity(10, 350, 5),
+    ];
+    const profile = buildPerformanceProfile(activities);
+
+    expect(profile.bestPRByDistance["5K"]).toBeDefined();
+    expect(profile.bestPRByDistance["5K"].paceSecondsPerKm).toBe(320);
+    expect(profile.bestPRByDistance["5K"].distanceMeters).toBe(5000);
+    expect(profile.bestPRByDistance["5K"].isRace).toBe(false);
+    expect(profile.bestPRByDistance["10K"]).toBeDefined();
+    expect(profile.bestPRByDistance["10K"].paceSecondsPerKm).toBe(350);
+  });
+
+  it("prefers race activity when within 10% of best pace", () => {
+    const activities = [
+      makeActivity(5, 300, 1),          // fastest training
+      makeActivity(5, 325, 3, 1),       // race, 8.3% slower → within 10%
+    ];
+    const profile = buildPerformanceProfile(activities);
+
+    expect(profile.bestPRByDistance["5K"].isRace).toBe(true);
+    expect(profile.bestPRByDistance["5K"].paceSecondsPerKm).toBe(325);
+  });
+
+  it("uses training PR when race is more than 10% slower", () => {
+    const activities = [
+      makeActivity(5, 300, 1),          // fastest training
+      makeActivity(5, 340, 3, 1),       // race, 13.3% slower → outside 10%
+    ];
+    const profile = buildPerformanceProfile(activities);
+
+    expect(profile.bestPRByDistance["5K"].isRace).toBe(false);
+    expect(profile.bestPRByDistance["5K"].paceSecondsPerKm).toBe(300);
+  });
+
+  it("computes movingTime from distance/speed when moving_time not provided", () => {
+    const activities = [
+      {
+        distance: 5000,
+        average_speed: 1000 / 320,
+        start_date_local: new Date().toISOString(),
+      },
+    ];
+    const profile = buildPerformanceProfile(activities);
+
+    expect(profile.bestPRByDistance["5K"].movingTime).toBe(1600); // 5 * 320
   });
 });
 
@@ -504,6 +560,7 @@ describe("buildPerformanceProfile", () => {
 describe("scoreRaceForUser", () => {
   const baseProfile: PerformanceProfile = {
     paceByDistance: { "5K": 320, "10K": 350 },
+    bestPRByDistance: {},
     levelByDistance: { "5K": "avancado", "10K": "intermediario" },
     overallLevel: "avancado",
     weeklyVolumeKm: 25,

@@ -53,9 +53,20 @@ interface StravaTotals {
   achievement_count?: number;
 }
 
+export interface StravaBestEffort {
+  id: number;
+  name: string; // "400m", "1k", "5k", "10k", "Half-Marathon", "Marathon", etc.
+  distance: number; // meters
+  moving_time: number; // seconds
+  elapsed_time: number; // seconds
+  start_date_local: string;
+  pr_rank: number | null; // 1=best, 2=2nd, 3=3rd, null=not top 3
+}
+
 export interface CachedAthleteData {
   activities: StravaActivity[];
   stats: StravaAthleteStats | null;
+  personal_records?: StravaBestEffort[];
   synced_at: string;
   needs_scope_upgrade: boolean;
 }
@@ -238,6 +249,82 @@ async function fetchStravaStats(
   return res.json();
 }
 
+/** Standard distances we care about for personal records */
+export const BEST_EFFORT_DISTANCES: Record<string, string> = {
+  "1k": "1K",
+  "5k": "5K",
+  "10k": "10K",
+  "Half-Marathon": "21K",
+  "30k": "30K",
+  "Marathon": "42K",
+};
+
+/**
+ * Fetch detailed activity data including best_efforts.
+ */
+async function fetchActivityBestEfforts(
+  accessToken: string,
+  activityId: number
+): Promise<StravaBestEffort[]> {
+  const res = await fetch(`${STRAVA_API}/activities/${activityId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) return [];
+
+  const detail = await res.json();
+  const efforts: StravaBestEffort[] = (detail.best_efforts ?? [])
+    .filter((e: { name: string }) => e.name in BEST_EFFORT_DISTANCES)
+    .map((e: { id: number; name: string; distance: number; moving_time: number; elapsed_time: number; start_date_local: string; pr_rank: number | null }) => ({
+      id: e.id,
+      name: e.name,
+      distance: e.distance,
+      moving_time: e.moving_time,
+      elapsed_time: e.elapsed_time,
+      start_date_local: e.start_date_local,
+      pr_rank: e.pr_rank,
+    }));
+
+  return efforts;
+}
+
+/**
+ * Fetch best efforts for activities that have PRs.
+ * Aggregates to keep only the best (pr_rank=1 or fastest) per distance.
+ */
+async function fetchPersonalRecords(
+  accessToken: string,
+  activities: StravaActivity[]
+): Promise<StravaBestEffort[]> {
+  // Only fetch details for activities with PRs to minimize API calls
+  const prActivities = activities
+    .filter((a) => a.pr_count > 0 && ["Run", "VirtualRun", "TrailRun"].includes(a.type))
+    .slice(0, 30); // Cap at 30 to respect rate limits
+
+  if (prActivities.length === 0) return [];
+
+  // Fetch in batches of 10 to avoid rate limiting
+  const allEfforts: StravaBestEffort[] = [];
+  for (let i = 0; i < prActivities.length; i += 10) {
+    const batch = prActivities.slice(i, i + 10);
+    const results = await Promise.all(
+      batch.map((a) => fetchActivityBestEfforts(accessToken, a.id))
+    );
+    allEfforts.push(...results.flat());
+  }
+
+  // Keep only the best (fastest moving_time) per distance name
+  const bestByDistance = new Map<string, StravaBestEffort>();
+  for (const effort of allEfforts) {
+    const current = bestByDistance.get(effort.name);
+    if (!current || effort.moving_time < current.moving_time) {
+      bestByDistance.set(effort.name, effort);
+    }
+  }
+
+  return [...bestByDistance.values()];
+}
+
 /**
  * Get athlete data (activities + stats) with caching.
  * Returns cached data if less than CACHE_TTL old, otherwise fetches fresh data.
@@ -281,9 +368,14 @@ export async function getAthleteData(
       if (!cacheError && cached) {
         const syncedAt = new Date(cached.synced_at).getTime();
         if (Date.now() - syncedAt < CACHE_TTL_MS) {
+          const cacheStats = cached.stats as unknown as Record<string, unknown> | null;
+          const personalRecords = (cacheStats && Array.isArray((cacheStats as Record<string, unknown>).__personal_records))
+            ? (cacheStats as Record<string, unknown>).__personal_records as unknown as StravaBestEffort[]
+            : undefined;
           return {
             activities: cached.activities as unknown as StravaActivity[],
             stats: cached.stats as unknown as StravaAthleteStats | null,
+            personal_records: personalRecords,
             synced_at: cached.synced_at,
             needs_scope_upgrade: false,
           };
@@ -308,15 +400,24 @@ export async function getAthleteData(
     return empty;
   }
 
+  // Fetch personal records (best efforts) from detailed activities
+  let personalRecords: StravaBestEffort[] = [];
+  try {
+    personalRecords = await fetchPersonalRecords(tokenData.accessToken, activities);
+  } catch (err) {
+    console.warn("[Strava] best_efforts fetch failed (non-critical):", err);
+  }
+
   const now = new Date().toISOString();
 
-  // Upsert cache (best-effort)
+  // Upsert cache (best-effort). Store personal_records inside stats JSONB to avoid migration.
   try {
+    const statsWithPR = { ...(stats ?? {}), __personal_records: personalRecords };
     await admin.from("strava_athlete_cache").upsert(
       {
         user_id: userId,
         activities: activities as unknown as Database["public"]["Tables"]["strava_athlete_cache"]["Insert"]["activities"],
-        stats: (stats ?? {}) as unknown as Database["public"]["Tables"]["strava_athlete_cache"]["Insert"]["stats"],
+        stats: statsWithPR as unknown as Database["public"]["Tables"]["strava_athlete_cache"]["Insert"]["stats"],
         synced_at: now,
       },
       { onConflict: "user_id" }
@@ -328,6 +429,7 @@ export async function getAthleteData(
   return {
     activities,
     stats,
+    personal_records: personalRecords.length > 0 ? personalRecords : undefined,
     synced_at: now,
     needs_scope_upgrade: false,
   };

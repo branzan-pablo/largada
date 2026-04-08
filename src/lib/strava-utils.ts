@@ -24,6 +24,14 @@ export function formatDurationShort(seconds: number): string {
   return `${m}m`;
 }
 
+export function formatDurationHMS(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.round(seconds % 60);
+  if (h > 0) return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
 export function getWorkoutLabel(workoutType?: number): string | null {
   switch (workoutType) {
     case 1:
@@ -128,9 +136,19 @@ const minWeeklyVolumeForDistance: Record<string, number> = {
   "42K": 50,
 };
 
+export interface PersonalRecord {
+  paceSecondsPerKm: number;
+  movingTime: number;
+  distanceMeters: number;
+  date: string;
+  isRace: boolean;
+}
+
 export interface PerformanceProfile {
-  /** Average pace in seconds/km per distance bucket */
+  /** Best pace in seconds/km per distance bucket */
   paceByDistance: Record<string, number>;
+  /** Personal records per distance bucket */
+  bestPRByDistance: Record<string, PersonalRecord>;
   /** Runner level per distance bucket */
   levelByDistance: Record<string, RunnerLevel>;
   /** Overall runner level (from most-run distance) */
@@ -147,11 +165,18 @@ export interface PerformanceProfile {
 
 /** Build a full performance profile from Strava activities */
 export function buildPerformanceProfile(
-  activities: { distance: number; average_speed: number; start_date_local: string }[]
+  activities: {
+    distance: number;
+    average_speed: number;
+    moving_time?: number;
+    start_date_local: string;
+    workout_type?: number;
+  }[]
 ): PerformanceProfile {
-  // Count and accumulate pace per bucket
+  // Track counts and best pace per bucket
   const bucketCounts = new Map<string, number>();
-  const bucketPaceSum = new Map<string, number>();
+  const bucketBest = new Map<string, { pace: number; activity: typeof activities[number] }>();
+  const bucketBestRace = new Map<string, { pace: number; activity: typeof activities[number] }>();
 
   for (const a of activities) {
     const km = a.distance / 1000;
@@ -159,16 +184,46 @@ export function buildPerformanceProfile(
     const bucket = getDistanceBucket(km);
     bucketCounts.set(bucket, (bucketCounts.get(bucket) ?? 0) + 1);
     const paceSeconds = 1000 / a.average_speed; // seconds per km
-    bucketPaceSum.set(bucket, (bucketPaceSum.get(bucket) ?? 0) + paceSeconds);
+
+    const currentBest = bucketBest.get(bucket);
+    if (!currentBest || paceSeconds < currentBest.pace) {
+      bucketBest.set(bucket, { pace: paceSeconds, activity: a });
+    }
+
+    if (a.workout_type === 1) {
+      const currentBestRace = bucketBestRace.get(bucket);
+      if (!currentBestRace || paceSeconds < currentBestRace.pace) {
+        bucketBestRace.set(bucket, { pace: paceSeconds, activity: a });
+      }
+    }
   }
 
-  // Pace per distance
+  // Best pace per distance (prefer race if within 10% of absolute best)
   const paceByDistance: Record<string, number> = {};
+  const bestPRByDistance: Record<string, PersonalRecord> = {};
   const levelByDistance: Record<string, RunnerLevel> = {};
-  for (const [bucket, count] of bucketCounts) {
-    const avgPace = (bucketPaceSum.get(bucket) ?? 0) / count;
-    paceByDistance[bucket] = Math.round(avgPace);
-    levelByDistance[bucket] = classifyRunnerLevel(bucket, avgPace);
+  for (const [bucket] of bucketCounts) {
+    const best = bucketBest.get(bucket);
+    if (!best) continue;
+
+    const bestRace = bucketBestRace.get(bucket);
+    let chosen = best;
+    if (bestRace && bestRace.pace <= best.pace * 1.10) {
+      chosen = bestRace;
+    }
+
+    const pace = Math.round(chosen.pace);
+    paceByDistance[bucket] = pace;
+    levelByDistance[bucket] = classifyRunnerLevel(bucket, chosen.pace);
+
+    const a = chosen.activity;
+    bestPRByDistance[bucket] = {
+      paceSecondsPerKm: pace,
+      movingTime: a.moving_time ?? Math.round(a.distance / a.average_speed),
+      distanceMeters: a.distance,
+      date: a.start_date_local,
+      isRace: a.workout_type === 1,
+    };
   }
 
   // Preferred distances (top 2)
@@ -213,12 +268,71 @@ export function buildPerformanceProfile(
 
   return {
     paceByDistance,
+    bestPRByDistance,
     levelByDistance,
     overallLevel,
     weeklyVolumeKm,
     nextChallenge,
     trend,
     preferredDistances,
+  };
+}
+
+/** Map Strava best effort names to our distance buckets */
+const bestEffortToBucket: Record<string, string> = {
+  "1k": "1K",
+  "5k": "5K",
+  "10k": "10K",
+  "Half-Marathon": "21K",
+  "30k": "30K",
+  "Marathon": "42K",
+};
+
+/**
+ * Enhance a performance profile with Strava best_efforts data.
+ * Best efforts are extracted from GPS data and ignore warmup/cooldown.
+ */
+export function enhanceProfileWithBestEfforts(
+  profile: PerformanceProfile,
+  bestEfforts: { name: string; distance: number; moving_time: number; start_date_local: string }[]
+): PerformanceProfile {
+  if (bestEfforts.length === 0) return profile;
+
+  const updatedPace = { ...profile.paceByDistance };
+  const updatedPR = { ...profile.bestPRByDistance };
+  const updatedLevel = { ...profile.levelByDistance };
+
+  for (const effort of bestEfforts) {
+    const bucket = bestEffortToBucket[effort.name];
+    if (!bucket) continue;
+
+    const paceSeconds = Math.round(effort.moving_time / (effort.distance / 1000));
+
+    // Use best_effort pace if it's faster than what we have
+    if (!updatedPace[bucket] || paceSeconds < updatedPace[bucket]) {
+      updatedPace[bucket] = paceSeconds;
+      updatedLevel[bucket] = classifyRunnerLevel(bucket, paceSeconds);
+      updatedPR[bucket] = {
+        paceSecondsPerKm: paceSeconds,
+        movingTime: effort.moving_time,
+        distanceMeters: effort.distance,
+        date: effort.start_date_local,
+        isRace: false,
+      };
+    }
+  }
+
+  // Recalculate overall level from most-run distance
+  const overallLevel = profile.preferredDistances.length > 0
+    ? (updatedLevel[profile.preferredDistances[0]] ?? profile.overallLevel)
+    : profile.overallLevel;
+
+  return {
+    ...profile,
+    paceByDistance: updatedPace,
+    bestPRByDistance: updatedPR,
+    levelByDistance: updatedLevel,
+    overallLevel,
   };
 }
 
