@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { ToggleChip } from "@/components/ui/toggle-chip";
 import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
-import { SlidersHorizontal, Search, CalendarDays } from "lucide-react";
+import { SlidersHorizontal, CalendarDays } from "lucide-react";
 import { DEFAULT_DISTANCES } from "@/lib/constants";
 import type { RaceFilters as Filters } from "@/types/race";
 import { getDateRange, getDatePreset } from "@/lib/filter-utils";
@@ -37,7 +37,6 @@ interface RaceFiltersMobileProps {
 export function RaceFiltersMobile({
   filters,
   onFiltersChange,
-  search,
   onSearchChange,
   availableDistances,
 }: RaceFiltersMobileProps) {
@@ -55,7 +54,6 @@ export function RaceFiltersMobile({
     filters.dateFrom || filters.dateTo,
     filters.distances?.length,
     filters.prizeType?.length,
-    search,
   ].filter(Boolean).length;
 
   const toggleDistance = (d: string) => {
@@ -94,95 +92,82 @@ export function RaceFiltersMobile({
             )}
           </Button>
         </SheetTrigger>
-        <SheetContent side="bottom" className="h-[85vh] flex flex-col px-5 pb-8 bg-white border-t-gray-200 text-gray-800">
-          <SheetHeader className="text-left mb-6 shrink-0">
-            <SheetTitle className="text-xl font-semibold text-[#0D1B2A]">Filtros</SheetTitle>
+        <SheetContent side="bottom" className="h-auto max-h-[80vh] flex flex-col px-4 pb-5 bg-white border-t-gray-200 text-gray-800">
+          <SheetHeader className="text-left mb-3 shrink-0">
+            <SheetTitle className="text-sm font-semibold text-[#0D1B2A]">Filtros</SheetTitle>
           </SheetHeader>
 
-          <div className="flex-1 overflow-y-auto space-y-6 pr-2">
-            {/* Search */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-[#6B7280]">Buscar</Label>
-              <div className="relative group">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 group-focus-within:text-gray-600 transition-colors" />
-                <input
-                  type="text"
-                  placeholder="Buscar por nome, cidade..."
-                  value={search}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full h-10 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-800 pl-9 pr-4 focus:outline-none focus:border-gray-300 focus:bg-white transition-all placeholder:text-gray-400"
+          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            {/* City */}
+            <div className="flex items-center gap-3">
+              <Label className="w-14 shrink-0 text-xs font-medium text-[#6B7280]">Cidade</Label>
+              <div className="flex-1">
+                <CityAutocomplete
+                  key={cityKey}
+                  initialCity={filters.city}
+                  onSelect={(c) => onFiltersChange({ ...filters, city: c.name })}
+                  onClear={() => onFiltersChange({ ...filters, city: undefined })}
+                  placeholder="Todas as cidades"
+                  inputClassName="border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 focus-visible:ring-gray-300"
                 />
               </div>
-            </div>
-
-            {/* City */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-[#6B7280]">Cidade</Label>
-              <CityAutocomplete
-                key={cityKey}
-                initialCity={filters.city}
-                onSelect={(c) => onFiltersChange({ ...filters, city: c.name })}
-                onClear={() => onFiltersChange({ ...filters, city: undefined })}
-                placeholder="Todas as cidades"
-                inputClassName="border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 focus-visible:ring-gray-300"
-              />
             </div>
 
             {/* Date Presets */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-[#6B7280]">Data</Label>
-              <Select
-                value={getDatePreset(filters)}
-                onValueChange={(v) => {
-                  const range = getDateRange(v);
-                  onFiltersChange({
-                    ...filters,
-                    dateFrom: range.dateFrom,
-                    dateTo: range.dateTo,
-                  });
-                }}
-              >
-                <SelectTrigger className="w-full bg-gray-50 border-gray-200 text-gray-800 focus:ring-gray-300">
-                  <div className="flex items-center gap-2">
-                    <CalendarDays className="h-4 w-4 text-gray-400 shrink-0" />
-                    <SelectValue placeholder="Qualquer data" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Qualquer data</SelectItem>
-                  <SelectItem value="this_week">Esta semana</SelectItem>
-                  <SelectItem value="this_month">Este mês</SelectItem>
-                  <SelectItem value="next_month">Próximo mês</SelectItem>
-                  <SelectItem value="next_3_months">Próximos 3 meses</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Trophy Toggle */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between py-2">
-                <Label htmlFor="trophy-mobile" className="text-sm font-medium text-[#6B7280]">Com troféu</Label>
-                <Switch
-                  id="trophy-mobile"
-                  checked={filters.prizeType?.includes("trophy") ?? false}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      togglePrize("trophy");
-                    } else {
-                      onFiltersChange({
-                        ...filters,
-                        prizeType: filters.prizeType?.filter((x) => x !== "trophy"),
-                      });
-                    }
+            <div className="flex items-center gap-3">
+              <Label className="w-14 shrink-0 text-xs font-medium text-[#6B7280]">Data</Label>
+              <div className="flex-1">
+                <Select
+                  value={getDatePreset(filters)}
+                  onValueChange={(v) => {
+                    const range = getDateRange(v);
+                    onFiltersChange({
+                      ...filters,
+                      dateFrom: range.dateFrom,
+                      dateTo: range.dateTo,
+                    });
                   }}
-                />
+                >
+                  <SelectTrigger className="w-full bg-gray-50 border-gray-200 text-gray-800 focus:ring-gray-300">
+                    <div className="flex items-center gap-2">
+                      <CalendarDays className="h-4 w-4 text-gray-400 shrink-0" />
+                      <SelectValue placeholder="Qualquer data" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Qualquer data</SelectItem>
+                    <SelectItem value="this_week">Esta semana</SelectItem>
+                    <SelectItem value="this_month">Este mês</SelectItem>
+                    <SelectItem value="next_month">Próximo mês</SelectItem>
+                    <SelectItem value="next_3_months">Próximos 3 meses</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
+            {/* Trophy Toggle */}
+            <div className="flex items-center justify-between">
+              <Label htmlFor="trophy-mobile" className="text-xs font-medium text-[#6B7280]">Com troféu</Label>
+              <Switch
+                id="trophy-mobile"
+                checked={filters.prizeType?.includes("trophy") ?? false}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    togglePrize("trophy");
+                  } else {
+                    onFiltersChange({
+                      ...filters,
+                      prizeType: filters.prizeType?.filter((x) => x !== "trophy"),
+                    });
+                  }
+                }}
+              />
+            </div>
+
             {/* Distances */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-[#6B7280]">Distâncias</Label>
-              <div className="flex flex-wrap gap-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-[#6B7280]">Distâncias</Label>
+              <div className="flex flex-wrap gap-1.5">
                 <ToggleChip
                   label="Todos"
                   active={!filters.distances || filters.distances.length === 0}
@@ -200,7 +185,7 @@ export function RaceFiltersMobile({
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-gray-200 mt-4 shrink-0">
+          <div className="flex gap-2 pt-3 border-t border-gray-200 mt-3 shrink-0">
             <Button
               variant="outline"
               className="flex-1 bg-transparent border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-[#0D1B2A]"

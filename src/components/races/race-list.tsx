@@ -5,12 +5,11 @@ import { useAuth } from "@/contexts/auth-context";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useInfiniteRaces } from "@/hooks/use-infinite-races";
 import { RaceCard } from "./race-card";
-import { PromotedHeroCarousel } from "./promoted-hero-carousel";
 import { RaceFiltersDesktop } from "./race-filters";
 import { RaceFiltersMobile } from "./race-filters-mobile";
 import { RadiusBanner } from "./radius-banner";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, ChevronDown } from "lucide-react";
+import { Trophy, ChevronDown, Search, X } from "lucide-react";
 import type { Race, RaceFilters } from "@/types/race";
 
 const PROMOTED_INSERT_INTERVAL = 7;
@@ -83,7 +82,7 @@ export function RaceList() {
       : {}),
   };
 
-  const { races, isLoading, isLoadingMore, hasMore, restoredFromCache, loadMore, sentinelRef } =
+  const { races, totalCount, isLoading, isLoadingMore, hasMore, restoredFromCache, loadMore, sentinelRef } =
     useInfiniteRaces(enrichedFilters, debouncedSearch);
 
   // Save scroll position on scroll (throttled)
@@ -149,17 +148,33 @@ export function RaceList() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
             <span className="text-xs font-medium text-[#6B7280]">
-              {races.length} provas abertas
+              {totalCount !== null ? totalCount : hasMore ? `${races.length}+` : races.length} provas abertas
             </span>
           </div>
         )}
       </div>
 
-      {/* Hero Carousel — promoted races (before filters) */}
-      {!isLoading && <PromotedHeroCarousel races={promotedRaces} />}
-
-      {/* Mobile: search + filter button */}
-      <div className="mb-4 flex justify-end gap-3 md:hidden">
+      {/* Mobile: search bar + filter button (same row) */}
+      <div className="mb-4 md:hidden flex items-center gap-2">
+        <div className="relative group flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 group-focus-within:text-[#FF4D00] transition-colors pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Nome, cidade ou organizador..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full h-10 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-800 pl-9 pr-8 focus:outline-none focus:border-gray-300 focus:bg-white transition-all placeholder:text-gray-400"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Limpar busca"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
         <RaceFiltersMobile
           filters={filters}
           onFiltersChange={setFilters}

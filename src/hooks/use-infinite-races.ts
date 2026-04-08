@@ -8,6 +8,7 @@ const CACHE_KEY = "race-list-cache";
 
 interface CachedState {
   races: Race[];
+  totalCount: number | null;
   page: number;
   hasMore: boolean;
   filterKey: string;
@@ -32,6 +33,7 @@ function loadCache(filterKey: string): CachedState | null {
 
 interface UseInfiniteRacesResult {
   races: Race[];
+  totalCount: number | null;
   isLoading: boolean;
   isLoadingMore: boolean;
   hasMore: boolean;
@@ -65,6 +67,7 @@ export function useInfiniteRaces(
   debouncedSearch: string
 ): UseInfiniteRacesResult {
   const [races, setRaces] = useState<Race[]>([]);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -103,6 +106,7 @@ export function useInfiniteRaces(
     const cached = loadCache(filterKey);
     if (cached) {
       setRaces(cached.races);
+      setTotalCount(cached.totalCount ?? null);
       setPage(cached.page);
       setHasMore(cached.hasMore);
       setIsLoading(false);
@@ -114,6 +118,7 @@ export function useInfiniteRaces(
     setHasMore(true);
     setIsLoading(true);
     setRestoredFromCache(false);
+    setTotalCount(null);
 
     const fetchInitial = async () => {
       try {
@@ -124,7 +129,9 @@ export function useInfiniteRaces(
           const more = json.hasMore ?? false;
           setRaces(data);
           setHasMore(more);
-          saveCache({ races: data, page: 1, hasMore: more, filterKey });
+          const total = json.count ?? null;
+          setTotalCount(total);
+          saveCache({ races: data, totalCount: total, page: 1, hasMore: more, filterKey });
         }
       } catch {
         if (!cancelled) setRaces([]);
@@ -142,6 +149,8 @@ export function useInfiniteRaces(
 
   const filterKeyRef = useRef(filterKey);
   filterKeyRef.current = filterKey;
+  const totalCountRef = useRef(totalCount);
+  totalCountRef.current = totalCount;
 
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
@@ -155,7 +164,7 @@ export function useInfiniteRaces(
       const more = json.hasMore ?? false;
       setRaces((prev) => {
         const updated = [...prev, ...newData];
-        saveCache({ races: updated, page: nextPage, hasMore: more, filterKey: filterKeyRef.current });
+        saveCache({ races: updated, totalCount: totalCountRef.current, page: nextPage, hasMore: more, filterKey: filterKeyRef.current });
         return updated;
       });
       setHasMore(more);
@@ -186,5 +195,5 @@ export function useInfiniteRaces(
     [hasMore, isLoadingMore, loadMore]
   );
 
-  return { races, isLoading, isLoadingMore, hasMore, restoredFromCache, loadMore, sentinelRef };
+  return { races, totalCount, isLoading, isLoadingMore, hasMore, restoredFromCache, loadMore, sentinelRef };
 }
