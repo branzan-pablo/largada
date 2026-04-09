@@ -60,19 +60,35 @@ export async function middleware(request: NextRequest) {
     const needsAdminCheck = pathname.startsWith("/admin");
     const needsOnboardingCheck = !pathname.startsWith("/onboarding") && !pathname.startsWith("/reset-password");
 
-    if (needsAdminCheck || needsOnboardingCheck) {
+    if (needsAdminCheck) {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("role, city_id, onboarding_completed")
+        .select("role")
         .eq("id", user.id)
         .single();
 
-      if (needsAdminCheck && profile?.role !== "admin") {
+      if (profile?.role !== "admin") {
         return NextResponse.redirect(new URL("/corridas", request.url));
       }
+    } else if (needsOnboardingCheck) {
+      const onboardingDone = request.cookies.get("onboarding_completed")?.value === "1";
+      if (!onboardingDone) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("onboarding_completed")
+          .eq("id", user.id)
+          .single();
 
-      if (needsOnboardingCheck && profile && !profile.onboarding_completed) {
-        return NextResponse.redirect(new URL("/onboarding", request.url));
+        if (profile && !profile.onboarding_completed) {
+          return NextResponse.redirect(new URL("/onboarding", request.url));
+        }
+        // Cache the result so future requests skip the DB query
+        supabaseResponse.cookies.set("onboarding_completed", "1", {
+          httpOnly: true,
+          secure: true,
+          sameSite: "lax",
+          maxAge: 60 * 60 * 24 * 30, // 30 days
+        });
       }
     }
   }

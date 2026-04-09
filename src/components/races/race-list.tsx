@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, useDeferredValue } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useInfiniteRaces } from "@/hooks/use-infinite-races";
@@ -72,7 +72,8 @@ export function RaceList() {
         /* silently fall back to defaults in filter components */
       });
   }, []);
-  const debouncedSearch = useDebounce(search, 300);
+  const debouncedSearch = useDebounce(search, 150);
+  const deferredSearch = useDeferredValue(debouncedSearch);
 
   // If radius filter is active and user has coordinates, pass them
   const enrichedFilters: RaceFilters = {
@@ -83,7 +84,7 @@ export function RaceList() {
   };
 
   const { races, totalCount, isLoading, isLoadingMore, hasMore, restoredFromCache, loadMore, sentinelRef } =
-    useInfiniteRaces(enrichedFilters, debouncedSearch);
+    useInfiniteRaces(enrichedFilters, deferredSearch);
 
   // Save scroll position on scroll (throttled)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -126,6 +127,16 @@ export function RaceList() {
     () => buildMergedGrid(races, promotedRaces),
     [races, promotedRaces],
   );
+
+  // Stable unique keys — promoted races may appear twice (top + inserted repeat)
+  const mergedKeys = useMemo(() => {
+    const seen = new Set<string>();
+    return mergedRaces.map((race) => {
+      if (seen.has(race.id)) return `${race.id}-repeat`;
+      seen.add(race.id);
+      return race.id;
+    });
+  }, [mergedRaces]);
 
   return (
     <>
@@ -232,7 +243,7 @@ export function RaceList() {
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {mergedRaces.map((race, i) => (
-                <RaceCard key={`${race.id}-${i}`} race={race} />
+                <RaceCard key={mergedKeys[i]} race={race} priority={i === 0} />
               ))}
             </div>
 
@@ -267,12 +278,13 @@ export function RaceList() {
 
 function RaceCardSkeleton() {
   return (
-    <div>
+    <div className="p-2">
       <Skeleton className="aspect-4/3 w-full rounded-xl bg-gray-200" />
-      <div className="pt-3 space-y-2">
-        <Skeleton className="h-4 w-full bg-gray-200 rounded" />
+      <div className="pt-3 pb-1 space-y-2">
+        <Skeleton className="h-5 w-full bg-gray-200 rounded" />
         <Skeleton className="h-4 w-3/4 bg-gray-200 rounded" />
-        <Skeleton className="h-3 w-1/2 bg-gray-200 rounded" />
+        <Skeleton className="h-4 w-2/3 bg-gray-200 rounded" />
+        <Skeleton className="h-4 w-1/2 bg-gray-200 rounded" />
         <div className="flex gap-1.5 pt-1">
           <Skeleton className="h-5 w-10 rounded-md bg-gray-200" />
           <Skeleton className="h-5 w-10 rounded-md bg-gray-200" />

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { RaceDistanceBadges } from "./race-distance-badges";
@@ -8,7 +9,7 @@ import { ptBR } from "date-fns/locale";
 import { formatTime, parseRaceDate } from "@/lib/date";
 import type { Race } from "@/types/race";
 
-export function RaceCard({ race }: { race: Race }) {
+export const RaceCard = memo(function RaceCard({ race, priority = false }: { race: Race; priority?: boolean }) {
   const raceDate = parseRaceDate(race.date);
   const day = format(raceDate, "dd");
   const month = format(raceDate, "MMM", { locale: ptBR }).toUpperCase();
@@ -26,7 +27,7 @@ export function RaceCard({ race }: { race: Race }) {
               alt=""
               fill
               className="object-cover scale-110 blur-xl brightness-75"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), calc(33vw - 2rem)"
               aria-hidden
             />
             {/* Sharp foreground — full image visible */}
@@ -34,8 +35,9 @@ export function RaceCard({ race }: { race: Race }) {
               src={race.image_url}
               alt={race.name}
               fill
-              className="object-contain transition-transform duration-300 group-hover:scale-[1.03] relative"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-contain md:transition-transform md:duration-300 md:group-hover:scale-[1.03] relative"
+              sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), calc(33vw - 2rem)"
+              priority={priority}
             />
           </>
         ) : (
@@ -77,16 +79,12 @@ export function RaceCard({ race }: { race: Race }) {
           <span>{formattedDate}{race.start_time ? ` · ${formatTime(race.start_time)}` : ""}</span>
         </div>
 
-        <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-2">
-          {race.rsvp_count > 0 && (
-            <>
-              <Users className="w-3.5 h-3.5 shrink-0" />
-              <div className="flex items-center gap-1 text-sm text-[#6B7280]">
-                <span>{race.rsvp_count === 1 ? "1 Pessoa confirmou" : `${race.rsvp_count} Pessoas confirmaram`}</span>
-              </div>
-            </>
-          )}
-        </div>
+        {race.rsvp_count > 0 && (
+          <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-2">
+            <Users className="w-3.5 h-3.5 shrink-0" />
+            <span>{race.rsvp_count === 1 ? "1 Pessoa confirmou" : `${race.rsvp_count} Pessoas confirmaram`}</span>
+          </div>
+        )}
 
         <div className="flex items-center gap-1.5 flex-wrap">
           <RaceDistanceBadges distances={race.distances} />
@@ -97,4 +95,4 @@ export function RaceCard({ race }: { race: Race }) {
       </div>
     </Link>
   );
-}
+});

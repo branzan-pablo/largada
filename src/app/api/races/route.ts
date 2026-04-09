@@ -121,13 +121,18 @@ export async function GET(request: Request) {
     ? (data?.length ?? 0) >= limit
     : count ? from + limit < count : false;
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     data: filteredData,
     count: filteredCount,
     page,
     limit,
     hasMore,
   });
+  response.headers.set(
+    "Cache-Control",
+    "public, s-maxage=60, stale-while-revalidate=300",
+  );
+  return response;
 }
 
 export async function POST(request: Request) {
