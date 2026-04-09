@@ -92,7 +92,7 @@ export function RaceFiltersMobile({
             )}
           </Button>
         </SheetTrigger>
-        <SheetContent side="bottom" className="h-auto max-h-[80vh] flex flex-col px-4 pb-5 bg-white border-t-gray-200 text-gray-800">
+        <SheetContent side="bottom" className="h-auto max-h-[80vh] flex flex-col px-4 pb-5 bg-white border-t-gray-200 text-gray-800" onOpenAutoFocus={(e) => e.preventDefault()}>
           <SheetHeader className="text-left mb-3 shrink-0">
             <SheetTitle className="text-sm font-semibold text-[#0D1B2A]">Filtros</SheetTitle>
           </SheetHeader>
