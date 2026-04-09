@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, useDeferredValue } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useDebounce } from "@/hooks/use-debounce";
-import { useInfiniteRaces } from "@/hooks/use-infinite-races";
+import { useInfiniteRaces, type InitialRaceData } from "@/hooks/use-infinite-races";
 import { RaceCard } from "./race-card";
 import { RaceFiltersDesktop } from "./race-filters";
 import { RaceFiltersMobile } from "./race-filters-mobile";
@@ -46,7 +46,7 @@ function buildMergedGrid(races: Race[], promotedRaces: Race[]): Race[] {
   return result;
 }
 
-export function RaceList() {
+export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
   const { profile } = useAuth();
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<RaceFilters>({});
@@ -84,7 +84,7 @@ export function RaceList() {
   };
 
   const { races, totalCount, isLoading, isLoadingMore, hasMore, restoredFromCache, loadMore, sentinelRef } =
-    useInfiniteRaces(enrichedFilters, deferredSearch);
+    useInfiniteRaces(enrichedFilters, deferredSearch, initialData);
 
   // Save scroll position on scroll (throttled)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -243,7 +243,7 @@ export function RaceList() {
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {mergedRaces.map((race, i) => (
-                <RaceCard key={mergedKeys[i]} race={race} priority={i === 0} />
+                <RaceCard key={mergedKeys[i]} race={race} priority={i < 2} />
               ))}
             </div>
 

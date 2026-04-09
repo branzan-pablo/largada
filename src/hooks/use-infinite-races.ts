@@ -62,17 +62,25 @@ function buildUrl(filters: RaceFilters, search: string, pageNum: number) {
   return `/api/races?${params.toString()}`;
 }
 
+export interface InitialRaceData {
+  data: Race[];
+  count: number | null;
+  hasMore: boolean;
+}
+
 export function useInfiniteRaces(
   filters: RaceFilters,
-  debouncedSearch: string
+  debouncedSearch: string,
+  initialData?: InitialRaceData,
 ): UseInfiniteRacesResult {
-  const [races, setRaces] = useState<Race[]>([]);
-  const [totalCount, setTotalCount] = useState<number | null>(null);
+  const [races, setRaces] = useState<Race[]>(initialData?.data ?? []);
+  const [totalCount, setTotalCount] = useState<number | null>(initialData?.count ?? null);
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(initialData?.hasMore ?? true);
+  const [isLoading, setIsLoading] = useState(!initialData);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [restoredFromCache, setRestoredFromCache] = useState(false);
+  const initialDataUsedRef = useRef(!!initialData);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   // Stable serialized key that only changes when filter values actually change
@@ -111,6 +119,12 @@ export function useInfiniteRaces(
       setHasMore(cached.hasMore);
       setIsLoading(false);
       setRestoredFromCache(true);
+      return;
+    }
+
+    // On first render with server-provided data, skip the client fetch
+    if (initialDataUsedRef.current) {
+      initialDataUsedRef.current = false;
       return;
     }
 

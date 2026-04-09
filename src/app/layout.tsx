@@ -12,12 +12,14 @@ import "./globals.css";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const bebasNeue = Bebas_Neue({
   variable: "--font-logo",
   subsets: ["latin"],
   weight: "400",
+  display: "optional",
 });
 
 export const viewport: Viewport = {
@@ -63,6 +65,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
+      <head>
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+      </head>
       <body
         className={`${inter.variable} ${bebasNeue.variable} font-sans antialiased`}
       >
