@@ -826,6 +826,10 @@ export type Database = {
         Args: { p_race_city_id: string }
         Returns: { user_id: string; distance_km: number }[]
       }
+      get_notification_recipients_by_location: {
+        Args: { p_lat: number; p_lng: number }
+        Returns: { user_id: string; distance_km: number }[]
+      }
       search_cities: {
         Args: { p_query: string; p_limit?: number }
         Returns: { id: string; name: string; state_code: string; slug: string; latitude: number; longitude: number }[]

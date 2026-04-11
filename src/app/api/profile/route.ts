@@ -55,6 +55,15 @@ export async function PATCH(request: Request) {
     if (!selectedCity) {
       return NextResponse.json({ error: "Cidade inválida" }, { status: 400 });
     }
+
+    // Resolve city_id from cities table so notifications work
+    const { data: cityRow } = await supabase
+      .from("cities")
+      .select("id")
+      .ilike("name", city)
+      .single();
+
+    updateData.city_id = cityRow?.id ?? null;
     updateData.city = city;
     updateData.state = selectedCity.state;
     updateData.latitude = selectedCity.lat;

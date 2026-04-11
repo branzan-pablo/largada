@@ -82,79 +82,58 @@ export async function sendToSubscriptions({
 }
 
 /**
- * Notify users when a new race is created.
- * Uses radius-based matching via Haversine if race has city_id,
- * falls back to exact city string match otherwise.
+ * Notify users when a new race is created/approved.
+ * Uses radius-based matching via Haversine with the race's lat/lng.
+ * Matches users who have coordinates via city_id OR directly on their profile.
  */
 export async function notifyNewRace(raceId: string) {
   const supabase = createAdminClient();
 
   const { data: race } = await supabase
     .from("races")
-    .select("name, city, city_id, slug")
+    .select("name, city, slug, latitude, longitude")
     .eq("id", raceId)
     .single();
 
   if (!race) return;
 
-  if (race.city_id) {
-    // Radius-based matching via Haversine
-    const { data: recipients } = await supabase.rpc(
-      "get_race_notification_recipients",
-      { p_race_city_id: race.city_id },
-    );
-
-    if (!recipients || recipients.length === 0) return;
-
-    const userIds = (
-      recipients as { user_id: string; distance_km: number }[]
-    ).map((r) => r.user_id);
-
-    const { data: subs } = await supabase
-      .from("push_subscriptions")
-      .select("endpoint, p256dh, auth")
-      .in("user_id", userIds);
-
-    if (!subs || subs.length === 0) return;
-
-    await sendToSubscriptions({
-      title: "VAI TER CORRIDA!",
-      body: `${race.name} em ${race.city}. Confira os detalhes.`,
-      url: `/corrida/${race.slug}`,
-      subscriptions: subs,
-    });
-  } else {
-    // Fallback: exact city string match
-    const { data: rows } = await supabase
-      .from("push_subscriptions")
-      .select(
-        "endpoint, p256dh, auth, profiles!push_subscriptions_user_id_fkey(notifications_enabled, city)",
-      )
-      .not("endpoint", "is", null);
-
-    if (!rows || rows.length === 0) return;
-
-    const targetSubs = rows
-      .filter((r) => {
-        const profile = r.profiles as unknown as {
-          notifications_enabled: boolean;
-          city: string;
-        } | null;
-        return (
-          profile?.notifications_enabled &&
-          profile?.city != null &&
-          profile.city === race.city
-        );
-      })
-      .map((r) => ({ endpoint: r.endpoint, p256dh: r.p256dh, auth: r.auth }));
-
-    await sendToSubscriptions({
-      title: "VAI TER CORRIDA!",
-      body: `${race.name} em ${race.city}. Confira os detalhes.`,
-      url: `/corrida/${race.slug}`,
-      subscriptions: targetSubs,
-    });
+  if (!race.latitude || !race.longitude) {
+    console.warn(`[notifyNewRace] race ${raceId} has no coordinates, skipping`);
+    return;
   }
+
+  const { data: recipients } = await supabase.rpc(
+    "get_notification_recipients_by_location",
+    { p_lat: race.latitude, p_lng: race.longitude },
+  );
+
+  console.log(
+    `[notifyNewRace] race=${raceId} recipients=${recipients?.length ?? 0}`,
+  );
+
+  if (!recipients || recipients.length === 0) return;
+
+  const userIds = (
+    recipients as { user_id: string; distance_km: number }[]
+  ).map((r) => r.user_id);
+
+  const { data: subs } = await supabase
+    .from("push_subscriptions")
+    .select("endpoint, p256dh, auth")
+    .in("user_id", userIds);
+
+  if (!subs || subs.length === 0) return;
+
+  const result = await sendToSubscriptions({
+    title: "VAI TER CORRIDA!",
+    body: `${race.name} em ${race.city}. Confira os detalhes.`,
+    url: `/corrida/${race.slug}`,
+    subscriptions: subs,
+  });
+
+  console.log(
+    `[notifyNewRace] race=${raceId} sent=${result.sent} failed=${result.failed}`,
+  );
 }
 
 /**
