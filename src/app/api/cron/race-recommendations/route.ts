@@ -81,7 +81,7 @@ export async function GET(request: Request) {
     .select(
       "id, name, date, city, state, distances, slug, latitude, longitude, is_promoted"
     )
-    .eq("status", "published")
+    .eq("status", "confirmed")
     .gte("date", today)
     .order("date", { ascending: true })
     .limit(100);

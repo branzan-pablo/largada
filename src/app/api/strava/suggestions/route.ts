@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     .select(
       "id, name, date, city, state, distances, slug, latitude, longitude, status, is_promoted"
     )
-    .eq("status", "published")
+    .eq("status", "confirmed")
     .gte("date", today)
     .order("date", { ascending: true })
     .limit(100);

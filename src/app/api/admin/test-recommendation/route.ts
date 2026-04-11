@@ -75,7 +75,7 @@ export async function POST(request: Request) {
   const { data: races } = await supabase
     .from("races")
     .select("id, name, date, city, state, distances, slug, latitude, longitude, is_promoted")
-    .eq("status", "published")
+    .eq("status", "confirmed")
     .gte("date", minDate)
     .order("date", { ascending: false })
     .limit(100);

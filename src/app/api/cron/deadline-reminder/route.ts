@@ -24,6 +24,7 @@ export async function GET(request: Request) {
   const { data: races } = await supabase
     .from("races")
     .select("id, name, city, slug, registration_deadline")
+    .eq("status", "confirmed")
     .eq("registration_deadline", targetDate);
 
   if (!races || races.length === 0) {
