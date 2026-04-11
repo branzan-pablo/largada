@@ -78,6 +78,39 @@ export function usePushNotifications() {
     }
   }, [isSupported]);
 
+  /**
+   * Re-sync the current browser subscription to the server.
+   * Creates a new subscription if the browser's expired.
+   * Does NOT unsubscribe first — safe for background calls.
+   */
+  const syncSubscription = useCallback(async () => {
+    if (!isSupported) return;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      let sub = await reg.pushManager.getSubscription();
+
+      if (!sub && Notification.permission === "granted") {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(
+            process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
+          ),
+        });
+      }
+
+      if (sub) {
+        await fetch("/api/push/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(sub.toJSON()),
+        });
+        setIsSubscribed(true);
+      }
+    } catch (err) {
+      console.error("[usePushNotifications] sync failed:", err);
+    }
+  }, [isSupported]);
+
   const unsubscribe = useCallback(async () => {
     if (!isSupported) return;
     try {
@@ -108,6 +141,7 @@ export function usePushNotifications() {
     isRegistering,
     subscribe,
     unsubscribe,
+    syncSubscription,
     requestPermission,
   };
 }
