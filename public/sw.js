@@ -7,6 +7,7 @@ self.addEventListener("activate", (event) => {
 
 // Handle incoming push notification
 self.addEventListener("push", function (event) {
+  console.log("[SW] push event received");
   if (!event.data) return;
 
   let data;
