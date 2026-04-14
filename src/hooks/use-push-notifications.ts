@@ -62,11 +62,17 @@ export function usePushNotifications() {
         ),
       });
 
-      await fetch("/api/push/subscribe", {
+      const res = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(sub.toJSON()),
       });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        console.error("[usePushNotifications] subscribe server error:", res.status, errBody);
+        return false;
+      }
 
       setIsSubscribed(true);
       return true;
@@ -99,12 +105,17 @@ export function usePushNotifications() {
       }
 
       if (sub) {
-        await fetch("/api/push/subscribe", {
+        const res = await fetch("/api/push/subscribe", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(sub.toJSON()),
         });
-        setIsSubscribed(true);
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          console.error("[usePushNotifications] sync server error:", res.status, errBody);
+        } else {
+          setIsSubscribed(true);
+        }
       }
     } catch (err) {
       console.error("[usePushNotifications] sync failed:", err);
