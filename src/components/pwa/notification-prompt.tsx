@@ -19,7 +19,7 @@ function isIOSWithoutStandalone(): boolean {
 
 export function NotificationPrompt() {
   const { user, profile } = useAuth();
-  const { isSupported, syncSubscription } = usePushNotifications();
+  const { isSupported, syncSubscription, subscribe } = usePushNotifications();
   const hasAttempted = useRef(false);
 
   useEffect(() => {
@@ -36,14 +36,21 @@ export function NotificationPrompt() {
       return;
     }
 
-    // Only auto-sync if permission was already granted
-    if (Notification.permission !== "granted") {
-      return;
-    }
+    const permission = Notification.permission;
 
-    hasAttempted.current = true;
-    syncSubscription();
-  }, [user, profile?.notifications_enabled, isSupported, syncSubscription]);
+    if (permission === "granted") {
+      syncSubscription().finally(() => {
+        hasAttempted.current = true;
+      });
+    } else if (permission === "default") {
+      subscribe().finally(() => {
+        hasAttempted.current = true;
+      });
+    } else {
+      // "denied" — nothing can be done
+      hasAttempted.current = true;
+    }
+  }, [user, profile?.notifications_enabled, isSupported, syncSubscription, subscribe]);
 
   return null;
 }

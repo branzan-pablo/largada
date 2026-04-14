@@ -1,5 +1,3 @@
-// public/sw.js — Standard Web Push service worker (no external dependencies)
-
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => {
   event.waitUntil(clients.claim());
@@ -8,14 +6,17 @@ self.addEventListener("activate", (event) => {
 // Handle incoming push notification
 self.addEventListener("push", function (event) {
   console.log("[SW] push event received");
-  if (!event.data) return;
 
   let data;
-  try {
-    data = event.data.json();
-  } catch (_) {
-    // Fallback for plain-text payloads (e.g. DevTools test push)
-    data = { title: "Largada", body: event.data.text() };
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (_) {
+      // Fallback for plain-text payloads (e.g. DevTools test push)
+      data = { title: "Largada", body: event.data.text() };
+    }
+  } else {
+    data = { title: "Largada", body: "Nova notificação" };
   }
 
   const options = {

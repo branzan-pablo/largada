@@ -3,6 +3,7 @@
   "short_name": "Largada",
   "description": "Calendário de corridas de rua do interior de SP. Encontre provas próximas, veja percurso, premiação e prazos de inscrição, confirme presença com 'vou nessa' e receba alertas por notificação push.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#FF4D00",
   "theme_color": "#fc5200",
