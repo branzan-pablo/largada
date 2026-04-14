@@ -3,6 +3,7 @@ import { raceSchemaBase } from "@/lib/validations";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { utcNow } from "@/lib/date";
+import { notifyNewRace } from "@/lib/notifications";
 
 export async function DELETE(
   _request: Request,
@@ -85,6 +86,17 @@ export async function PATCH(
     }
   }
 
+  // Capture current status before update so we can detect a transition to confirmed
+  let previousStatus: string | null = null;
+  if (updateData.status === "confirmed") {
+    const { data: current } = await supabase
+      .from("races")
+      .select("status")
+      .eq("id", id)
+      .single();
+    previousStatus = current?.status ?? null;
+  }
+
   // Resolve city_id when city changes
   if (updateData.city) {
     const adminClient = createAdminClient();
@@ -105,6 +117,15 @@ export async function PATCH(
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  // Notify when race transitions to confirmed for the first time
+  if (updateData.status === "confirmed" && previousStatus !== "confirmed") {
+    try {
+      await notifyNewRace(id);
+    } catch (err) {
+      console.error("[races/id] notifyNewRace failed:", err);
+    }
   }
 
   return NextResponse.json(data);
