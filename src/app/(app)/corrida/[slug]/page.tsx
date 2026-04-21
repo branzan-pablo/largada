@@ -1,3 +1,4 @@
+import { cache } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -17,6 +18,7 @@ import {
   ExpandableText,
 } from "./race-detail-client";
 import { PromoteRaceCard } from "@/components/races/promote-race-card";
+import { RaceShareButton } from "@/components/races/race-share-button";
 import {
   Building2,
   CalendarDays,
@@ -35,6 +37,20 @@ import type { Race, RegistrationBatch } from "@/types/race";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+// ISR: revalidate every 5 minutes (same as /corridas)
+export const revalidate = 300;
+
+// Deduplicated fetch — React.cache() ensures this runs only once per request
+const getRaceBySlug = cache(async (slug: string) => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("races")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+  return data as Race | null;
+});
+
 interface PageProps {
   params: Promise<{ slug: string }>;
   searchParams?: Promise<{ destaque?: string }>;
@@ -42,12 +58,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data: race } = await supabase
-    .from("races")
-    .select("name, city, date, distances, image_url")
-    .eq("slug", slug)
-    .single();
+  const race = await getRaceBySlug(slug);
 
   if (!race) return { title: "Corrida não encontrada" };
 
@@ -71,11 +82,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
   const paymentSuccess = resolvedSearch?.destaque === "sucesso";
   const supabase = await createClient();
 
-  const { data: race } = await supabase
-    .from("races")
-    .select("*")
-    .eq("slug", slug)
-    .single();
+  const race = await getRaceBySlug(slug);
 
   if (!race) notFound();
 
@@ -146,24 +153,19 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
   }
   const isPromoted = typedRace.is_promoted || promotionVerified;
 
-  let userRsvped = false;
-  if (user) {
-    const { data: rsvp } = await supabase
+  const [userRsvpResult, rsvpsResult] = await Promise.all([
+    user
+      ? supabase.from("rsvps").select("id").eq("user_id", user.id).eq("race_id", typedRace.id).single()
+      : Promise.resolve({ data: null }),
+    supabase
       .from("rsvps")
-      .select("id")
-      .eq("user_id", user.id)
+      .select("profiles!rsvps_user_id_fkey(id, full_name, avatar_url)")
       .eq("race_id", typedRace.id)
-      .single();
-    userRsvped = !!rsvp;
-  }
+      .limit(10),
+  ]);
 
-  const { data: rsvps } = await supabase
-    .from("rsvps")
-    .select("profiles!rsvps_user_id_fkey(id, full_name, avatar_url)")
-    .eq("race_id", typedRace.id)
-    .limit(10);
-
-  const participants = (rsvps ?? []).map((r) => ({
+  const userRsvped = !!userRsvpResult.data;
+  const participants = (rsvpsResult.data ?? []).map((r) => ({
     id: r.profiles?.id ?? "",
     full_name: r.profiles?.full_name ?? null,
     avatar_url: r.profiles?.avatar_url ?? null,
@@ -207,14 +209,25 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Back link */}
-      <Link
-        href="/corridas"
-        className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <ChevronLeft className="h-4 w-4" />
-        Voltar para listagem
-      </Link>
+      {/* Back link + share */}
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <Link
+          href="/corridas"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Voltar para listagem
+        </Link>
+        <RaceShareButton
+          raceName={typedRace.name}
+          city={typedRace.city}
+          state={typedRace.state}
+          date={typedRace.date}
+          startTime={typedRace.start_time}
+          distances={typedRace.distances as string[]}
+          shareUrl={`${baseUrl}/corrida/${typedRace.slug}`}
+        />
+      </div>
 
       {/* Hero */}
       <div className="relative -mx-4 md:-mx-0 mb-6 aspect-[16/9] md:aspect-[21/9] w-[calc(100%+2rem)] md:w-full overflow-hidden md:rounded-xl">
