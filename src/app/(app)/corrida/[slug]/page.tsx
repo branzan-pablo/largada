@@ -226,6 +226,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
           startTime={typedRace.start_time}
           distances={typedRace.distances as string[]}
           shareUrl={`${baseUrl}/corrida/${typedRace.slug}`}
+          imageUrl={typedRace.image_url}
         />
       </div>
 
