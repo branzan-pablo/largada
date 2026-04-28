@@ -1,20 +1,29 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+const getDistances = unstable_cache(
+  async () => {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("races")
+      .select("distances")
+      .eq("status", "confirmed");
+    if (error) throw error;
+    const all = (data ?? []).flatMap((r) => r.distances as string[]);
+    return [...new Set(all)].sort((a, b) => parseFloat(a) - parseFloat(b));
+  },
+  ["race-distances"],
+  { revalidate: 3600 }
+);
 
 export async function GET() {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("races")
-    .select("distances")
-    .eq("status", "confirmed");
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const unique = await getDistances();
+    const response = NextResponse.json(unique);
+    response.headers.set("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+    return response;
+  } catch (err) {
+    return NextResponse.json({ error: String(err) }, { status: 500 });
   }
-
-  const all = (data ?? []).flatMap((r) => r.distances as string[]);
-  const unique = [...new Set(all)].sort((a, b) => parseFloat(a) - parseFloat(b));
-
-  return NextResponse.json(unique);
 }

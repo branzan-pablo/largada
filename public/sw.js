@@ -1,6 +1,48 @@
-self.addEventListener("install", () => self.skipWaiting());
+const STATIC_CACHE = "largada-static-v1";
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then((cache) =>
+      cache.addAll(["/manifest.json"])
+    )
+  );
+  self.skipWaiting();
+});
+
 self.addEventListener("activate", (event) => {
-  event.waitUntil(clients.claim());
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((k) => k !== STATIC_CACHE)
+          .map((k) => caches.delete(k))
+      )
+    ).then(() => clients.claim())
+  );
+});
+
+// Cache-first for Next.js static chunks (content-addressed by hash, always safe)
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  if (request.method !== "GET") return;
+
+  const url = new URL(request.url);
+
+  // Only cache /_next/static/ assets — these are immutable (hash in filename)
+  if (url.pathname.startsWith("/_next/static/")) {
+    event.respondWith(
+      caches.match(request).then(
+        (cached) => cached || fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(STATIC_CACHE).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+      )
+    );
+  }
+  // All other requests fall through to network — no caching
 });
 
 // Handle incoming push notification

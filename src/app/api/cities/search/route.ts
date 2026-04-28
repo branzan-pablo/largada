@@ -21,5 +21,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  return NextResponse.json(data ?? []);
+  const response = NextResponse.json(data ?? []);
+  response.headers.set("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
+  return response;
 }
