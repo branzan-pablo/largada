@@ -21,15 +21,17 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Cache-first for Next.js static chunks (content-addressed by hash, always safe)
+// Cache-first for Next.js static chunks (content-addressed by hash, always safe).
+// Skipped on localhost so dev rebuilds aren't masked by stale chunks.
+const isDevHost = (host) => host === "localhost" || host === "127.0.0.1" || host.endsWith(".local");
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
 
-  // Only cache /_next/static/ assets — these are immutable (hash in filename)
-  if (url.pathname.startsWith("/_next/static/")) {
+  if (url.pathname.startsWith("/_next/static/") && !isDevHost(url.hostname)) {
     event.respondWith(
       caches.match(request).then(
         (cached) => cached || fetch(request).then((response) => {
