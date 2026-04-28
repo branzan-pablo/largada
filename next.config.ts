@@ -57,6 +57,14 @@ const nextConfig: NextConfig = {
           value: "max-age=63072000; includeSubDomains; preload",
         },
         {
+          key: "Cross-Origin-Opener-Policy",
+          value: "same-origin-allow-popups",
+        },
+        {
+          key: "Cross-Origin-Resource-Policy",
+          value: "same-origin",
+        },
+        {
           key: "Content-Security-Policy",
           value:
             "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://equilibrio.esp.br https://static.wixstatic.com https://tvcomrunning.com.br https://midia.recebedigital.com.br; font-src 'self'; connect-src 'self' https://*.supabase.co https://fcm.googleapis.com https://*.push.services.mozilla.com https://*.notify.windows.com https://*.push.apple.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
