@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { rateLimit } from "@/lib/rate-limit";
 import { requireAuth } from "@/lib/auth";
 
@@ -20,6 +21,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "raceId é obrigatório" }, { status: 400 });
   }
 
+  // Resolve slug so we can bust the cached detail page along with the listing.
+  // Both /corridas and /corrida/[slug] use ISR (revalidate=300), and rsvp_count
+  // appears on both, so a stale snapshot would show "0 confirmados" for up to
+  // 5 minutes after the user clicks "Vou nessa".
+  const { data: race } = await supabase
+    .from("races")
+    .select("slug")
+    .eq("id", raceId)
+    .maybeSingle();
+
   // Check if RSVP already exists
   const { data: existing } = await supabase
     .from("rsvps")
@@ -29,7 +40,6 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (existing) {
-    // Remove RSVP
     const { error } = await supabase
       .from("rsvps")
       .delete()
@@ -39,10 +49,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    revalidatePath("/corridas");
+    if (race?.slug) revalidatePath(`/corrida/${race.slug}`);
+
     return NextResponse.json({ rsvped: false });
   }
 
-  // Create RSVP
   const { error } = await supabase
     .from("rsvps")
     .insert({ user_id: user.id, race_id: raceId });
@@ -50,6 +62,9 @@ export async function POST(request: Request) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  revalidatePath("/corridas");
+  if (race?.slug) revalidatePath(`/corrida/${race.slug}`);
 
   return NextResponse.json({ rsvped: true });
 }
