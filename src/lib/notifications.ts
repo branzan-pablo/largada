@@ -1,5 +1,6 @@
 import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { utcNow } from "@/lib/date";
 
 let vapidConfigured = false;
 
@@ -89,6 +90,15 @@ export async function sendToSubscriptions({
 export async function notifyNewRace(raceId: string) {
   const supabase = createAdminClient();
 
+  // Mark the race as processed so the backlog cron does not retry it.
+  // Idempotent: also called on early-return paths (no coords / no recipients).
+  const markSent = async () => {
+    await supabase
+      .from("races")
+      .update({ notification_sent_at: utcNow() })
+      .eq("id", raceId);
+  };
+
   const { data: race } = await supabase
     .from("races")
     .select("name, city, slug, latitude, longitude")
@@ -97,8 +107,9 @@ export async function notifyNewRace(raceId: string) {
 
   if (!race) return;
 
-  if (!race.latitude || !race.longitude) {
+  if (race.latitude == null || race.longitude == null) {
     console.warn(`[notifyNewRace] race ${raceId} has no coordinates, skipping`);
+    await markSent();
     return;
   }
 
@@ -111,7 +122,10 @@ export async function notifyNewRace(raceId: string) {
     `[notifyNewRace] race=${raceId} recipients=${recipients?.length ?? 0}`,
   );
 
-  if (!recipients || recipients.length === 0) return;
+  if (!recipients || recipients.length === 0) {
+    await markSent();
+    return;
+  }
 
   const userIds = (
     recipients as { user_id: string; distance_km: number }[]
@@ -122,7 +136,10 @@ export async function notifyNewRace(raceId: string) {
     .select("endpoint, p256dh, auth")
     .in("user_id", userIds);
 
-  if (!subs || subs.length === 0) return;
+  if (!subs || subs.length === 0) {
+    await markSent();
+    return;
+  }
 
   const result = await sendToSubscriptions({
     title: "VAI TER CORRIDA!",
@@ -134,6 +151,8 @@ export async function notifyNewRace(raceId: string) {
   console.log(
     `[notifyNewRace] race=${raceId} sent=${result.sent} failed=${result.failed}`,
   );
+
+  await markSent();
 }
 
 /**

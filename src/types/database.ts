@@ -287,6 +287,7 @@ export type Database = {
           latitude: number
           longitude: number
           name: string
+          notification_sent_at: string | null
           organizer: string | null
           origin: string
           prize_details: string | null
@@ -325,6 +326,7 @@ export type Database = {
           longitude: number
           name: string
           notes?: string | null
+          notification_sent_at?: string | null
           organizer?: string | null
           origin?: string
           prize_details?: string | null
@@ -361,6 +363,7 @@ export type Database = {
           longitude?: number
           name?: string
           notes?: string | null
+          notification_sent_at?: string | null
           organizer?: string | null
           origin?: string
           prize_details?: string | null
