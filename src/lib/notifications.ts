@@ -87,7 +87,22 @@ export async function sendToSubscriptions({
  * Uses radius-based matching via Haversine with the race's lat/lng.
  * Matches users who have coordinates via city_id OR directly on their profile.
  */
-export async function notifyNewRace(raceId: string) {
+export interface NotifyNewRaceResult {
+  status:
+    | "race-not-found"
+    | "no-coords"
+    | "no-recipients"
+    | "no-subs"
+    | "sent";
+  recipients: number;
+  subs: number;
+  sent: number;
+  failed: number;
+}
+
+export async function notifyNewRace(
+  raceId: string,
+): Promise<NotifyNewRaceResult> {
   const supabase = createAdminClient();
 
   // Mark the race as processed so the backlog cron does not retry it.
@@ -105,12 +120,14 @@ export async function notifyNewRace(raceId: string) {
     .eq("id", raceId)
     .single();
 
-  if (!race) return;
+  if (!race) {
+    return { status: "race-not-found", recipients: 0, subs: 0, sent: 0, failed: 0 };
+  }
 
   if (race.latitude == null || race.longitude == null) {
     console.warn(`[notifyNewRace] race ${raceId} has no coordinates, skipping`);
     await markSent();
-    return;
+    return { status: "no-coords", recipients: 0, subs: 0, sent: 0, failed: 0 };
   }
 
   const { data: recipients } = await supabase.rpc(
@@ -118,13 +135,12 @@ export async function notifyNewRace(raceId: string) {
     { p_lat: race.latitude, p_lng: race.longitude },
   );
 
-  console.log(
-    `[notifyNewRace] race=${raceId} recipients=${recipients?.length ?? 0}`,
-  );
+  const recipientsCount = recipients?.length ?? 0;
+  console.log(`[notifyNewRace] race=${raceId} recipients=${recipientsCount}`);
 
   if (!recipients || recipients.length === 0) {
     await markSent();
-    return;
+    return { status: "no-recipients", recipients: 0, subs: 0, sent: 0, failed: 0 };
   }
 
   const userIds = (
@@ -136,9 +152,17 @@ export async function notifyNewRace(raceId: string) {
     .select("endpoint, p256dh, auth")
     .in("user_id", userIds);
 
+  const subsCount = subs?.length ?? 0;
+
   if (!subs || subs.length === 0) {
     await markSent();
-    return;
+    return {
+      status: "no-subs",
+      recipients: recipientsCount,
+      subs: 0,
+      sent: 0,
+      failed: 0,
+    };
   }
 
   const result = await sendToSubscriptions({
@@ -153,6 +177,13 @@ export async function notifyNewRace(raceId: string) {
   );
 
   await markSent();
+  return {
+    status: "sent",
+    recipients: recipientsCount,
+    subs: subsCount,
+    sent: result.sent,
+    failed: result.failed,
+  };
 }
 
 /**
