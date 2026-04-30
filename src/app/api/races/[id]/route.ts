@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { raceSchemaBase } from "@/lib/validations";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -14,6 +15,12 @@ export async function DELETE(
   if (authResult instanceof NextResponse) return authResult;
 
   const supabase = createAdminClient();
+  const { data: existing } = await supabase
+    .from("races")
+    .select("slug")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("races")
     .update({ status: "cancelled" })
@@ -22,6 +29,9 @@ export async function DELETE(
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  revalidatePath("/corridas");
+  if (existing?.slug) revalidatePath(`/corrida/${existing.slug}`);
 
   return NextResponse.json({ success: true });
 }
@@ -118,6 +128,9 @@ export async function PATCH(
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  revalidatePath("/corridas");
+  if (data?.slug) revalidatePath(`/corrida/${data.slug}`);
 
   // Notify when race transitions to confirmed for the first time
   if (updateData.status === "confirmed" && previousStatus !== "confirmed") {

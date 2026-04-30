@@ -54,7 +54,12 @@ export async function sendToSubscriptions({
     ),
   );
 
-  // Clean up expired subscriptions (HTTP 404/410)
+  // Clean up dead subscriptions.
+  //   404 / 410 — endpoint expired or the user revoked permission.
+  //   403       — VAPID key mismatch (sub was created against a different
+  //                public key, e.g. after rotation or the Firebase→VAPID
+  //                migration). The push service rejects every send and the
+  //                sub will never recover, so it must be deleted.
   const expiredEndpoints: string[] = [];
   results.forEach((result, idx) => {
     if (result.status === "rejected") {
@@ -64,7 +69,11 @@ export async function sendToSubscriptions({
         err?.statusCode,
         err,
       );
-      if (err?.statusCode === 404 || err?.statusCode === 410) {
+      if (
+        err?.statusCode === 404 ||
+        err?.statusCode === 410 ||
+        err?.statusCode === 403
+      ) {
         expiredEndpoints.push(subscriptions[idx].endpoint);
       }
     }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyNewRace } from "@/lib/notifications";
@@ -25,7 +26,7 @@ export async function PATCH(
   // Verify race exists and is pending_review
   const { data: race, error: fetchError } = await supabase
     .from("races")
-    .select("id, status")
+    .select("id, status, slug")
     .eq("id", id)
     .single();
 
@@ -50,6 +51,9 @@ export async function PATCH(
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
+
+  revalidatePath("/corridas");
+  if (race.slug) revalidatePath(`/corrida/${race.slug}`);
 
   // Notify users when a race is approved
   if (action === "approve") {

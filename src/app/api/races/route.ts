@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { slugify } from "@/lib/utils";
@@ -219,6 +220,12 @@ export async function POST(request: Request) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  // Bust ISR caches so the listing and detail page reflect the new race.
+  // pending_review races are filtered out of the listing query, but admin
+  // may still visit the detail URL — revalidating both is cheap and safe.
+  revalidatePath("/corridas");
+  if (data?.slug) revalidatePath(`/corrida/${data.slug}`);
 
   // Only notify for directly confirmed races (not pending_review)
   if (data.status === "confirmed") {
