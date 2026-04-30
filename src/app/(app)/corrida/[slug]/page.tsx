@@ -241,6 +241,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
               className="object-cover"
               sizes="100vw"
               priority
+              unoptimized
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           </>

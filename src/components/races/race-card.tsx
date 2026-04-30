@@ -29,6 +29,7 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
               className="object-cover scale-110 blur-xl brightness-75"
               sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), calc(33vw - 2rem)"
               aria-hidden
+              unoptimized
             />
             {/* Sharp foreground — full image visible */}
             <Image
@@ -38,6 +39,7 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
               className="object-contain md:transition-transform md:duration-300 md:group-hover:scale-[1.03] relative"
               sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), calc(33vw - 2rem)"
               priority={priority}
+              unoptimized
             />
           </>
         ) : (
