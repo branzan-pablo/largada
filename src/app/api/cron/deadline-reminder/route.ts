@@ -18,12 +18,14 @@ export async function GET(request: Request) {
 
   const supabase = createAdminClient();
 
-  // Find races with deadline in exactly 3 days (Brazil timezone)
+  // Find races with deadline in exactly 3 days (Brazil timezone). Each race
+  // matches this filter on exactly one day, so the cron is naturally
+  // idempotent — no per-race tracking column needed.
   const targetDate = futureDateInBrazil(3);
 
   const { data: races } = await supabase
     .from("races")
-    .select("id, name, city, slug, registration_deadline")
+    .select("id, name, city, slug, registration_deadline, latitude, longitude")
     .eq("status", "confirmed")
     .eq("registration_deadline", targetDate);
 
@@ -34,45 +36,40 @@ export async function GET(request: Request) {
   let totalSent = 0;
 
   for (const race of races) {
-    // Get users who RSVPed for this race and have notifications enabled
-    const { data: rsvps } = await supabase
-      .from("rsvps")
-      .select("user_id")
-      .eq("race_id", race.id);
+    // Match recipients by location (same RPC notifyNewRace uses). The RPC
+    // already filters by profiles.notifications_enabled and per-user
+    // notification_radius_km, so we don't need a follow-up join.
+    if (race.latitude == null || race.longitude == null) {
+      console.warn(
+        `[deadline-reminder] race ${race.id} has no coordinates, skipping`,
+      );
+      continue;
+    }
 
-    if (!rsvps || rsvps.length === 0) continue;
+    const { data: recipients } = await supabase.rpc(
+      "get_notification_recipients_by_location",
+      { p_lat: race.latitude, p_lng: race.longitude },
+    );
 
-    const userIds = rsvps.map((r) => r.user_id);
+    if (!recipients || recipients.length === 0) continue;
 
-    // Get push subscriptions for these users (with notification preference check via join)
+    const userIds = (
+      recipients as { user_id: string; distance_km: number }[]
+    ).map((r) => r.user_id);
+
     const { data: subs } = await supabase
       .from("push_subscriptions")
-      .select(
-        "endpoint, p256dh, auth, profiles!push_subscriptions_user_id_fkey(notifications_enabled)"
-      )
+      .select("endpoint, p256dh, auth")
       .in("user_id", userIds);
 
     if (!subs || subs.length === 0) continue;
-
-    const targetSubs = subs
-      .filter((s) => {
-        const profile = s.profiles as unknown as { notifications_enabled: boolean } | null;
-        return profile?.notifications_enabled;
-      })
-      .map((s) => ({
-        endpoint: s.endpoint,
-        p256dh: s.p256dh,
-        auth: s.auth,
-      }));
-
-    if (targetSubs.length === 0) continue;
 
     try {
       const result = await sendToSubscriptions({
         title: "Inscrição expirando!",
         body: `Faltam 3 dias para o prazo de inscrição: ${race.name}. Não perca!`,
         url: `/corrida/${race.slug}`,
-        subscriptions: targetSubs,
+        subscriptions: subs,
       });
 
       totalSent += result.sent;
