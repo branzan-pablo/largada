@@ -174,19 +174,17 @@ function DailyChart({
           return (
             <div
               key={d.date}
-              className="group relative flex-1"
+              className="group relative flex h-full flex-1 flex-col justify-end"
               title={`${d.date}: ${d.views} views, ${d.clicks} cliques`}
             >
-              <div className="flex h-full flex-col-reverse">
-                <div
-                  className="rounded-t-sm bg-[#FF4D00]/20"
-                  style={{ height: `${viewH}%` }}
-                />
-                <div
-                  className="absolute bottom-0 left-0 right-0 rounded-t-sm bg-[#FF4D00]"
-                  style={{ height: `${clickH}%` }}
-                />
-              </div>
+              <div
+                className="w-full rounded-t-sm bg-[#FF4D00]/20"
+                style={{ height: `${viewH}%` }}
+              />
+              <div
+                className="absolute bottom-0 left-0 right-0 rounded-t-sm bg-[#FF4D00]"
+                style={{ height: `${clickH}%` }}
+              />
             </div>
           );
         })}
