@@ -19,6 +19,7 @@ import {
 } from "./race-detail-client";
 import { PromoteRaceCard } from "@/components/races/promote-race-card";
 import { RaceShareButton } from "@/components/races/race-share-button";
+import { RaceViewTracker } from "@/components/races/race-view-tracker";
 import {
   Building2,
   CalendarDays,
@@ -208,6 +209,8 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
+      <RaceViewTracker raceId={typedRace.id} />
 
       {/* Back link + share */}
       <div className="mb-4 flex items-center justify-between gap-2">
