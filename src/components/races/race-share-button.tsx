@@ -28,6 +28,8 @@ interface RaceShareButtonProps {
   shareUrl: string;
   imageUrl?: string | null;
   className?: string;
+  /** "default" = full button with label; "icon" = small icon-only (for cards) */
+  variant?: "default" | "icon";
 }
 
 function buildShareText({
@@ -48,7 +50,7 @@ Veja detalhes e confirme presença:`;
 }
 
 export function RaceShareButton(props: RaceShareButtonProps) {
-  const { shareUrl, className, imageUrl } = props;
+  const { shareUrl, className, imageUrl, variant = "default" } = props;
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState<InstagramFormat | null>(null);
@@ -56,7 +58,14 @@ export function RaceShareButton(props: RaceShareButtonProps) {
   const text = buildShareText(props);
   const fullText = `${text}\n${shareUrl}`;
 
-  async function handleTriggerClick() {
+  async function handleTriggerClick(
+    event?: React.MouseEvent<HTMLButtonElement>
+  ) {
+    // When mounted inside a parent <Link>, prevent navigation/propagation.
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
       try {
         await navigator.share({
@@ -151,8 +160,20 @@ export function RaceShareButton(props: RaceShareButtonProps) {
   const whatsappHref = `https://wa.me/?text=${encodeURIComponent(fullText)}`;
   const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
 
-  return (
-    <>
+  const trigger =
+    variant === "icon" ? (
+      <button
+        type="button"
+        onClick={handleTriggerClick}
+        aria-label="Compartilhar corrida"
+        className={
+          className ??
+          "inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[#0D1B2A] shadow-md ring-1 ring-black/5 backdrop-blur-sm transition-colors hover:bg-white hover:text-[#FF4D00]"
+        }
+      >
+        <Share2 className="h-4 w-4" />
+      </button>
+    ) : (
       <Button
         type="button"
         variant="outline"
@@ -164,6 +185,11 @@ export function RaceShareButton(props: RaceShareButtonProps) {
         <Share2 className="h-4 w-4" />
         Compartilhar
       </Button>
+    );
+
+  return (
+    <>
+      {trigger}
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">

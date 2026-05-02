@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { RaceDistanceBadges } from "./race-distance-badges";
 import { RacePrizeBadge } from "./race-prize-badge";
+import { RaceShareButton } from "./race-share-button";
 import { MapPin, Users, Star, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -14,6 +15,8 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
   const day = format(raceDate, "dd");
   const month = format(raceDate, "MMM", { locale: ptBR }).toUpperCase();
   const formattedDate = format(raceDate, "dd 'de' MMM, yyyy", { locale: ptBR });
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+  const shareUrl = `${baseUrl}/corrida/${race.slug}`;
 
   return (
     <Link href={`/corrida/${race.slug}`} className={`block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden transition-colors ${race.is_promoted ? "ring-2 ring-[#FF4D00] shadow-lg shadow-[#FF4D00]/20 bg-linear-to-b from-[#FF4D00]/5 to-transparent" : ""}`}>
@@ -56,6 +59,21 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
             Destaque
           </div>
         )}
+
+        {/* Share button — top-left overlay */}
+        <div className="absolute top-2 left-2 z-10">
+          <RaceShareButton
+            variant="icon"
+            raceName={race.name}
+            city={race.city}
+            state={race.state}
+            date={race.date}
+            startTime={race.start_time}
+            distances={race.distances as string[]}
+            shareUrl={shareUrl}
+            imageUrl={race.image_url}
+          />
+        </div>
 
         {/* Date pill — bottom right (like YT duration) */}
         {race.image_url && (
