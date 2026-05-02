@@ -277,7 +277,37 @@ WHERE id = (SELECT id FROM auth.users WHERE email = 'lucas.cabral@adaptedtech.co
 
 ---
 
-## 13. Fluxo de trabalho daqui pra frente
+## 13. Dev local apontando para staging (não prod)
+
+Por padrão, `pnpm dev` carrega `.env.local`. Se você deixar valores de
+produção lá, o seu localhost vai gravar/ler do banco real — perigoso.
+
+Para apontar o `.env.local` para o **staging** (preservando os valores
+de prod num backup), use o helper:
+
+```powershell
+# Aponta .env.local pro staging (faz backup automatico de prod no
+# .env.local.prod-backup na primeira vez)
+powershell -ExecutionPolicy Bypass -File scripts/switch-local-env.ps1 staging
+
+# Quando quiser voltar pra prod (raro, normalmente nao precisa):
+powershell -ExecutionPolicy Bypass -File scripts/switch-local-env.ps1 prod
+```
+
+O switch para staging também troca `NEXT_PUBLIC_APP_URL` para
+`http://localhost:3000` automaticamente — o resto (Supabase, AbacatePay,
+Strava, VAPID, CRON_SECRET) vem do `.env.staging`.
+
+Restart `pnpm dev` depois de trocar.
+
+> ⚠️ **Pra Supabase Auth funcionar em local**, o projeto staging precisa
+> ter `http://localhost:3000/auth/callback` na allowlist de Redirect URLs
+> (já configurado em §8). Sem isso, login local vai dar "redirect URL not
+> allowed".
+
+---
+
+## 14. Fluxo de trabalho daqui pra frente
 
 ```
 feat/affiliate-dashboard  → merge → staging  → smoke test em staging.largadas.com.br
