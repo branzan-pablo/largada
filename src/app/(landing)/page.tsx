@@ -408,6 +408,9 @@ export default async function LandingPage() {
           <p className="text-center text-xs text-[#6B7280] mt-8">
             Pagamento único via PIX ou cartão. Sem assinatura recorrente.
           </p>
+          <p className="text-center text-xs text-[#6B7280] mt-2">
+            Quer testar primeiro? Destaque uma corrida por <span className="font-semibold text-[#0D1B2A]">R$ 49</span> via Express (7 dias no topo) direto na página da prova.
+          </p>
         </div>
       </section>
 

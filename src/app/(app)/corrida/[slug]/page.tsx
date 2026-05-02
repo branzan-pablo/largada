@@ -33,6 +33,7 @@ import {
   Banknote,
 } from "lucide-react";
 import { formatDateFull, formatTime, todayInBrazil, utcNow, futureUtc } from "@/lib/date";
+import { getDurationDaysFromMetadata } from "@/lib/promotions";
 import { PRIZE_TYPES } from "@/lib/constants";
 import type { Race, RegistrationBatch } from "@/types/race";
 import type { Metadata } from "next";
@@ -114,7 +115,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
       const admin = createAdminClient();
       const { data: pendingOrder } = await admin
         .from("payment_orders")
-        .select("id, abacatepay_id, status")
+        .select("id, abacatepay_id, status, metadata")
         .eq("order_type", "race_promotion")
         .eq("external_id", typedRace.id)
         .eq("status", "PENDING")
@@ -125,7 +126,8 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
       if (pendingOrder?.abacatepay_id) {
         const billing = await getBillingById(pendingOrder.abacatepay_id);
         if (billing?.status === "PAID") {
-          const promotedUntil = futureUtc(30);
+          const meta = pendingOrder.metadata as Record<string, unknown> | null;
+          const promotedUntil = futureUtc(getDurationDaysFromMetadata(meta));
 
           await Promise.all([
             admin
