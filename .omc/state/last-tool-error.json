@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cat .gitignore 2>&1 | grep -i env; echo \\\"---\\\"; git check-ignore -v .env.staging 2>&1\",\"description\":\"Check gitignore env patterns and verify .env.staging is ignored\"}",
+  "error": "Exit code 1\n# env files\n.env\n.env.local\n.env*.local\n.env.production\n.env*.production\nnext-env.d.ts\n---",
+  "timestamp": "2026-05-01T21:23:29.228Z",
+  "retry_count": 1
+}

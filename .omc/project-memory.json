@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1775512319632,
-  "projectRoot": "C:\\Users\\pablo\\Development\\MVP",
+  "lastScanned": 1777658491054,
+  "projectRoot": "c:\\Users\\pablo\\Development\\MVP",
   "techStack": {
     "languages": [
       {
@@ -87,7 +87,7 @@
       "path": "coverage",
       "purpose": null,
       "fileCount": 10,
-      "lastAccessed": 1775512319597,
+      "lastAccessed": 1777658491027,
       "keyFiles": [
         "base.css",
         "block-navigation.js",
@@ -100,7 +100,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 9,
-      "lastAccessed": 1775512319598,
+      "lastAccessed": 1777658491029,
       "keyFiles": [
         "AUDIT.md",
         "BRIEF.md",
@@ -109,18 +109,11 @@
         "LANDING-PAGE-SPEC.md"
       ]
     },
-    "packages": {
-      "path": "packages",
-      "purpose": null,
-      "fileCount": 0,
-      "lastAccessed": 1775512319611,
-      "keyFiles": []
-    },
     "public": {
       "path": "public",
       "purpose": "Public files",
       "fileCount": 6,
-      "lastAccessed": 1775512319612,
+      "lastAccessed": 1777658491036,
       "keyFiles": [
         "background-hero.jpg",
         "logo_120.png",
@@ -133,7 +126,7 @@
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 1,
-      "lastAccessed": 1775512319612,
+      "lastAccessed": 1777658491037,
       "keyFiles": [
         "cleanup-database.sql"
       ]
@@ -142,7 +135,7 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 1,
-      "lastAccessed": 1775512319612,
+      "lastAccessed": 1777658491037,
       "keyFiles": [
         "middleware.ts"
       ]
@@ -150,19 +143,20 @@
     "supabase": {
       "path": "supabase",
       "purpose": null,
-      "fileCount": 3,
-      "lastAccessed": 1775512319613,
+      "fileCount": 4,
+      "lastAccessed": 1777658491037,
       "keyFiles": [
         "config.toml",
         "reset.sql",
-        "seed-30-races.sql"
+        "seed-30-races.sql",
+        "seed-staging.sql"
       ]
     },
     "coverage\\lib": {
       "path": "coverage\\lib",
       "purpose": "Library code",
       "fileCount": 9,
-      "lastAccessed": 1775512319613,
+      "lastAccessed": 1777658491038,
       "keyFiles": [
         "constants.ts.html",
         "date.ts.html",
@@ -173,7 +167,7 @@
       "path": "src\\app",
       "purpose": "Application code",
       "fileCount": 7,
-      "lastAccessed": 1775512319615,
+      "lastAccessed": 1777658491039,
       "keyFiles": [
         "error.tsx",
         "favicon.ico",
@@ -184,14 +178,14 @@
       "path": "src\\components",
       "purpose": "UI components",
       "fileCount": 0,
-      "lastAccessed": 1775512319615,
+      "lastAccessed": 1777658491039,
       "keyFiles": []
     },
     "src\\lib": {
       "path": "src\\lib",
       "purpose": "Library code",
       "fileCount": 12,
-      "lastAccessed": 1775512319616,
+      "lastAccessed": 1777658491039,
       "keyFiles": [
         "auth.ts",
         "constants.ts",
@@ -202,7 +196,7 @@
       "path": "src\\types",
       "purpose": "Type definitions",
       "fileCount": 6,
-      "lastAccessed": 1775512319616,
+      "lastAccessed": 1777658491040,
       "keyFiles": [
         "database.ts",
         "payments.ts",
@@ -212,8 +206,8 @@
     "supabase\\migrations": {
       "path": "supabase\\migrations",
       "purpose": "Database migrations",
-      "fileCount": 15,
-      "lastAccessed": 1775512319616,
+      "fileCount": 18,
+      "lastAccessed": 1777658491040,
       "keyFiles": [
         "001_core_schema.sql",
         "002_cities_and_geo.sql",
@@ -224,8 +218,8 @@
   "hotPaths": [
     {
       "path": "src\\app\\api\\payments\\webhook\\route.ts",
-      "accessCount": 17,
-      "lastAccessed": 1775527890984,
+      "accessCount": 20,
+      "lastAccessed": 1777717666560,
       "type": "file"
     },
     {
@@ -253,9 +247,45 @@
       "type": "file"
     },
     {
+      "path": "src\\lib\\rate-limit.ts",
+      "accessCount": 4,
+      "lastAccessed": 1777643770162,
+      "type": "file"
+    },
+    {
+      "path": "src\\lib\\auth.ts",
+      "accessCount": 4,
+      "lastAccessed": 1777643770760,
+      "type": "file"
+    },
+    {
+      "path": "src\\types\\database.ts",
+      "accessCount": 4,
+      "lastAccessed": 1777643781022,
+      "type": "file"
+    },
+    {
       "path": ".env.local.example",
-      "accessCount": 3,
-      "lastAccessed": 1775512909077,
+      "accessCount": 4,
+      "lastAccessed": 1777646296372,
+      "type": "file"
+    },
+    {
+      "path": "src\\lib\\payments\\env.ts",
+      "accessCount": 4,
+      "lastAccessed": 1777646317479,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\api\\payments\\billing\\create\\route.ts",
+      "accessCount": 4,
+      "lastAccessed": 1777673731577,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\api\\payments\\billing\\check\\route.ts",
+      "accessCount": 4,
+      "lastAccessed": 1777717671416,
       "type": "file"
     },
     {
@@ -265,33 +295,15 @@
       "type": "file"
     },
     {
-      "path": "src\\app\\api\\payments\\billing\\create\\route.ts",
-      "accessCount": 3,
-      "lastAccessed": 1775512934322,
-      "type": "file"
-    },
-    {
       "path": "src\\app\\api\\subscriptions\\create\\route.ts",
       "accessCount": 3,
       "lastAccessed": 1775512934496,
       "type": "file"
     },
     {
-      "path": "src\\lib\\auth.ts",
+      "path": "src\\lib\\supabase\\admin.ts",
       "accessCount": 3,
-      "lastAccessed": 1775513019832,
-      "type": "file"
-    },
-    {
-      "path": "src\\lib\\rate-limit.ts",
-      "accessCount": 3,
-      "lastAccessed": 1775513020072,
-      "type": "file"
-    },
-    {
-      "path": "src\\lib\\payments\\env.ts",
-      "accessCount": 3,
-      "lastAccessed": 1775513048889,
+      "lastAccessed": 1777643770688,
       "type": "file"
     },
     {
@@ -361,15 +373,27 @@
       "type": "file"
     },
     {
-      "path": "src\\lib\\supabase\\admin.ts",
-      "accessCount": 2,
-      "lastAccessed": 1775512949063,
-      "type": "file"
-    },
-    {
       "path": "src\\app\\api\\cron\\scrape-races\\route.ts",
       "accessCount": 2,
       "lastAccessed": 1775528052945,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 2,
+      "lastAccessed": 1777643066560,
+      "type": "file"
+    },
+    {
+      "path": "src\\lib\\payments\\billing.ts",
+      "accessCount": 2,
+      "lastAccessed": 1777673731100,
+      "type": "file"
+    },
+    {
+      "path": "src\\types\\payments.ts",
+      "accessCount": 2,
+      "lastAccessed": 1777673765847,
       "type": "file"
     },
     {
@@ -433,12 +457,6 @@
       "type": "file"
     },
     {
-      "path": "src\\lib\\payments\\billing.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775512895930,
-      "type": "file"
-    },
-    {
       "path": "src\\lib\\payments\\pix.ts",
       "accessCount": 1,
       "lastAccessed": 1775512896036,
@@ -454,12 +472,6 @@
       "path": "src\\lib\\payments\\index.ts",
       "accessCount": 1,
       "lastAccessed": 1775512898458,
-      "type": "file"
-    },
-    {
-      "path": "src\\types\\payments.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775512898864,
       "type": "file"
     },
     {
@@ -481,21 +493,9 @@
       "type": "file"
     },
     {
-      "path": "src\\app\\api\\payments\\billing\\check\\route.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775512902881,
-      "type": "file"
-    },
-    {
       "path": "src\\lib\\subscriptions.ts",
       "accessCount": 1,
       "lastAccessed": 1775512902942,
-      "type": "file"
-    },
-    {
-      "path": "package.json",
-      "accessCount": 1,
-      "lastAccessed": 1775512903935,
       "type": "file"
     },
     {
@@ -514,12 +514,6 @@
       "path": "src\\types\\subscription.ts",
       "accessCount": 1,
       "lastAccessed": 1775512912123,
-      "type": "file"
-    },
-    {
-      "path": "src\\types\\database.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775512912551,
       "type": "file"
     }
   ],

@@ -20,11 +20,17 @@ interface CtaButtonsProps {
   swapActions?: boolean;
   /** Variante visual para o botão secundário em fundos escuros */
   darkSecondary?: boolean;
+  /**
+   * Numero de provas com inscricao aberta. Quando > 0 e swapActions=false,
+   * o botao primario do hero mostra "Ver X provas com inscricao aberta".
+   */
+  racesOpenCount?: number;
 }
 
 export function CtaButtons({
   swapActions = false,
   darkSecondary = false,
+  racesOpenCount,
 }: CtaButtonsProps) {
   const { openRegister } = useLoginModal();
   const { user } = useAuth();
@@ -63,12 +69,19 @@ export function CtaButtons({
     );
   }
 
+  const heroPrimaryLabel =
+    racesOpenCount && racesOpenCount > 0
+      ? racesOpenCount === 1
+        ? "Ver 1 prova com inscrição aberta"
+        : `Ver ${racesOpenCount} provas com inscrição aberta`
+      : "Ver as corridas";
+
   // Hero padrão: laranja = ver corridas | branco = sugerir / criar conta
   return (
     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
       <Link href="/corridas" className={primaryClass}>
         <Footprints className="w-5 h-5" />
-        Ver as corridas
+        {heroPrimaryLabel}
       </Link>
       {user ? (
         <Link href="/sugerir" className={resolvedSecondaryClass}>
