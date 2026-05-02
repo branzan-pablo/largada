@@ -122,85 +122,101 @@ export default function ParaOrganizadoresPage() {
       </section>
 
       {/* Pricing */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-12 text-center">
+      <section className="bg-white py-16 md:py-20">
+        <div className="mx-auto max-w-7xl px-5 sm:px-6">
+          <div className="mb-10 text-center md:mb-12">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#6B7280]">
               Planos
             </p>
-            <h2 className="text-3xl font-extrabold tracking-tight text-[#0D1B2A] md:text-4xl">
+            <h2 className="text-2xl font-extrabold tracking-tight text-[#0D1B2A] sm:text-3xl md:text-4xl">
               Escolha como destacar
             </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-[#6B7280]">
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-[#6B7280] md:text-base">
               Quer testar primeiro? Comece pelo Express. Quer cobertura
               completa? Vai de Total. Tem várias provas? Pacotes têm desconto.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {TIERS.map((tier) => (
-              <div
-                key={tier.slug}
-                className={`relative rounded-2xl border bg-white p-6 flex flex-col ${
-                  tier.popular
-                    ? "border-[#FF4D00] shadow-lg ring-1 ring-[#FF4D00]/20"
-                    : "border-gray-200"
-                }`}
-              >
-                {tier.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center gap-1 bg-[#FF4D00] text-white text-xs font-semibold px-3 py-1 rounded-full">
-                      <Star className="w-3 h-3 fill-current" />
-                      Mais escolhido
-                    </span>
-                  </div>
-                )}
-                <h3 className="text-lg font-semibold text-[#0D1B2A] mb-1">
-                  {tier.name}
-                </h3>
-                <p className="text-sm text-[#6B7280] mb-4">{tier.credits}</p>
-                <div className="mb-4">
-                  <span className="text-3xl font-extrabold text-[#0D1B2A]">
-                    {tier.price}
-                  </span>
-                  <span className="text-sm text-[#6B7280] ml-1">
-                    / {tier.period}
-                  </span>
-                </div>
-                {tier.discount && (
-                  <p className="text-xs font-medium text-green-600 bg-green-50 rounded-full px-3 py-1 w-fit mb-4">
-                    {tier.discount}
-                  </p>
-                )}
-                <ul className="space-y-3 mb-6 flex-1">
-                  {tier.benefits.map((benefit) => (
-                    <li
-                      key={benefit}
-                      className="flex items-start gap-2 text-sm text-[#6B7280]"
-                    >
-                      <Check className="w-4 h-4 text-[#FF4D00] mt-0.5 shrink-0" />
-                      {benefit}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={
-                    tier.slug === "express" || tier.slug === "standard"
-                      ? "/corridas"
-                      : `/perfil/assinatura?tier=${tier.slug}`
-                  }
-                  className={`block w-full text-center py-3 px-4 rounded-full font-semibold text-sm transition-colors ${
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
+            {TIERS.map((tier) => {
+              const isCheckout =
+                tier.slug === "express" || tier.slug === "standard";
+              const ctaLabel = isCheckout
+                ? "Destacar minha corrida"
+                : "Comprar pacote";
+              const ctaHref = isCheckout
+                ? "/corridas"
+                : `/perfil/assinatura?tier=${tier.slug}`;
+
+              return (
+                <div
+                  key={tier.slug}
+                  className={`relative flex flex-col rounded-2xl border p-6 transition-shadow ${
                     tier.popular
-                      ? "bg-[#FF4D00] text-white hover:bg-[#E04400]"
-                      : "bg-[#0D1B2A] text-white hover:bg-[#1a2d42]"
+                      ? "order-first border-[#FF4D00] bg-gradient-to-b from-[#FF4D00]/5 to-white shadow-xl ring-1 ring-[#FF4D00]/20 md:order-none md:scale-[1.02]"
+                      : "border-gray-200 bg-white"
                   }`}
                 >
-                  {tier.slug === "express" || tier.slug === "standard"
-                    ? "Destacar minha corrida"
-                    : "Comprar pacote"}
-                </Link>
-              </div>
-            ))}
+                  {tier.popular && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#FF4D00] px-3 py-1 text-xs font-semibold text-white shadow-md">
+                        <Star className="h-3 w-3 fill-current" />
+                        Mais escolhido
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="mb-4 flex items-baseline justify-between gap-2">
+                    <h3
+                      className={`text-base font-semibold ${
+                        tier.popular ? "text-[#FF4D00]" : "text-[#6B7280]"
+                      }`}
+                    >
+                      {tier.name}
+                    </h3>
+                    {tier.discount && (
+                      <span className="rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-semibold text-green-700">
+                        {tier.discount}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mb-1 flex items-baseline gap-1">
+                    <span className="text-4xl font-extrabold tracking-tight text-[#0D1B2A]">
+                      {tier.price}
+                    </span>
+                  </div>
+                  <p className="mb-5 text-xs text-[#6B7280]">{tier.period}</p>
+
+                  <p className="mb-5 text-sm font-semibold text-[#0D1B2A]">
+                    {tier.credits}
+                  </p>
+
+                  <ul className="mb-6 flex-1 space-y-3">
+                    {tier.benefits.map((benefit) => (
+                      <li
+                        key={benefit}
+                        className="flex items-start gap-2 text-sm text-[#6B7280]"
+                      >
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#FF4D00]" />
+                        <span>{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href={ctaHref}
+                    className={`flex min-h-12 w-full items-center justify-center rounded-full px-4 py-3 text-sm font-semibold transition-colors ${
+                      tier.popular
+                        ? "bg-[#FF4D00] text-white hover:bg-[#E04400]"
+                        : "border border-[#0D1B2A] bg-white text-[#0D1B2A] hover:bg-[#0D1B2A] hover:text-white"
+                    }`}
+                  >
+                    {ctaLabel}
+                  </Link>
+                </div>
+              );
+            })}
           </div>
 
           <p className="mt-10 text-center text-xs text-[#6B7280]">

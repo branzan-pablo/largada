@@ -538,8 +538,8 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
           deadlinePassed={deadlinePassed}
         />
 
-        {/* Bottom padding so sticky bar doesn't cover content on mobile */}
-        <div className="h-20 md:hidden" />
+        {/* Bottom padding so sticky action bar (above BottomNav) doesn't cover content on mobile */}
+        <div className="h-[calc(8rem+env(safe-area-inset-bottom))] md:hidden" />
       </RsvpProvider>
     </>
   );

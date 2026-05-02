@@ -9,8 +9,12 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const primaryClass =
-  "w-full flex items-center justify-center gap-2 bg-[#FF4D00] text-white text-sm px-6 py-3 mt-3 rounded-full font-semibold hover:bg-[#E04400] transition-colors";
+const SNOOZE_KEY = "largada_install_snooze_until";
+const LEGACY_DISMISS_KEY = "largada_install_dismissed";
+const VISITS_KEY = "largada_visits";
+const DAY_MS = 24 * 60 * 60 * 1000;
+const SHORT_SNOOZE_MS = 14 * DAY_MS;
+const LONG_SNOOZE_MS = 60 * DAY_MS;
 
 function getIsIOS(): boolean {
   if (typeof navigator === "undefined") return false;
@@ -26,6 +30,17 @@ function getIsStandalone(): boolean {
   );
 }
 
+function isSnoozed(): boolean {
+  // Legacy permanent dismiss: respect it for users who already opted out.
+  if (localStorage.getItem(LEGACY_DISMISS_KEY) === "1") return true;
+  const until = parseInt(localStorage.getItem(SNOOZE_KEY) || "0", 10);
+  return Number.isFinite(until) && until > Date.now();
+}
+
+function snoozeFor(ms: number) {
+  localStorage.setItem(SNOOZE_KEY, String(Date.now() + ms));
+}
+
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
@@ -34,13 +49,13 @@ export function InstallPrompt() {
 
   useEffect(() => {
     if (getIsStandalone()) return;
-    if (localStorage.getItem("largada_install_dismissed") === "1") return;
+    if (isSnoozed()) return;
 
     const visitCount = parseInt(
-      localStorage.getItem("largada_visits") || "0",
+      localStorage.getItem(VISITS_KEY) || "0",
       10
     );
-    localStorage.setItem("largada_visits", String(visitCount + 1));
+    localStorage.setItem(VISITS_KEY, String(visitCount + 1));
 
     // Only show after second visit
     if (visitCount < 1) return;
@@ -67,19 +82,28 @@ export function InstallPrompt() {
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === "accepted") {
       setDeferredPrompt(null);
+    } else {
+      // User declined the native prompt — back off for 14 days.
+      snoozeFor(SHORT_SNOOZE_MS);
+      setDismissed(true);
     }
+  };
+
+  const handleSnooze = () => {
+    setDismissed(true);
+    snoozeFor(SHORT_SNOOZE_MS);
   };
 
   const handleDismiss = () => {
     setDismissed(true);
-    localStorage.setItem("largada_install_dismissed", "1");
+    snoozeFor(LONG_SNOOZE_MS);
   };
 
   if (dismissed) return null;
   if (!deferredPrompt && !showIOSPrompt) return null;
 
   return (
-    <div className="fixed bottom-16 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 md:bottom-4 md:left-auto md:right-4 md:w-80">
+    <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-4 right-4 z-50 animate-in slide-in-from-bottom-4 md:bottom-4 md:left-auto md:right-4 md:w-80">
       <div className="rounded-lg border bg-background p-4 shadow-lg">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
@@ -91,8 +115,10 @@ export function InstallPrompt() {
             </p>
           </div>
           <button
+            type="button"
             onClick={handleDismiss}
-            className="text-muted-foreground hover:text-foreground"
+            aria-label="Não mostrar mais"
+            className="-m-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-gray-100 hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -120,10 +146,19 @@ export function InstallPrompt() {
             </div>
           </div>
         ) : (
-          <Button onClick={handleInstall} className={primaryClass}>
-            <Download className="mr-2 h-4 w-4" />
-            Instalar
-          </Button>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={handleSnooze}
+              className="h-11 flex-1 rounded-full px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-gray-100 hover:text-foreground"
+            >
+              Mais tarde
+            </button>
+            <Button onClick={handleInstall} className="h-11 flex-[1.4] text-sm font-semibold">
+              <Download className="h-4 w-4" />
+              Instalar
+            </Button>
+          </div>
         )}
       </div>
     </div>

@@ -20,5 +20,14 @@ export function ClientLoginModal() {
 }
 
 export function ClientToaster() {
-  return <Toaster position="bottom-center" richColors />;
+  return (
+    <Toaster
+      position="bottom-center"
+      richColors
+      closeButton
+      offset={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
+      mobileOffset={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
+      duration={4500}
+    />
+  );
 }

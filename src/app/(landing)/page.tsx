@@ -46,11 +46,12 @@ export default async function LandingPage() {
       <LandingHeader />
 
       {/* ==================== Hero Section ==================== */}
-      <section className="relative min-h-[640px] md:min-h-[720px] flex items-center overflow-hidden">
+      <section className="relative flex min-h-[520px] items-center overflow-hidden md:min-h-[720px]">
         <Image
           src="/background-hero.jpg"
           alt="Corredores em prova de rua"
           fill
+          sizes="100vw"
           className="object-cover object-center hero-bg"
           priority
           fetchPriority="high"
@@ -58,10 +59,10 @@ export default async function LandingPage() {
         <div className="absolute inset-0 bg-black/55" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/65" />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center text-center py-24 md:py-32">
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-5 py-12 text-center sm:px-6 md:py-32">
           {/* Stats badge */}
           {hasStats && (
-            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs sm:text-sm font-medium text-white/95 backdrop-blur-md">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[13px] sm:text-sm font-medium text-white/95 backdrop-blur-md md:mb-7">
               <span className="inline-block h-2 w-2 rounded-full bg-[#22c55e] animate-pulse" />
               <span>
                 <strong className="font-semibold text-white">
@@ -74,7 +75,7 @@ export default async function LandingPage() {
                     <strong className="font-semibold text-white">
                       {stats.racesOpenThisWeek}
                     </strong>
-                    {" com inscrição aberta esta semana"}
+                    {" abertas esta semana"}
                   </>
                 )}
                 {stats.totalRsvps > 0 && (
@@ -91,7 +92,7 @@ export default async function LandingPage() {
           )}
 
           <h1
-            className="font-[family-name:var(--font-logo)] text-4xl sm:text-5xl md:text-7xl tracking-wide text-white mb-6 leading-tight"
+            className="font-[family-name:var(--font-logo)] text-[2.25rem] leading-[1.05] tracking-wide text-white mb-4 sm:text-5xl md:mb-6 md:text-7xl md:leading-tight"
             style={{ textShadow: "0 2px 24px rgba(0,0,0,0.85)" }}
           >
             Vai ter corrida.
@@ -100,25 +101,24 @@ export default async function LandingPage() {
           </h1>
 
           <p
-            className="text-lg md:text-xl text-white max-w-2xl mb-10 font-normal leading-relaxed"
+            className="mx-auto mb-6 max-w-xl text-base font-normal leading-relaxed text-white sm:text-lg md:mb-10 md:text-xl"
             style={{ textShadow: "0 1px 12px rgba(0,0,0,0.9)" }}
           >
-            Calendário de corridas de rua do Noroeste Paulista. Filtre por
-            distância, premiação e raio de km. Receba alerta antes da inscrição
-            fechar e veja quem da sua turma confirmou presença.
+            Descubra provas perto de você e seja avisado antes das inscrições
+            encerrarem.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            <CtaButtons racesOpenCount={stats.racesOpenThisWeek} />
+          <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
+            <CtaButtons />
           </div>
 
-          <div className="mt-6 flex items-center gap-3 text-xs text-white/80">
+          <div className="mt-4 flex items-center gap-3 text-[13px] text-white/85 md:mt-6">
             <span className="flex items-center gap-1.5">
               <Check className="h-3.5 w-3.5" /> Grátis para atletas
             </span>
-            <span>·</span>
+            <span aria-hidden>·</span>
             <span className="flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5" /> Sem cadastro de cartão
+              <Check className="h-3.5 w-3.5" /> Sem cartão
             </span>
           </div>
         </div>
@@ -414,7 +414,10 @@ export default async function LandingPage() {
       <Footer />
 
       {/* ==================== Sticky CTA mobile ==================== */}
-      <StickyMobileCta racesOpenThisWeek={stats.racesOpenThisWeek} />
+      <StickyMobileCta
+        racesOpenThisWeek={stats.racesOpenThisWeek}
+        firstOpenSlug={stats.firstOpenSlug}
+      />
     </main>
   );
 }

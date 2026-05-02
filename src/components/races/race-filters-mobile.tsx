@@ -92,12 +92,12 @@ export function RaceFiltersMobile({
             )}
           </Button>
         </SheetTrigger>
-        <SheetContent side="bottom" className="h-auto max-h-[80vh] flex flex-col px-4 pb-5 bg-white border-t-gray-200 text-gray-800" onOpenAutoFocus={(e) => e.preventDefault()}>
-          <SheetHeader className="text-left mb-3 shrink-0">
-            <SheetTitle className="text-sm font-semibold text-[#0D1B2A]">Filtros</SheetTitle>
+        <SheetContent side="bottom" className="flex h-auto max-h-[85dvh] flex-col rounded-t-2xl bg-white px-4 pb-0 text-gray-800" onOpenAutoFocus={(e) => e.preventDefault()}>
+          <SheetHeader className="shrink-0 px-0 pb-2 pt-4 text-left">
+            <SheetTitle className="text-base font-semibold text-[#0D1B2A]">Filtros</SheetTitle>
           </SheetHeader>
 
-          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+          <div className="-mx-1 flex-1 space-y-4 overflow-y-auto px-1 pb-4">
             {/* City */}
             <div className="flex items-center gap-3">
               <Label className="w-14 shrink-0 text-xs font-medium text-[#6B7280]">Cidade</Label>
@@ -185,10 +185,10 @@ export function RaceFiltersMobile({
             </div>
           </div>
 
-          <div className="flex gap-2 pt-3 border-t border-gray-200 mt-3 shrink-0">
+          <div className="sticky bottom-0 -mx-4 flex shrink-0 gap-2 border-t border-gray-200 bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
             <Button
               variant="outline"
-              className="flex-1 bg-transparent border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-[#0D1B2A]"
+              className="h-11 flex-1 border-gray-200 bg-transparent text-gray-700 hover:bg-gray-50 hover:text-[#0D1B2A]"
               onClick={() => {
                 onFiltersChange({ radius: filters.radius });
                 onSearchChange("");
@@ -199,7 +199,7 @@ export function RaceFiltersMobile({
               Limpar
             </Button>
             <Button
-              className="flex-1 bg-[#FF4D00] hover:bg-[#E04400] text-white border-0"
+              className="h-11 flex-1 border-0 bg-[#FF4D00] text-white hover:bg-[#E04400]"
               onClick={() => setOpen(false)}
             >
               Ver resultados

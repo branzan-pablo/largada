@@ -10,6 +10,8 @@ export interface LandingStats {
   totalRaces: number;
   racesOpenThisWeek: number;
   totalRsvps: number;
+  /** Slug da prova quando há exatamente 1 com inscrição aberta — habilita link direto. */
+  firstOpenSlug?: string;
 }
 
 const FALLBACK: LandingStats = {
@@ -37,25 +39,37 @@ export async function getLandingStats(): Promise<LandingStats> {
     const today = todayInBrazil();
     const sevenDays = futureDateInBrazil(7);
 
-    const [{ count: totalRaces }, { count: racesOpenThisWeek }, rsvpAgg] =
-      await Promise.all([
-        supabase
-          .from("races")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "confirmed")
-          .gte("date", today),
-        supabase
-          .from("races")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "confirmed")
-          .gte("registration_deadline", today)
-          .lte("registration_deadline", sevenDays),
-        supabase
-          .from("races")
-          .select("rsvp_count")
-          .eq("status", "confirmed")
-          .gte("date", today),
-      ]);
+    const [
+      { count: totalRaces },
+      { count: racesOpenThisWeek },
+      rsvpAgg,
+      openSlugRes,
+    ] = await Promise.all([
+      supabase
+        .from("races")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "confirmed")
+        .gte("date", today),
+      supabase
+        .from("races")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "confirmed")
+        .gte("registration_deadline", today)
+        .lte("registration_deadline", sevenDays),
+      supabase
+        .from("races")
+        .select("rsvp_count")
+        .eq("status", "confirmed")
+        .gte("date", today),
+      supabase
+        .from("races")
+        .select("slug")
+        .eq("status", "confirmed")
+        .gte("registration_deadline", today)
+        .lte("registration_deadline", sevenDays)
+        .order("registration_deadline", { ascending: true })
+        .limit(2),
+    ]);
 
     const totalRsvps =
       rsvpAgg.data?.reduce(
@@ -63,10 +77,16 @@ export async function getLandingStats(): Promise<LandingStats> {
         0
       ) ?? 0;
 
+    const firstOpenSlug =
+      racesOpenThisWeek === 1 && openSlugRes.data?.[0]?.slug
+        ? openSlugRes.data[0].slug
+        : undefined;
+
     return {
       totalRaces: totalRaces ?? 0,
       racesOpenThisWeek: racesOpenThisWeek ?? 0,
       totalRsvps,
+      firstOpenSlug,
     };
   } catch (err) {
     console.error("[LandingStats] failed:", err);

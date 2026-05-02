@@ -48,19 +48,19 @@ export function LandingFaq() {
           </h2>
         </div>
 
-        <div className="divide-y divide-gray-200 rounded-2xl border border-gray-200 bg-white">
+        <div className="divide-y divide-gray-200 overflow-hidden rounded-2xl border border-gray-200 bg-white">
           {FAQ_ITEMS.map((item) => (
             <details
               key={item.q}
-              className="group px-6 py-5 [&_summary::-webkit-details-marker]:hidden"
+              className="group [&_summary::-webkit-details-marker]:hidden"
             >
-              <summary className="flex cursor-pointer items-center justify-between gap-4 list-none">
+              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-gray-50 active:bg-gray-100 group-open:bg-gray-50/50 sm:px-6">
                 <span className="text-sm font-semibold text-[#0D1B2A] md:text-base">
                   {item.q}
                 </span>
-                <ChevronDown className="h-4 w-4 shrink-0 text-[#6B7280] transition-transform group-open:rotate-180" />
+                <ChevronDown className="h-5 w-5 shrink-0 text-[#FF4D00] transition-transform duration-200 group-open:rotate-180" />
               </summary>
-              <p className="mt-3 text-sm leading-relaxed text-[#6B7280]">
+              <p className="px-5 pb-5 text-sm leading-relaxed text-[#6B7280] sm:px-6">
                 {item.a}
               </p>
             </details>

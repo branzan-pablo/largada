@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,8 +20,7 @@ interface City {
   longitude: number;
 }
 
-const primaryClass =
-  "w-full flex items-center justify-center gap-2 bg-[#FF4D00] text-white text-sm px-6 py-3 rounded-full font-semibold hover:bg-[#E04400] transition-colors";
+const submitClass = "h-12 w-full text-base font-semibold";
 
 export function RegisterForm() {
   const [fullName, setFullName] = useState("");
@@ -92,33 +92,59 @@ export function RegisterForm() {
         <Input
           id="fullName"
           type="text"
+          autoComplete="name"
+          autoCapitalize="words"
           placeholder="Seu nome"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
+          aria-invalid={!!errors.fullName}
+          aria-describedby={errors.fullName ? "fullName-error" : undefined}
         />
-        {errors.fullName && <p className="text-xs text-destructive">{errors.fullName}</p>}
+        {errors.fullName && (
+          <p id="fullName-error" role="alert" className="text-sm text-destructive">
+            {errors.fullName}
+          </p>
+        )}
       </div>
       <div className="space-y-2">
         <Label htmlFor="reg-email">E-mail</Label>
         <Input
           id="reg-email"
           type="email"
+          inputMode="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           placeholder="seu@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? "reg-email-error" : undefined}
         />
-        {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+        {errors.email && (
+          <p id="reg-email-error" role="alert" className="text-sm text-destructive">
+            {errors.email}
+          </p>
+        )}
       </div>
       <div className="space-y-2">
         <Label htmlFor="reg-password">Senha</Label>
         <Input
           id="reg-password"
           type="password"
+          autoComplete="new-password"
           placeholder="Mínimo 6 caracteres"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          aria-invalid={!!errors.password}
+          aria-describedby={errors.password ? "reg-password-error" : undefined}
         />
-        {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+        {errors.password && (
+          <p id="reg-password-error" role="alert" className="text-sm text-destructive">
+            {errors.password}
+          </p>
+        )}
       </div>
       <div className="space-y-2">
         <Label>Sua cidade</Label>
@@ -127,10 +153,21 @@ export function RegisterForm() {
           onClear={() => setSelectedCity(null)}
           placeholder="Digite sua cidade..."
         />
-        {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
+        {errors.city && (
+          <p role="alert" className="text-sm text-destructive">
+            {errors.city}
+          </p>
+        )}
       </div>
-      <Button type="submit" className={primaryClass} disabled={isLoading}>
-        {isLoading ? "Criando conta..." : "Criar conta"}
+      <Button type="submit" className={submitClass} disabled={isLoading}>
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Criando conta...
+          </>
+        ) : (
+          "Criar conta"
+        )}
       </Button>
     </form>
   );

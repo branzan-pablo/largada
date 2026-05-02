@@ -15,7 +15,11 @@ export function WhatsAppFab() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Fale conosco no WhatsApp"
-      className={`fixed right-4 z-50 flex items-center justify-center rounded-full bg-[#25D366] shadow-lg transition-transform hover:scale-110 md:bottom-6 md:right-6 ${isLanding ? "bottom-10" : "bottom-20"}`}
+      className={`fixed z-50 flex items-center justify-center rounded-full bg-[#25D366] shadow-lg transition-transform hover:scale-110 active:scale-95 md:bottom-6 md:right-6 ${
+        isLanding
+          ? "bottom-[calc(0.625rem+env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))]"
+          : "bottom-[calc(5rem+env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))]"
+      }`}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
