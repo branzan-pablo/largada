@@ -332,9 +332,9 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                 onClear={() => setSelectedCity(null)}
                 initialCity={
                   race
-                    ? `${race.city} — ${race.state}`
+                    ? `${race.city} - ${race.state}`
                     : suggestionData?.city && suggestionData?.state
-                      ? `${suggestionData.city} — ${suggestionData.state}`
+                      ? `${suggestionData.city} - ${suggestionData.state}`
                       : suggestionData?.city
                         ? suggestionData.city
                         : undefined
@@ -717,7 +717,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                 <p className="text-xs text-destructive">{errors.registrationLink}</p>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  Aceita links com ou sem https:// — o prefixo é adicionado automaticamente.
+                  Aceita links com ou sem https://. O prefixo é adicionado automaticamente.
                 </p>
               )}
             </div>

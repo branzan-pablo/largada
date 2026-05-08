@@ -37,7 +37,7 @@ export function Header() {
         {/* Logo */}
         <Link
           href="/"
-          aria-label="Largada — página inicial"
+          aria-label="Largada, página inicial"
           className="-m-2 flex items-center gap-1 rounded-md p-2 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4D00]/40 focus-visible:ring-offset-2"
         >
           <Image

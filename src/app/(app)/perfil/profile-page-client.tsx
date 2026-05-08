@@ -186,7 +186,7 @@ export function ProfilePageClient() {
               setCityId("");
               setCityName("");
             }}
-            initialCity={cityName ? `${cityName} — ${profile?.state ?? "SP"}` : undefined}
+            initialCity={cityName ? `${cityName} - ${profile?.state ?? "SP"}` : undefined}
           />
         </div>
 

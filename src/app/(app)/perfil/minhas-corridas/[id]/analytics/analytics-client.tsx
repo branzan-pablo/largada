@@ -104,7 +104,7 @@ export function AnalyticsClient({
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <p className="text-muted-foreground">
-            Mande este link para divulgar — cada acesso conta como visualização e
+            Mande este link para divulgar. Cada acesso conta como visualização e
             cada clique no botão de inscrição é registrado.
           </p>
           <Link

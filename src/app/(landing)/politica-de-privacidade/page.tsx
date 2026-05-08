@@ -29,7 +29,7 @@ export default function PoliticaDePrivacidadePage() {
               A Largada respeita a privacidade dos seus usuários. Esta Política
               de Privacidade descreve quais dados pessoais coletamos, por que os
               coletamos, como os utilizamos e quais são os seus direitos,
-              conforme a Lei Geral de Proteção de Dados (LGPD — Lei nº
+              conforme a Lei Geral de Proteção de Dados (LGPD, Lei nº
               13.709/2018). Esta política também atende aos requisitos do
               Regulamento Geral de Proteção de Dados (GDPR) da União Europeia
               e do UK GDPR.
@@ -153,19 +153,19 @@ export default function PoliticaDePrivacidadePage() {
             </p>
             <ul className="list-disc pl-6 mt-3 space-y-2">
               <li>
-                <strong className="text-[#0D1B2A]">AbacatePay</strong> —
+                <strong className="text-[#0D1B2A]">AbacatePay</strong>:
                 processamento de pagamentos (nome, e-mail, telefone, CPF/CNPJ)
               </li>
               <li>
-                <strong className="text-[#0D1B2A]">Supabase</strong> —
+                <strong className="text-[#0D1B2A]">Supabase</strong>:
                 infraestrutura e armazenamento de dados
               </li>
               <li>
-                <strong className="text-[#0D1B2A]">Vercel</strong> —
+                <strong className="text-[#0D1B2A]">Vercel</strong>:
                 hospedagem da plataforma e métricas de desempenho
               </li>
               <li>
-                <strong className="text-[#0D1B2A]">Google / Strava</strong> —
+                <strong className="text-[#0D1B2A]">Google / Strava</strong>:
                 autenticação OAuth. Apenas nome, foto de perfil e tokens de
                 sessão são utilizados. A Largada não armazena dados de
                 atividades do Strava.
@@ -210,23 +210,23 @@ export default function PoliticaDePrivacidadePage() {
             </p>
             <ul className="list-disc pl-6 mt-3 space-y-1">
               <li>
-                <strong className="text-[#0D1B2A]">Acesso</strong> — saber
+                <strong className="text-[#0D1B2A]">Acesso</strong>: saber
                 quais dados pessoais temos sobre você
               </li>
               <li>
-                <strong className="text-[#0D1B2A]">Correção</strong> —
+                <strong className="text-[#0D1B2A]">Correção</strong>:
                 solicitar a atualização de dados incompletos ou incorretos
               </li>
               <li>
-                <strong className="text-[#0D1B2A]">Exclusão</strong> —
+                <strong className="text-[#0D1B2A]">Exclusão</strong>:
                 solicitar a remoção dos seus dados pessoais
               </li>
               <li>
-                <strong className="text-[#0D1B2A]">Revogação de consentimento</strong> —
+                <strong className="text-[#0D1B2A]">Revogação de consentimento</strong>:
                 desativar notificações e revogar permissões a qualquer momento
               </li>
               <li>
-                <strong className="text-[#0D1B2A]">Portabilidade</strong> —
+                <strong className="text-[#0D1B2A]">Portabilidade</strong>:
                 solicitar seus dados em formato estruturado
               </li>
             </ul>
@@ -249,11 +249,11 @@ export default function PoliticaDePrivacidadePage() {
             <p>A Largada utiliza apenas cookies essenciais:</p>
             <ul className="list-disc pl-6 mt-3 space-y-1">
               <li>
-                <strong className="text-[#0D1B2A]">Cookies de sessão</strong> —
+                <strong className="text-[#0D1B2A]">Cookies de sessão</strong>:
                 gerenciados pelo Supabase Auth para manter sua autenticação
               </li>
               <li>
-                <strong className="text-[#0D1B2A]">Cookie de estado OAuth</strong> —
+                <strong className="text-[#0D1B2A]">Cookie de estado OAuth</strong>:
                 proteção CSRF temporária durante login com Strava
               </li>
             </ul>

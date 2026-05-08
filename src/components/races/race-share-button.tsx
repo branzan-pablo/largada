@@ -42,7 +42,7 @@ function buildShareText({
 }: Omit<RaceShareButtonProps, "shareUrl" | "className" | "imageUrl">) {
   const distancesLabel = distances.map((d) => d.toUpperCase()).join(", ");
   const timePart = startTime ? ` às ${formatTime(startTime)}` : "";
-  return `${raceName} — ${city}/${state}
+  return `${raceName} - ${city}/${state}
 📅 ${formatDateFull(date)}${timePart}
 🏃 Distâncias: ${distancesLabel}
 
@@ -66,20 +66,30 @@ export function RaceShareButton(props: RaceShareButtonProps) {
       event.preventDefault();
       event.stopPropagation();
     }
-    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-      try {
-        await navigator.share({
-          title: props.raceName,
-          text,
-          url: shareUrl,
-        });
-        return;
-      } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") return;
-        // fall through to open fallback sheet
-      }
-    }
+    // Always open the custom sheet so users see Instagram (Post/Story) options
+    // alongside WhatsApp/Facebook/Copy. The native share sheet (navigator.share)
+    // is invoked from within the sheet — for Instagram via canShare({files}),
+    // for the system "More" via shareViaSystem().
     setOpen(true);
+  }
+
+  async function shareViaSystem() {
+    if (typeof navigator === "undefined" || typeof navigator.share !== "function") {
+      copyToClipboard(fullText, "Texto copiado!");
+      setOpen(false);
+      return;
+    }
+    try {
+      await navigator.share({
+        title: props.raceName,
+        text,
+        url: shareUrl,
+      });
+      setOpen(false);
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
+      toast.error("Não foi possível compartilhar.");
+    }
   }
 
   async function copyToClipboard(value: string, successMessage: string) {
@@ -196,14 +206,14 @@ export function RaceShareButton(props: RaceShareButtonProps) {
           <SheetHeader>
             <SheetTitle>Compartilhar corrida</SheetTitle>
             <SheetDescription>
-              Gere uma imagem para Instagram ou compartilhe o link.
+              Poste direto no Instagram ou envie o link para sua turma.
             </SheetDescription>
           </SheetHeader>
 
           {/* Instagram image generation */}
           <div className="px-4 pt-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-              Imagem para Instagram
+              Postar no Instagram
             </p>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -220,8 +230,8 @@ export function RaceShareButton(props: RaceShareButtonProps) {
                   )}
                 </span>
                 <span className="flex flex-col">
-                  <span className="text-sm font-semibold text-[#0D1B2A]">Post (Feed)</span>
-                  <span className="text-xs text-muted-foreground">1080×1350</span>
+                  <span className="text-sm font-semibold text-[#0D1B2A]">Postar no Feed</span>
+                  <span className="text-xs text-muted-foreground">Imagem 1080×1350</span>
                 </span>
               </button>
 
@@ -239,8 +249,8 @@ export function RaceShareButton(props: RaceShareButtonProps) {
                   )}
                 </span>
                 <span className="flex flex-col">
-                  <span className="text-sm font-semibold text-[#0D1B2A]">Story</span>
-                  <span className="text-xs text-muted-foreground">1080×1920</span>
+                  <span className="text-sm font-semibold text-[#0D1B2A]">Postar no Story</span>
+                  <span className="text-xs text-muted-foreground">Imagem 1080×1920</span>
                 </span>
               </button>
             </div>
@@ -298,6 +308,17 @@ export function RaceShareButton(props: RaceShareButtonProps) {
                 Copiar link
               </button>
             </div>
+
+            {typeof navigator !== "undefined" && typeof navigator.share === "function" && (
+              <button
+                type="button"
+                onClick={shareViaSystem}
+                className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white text-sm font-medium text-[#0D1B2A] transition-colors hover:bg-gray-50 cursor-pointer"
+              >
+                <Share2 className="h-4 w-4" />
+                Mais apps...
+              </button>
+            )}
           </div>
         </SheetContent>
       </Sheet>

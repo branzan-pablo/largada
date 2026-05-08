@@ -2,7 +2,7 @@ import { RaceForm } from "@/components/admin/race-form";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Nova Corrida — Admin",
+  title: "Nova Corrida | Admin",
 };
 
 export default async function NewRacePage({

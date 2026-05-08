@@ -713,7 +713,7 @@ function RunnerLevelCard({ profile }: { profile: PerformanceProfile }) {
                 Pace melhorando!
               </p>
               <p className="text-xs text-muted-foreground">
-                Continue assim — seu ritmo está evoluindo. Aumente o volume
+                Continue assim, seu ritmo está evoluindo. Aumente o volume
                 semanal para desbloquear novos desafios.
               </p>
             </div>

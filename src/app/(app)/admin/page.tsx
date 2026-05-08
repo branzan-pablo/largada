@@ -10,7 +10,7 @@ import {
 import { AdminRacesTable } from "@/components/admin/admin-races-table";
 
 export const metadata = {
-  title: "Corridas — Admin",
+  title: "Corridas | Admin",
 };
 
 export default async function AdminPage() {

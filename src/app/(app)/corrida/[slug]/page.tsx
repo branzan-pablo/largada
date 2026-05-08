@@ -68,10 +68,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: race.name,
-    description: `${race.name} em ${race.city} — ${distances}. Veja detalhes e marque sua participação.`,
+    description: `${race.name} em ${race.city}. ${distances}. Veja detalhes e marque sua participação.`,
     openGraph: {
       title: race.name,
-      description: `Corrida em ${race.city} — ${distances}`,
+      description: `Corrida em ${race.city}. ${distances}`,
       type: "article",
       images: race.image_url ? [{ url: race.image_url }] : undefined,
     },

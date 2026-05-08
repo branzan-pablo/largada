@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
         order_type: "extra_service",
         status: "PENDING",
         amount: billing.amount,
-        description: "Radar de Pódio — Curadoria personalizada",
+        description: "Radar de Pódio | Curadoria personalizada",
         products: [
           {
             externalId: "radar-de-podio",

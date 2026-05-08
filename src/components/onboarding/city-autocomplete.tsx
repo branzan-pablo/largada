@@ -120,7 +120,7 @@ export function CityAutocomplete({
   }
 
   function handleSelect(city: City) {
-    setQuery(`${city.name} — ${city.state_code}`);
+    setQuery(`${city.name} - ${city.state_code}`);
     setSelectedId(city.id);
     setResults([]);
     setIsOpen(false);

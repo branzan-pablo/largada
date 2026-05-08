@@ -376,7 +376,7 @@ export function PromoteRaceCard({
           <h3 className="font-semibold text-green-900">Destacar esta corrida</h3>
         </div>
         <p className="text-xs text-green-700">
-          Incluso no seu plano — {remaining} destaque{remaining !== 1 ? "s" : ""}{" "}
+          Incluso no seu plano: {remaining} destaque{remaining !== 1 ? "s" : ""}{" "}
           disponíve{remaining !== 1 ? "is" : "l"}.
         </p>
         <Button

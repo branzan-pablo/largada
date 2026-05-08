@@ -10,7 +10,7 @@ import { formatDateShort, formatDateTime } from "@/lib/date";
 import { SuggestionActions } from "./suggestion-actions";
 
 export const metadata = {
-  title: "Sugestões — Admin",
+  title: "Sugestões | Admin",
 };
 
 export default async function AdminSuggestionsPage() {
@@ -34,7 +34,7 @@ export default async function AdminSuggestionsPage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">{suggestion.name}</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Cidade: {`${suggestion.city} — ${suggestion.state}`}
+                    Cidade: {`${suggestion.city} - ${suggestion.state}`}
                   </p>
                   {suggestion.date && (
                     <p className="text-sm text-muted-foreground">
@@ -62,7 +62,7 @@ export default async function AdminSuggestionsPage() {
                   <p className="text-xs text-muted-foreground">
                     Por:{" "}
                     {suggestion.profiles?.full_name ?? "Anônimo"}{" "}
-                    — {formatDateTime(suggestion.created_at)}
+                    · {formatDateTime(suggestion.created_at)}
                   </p>
                   <SuggestionActions suggestion={suggestion} />
                 </CardContent>

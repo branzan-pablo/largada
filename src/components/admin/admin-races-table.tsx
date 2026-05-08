@@ -28,7 +28,7 @@ interface RaceRow {
 }
 
 function formatCtr(views: number, clicks: number): string {
-  if (views === 0) return "—";
+  if (views === 0) return "-";
   return `${((clicks / views) * 100).toFixed(1)}%`;
 }
 
@@ -219,15 +219,15 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
                     )}
                     <div className="min-w-0">
                       <span className="line-clamp-2">{race.name}</span>
-                      <span className="block text-xs text-muted-foreground sm:hidden">{race.city} — {race.state}</span>
+                      <span className="block text-xs text-muted-foreground sm:hidden">{race.city} - {race.state}</span>
                     </div>
                   </div>
                 </td>
                 <td className="hidden px-4 py-3 sm:table-cell">
                   <span className="flex items-center gap-1">
-                    {`${race.city} — ${race.state}`}
+                    {`${race.city} - ${race.state}`}
                     {!hasCoords(race) && (
-                      <span title="Sem coordenadas — defina a cidade para esta corrida">
+                      <span title="Sem coordenadas. Defina a cidade para esta corrida">
                         <MapPinOff className="h-3.5 w-3.5 text-amber-500 shrink-0" />
                       </span>
                     )}

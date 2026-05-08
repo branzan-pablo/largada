@@ -5,7 +5,7 @@ import { LandingHeader } from "@/components/landing/landing-header";
 import { Footer } from "@/components/footer/footer";
 
 export const metadata: Metadata = {
-  title: "Para Organizadores — Largada",
+  title: "Para Organizadores | Largada",
   description:
     "Coloque sua corrida no topo do calendário do Noroeste Paulista. Pacotes a partir de R$49.",
   alternates: {
@@ -95,7 +95,7 @@ export default function ParaOrganizadoresPage() {
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-white/70 leading-relaxed">
             Apareça primeiro para os corredores que estão decidindo a próxima
-            prova. Pague só pela visibilidade — sem assinatura recorrente.
+            prova. Pague só pela visibilidade. Sem assinatura recorrente.
           </p>
         </div>
       </section>

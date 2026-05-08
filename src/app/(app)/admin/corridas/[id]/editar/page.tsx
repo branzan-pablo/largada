@@ -6,7 +6,7 @@ import Link from "next/dist/client/link";
 import { ChevronLeft } from "lucide-react";
 
 export const metadata = {
-  title: "Editar Corrida — Admin",
+  title: "Editar Corrida | Admin",
 };
 
 export default async function EditRacePage({

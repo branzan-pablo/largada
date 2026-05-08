@@ -44,17 +44,20 @@ export function LoginModal() {
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden text-foreground">
         <DialogHeader className="p-6 pb-0 text-center">
-          <DialogTitle className="text-2xl font-extrabold uppercase tracking-wider text-primary">
-            {/* Logo — same as header */}
-            <div className="flex items-center gap-1">
+          <DialogTitle className="text-2xl tracking-wide text-[#0D1B2A]">
+            <div className="flex items-center justify-center gap-1">
               <Image
                 src="/logo_120.png"
-                alt="Largada"
+                alt=""
                 width={60}
                 height={60}
+                className="w-10 h-10 sm:w-[60px] sm:h-[60px]"
               />
-              <span className="font-[family-name:var(--font-logo)] text-2xl tracking-wide text-[#0D1B2A]">LARGADA</span>
+              <span className="font-[family-name:var(--font-logo)] text-2xl font-normal sm:text-3xl">
+                LARGADA
+              </span>
             </div>
+            <span className="sr-only">Largada</span>
           </DialogTitle>
           <DialogDescription>
             Acesse sua conta ou crie uma nova para encontrar corridas na sua região

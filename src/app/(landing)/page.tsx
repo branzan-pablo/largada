@@ -25,7 +25,7 @@ import { Footer } from "@/components/footer/footer";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Largada — Calendário de Corridas de Rua",
+  title: "Largada | Calendário de Corridas de Rua",
   description:
     "Encontre corridas de rua perto de você. Filtre por distância, premiação e data. Receba alertas antes dos prazos fecharem.",
   alternates: {
@@ -38,8 +38,6 @@ export default async function LandingPage() {
   const cities = [...REGION_CITIES]
     .sort(() => Math.random() - 0.5)
     .map((c) => `${c.name} - ${c.state}`);
-
-  const hasStats = stats.totalRaces > 0;
 
   return (
     <main className="text-[#6B7280] antialiased overflow-x-hidden min-h-screen scroll-smooth bg-white pt-16 pb-20 md:pb-0">
@@ -60,37 +58,6 @@ export default async function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/65" />
 
         <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-5 py-12 text-center sm:px-6 md:py-32">
-          {/* Stats badge */}
-          {hasStats && (
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[13px] sm:text-sm font-medium text-white/95 backdrop-blur-md md:mb-7">
-              <span className="inline-block h-2 w-2 rounded-full bg-[#22c55e] animate-pulse" />
-              <span>
-                <strong className="font-semibold text-white">
-                  {stats.totalRaces}
-                </strong>
-                {" corrida"}{stats.totalRaces === 1 ? "" : "s"}
-                {stats.racesOpenThisWeek > 0 && (
-                  <>
-                    {" · "}
-                    <strong className="font-semibold text-white">
-                      {stats.racesOpenThisWeek}
-                    </strong>
-                    {" abertas esta semana"}
-                  </>
-                )}
-                {stats.totalRsvps > 0 && (
-                  <>
-                    {" · "}
-                    <strong className="font-semibold text-white">
-                      {stats.totalRsvps.toLocaleString("pt-BR")}
-                    </strong>
-                    {" corredor"}{stats.totalRsvps === 1 ? "" : "es"} {"confirmado"}{stats.totalRsvps === 1 ? "" : "s"}
-                  </>
-                )}
-              </span>
-            </div>
-          )}
-
           <h1
             className="font-[family-name:var(--font-logo)] text-[2.25rem] leading-[1.05] tracking-wide text-white mb-4 sm:text-5xl md:mb-6 md:text-7xl md:leading-tight"
             style={{ textShadow: "0 2px 24px rgba(0,0,0,0.85)" }}
@@ -110,16 +77,6 @@ export default async function LandingPage() {
 
           <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
             <CtaButtons />
-          </div>
-
-          <div className="mt-4 flex items-center gap-3 text-[13px] text-white/85 md:mt-6">
-            <span className="flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5" /> Grátis para atletas
-            </span>
-            <span aria-hidden>·</span>
-            <span className="flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5" /> Sem cartão
-            </span>
           </div>
         </div>
       </section>
@@ -361,7 +318,7 @@ export default async function LandingPage() {
           </h2>
           <p className="mb-6 text-sm md:text-base text-white/70 max-w-2xl mx-auto">
             Pacotes a partir de R$ 49 (Express, 7 dias). Pague só pela
-            visibilidade — sem assinatura recorrente.
+            visibilidade. Sem assinatura recorrente.
           </p>
           <Link
             href="/para-organizadores"

@@ -80,10 +80,10 @@ export async function POST(request: NextRequest) {
             const pace = paceByDistance[pref];
             if (pace) {
               reasons.push(
-                `Tem ${raceDistStr} — você corre a ${formatPaceFromSeconds(pace)}/km`
+                `Tem ${raceDistStr}, você corre a ${formatPaceFromSeconds(pace)}/km`
               );
             } else {
-              reasons.push(`Tem ${raceDistStr} — sua distância favorita`);
+              reasons.push(`Tem ${raceDistStr}, sua distância favorita`);
             }
             break;
           }
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       if (trend === "improving" && score > 0) {
         score += 2;
         if (reasons.length === 0) {
-          reasons.push("Seu pace está melhorando — hora de testar!");
+          reasons.push("Seu pace está melhorando, hora de testar!");
         }
       }
 

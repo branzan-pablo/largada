@@ -121,8 +121,8 @@ export default function TermosDeUsoPage() {
               6. Propriedade Intelectual
             </h2>
             <p>
-              Todo o conteúdo original da plataforma — incluindo marca, design,
-              código e textos — é de propriedade da Largada e está protegido
+              Todo o conteúdo original da plataforma, incluindo marca, design,
+              código e textos, é de propriedade da Largada e está protegido
               pelas leis de propriedade intelectual.
             </p>
             <p className="mt-3">

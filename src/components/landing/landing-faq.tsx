@@ -1,37 +1,37 @@
-import { ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, ChevronDown } from "lucide-react";
 
-const FAQ_ITEMS: { q: string; a: string }[] = [
+interface FaqItem {
+  q: string;
+  a: string;
+  cta?: { label: string; href: string };
+}
+
+const FAQ_ITEMS: FaqItem[] = [
   {
     q: "O Largada é grátis para atleta?",
     a: "Sim, 100% grátis. Cobramos apenas quando o organizador quer destacar a corrida na listagem.",
   },
   {
-    q: "Como vocês descobrem as corridas?",
-    a: "Monitoramos automaticamente os principais sites de eventos do Noroeste Paulista (Equilíbrio, Rax, TNV, TV Com Running e outros) e acrescentamos sugestões enviadas pela própria comunidade de corredores.",
-  },
-  {
-    q: "Atende qual região hoje?",
-    a: "Noroeste Paulista — São José do Rio Preto, Araçatuba, Catanduva, Votuporanga, Birigui e cidades vizinhas, em raio de até 200km.",
-  },
-  {
     q: "Vocês fazem a inscrição na corrida?",
-    a: "Não. Levamos você direto ao site oficial do organizador para você se inscrever lá. O Largada é o calendário e a alavanca de descoberta — a inscrição você faz no organizador.",
+    a: "Não. Levamos você direto ao site oficial do organizador para você se inscrever lá. O Largada é o calendário e a alavanca de descoberta. A inscrição você faz no organizador.",
   },
   {
     q: 'Como funciona o "Vou Nessa"?',
-    a: 'Você marca presença no card da corrida. A turma vê quem confirmou e cada um decide se inscreve. É um sinal social — não é a inscrição.',
+    a: 'Você marca presença no card da corrida. A turma vê quem confirmou e cada um decide se inscreve. É um sinal social, não é a inscrição.',
   },
   {
     q: "Tenho que instalar app?",
-    a: "Funciona no navegador. Se quiser, instala como PWA — abre da tela inicial, sem precisar de App Store ou Google Play.",
+    a: "Funciona no navegador. Se quiser, instala como PWA: abre da tela inicial, sem precisar de App Store ou Google Play.",
   },
   {
-    q: "Os alertas chegam por email?",
-    a: "Por push notification (web/PWA). Sem spam — só quando o prazo de inscrição está fechando ou aparece corrida nova na sua região.",
+    q: "Os alertas chegam por e-mail?",
+    a: "Não. Chegam por push notification (web/PWA). Sem spam: só quando o prazo de inscrição está fechando ou aparece corrida nova na sua região.",
   },
   {
     q: "Sou organizador. Como destaco minha corrida?",
-    a: "Tem uma página dedicada para organizadores com pacotes a partir de R$49. Acesse Para Organizadores no menu.",
+    a: "Temos uma página dedicada com pacotes a partir de R$49. Pagamento único, sem assinatura recorrente.",
+    cta: { label: "Ver pacotes para organizadores", href: "/para-organizadores" },
   },
 ];
 
@@ -60,9 +60,20 @@ export function LandingFaq() {
                 </span>
                 <ChevronDown className="h-5 w-5 shrink-0 text-[#FF4D00] transition-transform duration-200 group-open:rotate-180" />
               </summary>
-              <p className="px-5 pb-5 text-sm leading-relaxed text-[#6B7280] sm:px-6">
-                {item.a}
-              </p>
+              <div className="px-5 pb-5 sm:px-6">
+                <p className="text-sm leading-relaxed text-[#6B7280]">
+                  {item.a}
+                </p>
+                {item.cta && (
+                  <Link
+                    href={item.cta.href}
+                    className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-[#FF4D00] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#E04400] active:scale-[0.98]"
+                  >
+                    {item.cta.label}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                )}
+              </div>
             </details>
           ))}
         </div>
