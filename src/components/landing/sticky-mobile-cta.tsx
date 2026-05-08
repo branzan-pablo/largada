@@ -17,8 +17,9 @@ export function StickyMobileCta({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const wasDismissed = sessionStorage.getItem(DISMISS_KEY) === "1";
-    setDismissed(wasDismissed);
+    // Hydration-safe read: start hidden, reveal once we know the storage state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDismissed(sessionStorage.getItem(DISMISS_KEY) === "1");
   }, []);
 
   if (racesOpenThisWeek <= 0) return null;
