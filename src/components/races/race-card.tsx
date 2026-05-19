@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { RaceDistanceBadges } from "./race-distance-badges";
 import { RacePrizeBadge } from "./race-prize-badge";
+import { RacePrizeAmountBadge } from "./race-prize-amount-badge";
 import { RaceShareButton } from "./race-share-button";
 import { MapPin, Users, Star, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
@@ -111,6 +112,7 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
           {race.prize_type !== "none" && (
             <RacePrizeBadge prizeType={race.prize_type} />
           )}
+          <RacePrizeAmountBadge prize={race.prize_structured} />
         </div>
       </div>
     </Link>

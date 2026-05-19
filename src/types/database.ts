@@ -41,6 +41,45 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_call_logs: {
+        Row: {
+          id: string
+          task: string
+          model: string | null
+          duration_ms: number
+          input_tokens: number | null
+          output_tokens: number | null
+          success: boolean
+          error: string | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          task: string
+          model?: string | null
+          duration_ms: number
+          input_tokens?: number | null
+          output_tokens?: number | null
+          success: boolean
+          error?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          task?: string
+          model?: string | null
+          duration_ms?: number
+          input_tokens?: number | null
+          output_tokens?: number | null
+          success?: boolean
+          error?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       race_views: {
         Row: {
           id: string
@@ -343,6 +382,9 @@ export type Database = {
           state: string
           status: string
           updated_at: string
+          embedding: string | null
+          prize_structured: Json | null
+          prize_structured_updated_at: string | null
         }
         Insert: {
           address: string
@@ -380,6 +422,9 @@ export type Database = {
           state?: string
           status?: string
           updated_at?: string
+          embedding?: string | null
+          prize_structured?: Json | null
+          prize_structured_updated_at?: string | null
         }
         Update: {
           address?: string
@@ -417,6 +462,9 @@ export type Database = {
           state?: string
           status?: string
           updated_at?: string
+          embedding?: string | null
+          prize_structured?: Json | null
+          prize_structured_updated_at?: string | null
         }
         Relationships: [
           {
@@ -876,6 +924,22 @@ export type Database = {
       get_random_cities: {
         Args: { p_limit?: number }
         Returns: { name: string; state_code: string }[]
+      }
+      match_races_semantic: {
+        Args: {
+          query_embedding: string
+          query_date: string
+          match_threshold?: number
+          match_count?: number
+          date_window_days?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          city: string
+          date: string
+          similarity: number
+        }[]
       }
     }
     Enums: {

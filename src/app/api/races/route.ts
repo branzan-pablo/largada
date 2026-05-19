@@ -9,6 +9,7 @@ import { ITEMS_PER_PAGE } from "@/lib/constants";
 import { notifyNewRace } from "@/lib/notifications";
 import { raceSchema } from "@/lib/validations";
 import { requireAdmin } from "@/lib/auth";
+import { enrichRace } from "@/lib/ai/enrich-race";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -226,6 +227,15 @@ export async function POST(request: Request) {
   // may still visit the detail URL — revalidating both is cheap and safe.
   revalidatePath("/corridas");
   if (data?.slug) revalidatePath(`/corrida/${data.slug}`);
+
+  // AI enrichment: structured prize + fingerprint embedding. Awaited inline
+  // because Vercel kills the runtime after response, but the call is wrapped
+  // in graceful-failure so a provider outage never blocks the admin flow.
+  try {
+    await enrichRace(data.id);
+  } catch (err) {
+    console.error("[ai] enrichRace failed:", err);
+  }
 
   // Only notify for directly confirmed races (not pending_review)
   if (data.status === "confirmed") {

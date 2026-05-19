@@ -1,7 +1,12 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { slugify } from "@/lib/utils";
 import { todayInBrazil } from "@/lib/date";
+import { buildRaceFingerprint, embedText, toPgVector } from "@/lib/ai/embed";
+import { isAIEnabled } from "@/lib/ai/provider";
 import type { ScrapedRace } from "./types";
+
+const SEMANTIC_DEDUP_THRESHOLD = 0.92;
+const SEMANTIC_DEDUP_DATE_WINDOW_DAYS = 1;
 
 function isValidDate(dateStr: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
@@ -13,7 +18,7 @@ function isValidDate(dateStr: string): boolean {
 function normalizeForDedup(name: string): string {
   return name
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, "")
     .replace(/\s+/g, " ")
@@ -40,6 +45,30 @@ function isSimilarRace(
   const cityB = b.city ? normalizeForDedup(b.city) : "";
   if (cityA !== cityB) return false;
   return jaccardSimilarity(normalizeForDedup(a.name), normalizeForDedup(b.name)) >= 0.75;
+}
+
+/**
+ * Try to compute the fingerprint embedding for a candidate race. Returns null
+ * when AI is disabled or the embedding call errors — caller should fall back
+ * to Jaccard-only dedup in that case rather than blocking the insertion.
+ */
+async function tryEmbed(race: ScrapedRace): Promise<number[] | null> {
+  if (!isAIEnabled() || !race.date) return null;
+  try {
+    const fingerprint = buildRaceFingerprint({
+      name: race.name,
+      city: race.city,
+      date: race.date,
+      organizer: race.organizer,
+    });
+    return await embedText(fingerprint);
+  } catch (err) {
+    console.warn(
+      `[insert-races] Embedding failed for "${race.name}", falling back to Jaccard:`,
+      err,
+    );
+    return null;
+  }
 }
 
 export async function insertScrapedRaces(
@@ -110,7 +139,32 @@ export async function insertScrapedRaces(
       continue;
     }
 
-    // Fuzzy duplicate check against DB
+    // Semantic dedup (catches near-duplicates with slight wording differences,
+    // off-by-one date, missing accents, etc. that Jaccard misses).
+    const embedding = await tryEmbed(race);
+    if (embedding && race.date) {
+      const { data: semanticMatches } = await supabase.rpc(
+        "match_races_semantic",
+        {
+          query_embedding: toPgVector(embedding),
+          query_date: race.date,
+          match_threshold: SEMANTIC_DEDUP_THRESHOLD,
+          match_count: 3,
+          date_window_days: SEMANTIC_DEDUP_DATE_WINDOW_DAYS,
+        },
+      );
+      if (semanticMatches && semanticMatches.length > 0) {
+        const top = semanticMatches[0];
+        console.log(
+          `[insert-races] Semantic duplicate (${(top.similarity * 100).toFixed(1)}%): "${race.name}" ~ "${top.name}" (${top.date}, ${top.city})`,
+        );
+        skipped++;
+        continue;
+      }
+    }
+
+    // Fuzzy duplicate check against DB (kept as belt-and-suspenders fallback
+    // for races inserted before the embedding column existed).
     const dbMatch = race.date
       ? dbRaces.find((db) => isSimilarRace(race, db))
       : undefined;
@@ -202,6 +256,7 @@ export async function insertScrapedRaces(
       is_promoted: false,
       origin: "scraper" as const,
       created_by: adminProfile.id,
+      embedding: embedding ? toPgVector(embedding) : null,
     };
 
     const { error: insertError } = await supabase
