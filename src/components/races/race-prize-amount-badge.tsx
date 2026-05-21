@@ -1,29 +1,46 @@
 import { Banknote } from "lucide-react";
-import type { PrizeStructured } from "@/types/race";
+import type { PrizeStructured, DistancePrize } from "@/types/race";
+
+const BADGE_CLASS =
+  "inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[12px] font-semibold uppercase tracking-wide bg-emerald-50 text-emerald-700 border-emerald-200";
+
+function formatBrl(value: number): string {
+  return value.toLocaleString("pt-BR");
+}
+
+function describeDistance(d: DistancePrize): string {
+  if (d.distance === "geral" || !d.distance) {
+    return `Até R$ ${formatBrl(d.top_prize ?? 0)} ao 1º`;
+  }
+  return `${d.distance.toUpperCase()} até R$ ${formatBrl(d.top_prize ?? 0)}`;
+}
 
 /**
- * Compact money-amount badge shown next to the prize-type badge when the
- * LLM-extracted prize_structured has a credible total. Only renders if the
- * extraction returned at least one positive figure — keeps "💰 R$ X" honest.
+ * Per-distance prize badges. Each distance with a credible top_prize gets its
+ * own chip so a 5K runner reads the 5K payout and a 10K runner reads the 10K
+ * payout, never the sum across categories.
  */
 export function RacePrizeAmountBadge({
   prize,
 }: {
   prize: PrizeStructured | null | undefined;
 }) {
-  if (!prize) return null;
+  if (!prize || !prize.has_money) return null;
 
-  const amount = prize.total_money_brl ?? prize.max_per_position;
-  if (!amount || amount <= 0) return null;
+  const payouts = (prize.by_distance ?? [])
+    .filter((d) => (d.top_prize ?? 0) > 0)
+    .sort((a, b) => (b.top_prize ?? 0) - (a.top_prize ?? 0));
 
-  const formatted = amount.toLocaleString("pt-BR");
-  const isTotal = prize.total_money_brl !== null && prize.total_money_brl > 0;
+  if (payouts.length === 0) return null;
 
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[12px] font-semibold uppercase tracking-wide bg-emerald-50 text-emerald-700 border-emerald-200">
-      <Banknote className="h-4 w-4" />
-      R$ {formatted}
-      {!isTotal && " (1º)"}
-    </span>
+    <>
+      {payouts.map((d) => (
+        <span key={d.distance} className={BADGE_CLASS}>
+          <Banknote className="h-4 w-4" />
+          {describeDistance(d)}
+        </span>
+      ))}
+    </>
   );
 }

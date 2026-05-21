@@ -1,8 +1,13 @@
-export interface PrizeStructured {
-  total_money_brl: number | null;
+export interface DistancePrize {
+  distance: string;
+  total: number | null;
+  top_prize: number | null;
   top_n: number | null;
+}
+
+export interface PrizeStructured {
+  by_distance: DistancePrize[];
   by_category: boolean;
-  max_per_position: number | null;
   has_money: boolean;
   has_trophy: boolean;
   notes: string | null;

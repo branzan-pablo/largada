@@ -2,10 +2,9 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { extractPrizeStructured } from "@/lib/ai/extract-prize";
 
 /**
- * These tests verify the cheap-path branches of extractPrizeStructured —
- * the ones that avoid spending tokens. The actual LLM call is exercised in
- * integration testing (manual), since mocking a streaming provider would
- * test the mock more than the code.
+ * These tests verify the cheap-path branches of extractPrizeStructured.
+ * They cover the cases that avoid spending tokens. The actual LLM call is
+ * exercised through manual integration testing in staging.
  */
 describe("extractPrizeStructured — cheap paths", () => {
   let originalKey: string | undefined;
@@ -22,7 +21,7 @@ describe("extractPrizeStructured — cheap paths", () => {
     }
   });
 
-  it("returns null when AI is disabled (no GOOGLE_GENERATIVE_AI_API_KEY)", async () => {
+  it("returns null when AI is disabled (no key)", async () => {
     delete process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     const result = await extractPrizeStructured({
       prizeType: "money",
@@ -31,24 +30,22 @@ describe("extractPrizeStructured — cheap paths", () => {
     expect(result).toBeNull();
   });
 
-  it("returns a zero/false skeleton when prize_type is none and details are empty", async () => {
+  it("returns an empty skeleton when prize_type is none and details are empty", async () => {
     process.env.GOOGLE_GENERATIVE_AI_API_KEY = "test-key";
     const result = await extractPrizeStructured({
       prizeType: "none",
       prizeDetails: null,
     });
     expect(result).toEqual({
-      total_money_brl: null,
-      top_n: null,
+      by_distance: [],
       by_category: false,
-      max_per_position: null,
       has_money: false,
       has_trophy: false,
       notes: null,
     });
   });
 
-  it("flags has_money=true when prize_type is money but details are empty", async () => {
+  it("flags has_money=true with empty by_distance when prize_type=money but details are empty", async () => {
     process.env.GOOGLE_GENERATIVE_AI_API_KEY = "test-key";
     const result = await extractPrizeStructured({
       prizeType: "money",
@@ -56,7 +53,7 @@ describe("extractPrizeStructured — cheap paths", () => {
     });
     expect(result?.has_money).toBe(true);
     expect(result?.has_trophy).toBe(false);
-    expect(result?.total_money_brl).toBeNull();
+    expect(result?.by_distance).toEqual([]);
   });
 
   it("flags both has_money and has_trophy when prize_type=both but details are empty", async () => {
@@ -67,6 +64,7 @@ describe("extractPrizeStructured — cheap paths", () => {
     });
     expect(result?.has_money).toBe(true);
     expect(result?.has_trophy).toBe(true);
+    expect(result?.by_distance).toEqual([]);
   });
 
   it("flags has_trophy only when prize_type=trophy and details are short", async () => {
@@ -77,5 +75,6 @@ describe("extractPrizeStructured — cheap paths", () => {
     });
     expect(result?.has_money).toBe(false);
     expect(result?.has_trophy).toBe(true);
+    expect(result?.by_distance).toEqual([]);
   });
 });

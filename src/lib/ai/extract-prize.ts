@@ -13,40 +13,38 @@ import {
 interface ExtractPrizeInput {
   prizeType: "money" | "trophy" | "both" | "none";
   prizeDetails: string | null;
+  distances?: string[] | null;
 }
+
+const EMPTY_SKELETON: PrizeStructured = {
+  by_distance: [],
+  by_category: false,
+  has_money: false,
+  has_trophy: false,
+  notes: null,
+};
 
 /**
  * Extract structured prize data from a race's free-text prize_details.
  *
- * Returns `null` when AI is disabled, the input is empty, or the call fails —
- * callers should treat null as "skip enrichment, keep the raw text".
+ * Returns `null` when AI is disabled or the call fails — callers should treat
+ * null as "skip enrichment, keep the raw text". The cheap-path skeletons fire
+ * before any token is spent when the prize_type/details combination already
+ * tells the full story.
  */
 export async function extractPrizeStructured(
   input: ExtractPrizeInput,
 ): Promise<PrizeStructured | null> {
   if (!isAIEnabled()) return null;
 
-  // Cheap path: prize_type=none or empty details. No need to spend a token.
   if (input.prizeType === "none" && !input.prizeDetails) {
-    return {
-      total_money_brl: null,
-      top_n: null,
-      by_category: false,
-      max_per_position: null,
-      has_money: false,
-      has_trophy: false,
-      notes: null,
-    };
+    return EMPTY_SKELETON;
   }
   if (!input.prizeDetails || input.prizeDetails.trim().length < 3) {
     return {
-      total_money_brl: null,
-      top_n: null,
-      by_category: false,
-      max_per_position: null,
+      ...EMPTY_SKELETON,
       has_money: input.prizeType === "money" || input.prizeType === "both",
       has_trophy: input.prizeType === "trophy" || input.prizeType === "both",
-      notes: null,
     };
   }
 

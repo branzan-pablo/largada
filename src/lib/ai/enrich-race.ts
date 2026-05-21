@@ -32,7 +32,7 @@ export async function enrichRace(raceId: string): Promise<EnrichResult> {
   const supabase = createAdminClient();
   const { data: race, error } = await supabase
     .from("races")
-    .select("id, name, city, date, organizer, prize_type, prize_details")
+    .select("id, name, city, date, organizer, prize_type, prize_details, distances")
     .eq("id", raceId)
     .single();
 
@@ -47,6 +47,7 @@ export async function enrichRace(raceId: string): Promise<EnrichResult> {
   const prize = await extractPrizeStructured({
     prizeType: race.prize_type as "money" | "trophy" | "both" | "none",
     prizeDetails: race.prize_details,
+    distances: race.distances,
   });
   if (prize) {
     updates.prize_structured = prize;
