@@ -51,7 +51,7 @@ export async function extractRaceFromUrl(
           completionTokens: usage?.outputTokens,
           totalTokens: usage?.totalTokens,
         },
-        model: "gemini-2.5-flash-lite",
+        model: "gemini-2.5-flash",
       };
     },
     { source: "url", host: new URL(url).hostname, bytes: fetched.bytes },
@@ -104,7 +104,7 @@ export async function extractRaceFromImage(
           completionTokens: usage?.outputTokens,
           totalTokens: usage?.totalTokens,
         },
-        model: "gemini-2.5-flash-lite",
+        model: "gemini-2.5-flash",
       };
     },
     { source: "image", mime: mimeType, bytes: imageBase64.length },

@@ -122,7 +122,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   // Merge AI-extracted fields into the form, preserving anything the admin
   // already typed. Treats form defaults ("07:00", "none", "") as "empty" so
   // a fresh form gets filled but mid-flight edits are never overwritten.
-  const handleExtracted = (extracted: RaceExtraction) => {
+  const handleExtracted = async (extracted: RaceExtraction) => {
     let filled = 0;
     const hints: string[] = [];
 
@@ -178,12 +178,48 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       setDescription(extracted.description);
       filled++;
     }
-
-    if (extracted.city && extracted.state && !selectedCity) {
-      hints.push(`Cidade detectada: ${extracted.city} - ${extracted.state}. Selecione na busca para vincular as coordenadas.`);
-    }
     if (extracted.imageUrl && !imageUrl) {
-      hints.push("Imagem detectada na fonte. Faça upload do arquivo no campo de banner.");
+      setImageUrl(extracted.imageUrl);
+      filled++;
+    }
+
+    // Resolve city via the same search RPC the autocomplete uses so we land
+    // on a row with lat/lng instead of a raw text hint.
+    if (extracted.city && !selectedCity) {
+      try {
+        const res = await fetch(
+          `/api/cities/search?q=${encodeURIComponent(extracted.city)}&limit=8`,
+        );
+        if (res.ok) {
+          const cities: Array<{
+            name: string;
+            state_code: string;
+            latitude: number;
+            longitude: number;
+          }> = await res.json();
+          const match =
+            (extracted.state &&
+              cities.find((c) => c.state_code === extracted.state)) ||
+            cities[0];
+          if (match) {
+            setSelectedCity({
+              name: match.name,
+              state_code: match.state_code,
+              latitude: match.latitude,
+              longitude: match.longitude,
+            });
+            filled++;
+          } else {
+            hints.push(
+              `Cidade ${extracted.city}${extracted.state ? " - " + extracted.state : ""} não encontrada no banco. Cadastre manualmente.`,
+            );
+          }
+        }
+      } catch {
+        hints.push(
+          `Não foi possível resolver a cidade ${extracted.city} automaticamente.`,
+        );
+      }
     }
 
     if (filled > 0) {

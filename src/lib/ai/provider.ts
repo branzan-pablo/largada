@@ -10,7 +10,10 @@ import { anthropic } from "@ai-sdk/anthropic";
  * Anthropic Haiku 4.5 stays wired as a future failover lane.
  */
 export const models = {
-  extract: google("gemini-2.5-flash-lite"),
+  // Extraction tasks (race autofill, prize structuring) need higher fidelity
+  // than batch ops because the admin trusts the output directly. Flash (not
+  // lite) has 250 RPD on free tier — plenty for solo admin volume.
+  extract: google("gemini-2.5-flash"),
   describe: google("gemini-2.5-flash-lite"),
   classify: google("gemini-2.5-flash-lite"),
   chat: google("gemini-2.5-flash-lite"),

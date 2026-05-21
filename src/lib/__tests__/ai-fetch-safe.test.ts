@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cleanHtml, __TESTING__ } from "@/lib/ai/fetch-safe";
+import { cleanHtml, extractMetadata, __TESTING__ } from "@/lib/ai/fetch-safe";
 
 const { isPrivateIPv4, isPrivateIPv6 } = __TESTING__;
 
@@ -86,5 +86,56 @@ describe("cleanHtml", () => {
   it("truncates to maxChars", () => {
     const long = "a".repeat(50_000);
     expect(cleanHtml(long, 1000).length).toBeLessThanOrEqual(1000);
+  });
+
+  it("prepends a METADATA block when og tags are present", () => {
+    const html = `<head>
+      <meta property="og:image" content="https://x.com/cartaz.jpg">
+      <meta property="og:title" content="Corrida Y">
+    </head><body><p>Hello</p></body>`;
+    const cleaned = cleanHtml(html);
+    expect(cleaned).toMatch(/^METADATA:/);
+    expect(cleaned).toContain("og:image: https://x.com/cartaz.jpg");
+    expect(cleaned).toContain("og:title: Corrida Y");
+    expect(cleaned).toContain("BODY:");
+    expect(cleaned).toContain("Hello");
+  });
+});
+
+describe("extractMetadata", () => {
+  it("captures og and twitter meta tags", () => {
+    const html = `<meta property="og:image" content="https://a/b.jpg">
+                  <meta name="twitter:card" content="summary_large_image">
+                  <meta property="og:description" content="desc">`;
+    const out = extractMetadata(html);
+    expect(out).toContain("og:image: https://a/b.jpg");
+    expect(out).toContain("twitter:card: summary_large_image");
+    expect(out).toContain("og:description: desc");
+  });
+
+  it("captures canonical link", () => {
+    const html = `<link rel="canonical" href="https://x.com/race">`;
+    expect(extractMetadata(html)).toContain("canonical: https://x.com/race");
+  });
+
+  it("parses JSON-LD blocks", () => {
+    const html = `<script type="application/ld+json">{"@type":"SportsEvent","name":"X"}</script>`;
+    const out = extractMetadata(html);
+    expect(out).toContain("json-ld:");
+    expect(out).toContain('"name":"X"');
+  });
+
+  it("skips malformed JSON-LD without throwing", () => {
+    const html = `<script type="application/ld+json">{not valid json</script>
+                  <meta property="og:title" content="Y">`;
+    const out = extractMetadata(html);
+    expect(out).toContain("og:title: Y");
+    expect(out).not.toContain("json-ld:");
+  });
+
+  it("ignores unrelated meta tags", () => {
+    const html = `<meta name="viewport" content="width=device-width">
+                  <meta name="generator" content="WordPress">`;
+    expect(extractMetadata(html)).toBe("");
   });
 });

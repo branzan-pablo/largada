@@ -115,19 +115,74 @@ export async function fetchSafe(
 }
 
 /**
+ * Pull structured signals from the head of an HTML document: Open Graph,
+ * Twitter card meta tags, canonical link, and JSON-LD blocks. These are far
+ * cheaper for the LLM to read than the surrounding markup and usually hold
+ * the canonical image, title, description, and event date for race pages
+ * that are JS-rendered (the visible HTML is sparse).
+ */
+export function extractMetadata(html: string): string {
+  const lines: string[] = [];
+
+  const metaAttr = /<meta\b[^>]*>/gi;
+  const attrPair = /(\w[\w:-]*)=["']([^"']+)["']/g;
+  let m: RegExpExecArray | null;
+  while ((m = metaAttr.exec(html)) !== null) {
+    const tag = m[0];
+    const attrs: Record<string, string> = {};
+    let a: RegExpExecArray | null;
+    attrPair.lastIndex = 0;
+    while ((a = attrPair.exec(tag)) !== null) {
+      attrs[a[1].toLowerCase()] = a[2];
+    }
+    const key = attrs.property ?? attrs.name;
+    const value = attrs.content;
+    if (!key || !value) continue;
+    if (!/^(og:|twitter:|article:|event:|description$|keywords$)/i.test(key)) continue;
+    lines.push(`${key}: ${value}`);
+  }
+
+  const canonicalMatch = html.match(
+    /<link\b[^>]*\brel=["']canonical["'][^>]*\bhref=["']([^"']+)["']/i,
+  );
+  if (canonicalMatch) lines.push(`canonical: ${canonicalMatch[1]}`);
+
+  const jsonLd = /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let n: RegExpExecArray | null;
+  while ((n = jsonLd.exec(html)) !== null) {
+    const raw = n[1].trim();
+    try {
+      const parsed = JSON.parse(raw);
+      const serialized = JSON.stringify(parsed).slice(0, 4000);
+      lines.push(`json-ld: ${serialized}`);
+    } catch {
+      // skip malformed json-ld
+    }
+  }
+
+  return lines.join("\n");
+}
+
+/**
  * Strip script/style tags and collapse whitespace from an HTML document so the
- * LLM gets cheaper, denser input. Keeps anchor text, headings, meta tags.
+ * LLM gets cheaper, denser input. Prepends extracted metadata (og:*, json-ld,
+ * canonical) so the LLM sees structured signals before the noisy body.
  */
 export function cleanHtml(html: string, maxChars = 30_000): string {
-  let text = html
+  const metadata = extractMetadata(html);
+  let body = html
     .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
     .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
     .replace(/<noscript\b[\s\S]*?<\/noscript>/gi, " ")
     .replace(/<!--[\s\S]*?-->/g, " ")
     .replace(/<svg\b[\s\S]*?<\/svg>/gi, " ");
-  text = text.replace(/[ \t\f\v]+/g, " ").replace(/\n\s*\n+/g, "\n\n").trim();
-  if (text.length > maxChars) text = text.slice(0, maxChars);
-  return text;
+  body = body.replace(/[ \t\f\v]+/g, " ").replace(/\n\s*\n+/g, "\n\n").trim();
+
+  const combined = metadata
+    ? `METADATA:\n${metadata}\n\nBODY:\n${body}`
+    : body;
+  if (combined.length > maxChars) return combined.slice(0, maxChars);
+  return combined;
 }
 
 // Exported for testing
