@@ -11,19 +11,19 @@ describe("extractPrizeStructured — cheap paths", () => {
   let originalKey: string | undefined;
 
   beforeEach(() => {
-    originalKey = process.env.OPENAI_API_KEY;
+    originalKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
   });
 
   afterEach(() => {
     if (originalKey === undefined) {
-      delete process.env.OPENAI_API_KEY;
+      delete process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     } else {
-      process.env.OPENAI_API_KEY = originalKey;
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY = originalKey;
     }
   });
 
-  it("returns null when AI is disabled (no OPENAI_API_KEY)", async () => {
-    delete process.env.OPENAI_API_KEY;
+  it("returns null when AI is disabled (no GOOGLE_GENERATIVE_AI_API_KEY)", async () => {
+    delete process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     const result = await extractPrizeStructured({
       prizeType: "money",
       prizeDetails: "1º R$500, 2º R$300",
@@ -32,7 +32,7 @@ describe("extractPrizeStructured — cheap paths", () => {
   });
 
   it("returns a zero/false skeleton when prize_type is none and details are empty", async () => {
-    process.env.OPENAI_API_KEY = "test-key";
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY = "test-key";
     const result = await extractPrizeStructured({
       prizeType: "none",
       prizeDetails: null,
@@ -49,7 +49,7 @@ describe("extractPrizeStructured — cheap paths", () => {
   });
 
   it("flags has_money=true when prize_type is money but details are empty", async () => {
-    process.env.OPENAI_API_KEY = "test-key";
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY = "test-key";
     const result = await extractPrizeStructured({
       prizeType: "money",
       prizeDetails: null,
@@ -60,7 +60,7 @@ describe("extractPrizeStructured — cheap paths", () => {
   });
 
   it("flags both has_money and has_trophy when prize_type=both but details are empty", async () => {
-    process.env.OPENAI_API_KEY = "test-key";
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY = "test-key";
     const result = await extractPrizeStructured({
       prizeType: "both",
       prizeDetails: "  ",
@@ -70,7 +70,7 @@ describe("extractPrizeStructured — cheap paths", () => {
   });
 
   it("flags has_trophy only when prize_type=trophy and details are short", async () => {
-    process.env.OPENAI_API_KEY = "test-key";
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY = "test-key";
     const result = await extractPrizeStructured({
       prizeType: "trophy",
       prizeDetails: "ok",

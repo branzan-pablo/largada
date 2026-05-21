@@ -47,10 +47,10 @@ COMMENT ON TABLE public.ai_call_logs IS
 -- ──────────────────────────────────────────────────────────
 CREATE EXTENSION IF NOT EXISTS vector;
 
-ALTER TABLE public.races ADD COLUMN embedding vector(1536);
+ALTER TABLE public.races ADD COLUMN embedding vector(768);
 
 COMMENT ON COLUMN public.races.embedding IS
-  'Fingerprint embedding (name | city | date | organizer) from text-embedding-3-small. Used for semantic dedup and recommendation re-ranking.';
+  'Fingerprint embedding (name | city | date | organizer) from Google text-embedding-004 (768d). Used for semantic dedup and recommendation re-ranking.';
 
 -- HNSW is the right default for our volume (<100k rows expected for years).
 CREATE INDEX idx_races_embedding ON public.races
@@ -62,7 +62,7 @@ CREATE INDEX idx_races_embedding ON public.races
 --    Returns races above similarity threshold with same date (±1 day).
 -- ──────────────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION public.match_races_semantic(
-  query_embedding vector(1536),
+  query_embedding vector(768),
   query_date      DATE,
   match_threshold FLOAT DEFAULT 0.92,
   match_count     INT DEFAULT 5,

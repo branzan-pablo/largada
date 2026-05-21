@@ -14,9 +14,9 @@ importers:
       '@ai-sdk/anthropic':
         specifier: ^3.0.78
         version: 3.0.78(zod@4.3.6)
-      '@ai-sdk/openai':
-        specifier: ^3.0.64
-        version: 3.0.64(zod@4.3.6)
+      '@ai-sdk/google':
+        specifier: ^3.0.78
+        version: 3.0.78(zod@4.3.6)
       '@supabase/ssr':
         specifier: ^0.8.0
         version: 0.8.0(@supabase/supabase-js@2.95.3)
@@ -126,8 +126,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@3.0.64':
-    resolution: {integrity: sha512-epO4iS6QwktaY2PF6uBcPnDTJ3BxPOfsGS7/OEtBe3GtNj7C8h8gMDVtIe5K8W16HNDbn0tbR4dcQfpfs+XVFg==}
+  '@ai-sdk/google@3.0.78':
+    resolution: {integrity: sha512-iPkZHiaaBNreaVX2fLpc+SAa7OJPV6f7pZRK98lWTI4vf0D546+9eEQ6T2FagJAHO0K0gEyzx5zogCoHbJnhQg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -4565,7 +4565,7 @@ snapshots:
       '@vercel/oidc': 3.2.0
       zod: 4.3.6
 
-  '@ai-sdk/openai@3.0.64(zod@4.3.6)':
+  '@ai-sdk/google@3.0.78(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
       '@ai-sdk/provider-utils': 4.0.27(zod@4.3.6)

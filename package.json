@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.78",
-    "@ai-sdk/openai": "^3.0.64",
+    "@ai-sdk/google": "^3.0.78",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.95.3",
     "@vercel/analytics": "^1.6.1",

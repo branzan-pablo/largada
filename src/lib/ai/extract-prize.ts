@@ -67,7 +67,7 @@ export async function extractPrizeStructured(
             completionTokens: usage?.outputTokens,
             totalTokens: usage?.totalTokens,
           },
-          model: "gpt-4o-mini",
+          model: "gemini-2.0-flash-001",
         };
       },
       { prize_type: input.prizeType },

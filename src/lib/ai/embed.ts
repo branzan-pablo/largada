@@ -41,7 +41,7 @@ export async function embedText(text: string): Promise<number[]> {
       return {
         result: embedding,
         usage: { promptTokens: usage?.tokens, totalTokens: usage?.tokens },
-        model: "text-embedding-3-small",
+        model: "text-embedding-004",
       };
     },
     { text_length: text.length },
