@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Sparkles, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,6 +83,56 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   const [isPromoted, setIsPromoted] = useState(race?.is_promoted ?? false);
   const [imageUrl, setImageUrl] = useState<string | null>(race?.image_url ?? null);
   const [uploadFolder] = useState(() => race?.id ?? crypto.randomUUID());
+  const [isDescribing, setIsDescribing] = useState(false);
+
+  // Ask the LLM to draft "Descrição adicional" from the fields already filled
+  // in the form. If the textarea already has content, confirm before replacing
+  // so the admin does not lose their own writing on an accidental click.
+  const suggestDescription = async () => {
+    if (!name.trim()) {
+      toast.error("Informe pelo menos o nome da corrida antes de sugerir.");
+      return;
+    }
+    if (description.trim() && !window.confirm("Substituir a descrição atual?")) {
+      return;
+    }
+    setIsDescribing(true);
+    try {
+      const res = await fetch("/api/admin/ai/describe-race", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          city: selectedCity?.name ?? null,
+          state: selectedCity?.state_code ?? null,
+          date: date || null,
+          startTime: startTime || null,
+          distances: distances.length > 0 ? distances : null,
+          prizeType: (prizeType as "money" | "trophy" | "both" | "none") || null,
+          prizeDetails: prizeDetails || null,
+          registrationPrice: registrationPrice || null,
+          organizer: organizer || null,
+          address: address || null,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.message || json.error || "Falha ao gerar descrição.");
+        return;
+      }
+      if (typeof json.description !== "string" || !json.description.trim()) {
+        toast.warning("Resposta vazia.");
+        return;
+      }
+      setDescription(json.description);
+      toast.success("Descrição sugerida. Revise antes de salvar.");
+    } catch (err) {
+      console.error("[describe]", err);
+      toast.error("Erro inesperado ao gerar descrição.");
+    } finally {
+      setIsDescribing(false);
+    }
+  };
 
   const handleDistanceToggle = (distance: string) => {
     setDistances((prev) => {
@@ -878,7 +929,24 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Descrição adicional</Label>
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="description">Descrição adicional</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 gap-1.5 px-2 text-xs"
+                  onClick={suggestDescription}
+                  disabled={isDescribing || isLoading || !name.trim()}
+                >
+                  {isDescribing ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                  {isDescribing ? "Gerando..." : "Sugerir com IA"}
+                </Button>
+              </div>
               <Textarea
                 id="description"
                 value={description}
