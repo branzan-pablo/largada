@@ -23,7 +23,7 @@ export default async function NewRacePage({
   }
 
   const suggestionData = params.suggestionId
-    ? { name: params.name ?? "", city: params.city ?? "", state: params.state ?? "", date: params.date ?? "", link: params.link ?? "", notes: params.notes ?? "", suggestionId: params.suggestionId, cityData }
+    ? { name: params.name ?? "", city: params.city ?? "", state: params.state ?? "", date: params.date ?? "", link: params.link ?? "", notes: params.notes ?? "", description: params.description ?? "", suggestionId: params.suggestionId, cityData }
     : undefined;
 
   return (

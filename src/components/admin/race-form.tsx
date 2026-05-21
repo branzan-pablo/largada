@@ -35,6 +35,7 @@ interface RaceFormProps {
     date?: string;
     link?: string;
     notes?: string;
+    description?: string;
     suggestionId?: string;
     cityData?: { name: string; state_code: string; latitude: number; longitude: number };
   };
@@ -76,7 +77,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   const [prizeDetails, setPrizeDetails] = useState(race?.prize_details ?? "");
   const [routeDescription, setRouteDescription] = useState(race?.route_description ?? "");
   const [organizer, setOrganizer] = useState(race?.organizer ?? "");
-  const [description, setDescription] = useState(race?.description ?? "");
+  const [description, setDescription] = useState(race?.description ?? suggestionData?.description ?? "");
   const [status, setStatus] = useState<string>(race?.status ?? "confirmed");
   const [notes, setNotes] = useState(race?.notes ?? suggestionData?.notes ?? "");
   const [link, setLink] = useState(race?.link ?? suggestionData?.link ?? "");

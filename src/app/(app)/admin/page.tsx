@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { AdminRacesTable } from "@/components/admin/admin-races-table";
+import { BackfillEnrichButton } from "@/components/admin/backfill-enrich-button";
 
 export const metadata = {
   title: "Corridas | Admin",
@@ -81,6 +82,10 @@ export default async function AdminPage() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="mb-4 flex justify-end">
+        <BackfillEnrichButton />
       </div>
 
       <AdminRacesTable races={racesWithClicks} />
