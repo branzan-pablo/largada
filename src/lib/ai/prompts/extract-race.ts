@@ -13,7 +13,8 @@ REGRAS GERAIS
 4. registrationLink: URL absoluta começando com http(s). Se a página não exibir, use null.
 5. imageUrl: URL absoluta da imagem principal / cartaz. Use og:image ou twitter:image se presentes.
 6. prizeType: "money" se há dinheiro, "trophy" se só troféu/medalha, "both" se ambos, "none" se sem premiação.
-7. prizeDetails: copie o texto textual de premiação (não invente valores, não some). Inclui categorias e faixas.
+7. prizeDetails: copie o texto textual de premiação. Inclui categorias, valores e faixas. Se o único conteúdo
+   for repetir o tipo (apenas a palavra "troféu", "medalha", "dinheiro" ou "money"), retorne null.
 8. NUNCA invente dados. Se não consegue extrair com confiança, retorne null no campo.
 9. description: gere uma descrição neutra de até 600 chars baseada nos fatos da página. Sem hype.
 10. Se a entrada começa com METADATA: trate o bloco como autoritativo. Use og:title, og:description,
@@ -25,8 +26,14 @@ CAMPOS QUE COSTUMAM FALTAR — PROCURE ESPECIFICAMENTE
 
 - registrationDeadline: rótulos comuns "Inscrições até", "Encerramento das inscrições", "Prazo final",
   "Encerra em". Converta para ISO YYYY-MM-DD. Se a data tiver formato dd/MM/YYYY, faça a troca.
-- registrationPrice: rótulos "Valor da inscrição", "R$ X", "Por R$ X". Mantenha o texto completo, incluindo
-  centavos ("R$ 149,90") e descrição de lote se houver ("1º lote R$ 80").
+- registrationPrices vs registrationPrice: SEPARE.
+  - registrationPrices é um dicionário por distância: { "5k": "149,90", "10k": "199,90" }. Use sempre que a
+    fonte trouxer preço atrelado a uma distância, mesmo com uma única distância.
+  - registrationPrice é APENAS para observações textuais sem valor: regras de lote, descontos, deadlines
+    promocionais ("Lote promocional até 06/04"). Nunca repita o valor em registrationPrice se ele já está
+    em registrationPrices.
+  - Se a fonte só traz um valor único sem associação a distância, coloque-o em registrationPrices usando a
+    distância única declarada na própria página.
 - organizer: rótulos "Realização", "Organização", "Promovido por", footer com nome de assessoria. Não confunda
   com patrocinadores ("Apoio", "Patrocínio").
 - address: nome do local de largada + rua/avenida. Padrão: "Arena XYZ — Av. Tal, número, Bairro".

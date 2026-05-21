@@ -49,7 +49,15 @@ export const raceExtractionSchema = z.object({
     .string()
     .max(200)
     .nullable()
-    .describe("Valor de inscrição como texto livre. Pode incluir lotes."),
+    .describe(
+      "Observações textuais sobre o valor (ex: 'Lote promocional até 06/04', regras de desconto). NÃO inclua o valor em si aqui se já estiver em registrationPrices.",
+    ),
+  registrationPrices: z
+    .record(z.string().min(1).max(16), z.string().min(1).max(64))
+    .nullable()
+    .describe(
+      "Preço por distância. Use a mesma chave de distance ('5k', '10k', '21k'). Valor como string PT-BR ('149,90' ou 'R$ 149,90'). null se não houver preço por distância.",
+    ),
   registrationLink: z
     .string()
     .max(2048)
@@ -111,6 +119,7 @@ export const RACE_EXTRACTION_FIELDS: ReadonlyArray<keyof RaceExtraction> = [
   "address",
   "distances",
   "registrationPrice",
+  "registrationPrices",
   "registrationLink",
   "registrationDeadline",
   "prizeType",

@@ -146,6 +146,14 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       setDistances(extracted.distances);
       filled++;
     }
+    if (
+      extracted.registrationPrices &&
+      Object.keys(extracted.registrationPrices).length > 0 &&
+      Object.keys(registrationPrices).length === 0
+    ) {
+      setRegistrationPrices(extracted.registrationPrices);
+      filled++;
+    }
     if (extracted.registrationPrice && !registrationPrice.trim()) {
       setRegistrationPrice(extracted.registrationPrice);
       filled++;
@@ -163,8 +171,14 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       filled++;
     }
     if (extracted.prizeDetails && !prizeDetails.trim()) {
-      setPrizeDetails(extracted.prizeDetails);
-      filled++;
+      // Guard against the LLM echoing the prize type label as the "detail".
+      // If the entire text matches a known type keyword, drop it.
+      const normalized = extracted.prizeDetails.trim().toLowerCase();
+      const isEcho = ["troféu", "trofeu", "medalha", "dinheiro", "money", "trophy", "both", "ambos", "none", "nenhum"].includes(normalized);
+      if (!isEcho) {
+        setPrizeDetails(extracted.prizeDetails);
+        filled++;
+      }
     }
     if (extracted.routeDescription && !routeDescription.trim()) {
       setRouteDescription(extracted.routeDescription);
