@@ -67,7 +67,7 @@ export async function extractPrizeStructured(
             completionTokens: usage?.outputTokens,
             totalTokens: usage?.totalTokens,
           },
-          model: "gemini-2.0-flash-001",
+          model: "gemini-2.5-flash-lite",
         };
       },
       { prize_type: input.prizeType },

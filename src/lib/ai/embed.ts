@@ -2,6 +2,10 @@ import { embed as aiEmbed } from "ai";
 import { embeddingModel, EMBEDDING_DIMENSIONS } from "./provider";
 import { withTelemetry } from "./observability";
 
+const GOOGLE_EMBED_PROVIDER_OPTIONS = {
+  google: { outputDimensionality: EMBEDDING_DIMENSIONS },
+};
+
 /**
  * Build the canonical "race fingerprint" string used both at insertion time
  * (for dedup) and at backfill (for existing rows). Keep this stable — changing
@@ -32,6 +36,7 @@ export async function embedText(text: string): Promise<number[]> {
       const { embedding, usage } = await aiEmbed({
         model: embeddingModel,
         value: text,
+        providerOptions: GOOGLE_EMBED_PROVIDER_OPTIONS,
       });
       if (embedding.length !== EMBEDDING_DIMENSIONS) {
         throw new Error(
@@ -41,7 +46,7 @@ export async function embedText(text: string): Promise<number[]> {
       return {
         result: embedding,
         usage: { promptTokens: usage?.tokens, totalTokens: usage?.tokens },
-        model: "text-embedding-004",
+        model: "gemini-embedding-001",
       };
     },
     { text_length: text.length },

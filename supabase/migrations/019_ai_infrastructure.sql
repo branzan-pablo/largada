@@ -50,7 +50,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 ALTER TABLE public.races ADD COLUMN embedding vector(768);
 
 COMMENT ON COLUMN public.races.embedding IS
-  'Fingerprint embedding (name | city | date | organizer) from Google text-embedding-004 (768d). Used for semantic dedup and recommendation re-ranking.';
+  'Fingerprint embedding (name | city | date | organizer) from Google gemini-embedding-001 truncated to 768d via outputDimensionality. Used for semantic dedup and recommendation re-ranking.';
 
 -- HNSW is the right default for our volume (<100k rows expected for years).
 CREATE INDEX idx_races_embedding ON public.races
