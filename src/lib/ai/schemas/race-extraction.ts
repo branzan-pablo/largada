@@ -53,10 +53,23 @@ export const raceExtractionSchema = z.object({
       "Observações textuais sobre o valor (ex: 'Lote promocional até 06/04', regras de desconto). NÃO inclua o valor em si aqui se já estiver em registrationPrices.",
     ),
   registrationPrices: z
-    .record(z.string().min(1).max(16), z.string().min(1).max(64))
+    .array(
+      z.object({
+        distance: z
+          .string()
+          .min(1)
+          .max(16)
+          .describe("Distância em formato curto e minúsculo ('5k', '10k')."),
+        price: z
+          .string()
+          .min(1)
+          .max(64)
+          .describe("Valor PT-BR ('149,90' ou 'R$ 149,90')."),
+      }),
+    )
     .nullable()
     .describe(
-      "Preço por distância. Use a mesma chave de distance ('5k', '10k', '21k'). Valor como string PT-BR ('149,90' ou 'R$ 149,90'). null se não houver preço por distância.",
+      "Lista de preço por distância. Vazia ou null se não houver preço por distância.",
     ),
   registrationLink: z
     .string()

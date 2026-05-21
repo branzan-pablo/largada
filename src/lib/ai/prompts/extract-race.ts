@@ -27,8 +27,9 @@ CAMPOS QUE COSTUMAM FALTAR — PROCURE ESPECIFICAMENTE
 - registrationDeadline: rótulos comuns "Inscrições até", "Encerramento das inscrições", "Prazo final",
   "Encerra em". Converta para ISO YYYY-MM-DD. Se a data tiver formato dd/MM/YYYY, faça a troca.
 - registrationPrices vs registrationPrice: SEPARE.
-  - registrationPrices é um dicionário por distância: { "5k": "149,90", "10k": "199,90" }. Use sempre que a
-    fonte trouxer preço atrelado a uma distância, mesmo com uma única distância.
+  - registrationPrices é uma LISTA de objetos { distance, price }. Exemplo:
+    [{ "distance": "5k", "price": "149,90" }, { "distance": "10k", "price": "199,90" }].
+    Use sempre que a fonte trouxer preço atrelado a uma distância, mesmo com uma única distância.
   - registrationPrice é APENAS para observações textuais sem valor: regras de lote, descontos, deadlines
     promocionais ("Lote promocional até 06/04"). Nunca repita o valor em registrationPrice se ele já está
     em registrationPrices.

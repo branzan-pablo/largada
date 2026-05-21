@@ -148,10 +148,13 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     }
     if (
       extracted.registrationPrices &&
-      Object.keys(extracted.registrationPrices).length > 0 &&
+      extracted.registrationPrices.length > 0 &&
       Object.keys(registrationPrices).length === 0
     ) {
-      setRegistrationPrices(extracted.registrationPrices);
+      const asMap = Object.fromEntries(
+        extracted.registrationPrices.map((p) => [p.distance, p.price]),
+      );
+      setRegistrationPrices(asMap);
       filled++;
     }
     if (extracted.registrationPrice && !registrationPrice.trim()) {

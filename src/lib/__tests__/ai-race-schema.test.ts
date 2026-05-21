@@ -10,7 +10,10 @@ const FULL_VALID = {
   address: "Praça XV de Novembro",
   distances: ["5k", "10k"],
   registrationPrice: "Lote promocional até 06/04",
-  registrationPrices: { "5k": "80,00", "10k": "100,00" },
+  registrationPrices: [
+    { distance: "5k", price: "80,00" },
+    { distance: "10k", price: "100,00" },
+  ],
   registrationLink: "https://example.com/inscricao",
   registrationDeadline: "2026-06-10",
   prizeType: "money" as const,
@@ -83,26 +86,26 @@ describe("raceExtractionSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("accepts registrationPrices as a single-distance map", () => {
+  it("accepts registrationPrices as a single-distance array", () => {
     const result = raceExtractionSchema.safeParse({
       ...FULL_VALID,
-      registrationPrices: { "5k": "149,90" },
+      registrationPrices: [{ distance: "5k", price: "149,90" }],
     });
     expect(result.success).toBe(true);
   });
 
-  it("rejects registrationPrices with empty key", () => {
+  it("rejects registrationPrices with empty distance", () => {
     const result = raceExtractionSchema.safeParse({
       ...FULL_VALID,
-      registrationPrices: { "": "100,00" },
+      registrationPrices: [{ distance: "", price: "100,00" }],
     });
     expect(result.success).toBe(false);
   });
 
-  it("rejects registrationPrices with empty value", () => {
+  it("rejects registrationPrices with empty price", () => {
     const result = raceExtractionSchema.safeParse({
       ...FULL_VALID,
-      registrationPrices: { "5k": "" },
+      registrationPrices: [{ distance: "5k", price: "" }],
     });
     expect(result.success).toBe(false);
   });
