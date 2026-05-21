@@ -17,10 +17,12 @@ import {
 } from "@/components/ui/select";
 import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { RaceFiller } from "@/components/admin/race-filler";
 import { DEFAULT_DISTANCES } from "@/lib/constants";
 import { raceSchema } from "@/lib/validations";
 import { toast } from "sonner";
 import type { Race, RegistrationBatch } from "@/types/race";
+import type { RaceExtraction } from "@/lib/ai/schemas/race-extraction";
 import { todayInBrazil } from "@/lib/date";
 
 interface RaceFormProps {
@@ -115,6 +117,81 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     setCustomDistanceError("");
     setDistances((prev) => [...prev, normalized]);
     setCustomDistanceInput("");
+  };
+
+  // Merge AI-extracted fields into the form, preserving anything the admin
+  // already typed. Treats form defaults ("07:00", "none", "") as "empty" so
+  // a fresh form gets filled but mid-flight edits are never overwritten.
+  const handleExtracted = (extracted: RaceExtraction) => {
+    let filled = 0;
+    const hints: string[] = [];
+
+    if (extracted.name && !name.trim()) {
+      setName(extracted.name);
+      filled++;
+    }
+    if (extracted.date && !date) {
+      setDate(extracted.date);
+      filled++;
+    }
+    if (extracted.startTime && startTime === "07:00") {
+      setStartTime(extracted.startTime);
+      filled++;
+    }
+    if (extracted.address && !address.trim()) {
+      setAddress(extracted.address);
+      filled++;
+    }
+    if (extracted.distances && extracted.distances.length > 0 && distances.length === 0) {
+      setDistances(extracted.distances);
+      filled++;
+    }
+    if (extracted.registrationPrice && !registrationPrice.trim()) {
+      setRegistrationPrice(extracted.registrationPrice);
+      filled++;
+    }
+    if (extracted.registrationLink && !registrationLink.trim()) {
+      setRegistrationLink(extracted.registrationLink);
+      filled++;
+    }
+    if (extracted.registrationDeadline && !registrationDeadline) {
+      setRegistrationDeadline(extracted.registrationDeadline);
+      filled++;
+    }
+    if (extracted.prizeType && prizeType === "none") {
+      setPrizeType(extracted.prizeType);
+      filled++;
+    }
+    if (extracted.prizeDetails && !prizeDetails.trim()) {
+      setPrizeDetails(extracted.prizeDetails);
+      filled++;
+    }
+    if (extracted.routeDescription && !routeDescription.trim()) {
+      setRouteDescription(extracted.routeDescription);
+      filled++;
+    }
+    if (extracted.organizer && !organizer.trim()) {
+      setOrganizer(extracted.organizer);
+      filled++;
+    }
+    if (extracted.description && !description.trim()) {
+      setDescription(extracted.description);
+      filled++;
+    }
+
+    if (extracted.city && extracted.state && !selectedCity) {
+      hints.push(`Cidade detectada: ${extracted.city} - ${extracted.state}. Selecione na busca para vincular as coordenadas.`);
+    }
+    if (extracted.imageUrl && !imageUrl) {
+      hints.push("Imagem detectada na fonte. Faça upload do arquivo no campo de banner.");
+    }
+
+    if (filled > 0) {
+      toast.success(`${filled} ${filled === 1 ? "campo preenchido" : "campos preenchidos"}.`);
+    } else {
+      toast.info("Nenhum campo novo. Os existentes foram preservados.");
+    }
+    for (const hint of hints) toast.info(hint);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -246,6 +323,11 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-5xl space-y-6" noValidate>
+      {!isEditing && (
+        <div className="flex justify-end">
+          <RaceFiller onExtract={handleExtracted} disabled={isLoading} />
+        </div>
+      )}
       {suggestionData?.suggestionId && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
           Criando corrida a partir de uma sugestão. Os campos Nome, Cidade, Data, Link e Observações já
