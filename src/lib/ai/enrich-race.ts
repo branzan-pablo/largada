@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { extractPrizeStructured } from "./extract-prize";
-import { buildRaceFingerprint, embedText, toPgVector } from "./embed";
+import { buildRaceFingerprint, embedText } from "./embed";
 import { isAIEnabled } from "./provider";
 
 interface EnrichResult {
@@ -62,7 +62,10 @@ export async function enrichRace(raceId: string): Promise<EnrichResult> {
       organizer: race.organizer,
     });
     const embedding = await embedText(fingerprint);
-    updates.embedding = toPgVector(embedding);
+    // pgvector via supabase-js accepts the raw number[] as JSON array; do NOT
+    // serialize to "[...]" text here, that goes through PostgREST as a string
+    // and fails the implicit cast to vector(N).
+    updates.embedding = embedding;
     result.embeddingUpdated = true;
   } catch (err) {
     console.warn(`[ai/enrich-race] Embedding failed for race ${raceId}:`, err);
@@ -77,6 +80,12 @@ export async function enrichRace(raceId: string): Promise<EnrichResult> {
       console.error(
         `[ai/enrich-race] Update failed for race ${raceId}:`,
         updateError,
+      );
+      result.prizeUpdated = false;
+      result.embeddingUpdated = false;
+    } else {
+      console.log(
+        `[ai/enrich-race] Race ${raceId} enriched: prize=${result.prizeUpdated} embedding=${result.embeddingUpdated}`,
       );
     }
   }
