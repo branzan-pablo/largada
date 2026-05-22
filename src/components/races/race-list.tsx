@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useInfiniteRaces, type InitialRaceData } from "@/hooks/use-infinite-races";
 import { RaceCard } from "./race-card";
+import { RaceEmptyStateSuggestions } from "./race-empty-state-suggestions";
 import { RaceFiltersDesktop } from "./race-filters";
 import { RaceFiltersMobile } from "./race-filters-mobile";
 import { RadiusBanner } from "./radius-banner";
@@ -229,7 +230,13 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
             <p className="mt-1 text-sm text-[#6B7280]">
               Tente ampliar o raio de distância ou remover alguns filtros.
             </p>
-            <p className="mt-3 text-sm text-[#6B7280]">
+            <RaceEmptyStateSuggestions
+              filters={filters}
+              search={search}
+              onApplyFilters={setFilters}
+              onApplySearch={setSearch}
+            />
+            <p className="mt-5 text-sm text-[#6B7280]">
               Conhece uma corrida que deveria aparecer aqui?{" "}
               <a
                 href="/sugerir"
