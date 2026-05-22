@@ -13,10 +13,10 @@
 
 
 ALTER TABLE public.race_recommendation_logs
-  ADD COLUMN match_reason            TEXT,
-  ADD COLUMN match_score_breakdown   JSONB,
-  ADD COLUMN clicked_at              TIMESTAMPTZ,
-  ADD COLUMN registered_at           TIMESTAMPTZ;
+  ADD COLUMN IF NOT EXISTS match_reason            TEXT,
+  ADD COLUMN IF NOT EXISTS match_score_breakdown   JSONB,
+  ADD COLUMN IF NOT EXISTS clicked_at              TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS registered_at           TIMESTAMPTZ;
 
 COMMENT ON COLUMN public.race_recommendation_logs.match_reason IS
   'Short PT-BR explanation shown in the "Pra você porque..." chip and in the push body.';
@@ -30,7 +30,7 @@ COMMENT ON COLUMN public.race_recommendation_logs.clicked_at IS
 COMMENT ON COLUMN public.race_recommendation_logs.registered_at IS
   'When the user clicked the registration link from the recommended race. Null if not yet.';
 
-CREATE INDEX idx_race_recommendation_logs_race_user
+CREATE INDEX IF NOT EXISTS idx_race_recommendation_logs_race_user
   ON public.race_recommendation_logs(race_id, user_id);
 
 
@@ -38,9 +38,18 @@ CREATE INDEX idx_race_recommendation_logs_race_user
 -- Allow the user to read their own recommendation log entries
 -- so the listing API can join match_reason into the race feed.
 -- ──────────────────────────────────────────────────────────
-CREATE POLICY "Users can read own recommendation logs"
-  ON public.race_recommendation_logs FOR SELECT
-  USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'race_recommendation_logs'
+      AND policyname = 'Users can read own recommendation logs'
+  ) THEN
+    EXECUTE 'CREATE POLICY "Users can read own recommendation logs"
+      ON public.race_recommendation_logs FOR SELECT
+      USING (auth.uid() = user_id)';
+  END IF;
+END $$;
 
 
 NOTIFY pgrst, 'reload schema';
