@@ -4,6 +4,7 @@ import Link from "next/link";
 import { RaceDistanceBadges } from "./race-distance-badges";
 import { RacePrizeBadge } from "./race-prize-badge";
 import { RacePrizeAmountBadge } from "./race-prize-amount-badge";
+import { RaceMatchReasonChip } from "./race-match-reason-chip";
 import { RaceShareButton } from "./race-share-button";
 import { MapPin, Users, Star, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
@@ -86,6 +87,11 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
 
       {/* Info — below thumbnail, no border */}
       <div className="pt-3 pb-1">
+        {race.match_reason ? (
+          <div className="mb-1.5">
+            <RaceMatchReasonChip reason={race.match_reason} />
+          </div>
+        ) : null}
         <h3 className="text-lg font-bold text-[#0D1B2A] line-clamp-2 leading-snug mb-1.5">
           {race.name}
         </h3>

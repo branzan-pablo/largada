@@ -130,11 +130,22 @@ describe("sendToSubscriptions", () => {
 // ─── notifyPersonalizedRace ─────────────────────────────
 
 describe("notifyPersonalizedRace", () => {
-  it("returns {sent:0} when user has no subscriptions", async () => {
-    mockFrom.mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ data: null }),
-      }),
+  it("logs the recommendation even when user has no subscriptions", async () => {
+    // The upsert must still happen so the "Pra você porque..." chip can render
+    // on the listing even for users who opted out of push.
+    const mockUpsert = vi.fn().mockResolvedValue({});
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "push_subscriptions") {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ data: null }),
+          }),
+        };
+      }
+      if (table === "race_recommendation_logs") {
+        return { upsert: mockUpsert };
+      }
+      return {};
     });
 
     const result = await notifyPersonalizedRace(
@@ -144,10 +155,18 @@ describe("notifyPersonalizedRace", () => {
     );
 
     expect(result).toEqual({ sent: 0 });
+    expect(mockUpsert).toHaveBeenCalledTimes(1);
+    expect(mockUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user_id: "user-1",
+        race_id: "race-1",
+        match_reason: "sua distância favorita",
+      }),
+      { onConflict: "user_id,race_id" },
+    );
   });
 
-  it("sends push and logs dedup on success", async () => {
-    // Mock subscription lookup
+  it("sends push and logs the recommendation with match_reason on success", async () => {
     const mockEq = vi.fn().mockResolvedValue({
       data: [makeSub()],
     });
@@ -169,16 +188,30 @@ describe("notifyPersonalizedRace", () => {
       "user-1",
       { id: "race-1", name: "Corrida X", city: "São Paulo", slug: "corrida-x" },
       "seu pace de 5:20/km é ideal",
+      { heuristic: 12, cosine_sim: 0.9, final: 10.8, source: "blended" },
     );
 
     expect(result.sent).toBe(1);
     expect(mockUpsert).toHaveBeenCalledWith(
-      { user_id: "user-1", race_id: "race-1" },
+      expect.objectContaining({
+        user_id: "user-1",
+        race_id: "race-1",
+        match_reason: "seu pace de 5:20/km é ideal",
+        match_score_breakdown: expect.objectContaining({
+          heuristic: 12,
+          cosine_sim: 0.9,
+          final: 10.8,
+          source: "blended",
+        }),
+      }),
       { onConflict: "user_id,race_id" },
     );
   });
 
-  it("does not log dedup when send fails", async () => {
+  it("still logs the recommendation when the push send fails", async () => {
+    // The chip should appear in the listing regardless of push delivery — if
+    // the user opens the app organically we want them to see why the race was
+    // recommended.
     const mockEq = vi.fn().mockResolvedValue({
       data: [makeSub()],
     });
@@ -203,7 +236,15 @@ describe("notifyPersonalizedRace", () => {
     );
 
     expect(result.sent).toBe(0);
-    expect(mockUpsert).not.toHaveBeenCalled();
+    expect(mockUpsert).toHaveBeenCalledTimes(1);
+    expect(mockUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user_id: "user-1",
+        race_id: "race-1",
+        match_reason: "match",
+      }),
+      { onConflict: "user_id,race_id" },
+    );
   });
 });
 

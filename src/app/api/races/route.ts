@@ -99,6 +99,40 @@ export async function GET(request: Request) {
 
   let filteredData = data ?? [];
 
+  // Join the user's match_reason on top of the race rows so the listing card
+  // can render the "Pra você porque..." chip without a second round trip.
+  // We do this in JS (not a SQL join) because the cardinality is tiny — at
+  // most ITEMS_PER_PAGE races — and Supabase doesn't easily express a
+  // filtered left join with a foreign-table user_id predicate.
+  let isPersonalized = false;
+  if (filteredData.length > 0) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const raceIds = filteredData.map((r) => r.id);
+      const { data: logs } = await supabase
+        .from("race_recommendation_logs")
+        .select("race_id, match_reason")
+        .eq("user_id", user.id)
+        .in("race_id", raceIds);
+      if (logs && logs.length > 0) {
+        const reasonByRace = new Map(
+          logs
+            .filter((l) => l.match_reason)
+            .map((l) => [l.race_id, l.match_reason as string]),
+        );
+        if (reasonByRace.size > 0) {
+          filteredData = filteredData.map((race) => ({
+            ...race,
+            match_reason: reasonByRace.get(race.id) ?? null,
+          }));
+          isPersonalized = true;
+        }
+      }
+    }
+  }
+
   // Radius filter (Haversine — kept client-side, PostGIS would be needed to move server-side)
   if (lat && lng && radius) {
     const userLat = parseFloat(lat);
@@ -130,9 +164,13 @@ export async function GET(request: Request) {
     limit,
     hasMore,
   });
+  // Personalized responses include per-user match_reason and must not be
+  // shared by the CDN cache. Anonymous responses stay on the same SWR policy.
   response.headers.set(
     "Cache-Control",
-    "public, s-maxage=60, stale-while-revalidate=300",
+    isPersonalized
+      ? "private, no-store"
+      : "public, s-maxage=60, stale-while-revalidate=300",
   );
   return response;
 }
