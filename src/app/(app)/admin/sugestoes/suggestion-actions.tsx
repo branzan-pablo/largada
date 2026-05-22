@@ -113,20 +113,16 @@ export function SuggestionActions({
   });
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3 pt-1">
       {draftDescription && (
         <div className="rounded-md border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-900">
           <strong className="block">Descrição sugerida:</strong>
           <p className="mt-1 whitespace-pre-line">{draftDescription}</p>
         </div>
       )}
-      <div className="flex flex-wrap gap-2">
-        <Button size="sm" asChild>
-          <Link href={`/admin/corridas/nova?${approveParams.toString()}`}>
-            Criar corrida
-            <ArrowRight className="ml-1 h-3.5 w-3.5" />
-          </Link>
-        </Button>
+
+      {/* Row 1: AI tools — aids that inform the decision. */}
+      <div className="grid grid-cols-2 gap-2">
         <Button
           size="sm"
           variant="outline"
@@ -160,10 +156,20 @@ export function SuggestionActions({
           )}
           {isDescribing ? "Gerando..." : "Sugerir descrição"}
         </Button>
+      </div>
+
+      {/* Row 2: final decision — primary action + destructive. */}
+      <div className="flex gap-2 border-t border-dashed border-gray-200 pt-2">
+        <Button size="sm" asChild className="flex-1">
+          <Link href={`/admin/corridas/nova?${approveParams.toString()}`}>
+            Criar corrida
+            <ArrowRight className="ml-1 h-3.5 w-3.5" />
+          </Link>
+        </Button>
         <Button
           size="sm"
           variant="outline"
-          className="cursor-pointer"
+          className="cursor-pointer text-destructive border-destructive/40 hover:bg-destructive/5 hover:text-destructive"
           onClick={handleReject}
           disabled={isRejecting}
         >
