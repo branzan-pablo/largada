@@ -23,7 +23,7 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
   return (
     <Link href={`/corrida/${race.slug}`} className={`block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden transition-colors ${race.is_promoted ? "ring-2 ring-[#FF4D00] shadow-lg shadow-[#FF4D00]/20 bg-linear-to-b from-[#FF4D00]/5 to-transparent" : ""}`}>
       {/* Thumbnail */}
-      <div className="relative aspect-4/3 w-full overflow-hidden rounded-xl bg-gray-100">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-gray-100">
         {race.image_url ? (
           <>
             {/* Blurred background layer */}
@@ -49,8 +49,8 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
           </>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-linear-to-br from-[#FF4D00]/10 via-gray-100 to-gray-200">
-            <span className="text-5xl font-black leading-none text-[#0D1B2A]">{day}</span>
-            <span className="mt-1 text-sm font-bold uppercase tracking-wider text-[#FF4D00]">{month}</span>
+            <span className="text-4xl font-black leading-none text-[#0D1B2A]">{day}</span>
+            <span className="mt-0.5 text-xs font-bold uppercase tracking-wider text-[#FF4D00]">{month}</span>
           </div>
         )}
 
@@ -80,35 +80,35 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
         {/* Date pill — bottom right (like YT duration) */}
         {race.image_url && (
           <div className="absolute bottom-2 right-2 rounded-md bg-black/80 px-1.5 py-0.5 z-10">
-            <span className="text-[16px] font-bold text-white">{day} {month}</span>
+            <span className="text-xs font-bold text-white">{day} {month}</span>
           </div>
         )}
       </div>
 
       {/* Info — below thumbnail, no border */}
-      <div className="pt-3 pb-1">
+      <div className="pt-2 pb-1">
         {race.match_reason ? (
-          <div className="mb-1.5">
+          <div className="mb-1">
             <RaceMatchReasonChip reason={race.match_reason} />
           </div>
         ) : null}
-        <h3 className="text-lg font-bold text-[#0D1B2A] line-clamp-2 leading-snug mb-1.5">
+        <h3 className="text-base font-bold text-[#0D1B2A] line-clamp-2 leading-snug mb-1">
           {race.name}
         </h3>
 
-        <div className="flex min-w-0 items-center gap-1 text-sm text-[#6B7280] mb-1">
-          <MapPin className="w-3.5 h-3.5 shrink-0" />
+        <div className="flex min-w-0 items-center gap-1 text-xs text-[#6B7280] mb-0.5">
+          <MapPin className="w-3 h-3 shrink-0" />
           <span className="truncate">{race.city}, {race.state}</span>
         </div>
 
-        <div className="flex min-w-0 items-center gap-1 text-sm text-[#6B7280] mb-2">
-          <CalendarDays className="w-3.5 h-3.5 shrink-0" />
+        <div className="flex min-w-0 items-center gap-1 text-xs text-[#6B7280] mb-1">
+          <CalendarDays className="w-3 h-3 shrink-0" />
           <span className="truncate">{formattedDate}{race.start_time ? ` · ${formatTime(race.start_time)}` : ""}</span>
         </div>
 
         {race.rsvp_count > 0 && (
-          <div className="flex min-w-0 items-center gap-1 text-sm text-[#6B7280] mb-2">
-            <Users className="w-3.5 h-3.5 shrink-0" />
+          <div className="flex min-w-0 items-center gap-1 text-xs text-[#6B7280] mb-1.5">
+            <Users className="w-3 h-3 shrink-0" />
             <span className="truncate">{race.rsvp_count === 1 ? "1 pessoa confirmou" : `${race.rsvp_count} pessoas confirmaram`}</span>
           </div>
         )}
