@@ -16,7 +16,16 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
 import { todayInBrazil } from "@/lib/date";
+import {
+  PROMOTION_TIERS,
+  DEFAULT_PROMOTION_TIER,
+  type PromotionTier,
+} from "@/lib/promotions";
 import type { OrganizerSubscription } from "@/types/subscription";
+
+function formatBRL(centavos: number): string {
+  return `R$ ${(centavos / 100).toFixed(2).replace(".", ",")}`;
+}
 
 interface PromoteRaceCardProps {
   raceId: string;
@@ -47,6 +56,7 @@ export function PromoteRaceCard({
   const [needsCustomer, setNeedsCustomer] = useState(false);
   const [taxId, setTaxId] = useState("");
   const [cellphone, setCellphone] = useState("");
+  const [selectedTier, setSelectedTier] = useState<PromotionTier>(DEFAULT_PROMOTION_TIER);
 
   const hasSubscription = !!subscription;
   const hasCredits =
@@ -85,7 +95,10 @@ export function PromoteRaceCard({
       const res = await fetch(`/api/races/${raceId}/promote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(customer ? { customer } : {}),
+        body: JSON.stringify({
+          tier: selectedTier,
+          ...(customer ? { customer } : {}),
+        }),
       });
 
       if (res.status === 422) {
@@ -171,6 +184,7 @@ export function PromoteRaceCard({
   }
 
   // Confirmation dialog with optional customer form
+  const tierConfig = PROMOTION_TIERS[selectedTier];
   const paymentDialog = (
     <Dialog open={open} onOpenChange={(isOpen) => {
       setOpen(isOpen);
@@ -178,6 +192,7 @@ export function PromoteRaceCard({
         setNeedsCustomer(false);
         setTaxId("");
         setCellphone("");
+        setSelectedTier(DEFAULT_PROMOTION_TIER);
       }
     }}>
       <DialogContent>
@@ -186,26 +201,45 @@ export function PromoteRaceCard({
           <DialogDescription>
             {needsCustomer
               ? "Precisamos do seu CPF/CNPJ e celular para processar o pagamento."
-              : "Sua corrida aparecerá com o badge ⭐ Destaque e será exibida no topo da listagem por 30 dias."}
+              : `Sua corrida aparecerá com o badge ⭐ Destaque e será exibida no topo da listagem por ${tierConfig.durationDays} dias.`}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Race + price summary */}
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-[#0D1B2A] line-clamp-1">
-                {raceName}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Destaque por 30 dias
-              </p>
+          <p className="text-sm font-medium text-[#0D1B2A] line-clamp-1">
+            {raceName}
+          </p>
+
+          {!needsCustomer && (
+            <div className="grid grid-cols-2 gap-3">
+              {(["express", "standard"] as PromotionTier[]).map((tier) => {
+                const cfg = PROMOTION_TIERS[tier];
+                const active = selectedTier === tier;
+                return (
+                  <button
+                    key={tier}
+                    type="button"
+                    onClick={() => setSelectedTier(tier)}
+                    className={`text-left rounded-lg border-2 p-3 transition-colors ${
+                      active
+                        ? "border-[#FF4D00] bg-orange-50"
+                        : "border-gray-200 bg-white hover:border-gray-300"
+                    }`}
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[#FF4D00]">
+                      {cfg.label}
+                    </p>
+                    <p className="mt-1 text-lg font-bold text-[#0D1B2A]">
+                      {formatBRL(cfg.priceCentavos)}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {cfg.durationDays} dias no topo
+                    </p>
+                  </button>
+                );
+              })}
             </div>
-            <div className="text-right shrink-0 ml-4">
-              <span className="text-lg font-bold text-[#0D1B2A]">R$ 149,00</span>
-              <p className="text-xs text-muted-foreground">pagamento único</p>
-            </div>
-          </div>
+          )}
 
           {needsCustomer && (
             <>
@@ -292,7 +326,7 @@ export function PromoteRaceCard({
             onClick={() => setOpen(true)}
           >
             <Star className="mr-1.5 h-3.5 w-3.5" />
-            Destacar (R$ 149)
+            Destacar
           </Button>
           {paymentDialog}
         </>
@@ -342,7 +376,7 @@ export function PromoteRaceCard({
           <h3 className="font-semibold text-green-900">Destacar esta corrida</h3>
         </div>
         <p className="text-xs text-green-700">
-          Incluso no seu plano — {remaining} destaque{remaining !== 1 ? "s" : ""}{" "}
+          Incluso no seu plano: {remaining} destaque{remaining !== 1 ? "s" : ""}{" "}
           disponíve{remaining !== 1 ? "is" : "l"}.
         </p>
         <Button
@@ -374,9 +408,9 @@ export function PromoteRaceCard({
           Apareça no topo da listagem e ganhe mais visibilidade para os atletas.
         </p>
         <p className="text-sm font-semibold text-[#0D1B2A]">
-          R$ 149,00{" "}
+          A partir de {formatBRL(PROMOTION_TIERS.express.priceCentavos)}{" "}
           <span className="text-xs font-normal text-muted-foreground">
-            por 30 dias
+            por {PROMOTION_TIERS.express.durationDays} dias
           </span>
         </p>
         <Button className="w-full cursor-pointer" variant="outline" onClick={() => setOpen(true)}>

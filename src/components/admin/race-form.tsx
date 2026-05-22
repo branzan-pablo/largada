@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Sparkles, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,10 +18,12 @@ import {
 } from "@/components/ui/select";
 import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { RaceFiller } from "@/components/admin/race-filler";
 import { DEFAULT_DISTANCES } from "@/lib/constants";
 import { raceSchema } from "@/lib/validations";
 import { toast } from "sonner";
 import type { Race, RegistrationBatch } from "@/types/race";
+import type { RaceExtraction } from "@/lib/ai/schemas/race-extraction";
 import { todayInBrazil } from "@/lib/date";
 
 interface RaceFormProps {
@@ -32,8 +35,10 @@ interface RaceFormProps {
     date?: string;
     link?: string;
     notes?: string;
+    description?: string;
     suggestionId?: string;
     cityData?: { name: string; state_code: string; latitude: number; longitude: number };
+    extracted?: RaceExtraction;
   };
 }
 
@@ -73,13 +78,63 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   const [prizeDetails, setPrizeDetails] = useState(race?.prize_details ?? "");
   const [routeDescription, setRouteDescription] = useState(race?.route_description ?? "");
   const [organizer, setOrganizer] = useState(race?.organizer ?? "");
-  const [description, setDescription] = useState(race?.description ?? "");
+  const [description, setDescription] = useState(race?.description ?? suggestionData?.description ?? "");
   const [status, setStatus] = useState<string>(race?.status ?? "confirmed");
   const [notes, setNotes] = useState(race?.notes ?? suggestionData?.notes ?? "");
   const [link, setLink] = useState(race?.link ?? suggestionData?.link ?? "");
   const [isPromoted, setIsPromoted] = useState(race?.is_promoted ?? false);
   const [imageUrl, setImageUrl] = useState<string | null>(race?.image_url ?? null);
   const [uploadFolder] = useState(() => race?.id ?? crypto.randomUUID());
+  const [isDescribing, setIsDescribing] = useState(false);
+
+  // Ask the LLM to draft "Descrição adicional" from the fields already filled
+  // in the form. If the textarea already has content, confirm before replacing
+  // so the admin does not lose their own writing on an accidental click.
+  const suggestDescription = async () => {
+    if (!name.trim()) {
+      toast.error("Informe pelo menos o nome da corrida antes de sugerir.");
+      return;
+    }
+    if (description.trim() && !window.confirm("Substituir a descrição atual?")) {
+      return;
+    }
+    setIsDescribing(true);
+    try {
+      const res = await fetch("/api/admin/ai/describe-race", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          city: selectedCity?.name ?? null,
+          state: selectedCity?.state_code ?? null,
+          date: date || null,
+          startTime: startTime || null,
+          distances: distances.length > 0 ? distances : null,
+          prizeType: (prizeType as "money" | "trophy" | "both" | "none") || null,
+          prizeDetails: prizeDetails || null,
+          registrationPrice: registrationPrice || null,
+          organizer: organizer || null,
+          address: address || null,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.message || json.error || "Falha ao gerar descrição.");
+        return;
+      }
+      if (typeof json.description !== "string" || !json.description.trim()) {
+        toast.warning("Resposta vazia.");
+        return;
+      }
+      setDescription(json.description);
+      toast.success("Descrição sugerida. Revise antes de salvar.");
+    } catch (err) {
+      console.error("[describe]", err);
+      toast.error("Erro inesperado ao gerar descrição.");
+    } finally {
+      setIsDescribing(false);
+    }
+  };
 
   const handleDistanceToggle = (distance: string) => {
     setDistances((prev) => {
@@ -116,6 +171,146 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     setDistances((prev) => [...prev, normalized]);
     setCustomDistanceInput("");
   };
+
+  // Merge AI-extracted fields into the form, preserving anything the admin
+  // already typed. Treats form defaults ("07:00", "none", "") as "empty" so
+  // a fresh form gets filled but mid-flight edits are never overwritten.
+  const handleExtracted = async (extracted: RaceExtraction) => {
+    let filled = 0;
+    const hints: string[] = [];
+
+    if (extracted.name && !name.trim()) {
+      setName(extracted.name);
+      filled++;
+    }
+    if (extracted.date && !date) {
+      setDate(extracted.date);
+      filled++;
+    }
+    if (extracted.startTime && startTime === "07:00") {
+      setStartTime(extracted.startTime);
+      filled++;
+    }
+    if (extracted.address && !address.trim()) {
+      setAddress(extracted.address);
+      filled++;
+    }
+    if (extracted.distances && extracted.distances.length > 0 && distances.length === 0) {
+      setDistances(extracted.distances);
+      filled++;
+    }
+    if (
+      extracted.registrationPrices &&
+      extracted.registrationPrices.length > 0 &&
+      Object.keys(registrationPrices).length === 0
+    ) {
+      const asMap = Object.fromEntries(
+        extracted.registrationPrices.map((p) => [p.distance, p.price]),
+      );
+      setRegistrationPrices(asMap);
+      filled++;
+    }
+    if (extracted.registrationPrice && !registrationPrice.trim()) {
+      setRegistrationPrice(extracted.registrationPrice);
+      filled++;
+    }
+    if (extracted.registrationLink && !registrationLink.trim()) {
+      setRegistrationLink(extracted.registrationLink);
+      filled++;
+    }
+    if (extracted.registrationDeadline && !registrationDeadline) {
+      setRegistrationDeadline(extracted.registrationDeadline);
+      filled++;
+    }
+    if (extracted.prizeType && prizeType === "none") {
+      setPrizeType(extracted.prizeType);
+      filled++;
+    }
+    if (extracted.prizeDetails && !prizeDetails.trim()) {
+      // Guard against the LLM echoing the prize type label as the "detail".
+      // If the entire text matches a known type keyword, drop it.
+      const normalized = extracted.prizeDetails.trim().toLowerCase();
+      const isEcho = ["troféu", "trofeu", "medalha", "dinheiro", "money", "trophy", "both", "ambos", "none", "nenhum"].includes(normalized);
+      if (!isEcho) {
+        setPrizeDetails(extracted.prizeDetails);
+        filled++;
+      }
+    }
+    if (extracted.routeDescription && !routeDescription.trim()) {
+      setRouteDescription(extracted.routeDescription);
+      filled++;
+    }
+    if (extracted.organizer && !organizer.trim()) {
+      setOrganizer(extracted.organizer);
+      filled++;
+    }
+    if (extracted.description && !description.trim()) {
+      setDescription(extracted.description);
+      filled++;
+    }
+    if (extracted.imageUrl && !imageUrl) {
+      setImageUrl(extracted.imageUrl);
+      filled++;
+    }
+
+    // Resolve city via the same search RPC the autocomplete uses so we land
+    // on a row with lat/lng instead of a raw text hint.
+    if (extracted.city && !selectedCity) {
+      try {
+        const res = await fetch(
+          `/api/cities/search?q=${encodeURIComponent(extracted.city)}&limit=8`,
+        );
+        if (res.ok) {
+          const cities: Array<{
+            name: string;
+            state_code: string;
+            latitude: number;
+            longitude: number;
+          }> = await res.json();
+          const match =
+            (extracted.state &&
+              cities.find((c) => c.state_code === extracted.state)) ||
+            cities[0];
+          if (match) {
+            setSelectedCity({
+              name: match.name,
+              state_code: match.state_code,
+              latitude: match.latitude,
+              longitude: match.longitude,
+            });
+            filled++;
+          } else {
+            hints.push(
+              `Cidade ${extracted.city}${extracted.state ? " - " + extracted.state : ""} não encontrada no banco. Cadastre manualmente.`,
+            );
+          }
+        }
+      } catch {
+        hints.push(
+          `Não foi possível resolver a cidade ${extracted.city} automaticamente.`,
+        );
+      }
+    }
+
+    if (filled > 0) {
+      toast.success(`${filled} ${filled === 1 ? "campo preenchido" : "campos preenchidos"}.`);
+    } else {
+      toast.info("Nenhum campo novo. Os existentes foram preservados.");
+    }
+    for (const hint of hints) toast.info(hint);
+  };
+
+  // When opening the form from a previously analyzed suggestion, apply the
+  // pre-extracted fields once on mount. Same "preserve admin input" gates as
+  // the URL autofill, so nothing is overwritten on a re-render or remount.
+  const appliedSuggestionExtractedRef = useRef(false);
+  useEffect(() => {
+    if (appliedSuggestionExtractedRef.current) return;
+    if (!suggestionData?.extracted) return;
+    appliedSuggestionExtractedRef.current = true;
+    void handleExtracted(suggestionData.extracted);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -246,6 +441,11 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-5xl space-y-6" noValidate>
+      {!isEditing && (
+        <div className="flex justify-end">
+          <RaceFiller onExtract={handleExtracted} disabled={isLoading} />
+        </div>
+      )}
       {suggestionData?.suggestionId && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
           Criando corrida a partir de uma sugestão. Os campos Nome, Cidade, Data, Link e Observações já
@@ -332,9 +532,9 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                 onClear={() => setSelectedCity(null)}
                 initialCity={
                   race
-                    ? `${race.city} — ${race.state}`
+                    ? `${race.city} - ${race.state}`
                     : suggestionData?.city && suggestionData?.state
-                      ? `${suggestionData.city} — ${suggestionData.state}`
+                      ? `${suggestionData.city} - ${suggestionData.state}`
                       : suggestionData?.city
                         ? suggestionData.city
                         : undefined
@@ -717,7 +917,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                 <p className="text-xs text-destructive">{errors.registrationLink}</p>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  Aceita links com ou sem https:// — o prefixo é adicionado automaticamente.
+                  Aceita links com ou sem https://. O prefixo é adicionado automaticamente.
                 </p>
               )}
             </div>
@@ -743,7 +943,24 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Descrição adicional</Label>
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="description">Descrição adicional</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 gap-1.5 px-2 text-xs"
+                  onClick={suggestDescription}
+                  disabled={isDescribing || isLoading || !name.trim()}
+                >
+                  {isDescribing ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                  {isDescribing ? "Gerando..." : "Sugerir com IA"}
+                </Button>
+              </div>
               <Textarea
                 id="description"
                 value={description}

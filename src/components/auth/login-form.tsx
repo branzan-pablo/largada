@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { loginSchema } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
@@ -14,8 +15,7 @@ interface LoginFormProps {
   onSuccess?: () => void;
 }
 
-const primaryClass =
-  "cursor-pointer w-full flex items-center justify-center gap-2 bg-[#FF4D00] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#E04400] transition-colors";
+const submitClass = "h-12 w-full text-base font-semibold";
 
 export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
   const [email, setEmail] = useState("");
@@ -96,14 +96,26 @@ export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
           <Input
             id="reset-email"
             type="email"
+            inputMode="email"
+            autoComplete="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             placeholder="seu@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
-        <Button type="submit" className={primaryClass} disabled={isLoading}>
-          {isLoading ? "Enviando..." : "Enviar e-mail de recuperação"}
+        <Button type="submit" className={submitClass} disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Enviando...
+            </>
+          ) : (
+            "Enviar e-mail de recuperação"
+          )}
         </Button>
         <button
           type="button"
@@ -123,25 +135,50 @@ export function LoginForm({ redirectTo, onSuccess }: LoginFormProps = {}) {
         <Input
           id="email"
           type="email"
+          inputMode="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           placeholder="seu@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? "email-error" : undefined}
         />
-        {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+        {errors.email && (
+          <p id="email-error" role="alert" className="text-sm text-destructive">
+            {errors.email}
+          </p>
+        )}
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Senha</Label>
         <Input
           id="password"
           type="password"
+          autoComplete="current-password"
           placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          aria-invalid={!!errors.password}
+          aria-describedby={errors.password ? "password-error" : undefined}
         />
-        {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+        {errors.password && (
+          <p id="password-error" role="alert" className="text-sm text-destructive">
+            {errors.password}
+          </p>
+        )}
       </div>
-      <Button type="submit" className={primaryClass} disabled={isLoading}>
-        {isLoading ? "Entrando..." : "Entrar"}
+      <Button type="submit" className={submitClass} disabled={isLoading}>
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Entrando...
+          </>
+        ) : (
+          "Entrar"
+        )}
       </Button>
       <button
         type="button"

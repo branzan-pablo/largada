@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { CtaButtons } from "@/components/landing/cta-buttons";
+import { LandingFaq } from "@/components/landing/landing-faq";
+import { StickyMobileCta } from "@/components/landing/sticky-mobile-cta";
+import { getLandingStats } from "@/components/landing/landing-stats";
 import { REGION_CITIES } from "@/lib/constants";
 import {
   Filter,
@@ -13,13 +16,16 @@ import {
   Search,
   Award,
   Check,
-  Star,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { Footer } from "@/components/footer/footer";
 
+// Revalida stats a cada hora — landing nao precisa de tempo real.
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
-  title: "Largada — Calendário de Corridas de Rua",
+  title: "Largada | Calendário de Corridas de Rua",
   description:
     "Encontre corridas de rua perto de você. Filtre por distância, premiação e data. Receba alertas antes dos prazos fecharem.",
   alternates: {
@@ -28,33 +34,32 @@ export const metadata: Metadata = {
 };
 
 export default async function LandingPage() {
+  const stats = await getLandingStats();
   const cities = [...REGION_CITIES]
     .sort(() => Math.random() - 0.5)
     .map((c) => `${c.name} - ${c.state}`);
+
   return (
-    <main className="text-[#6B7280] antialiased overflow-x-hidden min-h-screen scroll-smooth bg-white pt-16">
+    <main className="text-[#6B7280] antialiased overflow-x-hidden min-h-screen scroll-smooth bg-white pt-16 pb-20 md:pb-0">
       <LandingHeader />
 
       {/* ==================== Hero Section ==================== */}
-      <section className="relative min-h-[620px] md:min-h-[700px] flex items-center overflow-hidden">
-        {/* Background photo — Ken Burns zoom */}
+      <section className="relative flex min-h-[520px] items-center overflow-hidden md:min-h-[720px]">
         <Image
           src="/background-hero.jpg"
           alt="Corredores em prova de rua"
           fill
+          sizes="100vw"
           className="object-cover object-center hero-bg"
           priority
           fetchPriority="high"
         />
-        {/* Overlay: base escuro + gradiente vertical */}
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+        <div className="absolute inset-0 bg-black/55" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/65" />
 
-        {/* Content */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center text-center py-24 md:py-32">
-          {/* Headline */}
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-5 py-12 text-center sm:px-6 md:py-32">
           <h1
-            className="font-[family-name:var(--font-logo)] text-4xl sm:text-5xl md:text-7xl tracking-wide text-white mb-6 leading-tight"
+            className="font-[family-name:var(--font-logo)] text-[2.25rem] leading-[1.05] tracking-wide text-white mb-4 sm:text-5xl md:mb-6 md:text-7xl md:leading-tight"
             style={{ textShadow: "0 2px 24px rgba(0,0,0,0.85)" }}
           >
             Vai ter corrida.
@@ -62,17 +67,15 @@ export default async function LandingPage() {
             <span className="text-[#FF4D00]">Você vai ficar sabendo.</span>
           </h1>
 
-          {/* Subheadline */}
           <p
-            className="text-lg md:text-xl text-white max-w-2xl mb-10 font-normal leading-relaxed"
+            className="mx-auto mb-6 max-w-xl text-base font-normal leading-relaxed text-white sm:text-lg md:mb-10 md:text-xl"
             style={{ textShadow: "0 1px 12px rgba(0,0,0,0.9)" }}
           >
-            Descubra provas perto de você, filtre por distância ou cidade e seja
-            avisado antes das inscrições encerrarem.
+            Descubra provas perto de você e seja avisado antes das inscrições
+            encerrarem.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
             <CtaButtons />
           </div>
         </div>
@@ -153,9 +156,7 @@ export default async function LandingPage() {
             </p>
           </div>
 
-          {/* Bento grid — row 1: large + 2 small | row 2: 2 small + large */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* 01 — large */}
             <div className="md:col-span-2 rounded-2xl border border-gray-200 bg-white shadow-sm p-8 flex flex-col hover:border-[#FF4D00]/30 transition-colors relative overflow-hidden">
               <div className="flex items-start justify-between mb-6">
                 <div className="w-12 h-12 rounded-xl bg-[#FF4D00]/10 border border-[#FF4D00]/20 flex items-center justify-center">
@@ -175,7 +176,6 @@ export default async function LandingPage() {
               </p>
             </div>
 
-            {/* 02 — small */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 flex flex-col hover:border-[#FF4D00]/30 transition-colors">
               <div className="flex items-start justify-between mb-5">
                 <div className="w-10 h-10 rounded-xl bg-[#FF4D00]/10 border border-[#FF4D00]/20 flex items-center justify-center">
@@ -194,7 +194,6 @@ export default async function LandingPage() {
               </p>
             </div>
 
-            {/* 03 — small */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 flex flex-col hover:border-[#FF4D00]/30 transition-colors">
               <div className="flex items-start justify-between mb-5">
                 <div className="w-10 h-10 rounded-xl bg-[#FF4D00]/10 border border-[#FF4D00]/20 flex items-center justify-center">
@@ -213,7 +212,6 @@ export default async function LandingPage() {
               </p>
             </div>
 
-            {/* 04 — small */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 flex flex-col hover:border-[#FF4D00]/30 transition-colors">
               <div className="flex items-start justify-between mb-5">
                 <div className="w-10 h-10 rounded-xl bg-[#FF4D00]/10 border border-[#FF4D00]/20 flex items-center justify-center">
@@ -227,12 +225,11 @@ export default async function LandingPage() {
                 Informação completa
               </h3>
               <p className="text-sm text-[#6B7280] leading-relaxed">
-                Categorias, local de largada, percurso, valores por lote e prazo
-                de inscrição tudo na mesma tela.
+                Categorias, local de largada, percurso, valores por lote e
+                prazo de inscrição tudo na mesma tela.
               </p>
             </div>
 
-            {/* 05 — small */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 flex flex-col hover:border-[#FF4D00]/30 transition-colors">
               <div className="flex items-start justify-between mb-5">
                 <div className="w-10 h-10 rounded-xl bg-[#FF4D00]/10 border border-[#FF4D00]/20 flex items-center justify-center">
@@ -251,7 +248,6 @@ export default async function LandingPage() {
               </p>
             </div>
 
-            {/* 06 — large */}
             <div className="md:col-span-2 rounded-2xl border border-gray-200 bg-white shadow-sm p-8 flex flex-col hover:border-[#FF4D00]/30 transition-colors relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-bl from-[#FF4D00]/5 to-transparent pointer-events-none" />
               <div className="flex items-start justify-between mb-6">
@@ -276,152 +272,18 @@ export default async function LandingPage() {
 
       <div className="h-px bg-gray-200" />
 
-      {/* ==================== Para Organizadores ==================== */}
-      <section className="relative bg-[#F7F8FA] py-16 md:py-24 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <div className="inline-block bg-[#0D1B2A] text-white rounded-xl px-5 py-3 mb-10 shadow-sm border border-[#1a2d42]">
-              <p className="text-sm font-medium">
-                ✌️ O Largada é 100% gratuito para corredores. A seção abaixo é exclusiva para organizadores de eventos.
-              </p>
-            </div>
-            <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-[0.2em] mb-5">
-              Para Organizadores
-            </p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-[#0D1B2A] tracking-tight mb-3">
-              Dê visibilidade ao seu evento
-            </h2>
-            <p className="text-lg text-[#6B7280] max-w-2xl mx-auto">
-              Coloque seus eventos no topo do calendário e seja visto por quem
-              está procurando a próxima prova.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {[
-              {
-                name: "Avulso",
-                slug: "avulso",
-                price: "R$ 149",
-                period: "pagamento único",
-                credits: "1 corrida em destaque",
-                discount: null,
-                popular: false,
-                benefits: [
-                  "Corrida no topo do calendário",
-                  "Badge de destaque na listagem",
-                  "Mais visibilidade para inscrições",
-                ],
-              },
-              {
-                name: "Organizador",
-                slug: "organizador",
-                price: "R$ 349",
-                period: "pagamento único",
-                credits: "3 corridas em destaque",
-                discount: "~22% de desconto",
-                popular: true,
-                benefits: [
-                  "Tudo do plano Avulso",
-                  "3 créditos para destacar corridas",
-                  "Créditos válidos por 30 dias",
-                ],
-              },
-              {
-                name: "Organizador Pro",
-                slug: "organizador_pro",
-                price: "R$ 699",
-                period: "pagamento único",
-                credits: "8 corridas em destaque",
-                discount: "~41% de desconto",
-                popular: false,
-                benefits: [
-                  "Tudo do plano Organizador",
-                  "8 créditos para destacar corridas",
-                  "Créditos válidos por 30 dias",
-                ],
-              },
-            ].map((tier) => (
-              <div
-                key={tier.name}
-                className={`relative rounded-2xl border bg-white p-6 md:p-8 flex flex-col ${
-                  tier.popular
-                    ? "border-[#FF4D00] shadow-lg ring-1 ring-[#FF4D00]/20"
-                    : "border-gray-200"
-                }`}
-              >
-                {tier.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center gap-1 bg-[#FF4D00] text-white text-xs font-semibold px-3 py-1 rounded-full">
-                      <Star className="w-3 h-3 fill-current" />
-                      Mais popular
-                    </span>
-                  </div>
-                )}
-
-                <h3 className="text-lg font-semibold text-[#0D1B2A] mb-1">
-                  {tier.name}
-                </h3>
-                <p className="text-sm text-[#6B7280] mb-4">{tier.credits}</p>
-
-                <div className="mb-6">
-                  <span className="text-3xl font-extrabold text-[#0D1B2A]">
-                    {tier.price}
-                  </span>
-                  <span className="text-sm text-[#6B7280] ml-1">
-                    / {tier.period}
-                  </span>
-                </div>
-
-                {tier.discount && (
-                  <p className="text-xs font-medium text-green-600 bg-green-50 rounded-full px-3 py-1 w-fit mb-4">
-                    {tier.discount}
-                  </p>
-                )}
-
-                <ul className="space-y-3 mb-8 flex-1">
-                  {tier.benefits.map((benefit) => (
-                    <li
-                      key={benefit}
-                      className="flex items-start gap-2 text-sm text-[#6B7280]"
-                    >
-                      <Check className="w-4 h-4 text-[#FF4D00] mt-0.5 shrink-0" />
-                      {benefit}
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href={`/perfil/assinatura?tier=${tier.slug}`}
-                  className={`block w-full text-center py-3 px-4 rounded-full font-semibold text-sm transition-colors ${
-                    tier.popular
-                      ? "bg-[#FF4D00] text-white hover:bg-[#E04400]"
-                      : "bg-[#0D1B2A] text-white hover:bg-[#1a2d42]"
-                  }`}
-                >
-                  Destacar meu evento
-                </Link>
-              </div>
-            ))}
-          </div>
-
-          <p className="text-center text-xs text-[#6B7280] mt-8">
-            Pagamento único via PIX ou cartão. Sem assinatura recorrente.
-          </p>
-        </div>
-      </section>
-
-      <div className="h-px bg-gray-200" />
-
       {/* ==================== Cobertura Regional ==================== */}
       <section
         id="cobertura"
         className="relative bg-white bg-grid py-16 overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-center text-xs font-semibold text-[#6B7280] uppercase tracking-[0.2em] mb-10">
+          <h2 className="text-center text-xs font-semibold text-[#6B7280] uppercase tracking-[0.2em] mb-3">
             Corridas do Noroeste Paulista
           </h2>
+          <p className="text-center text-sm text-[#6B7280] mb-10">
+            Atendemos hoje cidades em raio de 200km a partir de São José do Rio Preto.
+          </p>
 
           <div className="ticker-mask">
             <div className="ticker-track">
@@ -440,11 +302,38 @@ export default async function LandingPage() {
 
       <div className="h-px bg-gray-200" />
 
+      {/* ==================== FAQ ==================== */}
+      <LandingFaq />
+
+      <div className="h-px bg-gray-200" />
+
+      {/* ==================== Para Organizadores (link compacto) ==================== */}
+      <section className="bg-[#0D1B2A] py-14">
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#FF4D00]">
+            Para organizadores
+          </p>
+          <h2 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight text-white">
+            Quer destacar sua corrida?
+          </h2>
+          <p className="mb-6 text-sm md:text-base text-white/70 max-w-2xl mx-auto">
+            Pacotes a partir de R$ 49 (Express, 7 dias). Pague só pela
+            visibilidade. Sem assinatura recorrente.
+          </p>
+          <Link
+            href="/para-organizadores"
+            className="inline-flex items-center gap-2 rounded-full bg-[#FF4D00] px-6 py-3 text-sm font-semibold text-white hover:bg-[#E04400] transition-colors"
+          >
+            Ver pacotes para organizadores
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
       {/* ==================== CTA Final ==================== */}
       <section className="relative bg-[#F7F8FA] py-24 md:py-32 overflow-hidden border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-6 relative z-10">
           <div className="rounded-[2.5rem] bg-white border border-gray-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] p-12 md:p-20 text-center relative overflow-hidden">
-            {/* Gradientes Premium Sutis */}
             <div className="absolute -top-32 -right-32 w-96 h-96 bg-linear-to-bl from-[#FF4D00]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-linear-to-tr from-[#0D1B2A]/5 to-transparent rounded-full blur-3xl pointer-events-none" />
 
@@ -456,17 +345,22 @@ export default async function LandingPage() {
                 Pronto para a largada?
               </h2>
               <p className="text-[#6B7280] font-medium mb-10 max-w-xl mx-auto text-lg leading-relaxed">
-                Crie sua conta no Largada agora e centralize todo o seu calendário de corridas em um só lugar.
+                Crie sua conta no Largada agora e centralize todo o seu
+                calendário de corridas em um só lugar.
               </p>
-              
+
               <div className="flex flex-col items-center justify-center">
                 <CtaButtons swapActions />
               </div>
 
               <div className="mt-10 flex items-center justify-center gap-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-green-500" /> Gratuito para Atletas</span>
+                <span className="flex items-center gap-1.5">
+                  <Check className="w-4 h-4 text-green-500" /> Gratuito para Atletas
+                </span>
                 <span className="hidden sm:inline">•</span>
-                <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-green-500" /> Sem Cadastro de Cartão</span>
+                <span className="flex items-center gap-1.5">
+                  <Check className="w-4 h-4 text-green-500" /> Sem Cadastro de Cartão
+                </span>
               </div>
             </div>
           </div>
@@ -475,6 +369,12 @@ export default async function LandingPage() {
 
       {/* ==================== Footer ==================== */}
       <Footer />
+
+      {/* ==================== Sticky CTA mobile ==================== */}
+      <StickyMobileCta
+        racesOpenThisWeek={stats.racesOpenThisWeek}
+        firstOpenSlug={stats.firstOpenSlug}
+      />
     </main>
   );
 }

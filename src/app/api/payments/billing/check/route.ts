@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getBillingById } from "@/lib/payments/billing";
 import { AbacatePayApiError } from "@/lib/payments/errors";
 import { utcNow, futureUtc } from "@/lib/date";
+import { getDurationDaysFromMetadata } from "@/lib/promotions";
 
 export async function GET(request: NextRequest) {
   try {
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
         const meta = order.metadata as Record<string, unknown> | null;
         const raceId = meta?.raceId as string | undefined;
         if (raceId) {
-          const promotedUntil = futureUtc(30);
+          const promotedUntil = futureUtc(getDurationDaysFromMetadata(meta));
           await admin
             .from("races")
             .update({ is_promoted: true, promoted_until: promotedUntil })

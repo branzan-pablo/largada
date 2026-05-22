@@ -110,7 +110,19 @@ export function useInfiniteRaces(
   useEffect(() => {
     let cancelled = false;
 
-    // Try to restore from sessionStorage cache
+    // On first render with server-provided data, the SSR payload is always
+    // fresher than any sessionStorage snapshot. Trust it and overwrite the
+    // cache so back-navigation from a detail page won't replay stale rows.
+    if (initialDataUsedRef.current) {
+      initialDataUsedRef.current = false;
+      const data = initialData?.data ?? [];
+      const more = initialData?.hasMore ?? false;
+      const total = initialData?.count ?? null;
+      saveCache({ races: data, totalCount: total, page: 1, hasMore: more, filterKey });
+      return;
+    }
+
+    // Restore from sessionStorage on filter changes within the same tab.
     const cached = loadCache(filterKey);
     if (cached) {
       setRaces(cached.races);
@@ -119,12 +131,6 @@ export function useInfiniteRaces(
       setHasMore(cached.hasMore);
       setIsLoading(false);
       setRestoredFromCache(true);
-      return;
-    }
-
-    // On first render with server-provided data, skip the client fetch
-    if (initialDataUsedRef.current) {
-      initialDataUsedRef.current = false;
       return;
     }
 

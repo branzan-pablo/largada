@@ -54,7 +54,7 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps = {}) {
     <div className="flex flex-col gap-3">
       <Button
         variant="outline"
-        className="w-full cursor-pointer"
+        className="h-12 w-full cursor-pointer rounded-full text-sm"
         onClick={handleGoogleLogin}
         disabled={isAnyLoading}
       >

@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { RaceDistanceBadges } from "./race-distance-badges";
 import { RacePrizeBadge } from "./race-prize-badge";
+import { RacePrizeAmountBadge } from "./race-prize-amount-badge";
+import { RaceShareButton } from "./race-share-button";
 import { MapPin, Users, Star, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -14,6 +16,8 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
   const day = format(raceDate, "dd");
   const month = format(raceDate, "MMM", { locale: ptBR }).toUpperCase();
   const formattedDate = format(raceDate, "dd 'de' MMM, yyyy", { locale: ptBR });
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+  const shareUrl = `${baseUrl}/corrida/${race.slug}`;
 
   return (
     <Link href={`/corrida/${race.slug}`} className={`block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden transition-colors ${race.is_promoted ? "ring-2 ring-[#FF4D00] shadow-lg shadow-[#FF4D00]/20 bg-linear-to-b from-[#FF4D00]/5 to-transparent" : ""}`}>
@@ -43,9 +47,9 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
             />
           </>
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-linear-to-br from-gray-100 to-gray-200">
-            <span className="text-3xl font-black text-[#0D1B2A]">{day}</span>
-            <span className="text-xs font-bold text-gray-500 uppercase">{month}</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-linear-to-br from-[#FF4D00]/10 via-gray-100 to-gray-200">
+            <span className="text-5xl font-black leading-none text-[#0D1B2A]">{day}</span>
+            <span className="mt-1 text-sm font-bold uppercase tracking-wider text-[#FF4D00]">{month}</span>
           </div>
         )}
 
@@ -56,6 +60,21 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
             Destaque
           </div>
         )}
+
+        {/* Share button — top-left overlay */}
+        <div className="absolute top-2 left-2 z-10">
+          <RaceShareButton
+            variant="icon"
+            raceName={race.name}
+            city={race.city}
+            state={race.state}
+            date={race.date}
+            startTime={race.start_time}
+            distances={race.distances as string[]}
+            shareUrl={shareUrl}
+            imageUrl={race.image_url}
+          />
+        </div>
 
         {/* Date pill — bottom right (like YT duration) */}
         {race.image_url && (
@@ -71,20 +90,20 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
           {race.name}
         </h3>
 
-        <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-1">
+        <div className="flex min-w-0 items-center gap-1 text-sm text-[#6B7280] mb-1">
           <MapPin className="w-3.5 h-3.5 shrink-0" />
-          <span>{race.city}, {race.state}</span>
+          <span className="truncate">{race.city}, {race.state}</span>
         </div>
 
-        <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-2">
+        <div className="flex min-w-0 items-center gap-1 text-sm text-[#6B7280] mb-2">
           <CalendarDays className="w-3.5 h-3.5 shrink-0" />
-          <span>{formattedDate}{race.start_time ? ` · ${formatTime(race.start_time)}` : ""}</span>
+          <span className="truncate">{formattedDate}{race.start_time ? ` · ${formatTime(race.start_time)}` : ""}</span>
         </div>
 
         {race.rsvp_count > 0 && (
-          <div className="flex items-center gap-1 text-sm text-[#6B7280] mb-2">
+          <div className="flex min-w-0 items-center gap-1 text-sm text-[#6B7280] mb-2">
             <Users className="w-3.5 h-3.5 shrink-0" />
-            <span>{race.rsvp_count === 1 ? "1 Pessoa confirmou" : `${race.rsvp_count} Pessoas confirmaram`}</span>
+            <span className="truncate">{race.rsvp_count === 1 ? "1 pessoa confirmou" : `${race.rsvp_count} pessoas confirmaram`}</span>
           </div>
         )}
 
@@ -93,6 +112,7 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
           {race.prize_type !== "none" && (
             <RacePrizeBadge prizeType={race.prize_type} />
           )}
+          <RacePrizeAmountBadge prize={race.prize_structured} />
         </div>
       </div>
     </Link>

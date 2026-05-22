@@ -15,9 +15,17 @@ import {
     useSubscriptionPromotion,
 } from "@/lib/subscriptions";
 import { futureUtc, todayInBrazil } from "@/lib/date";
+import {
+    PROMOTION_TIERS,
+    DEFAULT_PROMOTION_TIER,
+    type PromotionTier,
+} from "@/lib/promotions";
 
-const PROMOTION_PRICE_CENTAVOS = 14900; // R$ 149,00
-const PROMOTION_DAYS = 30;
+function resolveTier(input: unknown): PromotionTier {
+    return input === "express" || input === "standard"
+        ? input
+        : DEFAULT_PROMOTION_TIER;
+}
 
 export async function POST(
     request: NextRequest,
@@ -93,7 +101,7 @@ export async function POST(
             }
 
             const admin = createAdminClient();
-            const promotedUntil = futureUtc(PROMOTION_DAYS);
+            const promotedUntil = futureUtc(PROMOTION_TIERS.standard.durationDays);
             const { error: raceError } = await admin
                 .from("races")
                 .update({ is_promoted: true, promoted_until: promotedUntil })
@@ -162,13 +170,19 @@ export async function POST(
                 });
         }
 
-        // 5. Build URLs
+        // 5. Build URLs and resolve tier
+        const tier = resolveTier(body.tier);
+        const tierConfig = PROMOTION_TIERS[tier];
+
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://largada.app";
         const returnUrl = `${appUrl}/corrida/${race.slug}`;
         const completionUrl = `${appUrl}/corrida/${race.slug}?destaque=sucesso`;
 
         console.info("[Promote Race] Creating billing", {
             raceId,
+            tier,
+            price: tierConfig.priceCentavos,
+            days: tierConfig.durationDays,
             customerId: abacatepayCustomerId,
             returnUrl,
             completionUrl,
@@ -180,11 +194,11 @@ export async function POST(
             methods: ["PIX", "CARD"],
             products: [
                 {
-                    externalId: `race-promotion-${raceId}`,
-                    name: `Destaque: ${race.name}`,
-                    description: `Corrida em destaque por ${PROMOTION_DAYS} dias`,
+                    externalId: `race-promotion-${raceId}-${tier}`,
+                    name: `Destaque ${tierConfig.label}: ${race.name}`,
+                    description: `Corrida em destaque por ${tierConfig.durationDays} dias`,
                     quantity: 1,
-                    price: PROMOTION_PRICE_CENTAVOS,
+                    price: tierConfig.priceCentavos,
                 },
             ],
             returnUrl,
@@ -194,6 +208,7 @@ export async function POST(
                 raceId,
                 raceSlug: race.slug,
                 orderType: "race_promotion",
+                tier,
             },
         });
 
@@ -216,7 +231,7 @@ export async function POST(
         });
 
         // 7. Persist order in database
-        const promotionExpiresAt = futureUtc(PROMOTION_DAYS);
+        const promotionExpiresAt = futureUtc(tierConfig.durationDays);
 
         const { data: order, error: orderInsertError } = await admin
             .from("payment_orders")
@@ -229,18 +244,23 @@ export async function POST(
                 order_type: "race_promotion",
                 status: "PENDING",
                 amount: billing.amount,
-                description: `Destaque: ${race.name}`,
+                description: `Destaque ${tierConfig.label}: ${race.name}`,
                 products: [
                     {
-                        externalId: `race-promotion-${raceId}`,
-                        name: `Destaque: ${race.name}`,
+                        externalId: `race-promotion-${raceId}-${tier}`,
+                        name: `Destaque ${tierConfig.label}: ${race.name}`,
                         quantity: 1,
-                        price: PROMOTION_PRICE_CENTAVOS,
+                        price: tierConfig.priceCentavos,
                     },
                 ],
                 external_id: raceId,
                 expires_at: promotionExpiresAt,
-                metadata: { raceId, raceName: race.name, raceSlug: race.slug },
+                metadata: {
+                    raceId,
+                    raceName: race.name,
+                    raceSlug: race.slug,
+                    tier,
+                },
             })
             .select("id")
             .single();

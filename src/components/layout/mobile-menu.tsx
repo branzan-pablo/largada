@@ -142,14 +142,14 @@ export function MobileMenu({ variant }: MobileMenuProps) {
     <div className="md:hidden">
       <button
         onClick={() => setOpen(true)}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-[#6B7280] transition-colors hover:bg-gray-100 hover:text-[#0D1B2A]"
+        className="flex h-11 w-11 items-center justify-center rounded-full text-[#6B7280] transition-colors hover:bg-gray-100 hover:text-[#0D1B2A]"
         aria-label="Abrir menu"
       >
         <Menu className="h-5 w-5" />
       </button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" showCloseButton={false} className="w-[300px] p-0 flex flex-col">
+        <SheetContent side="right" showCloseButton={false} className="flex w-[88vw] max-w-[340px] flex-col p-0">
           {/* Header */}
           <div className="relative overflow-hidden px-5 pb-4 pt-5">
             <div className="absolute inset-0 bg-gradient-to-b from-[#FF4D00]/8 to-transparent" />
@@ -164,8 +164,8 @@ export function MobileMenu({ variant }: MobileMenuProps) {
                     height={50}
                   />
                 </div>
-                <SheetClose className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] transition-colors hover:bg-black/5 hover:text-[#0D1B2A]">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <SheetClose className="flex h-10 w-10 items-center justify-center rounded-lg text-[#6B7280] transition-colors hover:bg-black/5 hover:text-[#0D1B2A]">
+                  <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                     <path d="M4 4l8 8M12 4l-8 8" />
                   </svg>
                   <span className="sr-only">Fechar</span>
@@ -222,7 +222,7 @@ export function MobileMenu({ variant }: MobileMenuProps) {
 
           {/* Nav */}
           <nav className="flex flex-col gap-1 px-3 py-1">
-            <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-[#6B7280]/60">
+            <p className="mb-1 px-3 text-xs font-bold uppercase tracking-widest text-[#6B7280]/70">
               Navegação
             </p>
             {links.map((item) => renderLink(item))}
@@ -232,7 +232,7 @@ export function MobileMenu({ variant }: MobileMenuProps) {
           <div className="flex-1" />
 
           {/* User area */}
-          <div className="border-t border-gray-100 px-3 py-4">
+          <div className="border-t border-gray-100 px-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
             {user ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-3 py-3">
@@ -246,14 +246,14 @@ export function MobileMenu({ variant }: MobileMenuProps) {
                     <p className="truncate text-sm font-semibold text-[#0D1B2A]">
                       {profile?.full_name ?? "Corredor"}
                     </p>
-                    <p className="truncate text-[11px] text-[#6B7280]">
+                    <p className="truncate text-xs text-[#6B7280]">
                       {user.email}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={handleSignOut}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-50"
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-50"
                 >
                   <LogOut className="h-4 w-4" />
                   Sair da conta
@@ -266,7 +266,7 @@ export function MobileMenu({ variant }: MobileMenuProps) {
                     setOpen(false);
                     openRegister();
                   }}
-                  className="w-full rounded-xl bg-[#FF4D00] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#E04500]"
+                  className="min-h-12 w-full rounded-xl bg-[#FF4D00] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#E04500]"
                 >
                   Criar conta grátis
                 </button>
@@ -275,7 +275,7 @@ export function MobileMenu({ variant }: MobileMenuProps) {
                     setOpen(false);
                     openLogin();
                   }}
-                  className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-[#6B7280] transition-colors hover:bg-gray-50 hover:text-[#0D1B2A]"
+                  className="min-h-11 w-full rounded-xl px-4 py-2.5 text-sm font-medium text-[#6B7280] transition-colors hover:bg-gray-50 hover:text-[#0D1B2A]"
                 >
                   Já tenho conta
                 </button>

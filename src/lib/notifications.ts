@@ -215,7 +215,7 @@ export async function notifyPersonalizedRace(
 
   const result = await sendToSubscriptions({
     title: "Corrida ideal pra você!",
-    body: `${race.name} em ${race.city} — ${matchReason}`,
+    body: `${race.name} em ${race.city}. ${matchReason}`,
     url: `/corrida/${race.slug}`,
     subscriptions: subs,
   });

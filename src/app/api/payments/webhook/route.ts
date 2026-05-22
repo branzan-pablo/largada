@@ -17,6 +17,7 @@ import type {
 } from "@/types/payments";
 import { createSubscription } from "@/lib/subscriptions";
 import { SUBSCRIPTION_TIERS, type SubscriptionTier } from "@/types/subscription";
+import { getDurationDaysFromMetadata } from "@/lib/promotions";
 
 export async function POST(request: NextRequest) {
   let rawBody: string;
@@ -215,7 +216,7 @@ export async function POST(request: NextRequest) {
             > | null;
             const raceId = meta?.raceId as string | undefined;
             if (raceId) {
-              const promotedUntil = futureUtc(30);
+              const promotedUntil = futureUtc(getDurationDaysFromMetadata(meta));
               const { data: promotedRace, error: raceError } = await admin
                 .from("races")
                 .update({ is_promoted: true, promoted_until: promotedUntil })

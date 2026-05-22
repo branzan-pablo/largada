@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { utcNow } from "@/lib/date";
 import { notifyNewRace } from "@/lib/notifications";
+import { enrichRace } from "@/lib/ai/enrich-race";
 
 export async function DELETE(
   _request: Request,
@@ -131,6 +132,25 @@ export async function PATCH(
 
   revalidatePath("/corridas");
   if (data?.slug) revalidatePath(`/corrida/${data.slug}`);
+
+  // Re-run AI enrichment when fields that feed the embedding or the prize
+  // extractor change. Awaited inline with graceful failure so a provider
+  // outage never blocks the admin save.
+  const ENRICH_TRIGGER_FIELDS = [
+    "name",
+    "city",
+    "date",
+    "organizer",
+    "prize_type",
+    "prize_details",
+  ];
+  if (ENRICH_TRIGGER_FIELDS.some((f) => f in updateData)) {
+    try {
+      await enrichRace(id);
+    } catch (err) {
+      console.error("[ai] enrichRace on PATCH failed:", err);
+    }
+  }
 
   // Notify when race transitions to confirmed for the first time
   if (updateData.status === "confirmed" && previousStatus !== "confirmed") {

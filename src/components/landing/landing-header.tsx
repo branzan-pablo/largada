@@ -28,14 +28,14 @@ export function LandingHeader() {
 
         {/* Nav links - desktop */}
         <nav className="hidden md:flex items-center gap-8">
+          <Link href="/corridas" className="text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors">
+            Corridas
+          </Link>
           <Link href="/radar-de-podio" className="text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors">
             Radar de Pódio
           </Link>
-          <a href="#features" className="text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors">
-            Funcionalidades
-          </a>
-          <Link href="/corridas" className="text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors">
-            Corridas
+          <Link href="/para-organizadores" className="text-sm text-[#6B7280] hover:text-[#0D1B2A] transition-colors">
+            Para Organizadores
           </Link>
         </nav>
 

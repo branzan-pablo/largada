@@ -41,6 +41,81 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_call_logs: {
+        Row: {
+          id: string
+          task: string
+          model: string | null
+          duration_ms: number
+          input_tokens: number | null
+          output_tokens: number | null
+          success: boolean
+          error: string | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          task: string
+          model?: string | null
+          duration_ms: number
+          input_tokens?: number | null
+          output_tokens?: number | null
+          success: boolean
+          error?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          task?: string
+          model?: string | null
+          duration_ms?: number
+          input_tokens?: number | null
+          output_tokens?: number | null
+          success?: boolean
+          error?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      race_views: {
+        Row: {
+          id: string
+          race_id: string
+          user_id: string | null
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          race_id: string
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          race_id?: string
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "race_views_race_id_fkey"
+            columns: ["race_id"]
+            isOneToOne: false
+            referencedRelation: "races"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "race_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       link_clicks: {
         Row: {
           id: string
@@ -224,6 +299,8 @@ export type Database = {
           state: string | null
           status: string
           user_id: string
+          ai_analysis: Json | null
+          ai_analysis_updated_at: string | null
         }
         Insert: {
           city: string
@@ -238,6 +315,8 @@ export type Database = {
           state?: string | null
           status?: string
           user_id: string
+          ai_analysis?: Json | null
+          ai_analysis_updated_at?: string | null
         }
         Update: {
           city?: string
@@ -252,6 +331,8 @@ export type Database = {
           state?: string
           status?: string
           user_id?: string
+          ai_analysis?: Json | null
+          ai_analysis_updated_at?: string | null
         }
         Relationships: [
           {
@@ -307,6 +388,9 @@ export type Database = {
           state: string
           status: string
           updated_at: string
+          embedding: string | null
+          prize_structured: Json | null
+          prize_structured_updated_at: string | null
         }
         Insert: {
           address: string
@@ -344,6 +428,9 @@ export type Database = {
           state?: string
           status?: string
           updated_at?: string
+          embedding?: string | null
+          prize_structured?: Json | null
+          prize_structured_updated_at?: string | null
         }
         Update: {
           address?: string
@@ -381,6 +468,9 @@ export type Database = {
           state?: string
           status?: string
           updated_at?: string
+          embedding?: string | null
+          prize_structured?: Json | null
+          prize_structured_updated_at?: string | null
         }
         Relationships: [
           {
@@ -840,6 +930,36 @@ export type Database = {
       get_random_cities: {
         Args: { p_limit?: number }
         Returns: { name: string; state_code: string }[]
+      }
+      match_races_semantic: {
+        Args: {
+          query_embedding: string
+          query_date: string
+          match_threshold?: number
+          match_count?: number
+          date_window_days?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          city: string
+          date: string
+          similarity: number
+        }[]
+      }
+      match_races_semantic_any_date: {
+        Args: {
+          query_embedding: string
+          match_threshold?: number
+          match_count?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          city: string
+          date: string
+          similarity: number
+        }[]
       }
     }
     Enums: {

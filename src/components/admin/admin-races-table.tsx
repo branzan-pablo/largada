@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, MapPin, MapPinOff, Pencil, Plus, Star, Trash2 } from "lucide-react";
+import { BarChart3, Check, MapPin, MapPinOff, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import { formatDateShort } from "@/lib/date";
 import { RACE_STATUSES, RACE_ORIGINS } from "@/lib/constants";
 import { isWithinRegion } from "@/lib/geo";
@@ -21,9 +21,15 @@ interface RaceRow {
   origin: string;
   rsvp_count: number;
   is_promoted: boolean;
+  views: number;
   clicks: number;
   latitude: number;
   longitude: number;
+}
+
+function formatCtr(views: number, clicks: number): string {
+  if (views === 0) return "-";
+  return `${((clicks / views) * 100).toFixed(1)}%`;
 }
 
 const STATUS_FILTERS = [
@@ -195,7 +201,9 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
               <th className="px-3 sm:px-4 py-3 text-left font-medium">Status</th>
               <th className="hidden px-4 py-3 text-left font-medium lg:table-cell">Origem</th>
               <th className="hidden px-4 py-3 text-right font-medium sm:table-cell">RSVPs</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell">Views</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell">Cliques</th>
+              <th className="hidden px-4 py-3 text-right font-medium lg:table-cell">CTR</th>
               <th className="px-3 sm:px-4 py-3 text-right font-medium">Ação</th>
             </tr>
           </thead>
@@ -211,15 +219,15 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
                     )}
                     <div className="min-w-0">
                       <span className="line-clamp-2">{race.name}</span>
-                      <span className="block text-xs text-muted-foreground sm:hidden">{race.city} — {race.state}</span>
+                      <span className="block text-xs text-muted-foreground sm:hidden">{race.city} - {race.state}</span>
                     </div>
                   </div>
                 </td>
                 <td className="hidden px-4 py-3 sm:table-cell">
                   <span className="flex items-center gap-1">
-                    {`${race.city} — ${race.state}`}
+                    {`${race.city} - ${race.state}`}
                     {!hasCoords(race) && (
-                      <span title="Sem coordenadas — defina a cidade para esta corrida">
+                      <span title="Sem coordenadas. Defina a cidade para esta corrida">
                         <MapPinOff className="h-3.5 w-3.5 text-amber-500 shrink-0" />
                       </span>
                     )}
@@ -245,7 +253,13 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
                   {race.rsvp_count}
                 </td>
                 <td className="hidden px-4 py-3 text-right md:table-cell">
+                  {race.views}
+                </td>
+                <td className="hidden px-4 py-3 text-right md:table-cell">
                   {race.clicks}
+                </td>
+                <td className="hidden px-4 py-3 text-right lg:table-cell text-xs text-muted-foreground">
+                  {formatCtr(race.views, race.clicks)}
                 </td>
                 <td className="px-3 sm:px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
@@ -261,6 +275,17 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
                         <Check className="h-4 w-4" />
                       </Button>
                     )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      title="Analytics"
+                      asChild
+                    >
+                      <Link href={`/perfil/minhas-corridas/${race.id}/analytics`}>
+                        <BarChart3 className="h-4 w-4" />
+                      </Link>
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -289,7 +314,7 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">
                   Nenhuma corrida encontrada.
                 </td>
               </tr>

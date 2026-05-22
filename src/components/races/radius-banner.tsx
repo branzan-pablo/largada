@@ -20,10 +20,10 @@ export function RadiusBanner({ radius, onRemove }: RadiusBannerProps) {
       </span>
       <button
         onClick={onRemove}
-        className="ml-1 rounded-full p-1 text-blue-400 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+        className="-mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-blue-400 transition-colors hover:bg-blue-100 hover:text-blue-600"
         aria-label="Remover filtro de raio"
       >
-        <X className="h-3.5 w-3.5" />
+        <X className="h-4 w-4" />
       </button>
     </div>
   );

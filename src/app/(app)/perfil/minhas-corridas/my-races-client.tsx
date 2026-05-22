@@ -4,11 +4,12 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RaceCard } from "@/components/races/race-card";
 import { PromoteRaceCard } from "@/components/races/promote-race-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, CalendarDays, Star } from "lucide-react";
+import { Trophy, CalendarDays, Star, BarChart3 } from "lucide-react";
 import { todayInBrazil } from "@/lib/date";
 import { toast } from "sonner";
 import type { Race } from "@/types/race";
@@ -178,7 +179,14 @@ export function MyRacesClient({ initialTab }: { initialTab?: string }) {
             {created.map((race) => (
               <div key={race.id} className="flex flex-col gap-2">
                 <RaceCard race={race} />
-                <div className="flex justify-end px-1">
+                <div className="flex flex-wrap items-center justify-end gap-2 px-1">
+                  <Link
+                    href={`/perfil/minhas-corridas/${race.id}/analytics`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-[#0D1B2A] hover:border-[#FF4D00]/40 hover:text-[#FF4D00] transition-colors"
+                  >
+                    <BarChart3 className="h-3.5 w-3.5" />
+                    Analytics
+                  </Link>
                   <PromoteRaceCard
                     raceId={race.id}
                     raceName={race.name}

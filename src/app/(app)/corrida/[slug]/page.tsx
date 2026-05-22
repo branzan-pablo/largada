@@ -19,6 +19,7 @@ import {
 } from "./race-detail-client";
 import { PromoteRaceCard } from "@/components/races/promote-race-card";
 import { RaceShareButton } from "@/components/races/race-share-button";
+import { RaceViewTracker } from "@/components/races/race-view-tracker";
 import {
   Building2,
   CalendarDays,
@@ -32,6 +33,7 @@ import {
   Banknote,
 } from "lucide-react";
 import { formatDateFull, formatTime, todayInBrazil, utcNow, futureUtc } from "@/lib/date";
+import { getDurationDaysFromMetadata } from "@/lib/promotions";
 import { PRIZE_TYPES } from "@/lib/constants";
 import type { Race, RegistrationBatch } from "@/types/race";
 import type { Metadata } from "next";
@@ -66,10 +68,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: race.name,
-    description: `${race.name} em ${race.city} — ${distances}. Veja detalhes e marque sua participação.`,
+    description: `${race.name} em ${race.city}. ${distances}. Veja detalhes e marque sua participação.`,
     openGraph: {
       title: race.name,
-      description: `Corrida em ${race.city} — ${distances}`,
+      description: `Corrida em ${race.city}. ${distances}`,
       type: "article",
       images: race.image_url ? [{ url: race.image_url }] : undefined,
     },
@@ -113,7 +115,7 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
       const admin = createAdminClient();
       const { data: pendingOrder } = await admin
         .from("payment_orders")
-        .select("id, abacatepay_id, status")
+        .select("id, abacatepay_id, status, metadata")
         .eq("order_type", "race_promotion")
         .eq("external_id", typedRace.id)
         .eq("status", "PENDING")
@@ -124,7 +126,8 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
       if (pendingOrder?.abacatepay_id) {
         const billing = await getBillingById(pendingOrder.abacatepay_id);
         if (billing?.status === "PAID") {
-          const promotedUntil = futureUtc(30);
+          const meta = pendingOrder.metadata as Record<string, unknown> | null;
+          const promotedUntil = futureUtc(getDurationDaysFromMetadata(meta));
 
           await Promise.all([
             admin
@@ -208,6 +211,8 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
+      <RaceViewTracker raceId={typedRace.id} />
 
       {/* Back link + share */}
       <div className="mb-4 flex items-center justify-between gap-2">
@@ -533,8 +538,8 @@ export default async function RaceDetailPage({ params, searchParams }: PageProps
           deadlinePassed={deadlinePassed}
         />
 
-        {/* Bottom padding so sticky bar doesn't cover content on mobile */}
-        <div className="h-20 md:hidden" />
+        {/* Bottom padding so sticky action bar (above BottomNav) doesn't cover content on mobile */}
+        <div className="h-[calc(8rem+env(safe-area-inset-bottom))] md:hidden" />
       </RsvpProvider>
     </>
   );

@@ -1,3 +1,18 @@
+export interface DistancePrize {
+  distance: string;
+  total: number | null;
+  top_prize: number | null;
+  top_n: number | null;
+}
+
+export interface PrizeStructured {
+  by_distance: DistancePrize[];
+  by_category: boolean;
+  has_money: boolean;
+  has_trophy: boolean;
+  notes: string | null;
+}
+
 export interface RegistrationBatchItem {
   label: string;
   price: string;
@@ -28,6 +43,7 @@ export interface Race {
   registration_deadline: string;
   prize_type: "money" | "trophy" | "both" | "none";
   prize_details: string | null;
+  prize_structured: PrizeStructured | null;
   image_url: string | null;
   route_description: string | null;
   route_image_url: string | null;

@@ -22,16 +22,17 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white/95 backdrop-blur-md md:hidden">
-      <div className="flex justify-around py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <div className="flex justify-around pt-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))]">
         {navItems.map((item) => {
           if (item.requiresAuth && !user) {
             return (
               <button
                 key={item.href}
                 onClick={openLogin}
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-xs text-gray-400"
+                aria-label={item.label}
+                className="flex min-h-11 min-w-11 flex-1 flex-col items-center justify-center gap-0.5 px-2 py-1.5 text-[11px] font-medium text-gray-400 transition-colors active:text-[#FF4D00]"
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className="h-6 w-6" />
                 {item.label}
               </button>
             );
@@ -43,14 +44,14 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
+              aria-label={item.label}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center gap-0.5 px-3 py-1 text-xs",
-                isActive
-                  ? "text-[#FF4D00]"
-                  : "text-gray-400"
+                "flex min-h-11 min-w-11 flex-1 flex-col items-center justify-center gap-0.5 px-2 py-1.5 text-[11px] font-medium transition-colors",
+                isActive ? "text-[#FF4D00]" : "text-gray-400 active:text-[#FF4D00]"
               )}
             >
-              <item.icon className={cn("h-5 w-5", isActive && "text-[#FF4D00]")} />
+              <item.icon className={cn("h-6 w-6", isActive && "text-[#FF4D00]")} />
               {item.label}
             </Link>
           );

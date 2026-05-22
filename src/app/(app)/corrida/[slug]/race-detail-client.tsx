@@ -234,7 +234,7 @@ export function StickyActionBar({ registrationSlug, deadlinePassed }: StickyActi
   const { rsvped, isToggling, toggle } = useRsvpContext();
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 md:hidden border-t border-gray-200 bg-white/80 backdrop-blur-lg px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-50 md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-lg px-4 py-3">
       <div className="flex gap-3">
         {deadlinePassed ? (
           <Button variant="secondary" disabled className="flex-1">
