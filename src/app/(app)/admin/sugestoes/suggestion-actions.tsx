@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import Link from "next/link";
-import { ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Loader2, Sparkles, ScanSearch } from "lucide-react";
 
 interface SuggestionActionsProps {
   suggestion: {
@@ -17,11 +17,16 @@ interface SuggestionActionsProps {
     link: string | null;
     notes: string | null;
   };
+  alreadyAnalyzed?: boolean;
 }
 
-export function SuggestionActions({ suggestion }: SuggestionActionsProps) {
+export function SuggestionActions({
+  suggestion,
+  alreadyAnalyzed,
+}: SuggestionActionsProps) {
   const router = useRouter();
   const [isRejecting, setIsRejecting] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isDescribing, setIsDescribing] = useState(false);
   const [draftDescription, setDraftDescription] = useState<string | null>(null);
 
@@ -40,6 +45,28 @@ export function SuggestionActions({ suggestion }: SuggestionActionsProps) {
       toast.error("Erro ao rejeitar sugestão");
     }
     setIsRejecting(false);
+  };
+
+  const handleAnalyze = async () => {
+    setIsAnalyzing(true);
+    try {
+      const res = await fetch(
+        `/api/admin/ai/analyze-suggestion/${suggestion.id}`,
+        { method: "POST" },
+      );
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.message || json.error || "Falha ao analisar.");
+        return;
+      }
+      toast.success(`Veredito: ${json.analysis?.verdict ?? "?"}.`);
+      router.refresh();
+    } catch (err) {
+      console.error("[analyze-suggestion]", err);
+      toast.error("Erro inesperado na análise.");
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleSuggestDescription = async () => {
@@ -99,6 +126,25 @@ export function SuggestionActions({ suggestion }: SuggestionActionsProps) {
             Criar corrida
             <ArrowRight className="ml-1 h-3.5 w-3.5" />
           </Link>
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleAnalyze}
+          disabled={isAnalyzing}
+          className="gap-1.5"
+          title={alreadyAnalyzed ? "Re-analisar com IA" : "Analisar com IA"}
+        >
+          {isAnalyzing ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <ScanSearch className="h-3.5 w-3.5" />
+          )}
+          {isAnalyzing
+            ? "Analisando..."
+            : alreadyAnalyzed
+              ? "Re-analisar"
+              : "Analisar com IA"}
         </Button>
         <Button
           size="sm"

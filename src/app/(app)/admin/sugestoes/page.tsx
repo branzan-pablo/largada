@@ -8,6 +8,9 @@ import {
 } from "@/components/ui/card";
 import { formatDateShort, formatDateTime } from "@/lib/date";
 import { SuggestionActions } from "./suggestion-actions";
+import { SuggestionAiBadge } from "./suggestion-ai-badge";
+import type { SuggestionAnalysis } from "@/lib/ai/schemas/suggestion-analysis";
+import { suggestionAnalysisSchema } from "@/lib/ai/schemas/suggestion-analysis";
 
 export const metadata = {
   title: "Sugestões | Admin",
@@ -29,45 +32,56 @@ export default async function AdminSuggestionsPage() {
       {pending.length > 0 && (
         <section className="mb-8">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {pending.map((suggestion) => (
-              <Card key={suggestion.id}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">{suggestion.name}</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Cidade: {`${suggestion.city} - ${suggestion.state}`}
-                  </p>
-                  {suggestion.date && (
+            {pending.map((suggestion) => {
+              const aiParsed = suggestion.ai_analysis
+                ? suggestionAnalysisSchema.safeParse(suggestion.ai_analysis)
+                : null;
+              const aiAnalysis: SuggestionAnalysis | null =
+                aiParsed?.success ? aiParsed.data : null;
+              return (
+                <Card key={suggestion.id}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">{suggestion.name}</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      Data: {formatDateShort(suggestion.date)}
+                      Cidade: {`${suggestion.city} - ${suggestion.state}`}
                     </p>
-                  )}
-                </CardHeader>
+                    {suggestion.date && (
+                      <p className="text-sm text-muted-foreground">
+                        Data: {formatDateShort(suggestion.date)}
+                      </p>
+                    )}
+                  </CardHeader>
 
-                <CardContent className="space-y-3">
-                  {suggestion.link && (
-                    <a
-                      href={suggestion.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline"
-                    >
-                      Ver link
-                    </a>
-                  )}
-                  {suggestion.notes && (
-                    <p className="text-sm text-muted-foreground">
-                      {suggestion.notes}
+                  <CardContent className="space-y-3">
+                    {aiAnalysis && <SuggestionAiBadge analysis={aiAnalysis} />}
+                    {suggestion.link && (
+                      <a
+                        href={suggestion.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline"
+                      >
+                        Ver link
+                      </a>
+                    )}
+                    {suggestion.notes && (
+                      <p className="text-sm text-muted-foreground">
+                        {suggestion.notes}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Por:{" "}
+                      {suggestion.profiles?.full_name ?? "Anônimo"}{" "}
+                      · {formatDateTime(suggestion.created_at)}
                     </p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Por:{" "}
-                    {suggestion.profiles?.full_name ?? "Anônimo"}{" "}
-                    · {formatDateTime(suggestion.created_at)}
-                  </p>
-                  <SuggestionActions suggestion={suggestion} />
-                </CardContent>
-              </Card>
-            ))}
+                    <SuggestionActions
+                      suggestion={suggestion}
+                      alreadyAnalyzed={!!aiAnalysis}
+                    />
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </section>
       )}

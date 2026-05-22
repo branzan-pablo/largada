@@ -299,6 +299,8 @@ export type Database = {
           state: string | null
           status: string
           user_id: string
+          ai_analysis: Json | null
+          ai_analysis_updated_at: string | null
         }
         Insert: {
           city: string
@@ -313,6 +315,8 @@ export type Database = {
           state?: string | null
           status?: string
           user_id: string
+          ai_analysis?: Json | null
+          ai_analysis_updated_at?: string | null
         }
         Update: {
           city?: string
@@ -327,6 +331,8 @@ export type Database = {
           state?: string
           status?: string
           user_id?: string
+          ai_analysis?: Json | null
+          ai_analysis_updated_at?: string | null
         }
         Relationships: [
           {
@@ -932,6 +938,20 @@ export type Database = {
           match_threshold?: number
           match_count?: number
           date_window_days?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          city: string
+          date: string
+          similarity: number
+        }[]
+      }
+      match_races_semantic_any_date: {
+        Args: {
+          query_embedding: string
+          match_threshold?: number
+          match_count?: number
         }
         Returns: {
           id: string

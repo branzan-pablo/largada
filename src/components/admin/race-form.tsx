@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,7 @@ interface RaceFormProps {
     description?: string;
     suggestionId?: string;
     cityData?: { name: string; state_code: string; latitude: number; longitude: number };
+    extracted?: RaceExtraction;
   };
 }
 
@@ -298,6 +299,18 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     }
     for (const hint of hints) toast.info(hint);
   };
+
+  // When opening the form from a previously analyzed suggestion, apply the
+  // pre-extracted fields once on mount. Same "preserve admin input" gates as
+  // the URL autofill, so nothing is overwritten on a re-render or remount.
+  const appliedSuggestionExtractedRef = useRef(false);
+  useEffect(() => {
+    if (appliedSuggestionExtractedRef.current) return;
+    if (!suggestionData?.extracted) return;
+    appliedSuggestionExtractedRef.current = true;
+    void handleExtracted(suggestionData.extracted);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
