@@ -78,6 +78,12 @@ export interface RaceFilters {
   radius?: number;
   page?: number;
   limit?: number;
+  /**
+   * When true, the listing query routes through semantic search instead of
+   * ILIKE: the user's free-text query is embedded with gemini-embedding-001
+   * and ranked by cosine similarity against race embeddings.
+   */
+  semantic?: boolean;
 }
 
 export interface RaceSuggestion {

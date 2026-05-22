@@ -42,7 +42,7 @@ interface UseInfiniteRacesResult {
   sentinelRef: (node: HTMLDivElement | null) => void;
 }
 
-function buildUrl(filters: RaceFilters, search: string, pageNum: number) {
+export function buildUrl(filters: RaceFilters, search: string, pageNum: number) {
   const params = new URLSearchParams();
   params.set("page", String(pageNum));
   params.set("limit", String(ITEMS_PER_PAGE));
@@ -58,6 +58,10 @@ function buildUrl(filters: RaceFilters, search: string, pageNum: number) {
   if (filters.lat) params.set("lat", String(filters.lat));
   if (filters.lng) params.set("lng", String(filters.lng));
   if (filters.radius) params.set("radius", String(filters.radius));
+  // Semantic search is only meaningful with a query. The API also ignores
+  // the param when search is empty, but skipping it client-side keeps the
+  // filterKey stable across "search empty + semantic toggled" toggles.
+  if (filters.semantic && search) params.set("mode", "semantic");
 
   return `/api/races?${params.toString()}`;
 }
@@ -96,8 +100,9 @@ export function useInfiniteRaces(
         lng: filters.lng,
         radius: filters.radius,
         search: debouncedSearch,
+        semantic: filters.semantic,
       }),
-    [filters.city, filters.dateFrom, filters.dateTo, filters.distances, filters.prizeType, filters.lat, filters.lng, filters.radius, debouncedSearch]
+    [filters.city, filters.dateFrom, filters.dateTo, filters.distances, filters.prizeType, filters.lat, filters.lng, filters.radius, debouncedSearch, filters.semantic]
   );
 
   // Keep a ref to filters so the effect closure always reads the latest

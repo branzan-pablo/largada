@@ -9,6 +9,7 @@ import { RaceEmptyStateSuggestions } from "./race-empty-state-suggestions";
 import { RaceFiltersDesktop } from "./race-filters";
 import { RaceFiltersMobile } from "./race-filters-mobile";
 import { RadiusBanner } from "./radius-banner";
+import { SemanticSearchToggle } from "./semantic-search-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, ChevronDown, Search, X } from "lucide-react";
 import type { Race, RaceFilters } from "@/types/race";
@@ -187,6 +188,11 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
             </button>
           )}
         </div>
+        <SemanticSearchToggle
+          enabled={!!filters.semantic}
+          hidden={!search}
+          onToggle={(next) => setFilters({ ...filters, semantic: next })}
+        />
         <RaceFiltersMobile
           filters={filters}
           onFiltersChange={setFilters}

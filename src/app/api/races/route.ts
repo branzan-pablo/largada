@@ -10,6 +10,8 @@ import { notifyNewRace } from "@/lib/notifications";
 import { raceSchema } from "@/lib/validations";
 import { requireAdmin } from "@/lib/auth";
 import { enrichRace } from "@/lib/ai/enrich-race";
+import { embedText, toPgVector } from "@/lib/ai/embed";
+import { isAIEnabled } from "@/lib/ai/provider";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -29,6 +31,33 @@ export async function GET(request: Request) {
     searchParams.get("limit") ?? String(ITEMS_PER_PAGE)
   );
   const includePast = searchParams.get("includePast") === "true";
+  const semanticMode = searchParams.get("mode") === "semantic";
+
+  // When semantic search is requested and we have a query, embed it and
+  // resolve the top N matches by cosine similarity. The IDs replace the
+  // ILIKE branch below; other filters (city, date, distance, prize) still
+  // apply on top of the semantic candidate set.
+  let semanticIds: string[] | null = null;
+  let usedSemantic = false;
+  if (semanticMode && search && isAIEnabled()) {
+    try {
+      const queryEmbedding = await embedText(search);
+      const { data: matches, error: matchError } = await supabase.rpc(
+        "match_races_semantic_any_date",
+        {
+          query_embedding: toPgVector(queryEmbedding),
+          match_threshold: 0.5,
+          match_count: 50,
+        },
+      );
+      if (!matchError && matches && matches.length > 0) {
+        semanticIds = matches.map((m) => m.id);
+        usedSemantic = true;
+      }
+    } catch (err) {
+      console.error("[races] semantic search failed, falling back:", err);
+    }
+  }
 
   let query = supabase.from("races").select("*, cities(latitude, longitude)", { count: "exact" });
 
@@ -73,7 +102,12 @@ export async function GET(request: Request) {
     query = query.overlaps("distances", distanceList);
   }
 
-  if (search) {
+  if (usedSemantic && semanticIds) {
+    // Semantic mode replaces the ILIKE branch. Limit the query to the candidate
+    // set; ordering by similarity is reapplied in JS below because Postgres
+    // returns the `.in()` rows in arbitrary order.
+    query = query.in("id", semanticIds);
+  } else if (search) {
     // Sanitize search input — escape Postgres LIKE wildcards
     const sanitized = search.replace(/[%_\\]/g, "\\$&");
     query = query.or(
@@ -81,15 +115,21 @@ export async function GET(request: Request) {
     );
   }
 
-  // Promoted races first, then by date ascending
-  query = query
-    .order("is_promoted", { ascending: false })
-    .order("date", { ascending: true });
+  // Default order: promoted first, then date ascending. In semantic mode we
+  // skip this and reapply the similarity ranking in JS below.
+  if (!usedSemantic) {
+    query = query
+      .order("is_promoted", { ascending: false })
+      .order("date", { ascending: true });
+  }
 
-  // Pagination
+  // Pagination. Semantic mode returns at most 50 matches and disables
+  // pagination — every match comes back in a single response.
   const from = (page - 1) * limit;
-  const to = from + limit - 1;
-  query = query.range(from, to);
+  if (!usedSemantic) {
+    const to = from + limit - 1;
+    query = query.range(from, to);
+  }
 
   const { data, error, count } = await query;
 
@@ -98,6 +138,19 @@ export async function GET(request: Request) {
   }
 
   let filteredData = data ?? [];
+
+  // Reapply the semantic order: Postgres `.in()` doesn't preserve list order,
+  // so we sort the returned rows by their position in the original similarity
+  // ranking. Rows missing from the ID list go to the end (defensive only —
+  // shouldn't happen because we filtered by these IDs).
+  if (usedSemantic && semanticIds) {
+    const order = new Map(semanticIds.map((id, idx) => [id, idx]));
+    filteredData = [...filteredData].sort(
+      (a, b) =>
+        (order.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+        (order.get(b.id) ?? Number.MAX_SAFE_INTEGER),
+    );
+  }
 
   // Join the user's match_reason on top of the race rows so the listing card
   // can render the "Pra você porque..." chip without a second round trip.
@@ -148,14 +201,20 @@ export async function GET(request: Request) {
     });
   }
 
-  // When client-side filters (radius) are active, the DB count is unreliable
+  // When client-side filters (radius) are active, the DB count is unreliable.
+  // Semantic mode returns everything in one response, so the visible count is
+  // simply the filtered length and there are never more pages.
   const hasClientFilters = !!lat && !!lng && !!radius;
-  const filteredCount = hasClientFilters ? null : count;
-  // If client-side filters are active, we can only know there are more pages
-  // if the DB returned a full page (meaning there might be more to fetch)
-  const hasMore = hasClientFilters
-    ? (data?.length ?? 0) >= limit
-    : count ? from + limit < count : false;
+  const filteredCount = usedSemantic
+    ? filteredData.length
+    : hasClientFilters
+      ? null
+      : count;
+  const hasMore = usedSemantic
+    ? false
+    : hasClientFilters
+      ? (data?.length ?? 0) >= limit
+      : count ? from + limit < count : false;
 
   const response = NextResponse.json({
     data: filteredData,
