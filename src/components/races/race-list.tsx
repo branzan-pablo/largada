@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo, useDeferredValue } f
 import { useAuth } from "@/contexts/auth-context";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useInfiniteRaces, type InitialRaceData } from "@/hooks/use-infinite-races";
+import { loadFilterDefaults, saveFilterDefaults } from "@/lib/filter-defaults";
 import { RaceCard } from "./race-card";
 import { RaceEmptyStateSuggestions } from "./race-empty-state-suggestions";
 import { RaceFiltersDesktop } from "./race-filters";
@@ -49,21 +50,48 @@ function buildMergedGrid(races: Race[], promotedRaces: Race[]): Race[] {
 }
 
 export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
-  const { profile } = useAuth();
+  const { profile, isLoading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<RaceFilters>({});
   const [hasInitializedFilters, setHasInitializedFilters] = useState(false);
 
-  if (profile && !hasInitializedFilters) {
-    setHasInitializedFilters(true);
-    if (
-      profile.notification_radius_km &&
+  // Initial filter resolution, in order of preference:
+  //   1. Sticky defaults persisted to localStorage from a previous visit.
+  //   2. Profile-derived radius (notification_radius_km) when the user has geo.
+  //   3. Empty.
+  // Runs once after auth settles so we never reset to empty between profile
+  // loads, and never block on profile for anonymous visitors.
+  useEffect(() => {
+    if (hasInitializedFilters) return;
+    if (authLoading) return;
+
+    const stored = loadFilterDefaults();
+    if (stored) {
+      setFilters(stored);
+    } else if (
+      profile?.notification_radius_km &&
       profile.latitude &&
       profile.longitude
     ) {
       setFilters({ radius: profile.notification_radius_km });
     }
-  }
+    setHasInitializedFilters(true);
+  }, [profile, authLoading, hasInitializedFilters]);
+
+  // Persist the sticky slice of filters whenever the user changes them.
+  // Gated by hasInitializedFilters so the empty initial state never wipes a
+  // previously stored preference during the brief window before init runs.
+  useEffect(() => {
+    if (!hasInitializedFilters) return;
+    saveFilterDefaults(filters);
+  }, [
+    hasInitializedFilters,
+    filters.city,
+    filters.distances,
+    filters.prizeType,
+    filters.radius,
+    filters,
+  ]);
   const [availableDistances, setAvailableDistances] = useState<string[]>([]);
 
   useEffect(() => {
