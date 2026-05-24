@@ -7,8 +7,8 @@ const badgeStyles = {
 
 function Badge({ type }: { type: "trophy" | "money" }) {
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[12px] font-semibold uppercase tracking-wide ${badgeStyles[type]}`}>
-      {type === "money" ? <DollarSign className="h-4 w-4" /> : <Trophy className="h-4 w-4" />}
+    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 md:px-2 rounded-md border text-[11px] md:text-[12px] font-semibold uppercase tracking-wide ${badgeStyles[type]}`}>
+      {type === "money" ? <DollarSign className="h-3 w-3 md:h-4 md:w-4" /> : <Trophy className="h-3 w-3 md:h-4 md:w-4" />}
       {type === "money" ? "Dinheiro" : "Troféu"}
     </span>
   );

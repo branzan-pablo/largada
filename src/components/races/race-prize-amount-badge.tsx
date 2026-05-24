@@ -2,7 +2,7 @@ import { Banknote } from "lucide-react";
 import type { PrizeStructured, DistancePrize } from "@/types/race";
 
 const BADGE_CLASS =
-  "inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[12px] font-semibold uppercase tracking-wide bg-emerald-50 text-emerald-700 border-emerald-200";
+  "inline-flex items-center gap-1 px-1.5 py-0.5 md:px-2 rounded-md border text-[11px] md:text-[12px] font-semibold uppercase tracking-wide bg-emerald-50 text-emerald-700 border-emerald-200";
 
 function formatBrl(value: number): string {
   return value.toLocaleString("pt-BR");
@@ -37,7 +37,7 @@ export function RacePrizeAmountBadge({
     <>
       {payouts.map((d) => (
         <span key={d.distance} className={BADGE_CLASS}>
-          <Banknote className="h-4 w-4" />
+          <Banknote className="h-3 w-3 md:h-4 md:w-4" />
           {describeDistance(d)}
         </span>
       ))}
