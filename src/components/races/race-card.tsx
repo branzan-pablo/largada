@@ -63,7 +63,7 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
         )}
 
         {/* Share button — top-left overlay */}
-        <div className="absolute top-2 left-2 z-10">
+        <div className="absolute top-1.5 left-1.5 md:top-2 md:left-2 z-10">
           <RaceShareButton
             variant="icon"
             raceName={race.name}
