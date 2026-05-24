@@ -53,28 +53,18 @@ export interface FetchSafeResult {
   bytes: number;
 }
 
+const MAX_REDIRECTS = 5;
+
 /**
- * Fetch a URL with basic SSRF protection: only http(s), no private IPs on the
- * first hop, size cap, timeout. Used by the admin race extractor so a hostile
- * URL cannot reach internal services.
- *
- * Caveat: redirect targets are not re-validated against private IPs because
- * the consumer fetches public race pages on platforms we trust (Sympla,
- * Ticket Sports, Instagram, organizer sites). If we open this surface to
- * untrusted user input later, switch to `redirect: "manual"` and re-validate
- * each Location header before following.
+ * Fetch a URL with SSRF protection: only http(s), revalidates host against
+ * private IP ranges on every hop (initial + each redirect), size cap, timeout.
+ * Used by the admin race extractor so a hostile URL cannot reach internal
+ * services even via a redirect chain (e.g. evil.com → 169.254.169.254).
  */
 export async function fetchSafe(
   url: string,
   options: FetchSafeOptions = {},
 ): Promise<FetchSafeResult> {
-  const parsed = new URL(url);
-  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-    throw new Error(`Unsupported protocol: ${parsed.protocol}`);
-  }
-
-  await assertPublicHost(parsed.hostname);
-
   const timeoutMs = options.timeoutMs ?? 15_000;
   const maxBytes = options.maxBytes ?? 5_000_000;
   const userAgent =
@@ -84,31 +74,56 @@ export async function fetchSafe(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
+  let currentUrl = url;
+
   try {
-    const response = await fetch(url, {
-      signal: controller.signal,
-      redirect: "follow",
-      headers: { "User-Agent": userAgent, Accept: "text/html,*/*;q=0.8" },
-    });
+    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+      const parsed = new URL(currentUrl);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        throw new Error(`Unsupported protocol: ${parsed.protocol}`);
+      }
+      await assertPublicHost(parsed.hostname);
 
-    if (!response.ok) {
-      throw new Error(`Upstream returned ${response.status}`);
+      const response = await fetch(currentUrl, {
+        signal: controller.signal,
+        redirect: "manual",
+        headers: { "User-Agent": userAgent, Accept: "text/html,*/*;q=0.8" },
+      });
+
+      // Follow redirects manually so we can revalidate the next hop's host.
+      if (response.status >= 300 && response.status < 400) {
+        const location = response.headers.get("location");
+        if (!location) {
+          throw new Error(`Redirect ${response.status} without Location header`);
+        }
+        if (hop === MAX_REDIRECTS) {
+          throw new Error(`Too many redirects (>${MAX_REDIRECTS})`);
+        }
+        currentUrl = new URL(location, currentUrl).toString();
+        continue;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Upstream returned ${response.status}`);
+      }
+
+      const buffer = await response.arrayBuffer();
+      if (buffer.byteLength > maxBytes) {
+        throw new Error(
+          `Response too large: ${buffer.byteLength} bytes (limit ${maxBytes})`,
+        );
+      }
+
+      const text = new TextDecoder("utf-8", { fatal: false }).decode(buffer);
+      return {
+        text,
+        finalUrl: response.url || currentUrl,
+        contentType: response.headers.get("content-type"),
+        bytes: buffer.byteLength,
+      };
     }
 
-    const buffer = await response.arrayBuffer();
-    if (buffer.byteLength > maxBytes) {
-      throw new Error(
-        `Response too large: ${buffer.byteLength} bytes (limit ${maxBytes})`,
-      );
-    }
-
-    const text = new TextDecoder("utf-8", { fatal: false }).decode(buffer);
-    return {
-      text,
-      finalUrl: response.url,
-      contentType: response.headers.get("content-type"),
-      bytes: buffer.byteLength,
-    };
+    throw new Error(`Too many redirects (>${MAX_REDIRECTS})`);
   } finally {
     clearTimeout(timer);
   }
