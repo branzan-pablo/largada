@@ -1,9 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
@@ -19,7 +27,7 @@ export function CheckoutButton({ tier, label, apiPath, className }: CheckoutButt
   const { user, profile } = useAuth();
   const { openLogin } = useLoginModal();
   const [loading, setLoading] = useState(false);
-  const [needsCustomer, setNeedsCustomer] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [taxId, setTaxId] = useState("");
   const [cellphone, setCellphone] = useState("");
 
@@ -43,7 +51,7 @@ export function CheckoutButton({ tier, label, apiPath, className }: CheckoutButt
       }
 
       if (res.status === 422) {
-        setNeedsCustomer(true);
+        setDialogOpen(true);
         return;
       }
 
@@ -67,6 +75,7 @@ export function CheckoutButton({ tier, label, apiPath, className }: CheckoutButt
       toast.error("Preencha CPF/CNPJ e celular.");
       return;
     }
+    setDialogOpen(false);
     await checkout({
       name: profile?.full_name || user?.email?.split("@")[0] || "",
       email: user?.email || "",
@@ -75,44 +84,57 @@ export function CheckoutButton({ tier, label, apiPath, className }: CheckoutButt
     });
   };
 
-  if (needsCustomer) {
-    return (
-      <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-4">
-        <p className="text-xs font-medium text-[#6B7280]">Dados para o pagamento:</p>
-        <div className="space-y-1.5">
-          <Label htmlFor={`taxId-${tier}`} className="text-xs text-[#6B7280]">CPF/CNPJ</Label>
-          <Input
-            id={`taxId-${tier}`}
-            placeholder="000.000.000-00"
-            value={taxId}
-            onChange={e => setTaxId(e.target.value)}
-            className="h-9 text-sm"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor={`phone-${tier}`} className="text-xs text-[#6B7280]">Celular</Label>
-          <Input
-            id={`phone-${tier}`}
-            placeholder="(17) 99999-9999"
-            value={cellphone}
-            onChange={e => setCellphone(e.target.value)}
-            className="h-9 text-sm"
-          />
-        </div>
-        <button
-          onClick={handleCustomerSubmit}
-          disabled={loading || !taxId.trim() || !cellphone.trim()}
-          className={className}
-        >
-          {loading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : "Ir para pagamento"}
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <button onClick={() => checkout()} disabled={loading} className={className}>
-      {loading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : label}
-    </button>
+    <>
+      <button onClick={() => checkout()} disabled={loading} className={className}>
+        {loading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : label}
+      </button>
+
+      <Dialog open={dialogOpen} onOpenChange={(open) => {
+        setDialogOpen(open);
+        if (!open) { setTaxId(""); setCellphone(""); }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Dados para pagamento</DialogTitle>
+            <DialogDescription>
+              Precisamos do seu CPF/CNPJ e celular para processar a cobrança.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor={`taxId-${tier}`}>CPF/CNPJ</Label>
+              <Input
+                id={`taxId-${tier}`}
+                placeholder="000.000.000-00"
+                value={taxId}
+                onChange={e => setTaxId(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`phone-${tier}`}>Celular</Label>
+              <Input
+                id={`phone-${tier}`}
+                placeholder="(17) 99999-9999"
+                value={cellphone}
+                onChange={e => setCellphone(e.target.value)}
+              />
+            </div>
+            <Button
+              className="w-full"
+              disabled={loading || !taxId.trim() || !cellphone.trim()}
+              onClick={handleCustomerSubmit}
+            >
+              {loading ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Processando...</>
+              ) : (
+                <>Ir para pagamento<ExternalLink className="ml-2 h-4 w-4" /></>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
