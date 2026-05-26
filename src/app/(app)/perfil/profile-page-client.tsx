@@ -27,7 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { LogOut, Loader2, Mail, MapPin, Bell, Heart, MessageSquarePlus, Star, ChevronRight, Unlink, ExternalLink, Trash2, TrendingUp } from "lucide-react";
+import { LogOut, Loader2, Mail, MapPin, Bell, Heart, ChevronRight, Unlink, ExternalLink, Trash2 } from "lucide-react";
 
 export function ProfilePageClient() {
   const { user, profile, isLoading, signOut, updateProfile } = useAuth();
@@ -244,16 +244,6 @@ export function ProfilePageClient() {
       {/* Navigation links */}
       <div className="space-y-1">
         <Link
-          href="/perfil/assinatura"
-          className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"
-        >
-          <div className="flex items-center gap-2">
-            <Star className="h-4 w-4" />
-            <span className="text-sm font-medium">Pacotes de Destaque</span>
-          </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        </Link>
-        <Link
           href="/perfil/minhas-corridas"
           className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"
         >
@@ -263,28 +253,6 @@ export function ProfilePageClient() {
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </Link>
-        <Link
-          href="/perfil/sugestoes"
-          className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"
-        >
-          <div className="flex items-center gap-2">
-            <MessageSquarePlus className="h-4 w-4" />
-            <span className="text-sm font-medium">Minhas Sugestões</span>
-          </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        </Link>
-        {user.user_metadata?.provider === "strava" && (
-          <div className="flex items-center justify-between rounded-lg border p-4 opacity-50 cursor-not-allowed">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              <div>
-                <span className="text-sm font-medium">Meu Desempenho</span>
-                <p className="text-xs text-muted-foreground">Em atualização</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </div>
-        )}
       </div>
 
       {user.user_metadata?.provider === "strava" && (
