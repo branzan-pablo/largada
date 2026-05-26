@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Check, Star, ArrowLeft, Megaphone, Trophy, Users } from "lucide-react";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { Footer } from "@/components/footer/footer";
+import { CheckoutButton } from "@/components/landing/checkout-button";
 
 export const metadata: Metadata = {
   title: "Para Organizadores | Largada",
@@ -139,14 +140,9 @@ export default function ParaOrganizadoresPage() {
 
           <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
             {TIERS.map((tier) => {
-              const isCheckout =
-                tier.slug === "express" || tier.slug === "standard";
-              const ctaLabel = isCheckout
-                ? "Destacar minha corrida"
-                : "Comprar pacote";
-              const ctaHref = isCheckout
-                ? "/corridas"
-                : `/perfil/assinatura?tier=${tier.slug}`;
+              const isSingleRace = tier.slug === "express" || tier.slug === "standard";
+              const apiPath = isSingleRace ? "/api/promotions/checkout" : "/api/subscriptions/create";
+              const ctaLabel = isSingleRace ? "Destacar minha corrida" : "Comprar pacote";
 
               return (
                 <div
@@ -204,16 +200,16 @@ export default function ParaOrganizadoresPage() {
                     ))}
                   </ul>
 
-                  <Link
-                    href={ctaHref}
-                    className={`flex min-h-12 w-full items-center justify-center rounded-full px-4 py-3 text-sm font-semibold transition-colors ${
+                  <CheckoutButton
+                    tier={tier.slug}
+                    label={ctaLabel}
+                    apiPath={apiPath}
+                    className={`flex min-h-12 w-full items-center justify-center rounded-full px-4 py-3 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
                       tier.popular
                         ? "bg-[#FF4D00] text-white hover:bg-[#E04400]"
                         : "border border-[#0D1B2A] bg-white text-[#0D1B2A] hover:bg-[#0D1B2A] hover:text-white"
                     }`}
-                  >
-                    {ctaLabel}
-                  </Link>
+                  />
                 </div>
               );
             })}

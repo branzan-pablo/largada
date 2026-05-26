@@ -120,8 +120,8 @@ export async function POST(request: NextRequest) {
     const config = SUBSCRIPTION_TIERS[tier];
     const appUrl =
       process.env.NEXT_PUBLIC_APP_URL || "https://largada.app";
-    const returnUrl = `${appUrl}/perfil/assinatura`;
-    const completionUrl = `${appUrl}/perfil/assinatura?sucesso=true`;
+    const returnUrl = `${appUrl}/para-organizadores`;
+    const completionUrl = `${appUrl}/checkout/sucesso?tier=${tier}`;
 
     console.info("[Subscription] Creating billing", {
       userId: user.id,

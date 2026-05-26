@@ -352,15 +352,32 @@ export function PromoteRaceCard({
 
   // -- SIDEBAR VARIANT — non-owner --
   if (!isOwner) {
+    const waMsg = encodeURIComponent(
+      `Olá! Tenho interesse em destacar a corrida "${raceName}" na Largada.`
+    );
     return (
-      <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-2">
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-3">
         <div className="flex items-center gap-2">
           <Star className="h-4 w-4 text-[#FF4D00]" />
           <h3 className="font-semibold text-[#0D1B2A]">Destacar esta corrida</h3>
         </div>
         <p className="text-xs text-muted-foreground">
-          Interessado em destacar esta corrida? Entre em contato com o organizador.
+          Quer mais visibilidade para esta corrida? Fale com a equipe Largada.
         </p>
+        <a
+          href={`https://wa.me/5517988282542?text=${waMsg}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1ebe5d] transition-colors"
+        >
+          Falar no WhatsApp
+        </a>
+        <a
+          href={`mailto:branzan.pablo@gmail.com?subject=Destaque - ${encodeURIComponent(raceName)}`}
+          className="block text-center text-xs text-muted-foreground hover:text-[#FF4D00] transition-colors"
+        >
+          ou envie um e-mail
+        </a>
       </div>
     );
   }
