@@ -115,63 +115,54 @@ export async function POST(request: NextRequest) {
             .select("id, user_id, order_type, metadata, amount")
             .single();
 
-          let updatedOrder = updatedOrderData;
+          const updatedOrder = updatedOrderData;
 
           if (orderError && orderError.code !== "PGRST116") {
             console.error("[Webhook] Failed to update order:", orderError);
           }
 
-          // C4 fix: Validate paid amount against expected order amount
-          if (updatedOrder && typeof updatedOrder.amount === "number" && paidAmount !== undefined) {
-            if (paidAmount < updatedOrder.amount) {
-              console.error("[Webhook] AMOUNT MISMATCH — paid less than expected", {
+          // Sec A3 fix: fallback by external_id was removed. It allowed
+          // promoting a race even when the abacatepay_id in the payload did
+          // not match any order — an attacker who could spawn multiple
+          // PENDING orders for the same race could redirect a paid event to a
+          // higher-amount order. If primary match fails, surface for manual
+          // review instead of fuzzy matching.
+          if (!updatedOrder) {
+            console.error(
+              "[Webhook] No order updated for abacatepay_id (manual review required):",
+              abacatePayRefId,
+            );
+            break;
+          }
+
+          orderId = updatedOrder.id;
+
+          // Sec A2 fix: when paidAmount < expected, mark the order as
+          // UNDERPAID and skip side effects (promotion / subscription
+          // activation). Previously this only logged a warning and continued
+          // to promote the race, which combined with client-controlled
+          // amount (A1) let an attacker promote any race for 1 centavo.
+          if (
+            typeof updatedOrder.amount === "number" &&
+            paidAmount !== undefined &&
+            paidAmount < updatedOrder.amount
+          ) {
+            console.error(
+              "[Webhook] AMOUNT MISMATCH — paid less than expected, blocking side effects",
+              {
                 orderId: updatedOrder.id,
                 expectedAmount: updatedOrder.amount,
                 paidAmount,
                 difference: updatedOrder.amount - paidAmount,
-              });
-            }
-          }
-
-          // Fallback: if order not found by abacatepay_id, try metadata match
-          // Constrained by order_type + status + external_id to avoid race conditions
-          if (!updatedOrder) {
-            const webhookMeta = payload.data as unknown as Record<string, unknown>;
-            const billingMeta = webhookMeta.billing as Record<string, unknown> | undefined;
-            const metaRaceId = billingMeta?.metadata
-              ? (billingMeta.metadata as Record<string, unknown>)?.raceId as string | undefined
-              : undefined;
-
-            if (metaRaceId) {
-              const { data: fallbackOrder } = await admin
-                .from("payment_orders")
-                .update({
-                  status: "PAID",
-                  paid_amount: paidAmount ?? 0,
-                  paid_at: utcNow(),
-                })
-                .eq("external_id", metaRaceId)
-                .eq("order_type", "race_promotion")
-                .eq("status", "PENDING")
-                .order("created_at", { ascending: false })
-                .limit(1)
-                .select("id, user_id, order_type, metadata, amount")
-                .single();
-
-              if (fallbackOrder) {
-                updatedOrder = fallbackOrder;
-                console.warn(
-                  `[Webhook] Order found via external_id fallback (raceId: ${metaRaceId}), not by abacatepay_id: ${abacatePayRefId}`
-                );
-              }
-            }
-          }
-
-          orderId = updatedOrder?.id ?? null;
-
-          // C5 fix: Only proceed with side-effects if order was successfully updated
-          if (!updatedOrder) {
-            console.warn("[Webhook] No order updated for abacatepay_id:", abacatePayRefId);
+              },
+            );
+            // TODO(sec): add a dedicated UNDERPAID enum value via migration.
+            // Using FAILED for now to stay within the existing payment_status
+            // enum (PENDING/PAID/EXPIRED/CANCELLED/REFUNDED/FAILED).
+            await admin
+              .from("payment_orders")
+              .update({ status: "FAILED" })
+              .eq("id", updatedOrder.id);
             break;
           }
 

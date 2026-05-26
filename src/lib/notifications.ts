@@ -1,5 +1,6 @@
 import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { Json } from "@/types/database";
 import { utcNow } from "@/lib/date";
 
 let vapidConfigured = false;
@@ -203,6 +204,12 @@ export async function notifyPersonalizedRace(
   userId: string,
   race: { id: string; name: string; city: string; slug: string },
   matchReason: string,
+  scoreBreakdown?: {
+    heuristic: number;
+    cosine_sim: number | null;
+    final: number;
+    source: "heuristic" | "blended" | "embedding";
+  },
 ) {
   const supabase = createAdminClient();
 
@@ -210,6 +217,21 @@ export async function notifyPersonalizedRace(
     .from("push_subscriptions")
     .select("endpoint, p256dh, auth")
     .eq("user_id", userId);
+
+  // Always persist the recommendation log even when the user has no active
+  // push subscription, so the "Pra você porque..." chip can still light up
+  // on the listing when they sign in.
+  await supabase.from("race_recommendation_logs").upsert(
+    {
+      user_id: userId,
+      race_id: race.id,
+      match_reason: matchReason,
+      match_score_breakdown: scoreBreakdown
+        ? (scoreBreakdown as unknown as Json)
+        : null,
+    },
+    { onConflict: "user_id,race_id" },
+  );
 
   if (!subs || subs.length === 0) return { sent: 0 };
 
@@ -219,13 +241,6 @@ export async function notifyPersonalizedRace(
     url: `/corrida/${race.slug}`,
     subscriptions: subs,
   });
-
-  // Log for dedup
-  if (result.sent > 0) {
-    await supabase
-      .from("race_recommendation_logs")
-      .upsert({ user_id: userId, race_id: race.id }, { onConflict: "user_id,race_id" });
-  }
 
   return result;
 }

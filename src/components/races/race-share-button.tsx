@@ -178,10 +178,10 @@ export function RaceShareButton(props: RaceShareButtonProps) {
         aria-label="Compartilhar corrida"
         className={
           className ??
-          "inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-[#0D1B2A] shadow-md ring-1 ring-black/5 backdrop-blur-sm transition-colors hover:bg-white hover:text-[#FF4D00] active:scale-95"
+          "inline-flex h-9 w-9 md:h-11 md:w-11 items-center justify-center rounded-full bg-white/90 text-[#0D1B2A] shadow-md ring-1 ring-black/5 backdrop-blur-sm transition-colors hover:bg-white hover:text-[#FF4D00] active:scale-95"
         }
       >
-        <Share2 className="h-[18px] w-[18px]" />
+        <Share2 className="h-4 w-4 md:h-[18px] md:w-[18px]" />
       </button>
     ) : (
       <Button

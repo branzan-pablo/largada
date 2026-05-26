@@ -836,18 +836,30 @@ export type Database = {
           user_id: string
           race_id: string
           sent_at: string
+          match_reason: string | null
+          match_score_breakdown: Json | null
+          clicked_at: string | null
+          registered_at: string | null
         }
         Insert: {
           id?: string
           user_id: string
           race_id: string
           sent_at?: string
+          match_reason?: string | null
+          match_score_breakdown?: Json | null
+          clicked_at?: string | null
+          registered_at?: string | null
         }
         Update: {
           id?: string
           user_id?: string
           race_id?: string
           sent_at?: string
+          match_reason?: string | null
+          match_score_breakdown?: Json | null
+          clicked_at?: string | null
+          registered_at?: string | null
         }
         Relationships: [
           {

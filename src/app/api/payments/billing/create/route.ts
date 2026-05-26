@@ -1,9 +1,12 @@
 // POST /api/payments/billing/create
-// Creates a new billing charge via AbacatePay and persists it in the database.
+// Generic billing creation. Admin only: trusted callers may decide the products
+// and amount. Regular user flows must go through the typed wrappers
+// (e.g. /api/races/[id]/promote, /api/subscriptions/create, /api/radar/checkout)
+// which derive amount server-side from PROMOTION_TIERS / SUBSCRIPTION_TIERS.
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAdmin } from "@/lib/auth";
 import { createBilling } from "@/lib/payments/billing";
 import { createCustomer } from "@/lib/payments/customer";
 import { createBillingSchema } from "@/types/payments";
@@ -11,19 +14,10 @@ import { AbacatePayApiError } from "@/lib/payments/errors";
 
 export async function POST(request: NextRequest) {
     try {
-        // 1. Authenticate user
-        const supabase = await createClient();
-        const {
-            data: { user },
-            error: authError,
-        } = await supabase.auth.getUser();
-
-        if (authError || !user) {
-            return NextResponse.json(
-                { error: "Não autorizado" },
-                { status: 401 }
-            );
-        }
+        // 1. Authenticate as admin (regular users use typed wrappers)
+        const authResult = await requireAdmin();
+        if (authResult instanceof NextResponse) return authResult;
+        const { user } = authResult;
 
         // 2. Validate input
         const body = await request.json();

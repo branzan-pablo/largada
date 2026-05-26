@@ -50,7 +50,9 @@
   },
   "pnpm": {
     "overrides": {
-      "bn.js": "^5.2.2"
+      "bn.js": "^5.2.2",
+      "postcss": "^8.5.10",
+      "ws": "^8.20.1"
     },
     "onlyBuiltDependencies": [
       "esbuild",

@@ -44,6 +44,12 @@ export interface Race {
   prize_type: "money" | "trophy" | "both" | "none";
   prize_details: string | null;
   prize_structured: PrizeStructured | null;
+  /**
+   * Per-user explanation of why this race was recommended. Populated server-side
+   * only for the authenticated viewer (joined from race_recommendation_logs).
+   * Null when the user has no recommendation log for this race.
+   */
+  match_reason?: string | null;
   image_url: string | null;
   route_description: string | null;
   route_image_url: string | null;
@@ -72,6 +78,12 @@ export interface RaceFilters {
   radius?: number;
   page?: number;
   limit?: number;
+  /**
+   * When true, the listing query routes through semantic search instead of
+   * ILIKE: the user's free-text query is embedded with gemini-embedding-001
+   * and ranked by cosine similarity against race embeddings.
+   */
+  semantic?: boolean;
 }
 
 export interface RaceSuggestion {
