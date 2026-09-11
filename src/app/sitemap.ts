@@ -9,6 +9,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/corridas`, changeFrequency: "daily", priority: 0.9 },
   ];
 
+  // Preview builds may be created before Supabase credentials are configured.
+  // Keep the static sitemap available instead of failing the whole deployment.
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY
+  ) {
+    return staticPages;
+  }
+
   // Dynamic race pages (limited to most recent 1000 for performance)
   const supabase = createAdminClient();
   const { data: races } = await supabase

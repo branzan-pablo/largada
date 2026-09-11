@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
@@ -23,10 +22,9 @@ export function MySuggestionsClient() {
   const { openLogin } = useLoginModal();
   const [suggestions, setSuggestions] = useState<RaceSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const supabaseRef = useRef(createClient());
-
   const fetchSuggestions = useCallback(async (userId: string) => {
-    const { data } = await supabaseRef.current
+    const { createClient } = await import("@/lib/supabase/client");
+    const { data } = await createClient()
       .from("race_suggestions")
       .select("*")
       .eq("user_id", userId)
@@ -42,7 +40,10 @@ export function MySuggestionsClient() {
       openLogin();
       return;
     }
-    fetchSuggestions(user.id);
+    const timeoutId = window.setTimeout(() => {
+      void fetchSuggestions(user.id);
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
   }, [user, authLoading, openLogin, fetchSuggestions]);
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
