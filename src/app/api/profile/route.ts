@@ -9,7 +9,7 @@ export async function PATCH(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
   const { user, supabase } = authResult;
 
-  if (rateLimit(`profile:${user.id}`, { max: 5, windowMs: 60_000 }).limited) {
+  if ((await rateLimit(`profile:${user.id}`, { max: 5, windowMs: 60_000 })).limited) {
     return NextResponse.json(
       { error: "Muitas requisições. Aguarde um momento." },
       { status: 429 }

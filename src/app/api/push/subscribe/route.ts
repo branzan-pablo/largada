@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  if (rateLimit(`push:${user.id}`, { max: 10, windowMs: 3_600_000 }).limited) {
+  if ((await rateLimit(`push:${user.id}`, { max: 10, windowMs: 3_600_000 })).limited) {
     return NextResponse.json(
       { error: "Muitas requisições. Aguarde um momento." },
       { status: 429 }

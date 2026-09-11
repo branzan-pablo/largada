@@ -7,7 +7,6 @@ import {
   haversineKm,
   distanceRanges,
   formatPaceFromSeconds,
-  type RunnerLevel,
 } from "@/lib/strava-utils";
 
 /**
@@ -31,7 +30,6 @@ export async function POST(request: NextRequest) {
   const preferredDistances: string[] = body.preferredDistances ?? [];
   const nextChallenge: string | null = body.nextChallenge ?? null;
   const weeklyVolumeKm: number = body.weeklyVolumeKm ?? 0;
-  const overallLevel: RunnerLevel = body.overallLevel ?? "intermediario";
   const paceByDistance: Record<string, number> = body.paceByDistance ?? {};
   const trend: string = body.trend ?? "stable";
 

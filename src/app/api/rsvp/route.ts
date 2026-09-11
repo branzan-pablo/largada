@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
   const { user, supabase } = authResult;
 
-  if (rateLimit(`rsvp:${user.id}`, { max: 10, windowMs: 60_000 }).limited) {
+  if ((await rateLimit(`rsvp:${user.id}`, { max: 10, windowMs: 60_000 })).limited) {
     return NextResponse.json(
       { error: "Muitas requisições. Aguarde um momento." },
       { status: 429 }

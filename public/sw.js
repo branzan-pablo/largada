@@ -55,7 +55,7 @@ self.addEventListener("push", function (event) {
   if (event.data) {
     try {
       data = event.data.json();
-    } catch (_) {
+    } catch {
       // Fallback for plain-text payloads (e.g. DevTools test push)
       data = { title: "Largada", body: event.data.text() };
     }

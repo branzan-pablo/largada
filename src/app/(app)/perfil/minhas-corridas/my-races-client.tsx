@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useLoginModal } from "@/contexts/login-modal-context";
-import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RaceCard } from "@/components/races/race-card";
@@ -23,12 +22,12 @@ export function MyRacesClient({ initialTab }: { initialTab?: string }) {
   const [created, setCreated] = useState<Race[]>([]);
   const [subscription, setSubscription] = useState<OrganizerSubscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const supabaseRef = useRef(createClient());
   const fetchedRef = useRef(false);
 
   const fetchRaces = useCallback(async (userId: string) => {
     setIsLoading(true);
-    const supabase = supabaseRef.current;
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
     const today = todayInBrazil();
 
     try {

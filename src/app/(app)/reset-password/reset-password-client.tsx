@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +26,6 @@ export function ResetPasswordClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
-  const supabase = createClient();
   const { user } = useAuth();
   const { openLogin } = useLoginModal();
 
@@ -49,6 +47,8 @@ export function ResetPasswordClient() {
     setIsLoading(true);
 
     try {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
       const { error } = await supabase.auth.updateUser({
         password,
       });

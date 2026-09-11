@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const authResult = await requireAdmin();
   if (authResult instanceof NextResponse) return authResult;
 
-  const { limited } = rateLimit(`ai-describe:${authResult.user.id}`, {
+  const { limited } = await rateLimit(`ai-describe:${authResult.user.id}`, {
     max: 10,
     windowMs: 60_000,
   });

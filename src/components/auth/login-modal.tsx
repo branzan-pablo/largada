@@ -26,6 +26,8 @@ export function LoginModal() {
 
   // Sync tab when modal opens with a different default
   useEffect(() => {
+    // The requested tab comes from an imperative open-modal action.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isOpen) setTab(defaultTab);
   }, [isOpen, defaultTab]);
 

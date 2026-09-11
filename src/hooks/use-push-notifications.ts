@@ -28,6 +28,8 @@ export function usePushNotifications() {
       "serviceWorker" in navigator &&
       "PushManager" in window &&
       "Notification" in window;
+    // Browser capability state is only available after mounting.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsSupported(supported);
     if (!supported) return;
 

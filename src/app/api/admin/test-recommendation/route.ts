@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyPersonalizedRace } from "@/lib/notifications";
-import { todayInBrazil } from "@/lib/date";
 import {
   buildPerformanceProfile,
   scoreRaceForUser,
@@ -36,7 +35,6 @@ export async function POST(request: Request) {
   const dryRun = url.searchParams.get("dry") === "true";
 
   const supabase = createAdminClient();
-  const today = todayInBrazil();
 
   // 1. Get user's cached activities
   const { data: cache } = await supabase

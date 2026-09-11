@@ -12,7 +12,7 @@ import { AbacatePayApiError } from "@/lib/payments/errors";
 import {
     getActiveSubscription,
     canPromoteWithSubscription,
-    useSubscriptionPromotion,
+    consumeSubscriptionPromotion,
 } from "@/lib/subscriptions";
 import { futureUtc, todayInBrazil } from "@/lib/date";
 import {
@@ -92,23 +92,18 @@ export async function POST(
                 );
             }
 
-            const used = await useSubscriptionPromotion(subscription.id, raceId);
+            const promotedUntil = futureUtc(PROMOTION_TIERS.standard.durationDays);
+            const used = await consumeSubscriptionPromotion(
+                subscription.id,
+                raceId,
+                user.id,
+                promotedUntil,
+            );
             if (!used) {
                 return NextResponse.json(
                     { error: "Não foi possível usar crédito do plano" },
                     { status: 409 }
                 );
-            }
-
-            const admin = createAdminClient();
-            const promotedUntil = futureUtc(PROMOTION_TIERS.standard.durationDays);
-            const { error: raceError } = await admin
-                .from("races")
-                .update({ is_promoted: true, promoted_until: promotedUntil })
-                .eq("id", raceId);
-
-            if (raceError) {
-                throw new Error(`Failed to promote race ${raceId}: ${raceError.message}`);
             }
 
             console.info(`[Promote Race] Race ${raceId} promoted via subscription ${subscription.tier}`);

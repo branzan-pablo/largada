@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     "unknown";
 
   // Anti-spam: cap views per IP+race at 1 per 10 minutes.
-  const { limited } = rateLimit(`view:${ip}:${raceId}`, {
+  const { limited } = await rateLimit(`view:${ip}:${raceId}`, {
     max: 1,
     windowMs: 10 * 60 * 1000,
   });

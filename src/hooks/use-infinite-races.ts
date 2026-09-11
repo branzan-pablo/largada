@@ -108,8 +108,10 @@ export function useInfiniteRaces(
   // Keep a ref to filters so the effect closure always reads the latest
   const filtersRef = useRef(filters);
   const searchRef = useRef(debouncedSearch);
-  filtersRef.current = filters;
-  searchRef.current = debouncedSearch;
+  useEffect(() => {
+    filtersRef.current = filters;
+    searchRef.current = debouncedSearch;
+  }, [filters, debouncedSearch]);
 
   // Reset and fetch on filter change (or restore from cache)
   useEffect(() => {
@@ -130,6 +132,8 @@ export function useInfiniteRaces(
     // Restore from sessionStorage on filter changes within the same tab.
     const cached = loadCache(filterKey);
     if (cached) {
+      // Restore an external sessionStorage snapshot for this filter key.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRaces(cached.races);
       setTotalCount(cached.totalCount ?? null);
       setPage(cached.page);
@@ -170,12 +174,14 @@ export function useInfiniteRaces(
     return () => {
       cancelled = true;
     };
-  }, [filterKey]);
+  }, [filterKey, initialData?.count, initialData?.data, initialData?.hasMore]);
 
   const filterKeyRef = useRef(filterKey);
-  filterKeyRef.current = filterKey;
   const totalCountRef = useRef(totalCount);
-  totalCountRef.current = totalCount;
+  useEffect(() => {
+    filterKeyRef.current = filterKey;
+    totalCountRef.current = totalCount;
+  }, [filterKey, totalCount]);
 
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;

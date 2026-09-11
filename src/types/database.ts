@@ -927,6 +927,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_rate_limit: {
+        Args: { p_key_hash: string; p_max: number; p_window_seconds: number }
+        Returns: boolean
+      }
+      consume_subscription_promotion: {
+        Args: {
+          p_subscription_id: string
+          p_race_id: string
+          p_user_id: string
+          p_promoted_until: string
+        }
+        Returns: boolean
+      }
+      process_payment_event: {
+        Args: {
+          p_event_id: string
+          p_event_type: string
+          p_raw_payload: Json
+          p_dev_mode: boolean
+          p_abacatepay_id?: string | null
+          p_paid_amount?: number | null
+        }
+        Returns: Json
+      }
       get_race_notification_recipients: {
         Args: { p_race_city_id: string }
         Returns: { user_id: string; distance_km: number }[]

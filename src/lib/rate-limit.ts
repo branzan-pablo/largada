@@ -1,38 +1,26 @@
-const rateMap = new Map<string, { count: number; resetAt: number }>();
+import crypto from "node:crypto";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
- * Simple in-memory rate limiter for API routes.
- * Returns { limited: true } if the caller exceeded `max` requests within `windowMs`.
- *
- * KNOWN LIMITATION: Works per-instance — resets on redeploy / cold-start.
- * On Vercel with auto-scaling, each serverless instance has its own Map,
- * so limits are not shared across instances. This provides best-effort
- * protection only. For strict enforcement, migrate to @upstash/ratelimit + Redis.
+ * Distributed fixed-window limiter. Raw identifiers are hashed before storage.
+ * Failures are fail-open so a database incident does not take down every route.
  */
-export function rateLimit(
+export async function rateLimit(
   key: string,
   { max, windowMs }: { max: number; windowMs: number }
-): { limited: boolean } {
-  const now = Date.now();
+): Promise<{ limited: boolean }> {
+  const keyHash = crypto.createHash("sha256").update(key).digest("hex");
+  const admin = createAdminClient();
+  const { data, error } = await admin.rpc("consume_rate_limit", {
+    p_key_hash: keyHash,
+    p_max: max,
+    p_window_seconds: Math.max(1, Math.ceil(windowMs / 1000)),
+  });
 
-  // Cleanup expired entries periodically (every 100 calls) to prevent memory leak
-  if (rateMap.size > 100) {
-    for (const [k, v] of rateMap) {
-      if (now > v.resetAt) rateMap.delete(k);
-    }
-  }
-
-  const entry = rateMap.get(key);
-
-  if (!entry || now > entry.resetAt) {
-    rateMap.set(key, { count: 1, resetAt: now + windowMs });
+  if (error) {
+    console.error("[RateLimit] Distributed limiter unavailable:", error.message);
     return { limited: false };
   }
 
-  entry.count++;
-  if (entry.count > max) {
-    return { limited: true };
-  }
-
-  return { limited: false };
+  return { limited: data === true };
 }

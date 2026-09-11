@@ -20,7 +20,7 @@ acoplado a Vercel Preview Deployments e a um projeto Supabase próprio.
 
 ## 1. Aplicar todas as migrações no Supabase staging
 
-Você tem 18 migrações em `supabase/migrations/`. Tem dois caminhos.
+Você tem 26 migrações em `supabase/migrations/`. Tem dois caminhos.
 
 ### Caminho A — Supabase CLI (recomendado, automatizado)
 
@@ -56,7 +56,8 @@ race_views, payment_orders, etc.).
 ### Caminho B — SQL Editor manual (sem CLI)
 
 No painel do Supabase staging → **SQL Editor** → New query → cole o conteúdo
-de cada arquivo na ordem `001_…` até `018_…` e rode um por um.
+de cada arquivo na ordem lexical exibida na pasta (de `001_…` até a migração
+timestamped mais recente) e rode um por um.
 
 É tedioso mas não exige login no CLI. Se algum falhar, leia a mensagem — pode
 ser dependência de uma migração anterior.
@@ -197,6 +198,7 @@ ao invés de "Preview" — fica ainda mais isolado.
 | `ABACATEPAY_API_KEY` | API key sandbox (§5) |
 | `ABACATEPAY_WEBHOOK_SECRET` | Webhook secret de staging (§5) |
 | `CRON_SECRET` | Token gerado em §3.2 |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Chave Google AI exclusiva de staging |
 
 > ⚠️ **Nunca cole valores de staging no escopo Production por engano.**
 > Confira sempre o checkbox antes de salvar.
@@ -228,6 +230,10 @@ https://staging.largadas.com.br/api/payments/webhook?webhookSecret=<ABACATEPAY_W
 ```
 
 (O código já espera o secret na query string — mesmo padrão da prod.)
+
+A AbacatePay também envia `X-Webhook-Signature`. A aplicação valida
+obrigatoriamente tanto esse HMAC quanto o `webhookSecret`; não substitua o
+query parameter por um header `Authorization`.
 
 ---
 

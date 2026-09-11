@@ -308,6 +308,8 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     if (appliedSuggestionExtractedRef.current) return;
     if (!suggestionData?.extracted) return;
     appliedSuggestionExtractedRef.current = true;
+    // Apply the server-provided suggestion once when this form is initialized.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void handleExtracted(suggestionData.extracted);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

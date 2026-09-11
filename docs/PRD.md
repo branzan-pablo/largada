@@ -1,5 +1,9 @@
 # PRD — Largada
 
+> Estado da implementação (setembro de 2026): 26 migrações cobrem o núcleo de
+> corridas e RSVP, monetização AbacatePay, assinaturas de organizadores,
+> analytics, Strava, notificações push, scrapers e recomendações por IA.
+
 ## 1. Visão Geral
 
 Largada é uma aplicação web progressiva (PWA) que centraliza informações de corridas de rua regionais em um único lugar, permitindo que corredores do interior de São Paulo encontrem provas, vejam detalhes completos e sinalizem participação.
