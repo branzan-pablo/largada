@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { CheckCircle2, AlertTriangle, Copy, HelpCircle } from "lucide-react";
 import type { SuggestionAnalysis } from "@/lib/ai/schemas/suggestion-analysis";
 

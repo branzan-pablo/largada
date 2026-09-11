@@ -1,6 +1,6 @@
 import { memo } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import { RaceCardImage } from "./race-card-image";
 import { RaceDistanceBadges } from "./race-distance-badges";
 import { RacePrizeBadge } from "./race-prize-badge";
 import { RacePrizeAmountBadge } from "./race-prize-amount-badge";
@@ -24,35 +24,13 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
     <Link href={`/corrida/${race.slug}`} className={`block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden transition-colors ${race.is_promoted ? "ring-2 ring-[#FF4D00] shadow-lg shadow-[#FF4D00]/20 bg-linear-to-b from-[#FF4D00]/5 to-transparent" : ""}`}>
       {/* Thumbnail */}
       <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-gray-100">
-        {race.image_url ? (
-          <>
-            {/* Blurred background layer */}
-            <Image
-              src={race.image_url}
-              alt=""
-              fill
-              className="object-cover scale-110 blur-xl brightness-75"
-              sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), calc(33vw - 2rem)"
-              aria-hidden
-              unoptimized
-            />
-            {/* Sharp foreground — full image visible */}
-            <Image
-              src={race.image_url}
-              alt={race.name}
-              fill
-              className="object-contain md:transition-transform md:duration-300 md:group-hover:scale-[1.03] relative"
-              sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), calc(33vw - 2rem)"
-              priority={priority}
-              unoptimized
-            />
-          </>
-        ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-linear-to-br from-[#FF4D00]/10 via-gray-100 to-gray-200">
-            <span className="text-4xl font-black leading-none text-[#0D1B2A]">{day}</span>
-            <span className="mt-0.5 text-xs font-bold uppercase tracking-wider text-[#FF4D00]">{month}</span>
-          </div>
-        )}
+        <RaceCardImage
+          imageUrl={race.image_url}
+          raceName={race.name}
+          day={day}
+          month={month}
+          priority={priority}
+        />
 
         {/* Promoted badge — flush top right corner */}
         {race.is_promoted && (

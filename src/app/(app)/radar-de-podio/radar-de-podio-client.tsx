@@ -18,8 +18,16 @@ import { toast } from "sonner";
 import {
   DEFAULT_DISTANCES,
   RADAR_AGE_CATEGORIES,
-  RADAR_WHATSAPP_NUMBER,
 } from "@/lib/constants";
+import {
+  buildRadarWhatsAppUrl as buildWhatsAppUrl,
+  EMPTY_RADAR_FORM as EMPTY_FORM,
+  formatRadarPace as formatPace,
+  isValidRadarPace as isValidPace,
+  RADAR_BILLING_STORAGE_KEY as LS_BILLING_KEY,
+  type RadarFormData as FormData,
+  type RadarStep as Step,
+} from "@/lib/radar-form";
 import {
   ArrowLeft,
   ArrowRight,
@@ -33,67 +41,6 @@ import {
   Loader2,
   ExternalLink,
 } from "lucide-react";
-
-interface FormData {
-  pace: string;
-  distance: string;
-  category: string;
-  sex: string;
-  city: string;
-  cityId: string | null;
-  state: string | null;
-  latitude: number | null;
-  longitude: number | null;
-}
-
-type Step = "form" | "confirm" | "customer" | "verifying" | "paid" | "success";
-
-const LS_BILLING_KEY = "radar:lastBillingId";
-
-const EMPTY_FORM: FormData = {
-  pace: "",
-  distance: "",
-  category: "",
-  sex: "",
-  city: "",
-  cityId: null,
-  state: null,
-  latitude: null,
-  longitude: null,
-};
-
-function formatPace(value: string): string {
-  const digits = value.replace(/\D/g, "");
-  if (digits.length <= 2) return digits;
-  return `${digits.slice(0, 2)}:${digits.slice(2, 4)}`;
-}
-
-function isValidPace(pace: string): boolean {
-  return /^\d{2}:\d{2}$/.test(pace);
-}
-
-function buildWhatsAppUrl(form: {
-  pace: string;
-  distance: string;
-  category: string;
-  sex: string;
-  city: string;
-}): string {
-  const sexLabel = form.sex === "masculino" ? "Masculino" : "Feminino";
-  const message = [
-    "Olá! Acabei de pagar a *Curadoria de Corridas* (Radar de Pódio).",
-    "",
-    `Pace: ${form.pace}/km`,
-    `Distância: ${form.distance}`,
-    `Sexo: ${sexLabel}`,
-    `Faixa etária: ${form.category}`,
-    `Cidade: ${form.city}`,
-    "",
-    "Aguardo o retorno com as recomendações.",
-  ].join("\n");
-
-  return `https://wa.me/${RADAR_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-}
 
 export function RadarDePodioClient() {
   const { user, profile } = useAuth();
@@ -112,23 +59,6 @@ export function RadarDePodioClient() {
     form.category !== "" &&
     form.sex !== "" &&
     form.city !== "";
-
-  // Detect return from AbacatePay (?paid=sucesso) and start verifying.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (verifyingRef.current) return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("paid") !== "sucesso") return;
-    const billingId = window.localStorage.getItem(LS_BILLING_KEY);
-    if (!billingId) return;
-    verifyingRef.current = true;
-    setStep("verifying");
-    verifyPayment(billingId);
-    // Strip ?paid from URL without reload
-    const cleanUrl = window.location.pathname;
-    window.history.replaceState({}, "", cleanUrl);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const verifyPayment = useCallback(async (billingId: string) => {
     const maxAttempts = 20;
@@ -166,6 +96,21 @@ export function RadarDePodioClient() {
     );
     setStep("form");
   }, []);
+
+  // Detect return from AbacatePay (?paid=sucesso) and start verifying.
+  useEffect(() => {
+    if (verifyingRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("paid") !== "sucesso") return;
+    const billingId = window.localStorage.getItem(LS_BILLING_KEY);
+    if (!billingId) return;
+    verifyingRef.current = true;
+    // This effect synchronizes the UI with payment state stored by the external checkout.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setStep("verifying");
+    void verifyPayment(billingId);
+    window.history.replaceState({}, "", window.location.pathname);
+  }, [verifyPayment]);
 
   const handleCheckout = useCallback(
     async (customer?: {

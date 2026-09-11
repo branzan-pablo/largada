@@ -46,46 +46,24 @@ export function canPromoteWithSubscription(
  * Uses optimistic locking (eq on current promotions_used) to prevent races.
  * Returns true if successful, false if limit was already reached.
  */
-export async function useSubscriptionPromotion(
+export async function consumeSubscriptionPromotion(
   subscriptionId: string,
-  raceId: string
+  raceId: string,
+  userId: string,
+  promotedUntil: string,
 ): Promise<boolean> {
   const admin = createAdminClient();
-
-  // 1. Read current state
-  const { data: sub } = await admin
-    .from("organizer_subscriptions")
-    .select("promotions_used, promotions_limit")
-    .eq("id", subscriptionId)
-    .single();
-
-  if (!sub || sub.promotions_used >= sub.promotions_limit) {
+  const { data, error } = await admin.rpc("consume_subscription_promotion", {
+    p_subscription_id: subscriptionId,
+    p_race_id: raceId,
+    p_user_id: userId,
+    p_promoted_until: promotedUntil,
+  });
+  if (error) {
+    console.error("[Subscription] Failed to consume promotion:", error);
     return false;
   }
-
-  // 2. Optimistic-lock increment: only succeeds if promotions_used hasn't changed
-  const { data: updated, error: updateError } = await admin
-    .from("organizer_subscriptions")
-    .update({ promotions_used: sub.promotions_used + 1 })
-    .eq("id", subscriptionId)
-    .eq("promotions_used", sub.promotions_used)
-    .select("id")
-    .maybeSingle();
-
-  if (updateError || !updated) return false;
-
-  // 3. Track which race used this credit
-  const { error: trackError } = await admin
-    .from("subscription_promotions")
-    .insert({ subscription_id: subscriptionId, race_id: raceId });
-
-  if (trackError) {
-    // Unique constraint violation = race already promoted under this sub (idempotent)
-    if (trackError.code === "23505") return true;
-    console.error("[Subscription] Failed to track promotion:", trackError);
-  }
-
-  return true;
+  return data === true;
 }
 
 /**

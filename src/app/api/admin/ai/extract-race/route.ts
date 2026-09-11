@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   const authResult = await requireAdmin();
   if (authResult instanceof NextResponse) return authResult;
 
-  const { limited } = rateLimit(`ai-extract:${authResult.user.id}`, {
+  const { limited } = await rateLimit(`ai-extract:${authResult.user.id}`, {
     max: 5,
     windowMs: 60_000,
   });

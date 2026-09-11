@@ -1,88 +1,65 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { rpc } = vi.hoisted(() => ({ rpc: vi.fn() }));
+
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: () => ({ rpc }),
+}));
+
 import { rateLimit } from "@/lib/rate-limit";
 
 describe("rateLimit", () => {
-    beforeEach(() => {
-        // Reset time mocking between tests
-        vi.useRealTimers();
+  beforeEach(() => rpc.mockReset());
+
+  it("delegates enforcement to the distributed database function", async () => {
+    rpc.mockResolvedValue({ data: false, error: null });
+    await expect(rateLimit("rsvp:user-123", { max: 5, windowMs: 60_001 }))
+      .resolves.toEqual({ limited: false });
+    expect(rpc).toHaveBeenCalledWith("consume_rate_limit", {
+      p_key_hash: expect.stringMatching(/^[a-f0-9]{64}$/),
+      p_max: 5,
+      p_window_seconds: 61,
     });
+  });
 
-    it("allows requests up to the max limit", () => {
-        const key = "test-allow-" + Date.now();
-        for (let i = 0; i < 5; i++) {
-            expect(rateLimit(key, { max: 5, windowMs: 60_000 })).toEqual({ limited: false });
-        }
-    });
+  it("reports a request blocked by the database", async () => {
+    rpc.mockResolvedValue({ data: true, error: null });
+    await expect(rateLimit("view:ip:race", { max: 1, windowMs: 600_000 }))
+      .resolves.toEqual({ limited: true });
+  });
 
-    it("blocks requests that exceed the max limit", () => {
-        const key = "test-block-" + Date.now();
-        // First 3 allowed
-        for (let i = 0; i < 3; i++) {
-            rateLimit(key, { max: 3, windowMs: 60_000 });
-        }
-        // 4th should be blocked
-        expect(rateLimit(key, { max: 3, windowMs: 60_000 })).toEqual({ limited: true });
-    });
+  it("fails open when the limiter storage is unavailable", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    rpc.mockResolvedValue({ data: null, error: { message: "database unavailable" } });
+    await expect(rateLimit("profile:user", { max: 5, windowMs: 60_000 }))
+      .resolves.toEqual({ limited: false });
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
 
-    it("resets the counter after the window expires", () => {
-        vi.useFakeTimers();
-        const key = "test-reset";
+  it("never stores the raw identifier", async () => {
+    rpc.mockResolvedValue({ data: false, error: null });
+    const rawKey = "private-user-id";
+    await rateLimit(rawKey, { max: 2, windowMs: 1_000 });
+    expect(rpc.mock.calls[0][1].p_key_hash).not.toContain(rawKey);
+  });
 
-        // Exhaust the limit
-        for (let i = 0; i < 2; i++) {
-            rateLimit(key, { max: 2, windowMs: 10_000 });
-        }
-        expect(rateLimit(key, { max: 2, windowMs: 10_000 })).toEqual({ limited: true });
+  it("uses distinct hashes for distinct identifiers", async () => {
+    rpc.mockResolvedValue({ data: false, error: null });
+    await rateLimit("user-a", { max: 1, windowMs: 1_000 });
+    await rateLimit("user-b", { max: 1, windowMs: 1_000 });
+    expect(rpc.mock.calls[0][1].p_key_hash).not.toBe(rpc.mock.calls[1][1].p_key_hash);
+  });
 
-        // Advance time past the window
-        vi.advanceTimersByTime(11_000);
+  it("rounds sub-second windows up to one second", async () => {
+    rpc.mockResolvedValue({ data: false, error: null });
+    await rateLimit("short-window", { max: 1, windowMs: 1 });
+    expect(rpc.mock.calls[0][1].p_window_seconds).toBe(1);
+  });
 
-        // Should be allowed again
-        expect(rateLimit(key, { max: 2, windowMs: 10_000 })).toEqual({ limited: false });
-    });
-
-    it("treats different keys independently", () => {
-        const keyA = "test-a-" + Date.now();
-        const keyB = "test-b-" + Date.now();
-
-        // Exhaust key A
-        rateLimit(keyA, { max: 1, windowMs: 60_000 });
-        expect(rateLimit(keyA, { max: 1, windowMs: 60_000 })).toEqual({ limited: true });
-
-        // Key B should still be allowed
-        expect(rateLimit(keyB, { max: 1, windowMs: 60_000 })).toEqual({ limited: false });
-    });
-
-    it("allows exactly max requests (boundary check)", () => {
-        const key = "test-boundary-" + Date.now();
-        // Request 1 = allowed
-        expect(rateLimit(key, { max: 1, windowMs: 60_000 }).limited).toBe(false);
-        // Request 2 = blocked (exceeds max of 1)
-        expect(rateLimit(key, { max: 1, windowMs: 60_000 }).limited).toBe(true);
-    });
-
-    it("cleans up expired entries when map exceeds 100 keys", () => {
-        vi.useFakeTimers();
-        const windowMs = 5_000;
-
-        // Fill the map with >100 expired entries
-        for (let i = 0; i < 101; i++) {
-            rateLimit(`cleanup-${i}`, { max: 10, windowMs });
-        }
-
-        // Advance past the window so all entries are expired
-        vi.advanceTimersByTime(windowMs + 1);
-
-        // Next call should trigger cleanup (map.size > 100) and still work
-        const result = rateLimit("cleanup-new", { max: 10, windowMs });
-        expect(result).toEqual({ limited: false });
-    });
-
-    it("allows subsequent requests within limit after first request", () => {
-        const key = "test-within-limit-" + Date.now();
-        // max=5: requests 1 through 5 should all be allowed
-        expect(rateLimit(key, { max: 5, windowMs: 60_000 }).limited).toBe(false); // 1st (new entry)
-        expect(rateLimit(key, { max: 5, windowMs: 60_000 }).limited).toBe(false); // 2nd (count++)
-        expect(rateLimit(key, { max: 5, windowMs: 60_000 }).limited).toBe(false); // 3rd
-    });
+  it("passes the configured maximum unchanged", async () => {
+    rpc.mockResolvedValue({ data: false, error: null });
+    await rateLimit("ai:user", { max: 17, windowMs: 60_000 });
+    expect(rpc.mock.calls[0][1].p_max).toBe(17);
+  });
 });

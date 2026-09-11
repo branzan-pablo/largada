@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   // Tight cap because each call can spend dozens of LLM round-trips.
-  const { limited } = rateLimit(`ai-backfill:${authResult.user.id}`, {
+  const { limited } = await rateLimit(`ai-backfill:${authResult.user.id}`, {
     max: 1,
     windowMs: 5 * 60_000,
   });

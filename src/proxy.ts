@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Force canonical www domain in production to prevent OAuth state mismatch.
   // Skip API routes — redirecting POST requests (e.g. webhooks) breaks them.
   const host = request.headers.get("host") || "";

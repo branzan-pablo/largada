@@ -7,6 +7,39 @@ import type { ScrapedRace } from "./types";
 
 const SEMANTIC_DEDUP_THRESHOLD = 0.92;
 const SEMANTIC_DEDUP_DATE_WINDOW_DAYS = 1;
+const MAX_REMOTE_IMAGE_BYTES = 5 * 1024 * 1024;
+
+async function mirrorRaceImage(
+  supabase: ReturnType<typeof createAdminClient>,
+  imageUrl: string | null,
+  slug: string,
+): Promise<string | undefined> {
+  if (!imageUrl) return undefined;
+  try {
+    const url = new URL(imageUrl);
+    if (url.protocol !== "https:") return undefined;
+    const response = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+    if (!response.ok) return undefined;
+    const contentType = response.headers.get("content-type")?.split(";")[0] ?? "";
+    const extension = ({
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+    } as Record<string, string>)[contentType];
+    if (!extension) return undefined;
+    const image = await response.arrayBuffer();
+    if (image.byteLength === 0 || image.byteLength > MAX_REMOTE_IMAGE_BYTES) return undefined;
+
+    const path = `scraped/${slug}.${extension}`;
+    const { error } = await supabase.storage
+      .from("race-images")
+      .upload(path, image, { contentType, upsert: true });
+    if (error) return undefined;
+    return supabase.storage.from("race-images").getPublicUrl(path).data.publicUrl;
+  } catch {
+    return undefined;
+  }
+}
 
 function isValidDate(dateStr: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
@@ -229,6 +262,10 @@ export async function insertScrapedRaces(
       }
     }
 
+    // External event sites often expire URLs or block hotlinking. Persist a
+    // validated copy in our public bucket so cards remain stable over time.
+    const imageUrl = await mirrorRaceImage(supabase, race.image_url, slug);
+
     const raceData = {
       name: race.name,
       slug,
@@ -246,7 +283,7 @@ export async function insertScrapedRaces(
       registration_deadline: deadline || race.date,
       prize_type: race.prizeType,
       prize_details: race.prizeDetails,
-      image_url: race.image_url || undefined,
+      image_url: imageUrl,
       route_description: race.routeDescription || undefined,
       organizer: race.organizer,
       description: race.description || undefined,

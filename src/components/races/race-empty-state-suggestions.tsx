@@ -109,6 +109,8 @@ export function RaceEmptyStateSuggestions({
 
   useEffect(() => {
     if (!filtersActive) {
+      // Reset stale async results when the query no longer needs suggestions.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestions(null);
       return;
     }
@@ -137,8 +139,8 @@ export function RaceEmptyStateSuggestions({
     filters.radius,
     filters.lat,
     filters.lng,
-    filters.distances?.join(","),
-    filters.prizeType?.join(","),
+    filters.distances,
+    filters.prizeType,
     search,
   ]);
 

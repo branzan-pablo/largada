@@ -23,7 +23,7 @@ export async function POST(
     return NextResponse.json({ error: "ID inválido" }, { status: 400 });
   }
 
-  const { limited } = rateLimit(`ai-analyze-suggestion:${authResult.user.id}`, {
+  const { limited } = await rateLimit(`ai-analyze-suggestion:${authResult.user.id}`, {
     max: 10,
     windowMs: 60_000,
   });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import NextImage from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { X, Loader2, ImageIcon } from "lucide-react";
 
@@ -171,10 +172,13 @@ export function ImageUpload({ bucket, folder, value, onChange, className }: Imag
     return (
       <div className={`relative ${className ?? ""}`}>
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
-          <img
+          <NextImage
             src={value}
             alt="Preview"
-            className="h-full w-full object-contain"
+            fill
+            sizes="(max-width: 768px) 100vw, 640px"
+            className="object-contain"
+            unoptimized
           />
           <button
             type="button"

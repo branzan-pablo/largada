@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { getDateRange, getDatePreset } from "@/lib/filter-utils";
+import type { RaceFilters } from "@/types/race";
 
 // Mock todayInBrazil to return a deterministic date
 vi.mock("@/lib/date", () => ({
@@ -47,31 +48,31 @@ describe("getDateRange", () => {
 
 describe("getDatePreset", () => {
     it('returns "any" when no dateFrom is set', () => {
-        expect(getDatePreset({} as any)).toBe("any");
+        expect(getDatePreset({})).toBe("any");
     });
 
     it('detects "this_week" preset from filter values', () => {
         const filters = { dateFrom: "2026-03-10", dateTo: "2026-03-15" };
-        expect(getDatePreset(filters as any)).toBe("this_week");
+        expect(getDatePreset(filters as RaceFilters)).toBe("this_week");
     });
 
     it('detects "this_month" preset from filter values', () => {
         const filters = { dateFrom: "2026-03-10", dateTo: "2026-03-31" };
-        expect(getDatePreset(filters as any)).toBe("this_month");
+        expect(getDatePreset(filters as RaceFilters)).toBe("this_month");
     });
 
     it('detects "next_month" preset from filter values', () => {
         const filters = { dateFrom: "2026-04-01", dateTo: "2026-04-30" };
-        expect(getDatePreset(filters as any)).toBe("next_month");
+        expect(getDatePreset(filters as RaceFilters)).toBe("next_month");
     });
 
     it('detects "next_3_months" preset from filter values', () => {
         const filters = { dateFrom: "2026-03-10", dateTo: "2026-06-10" };
-        expect(getDatePreset(filters as any)).toBe("next_3_months");
+        expect(getDatePreset(filters as RaceFilters)).toBe("next_3_months");
     });
 
     it('returns "any" for non-matching custom range', () => {
         const filters = { dateFrom: "2026-05-01", dateTo: "2026-05-15" };
-        expect(getDatePreset(filters as any)).toBe("any");
+        expect(getDatePreset(filters as RaceFilters)).toBe("any");
     });
 });

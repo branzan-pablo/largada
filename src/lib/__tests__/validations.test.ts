@@ -4,7 +4,6 @@ import {
     loginSchema,
     registerSchema,
     profileUpdateSchema,
-    raceSchemaBase,
     raceSchema,
     suggestionSchema,
 } from "@/lib/validations";

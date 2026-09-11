@@ -1,5 +1,9 @@
 # MVP-SCOPE — Largada
 
+> Estado técnico atual: o esquema é composto por 26 migrações e inclui
+> monetização AbacatePay, planos de organizador, analytics, integração Strava,
+> push notifications, ingestão por scrapers e recomendações assistidas por IA.
+
 ## 1. O que ESTÁ no MVP
 
 ### MUST HAVE (sem isso não lança)

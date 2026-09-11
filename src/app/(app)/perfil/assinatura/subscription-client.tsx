@@ -91,7 +91,7 @@ export function SubscriptionClient({ initialTier, paymentSuccess }: { initialTie
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, initialTier, subscription]);
 
-  const handleSubscribe = async (tier: SubscriptionTier, customer?: { name: string; email: string; taxId: string; cellphone: string }) => {
+  async function handleSubscribe(tier: SubscriptionTier, customer?: { name: string; email: string; taxId: string; cellphone: string }) {
     setSubmittingTier(tier);
 
     try {
@@ -123,7 +123,7 @@ export function SubscriptionClient({ initialTier, paymentSuccess }: { initialTie
     } finally {
       setSubmittingTier(null);
     }
-  };
+  }
 
   const handleDialogSubmit = async () => {
     if (!selectedTier) return;

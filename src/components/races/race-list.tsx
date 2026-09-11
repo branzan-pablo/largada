@@ -67,6 +67,8 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
 
     const stored = loadFilterDefaults();
     if (stored) {
+      // Hydrate client-only preferences after authentication settles.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilters(stored);
     } else if (
       profile?.notification_radius_km &&
