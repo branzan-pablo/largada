@@ -20,7 +20,7 @@ acoplado a Vercel Preview Deployments e a um projeto Supabase próprio.
 
 ## 1. Aplicar todas as migrações no Supabase staging
 
-Você tem 26 migrações em `supabase/migrations/`. Tem dois caminhos.
+Você tem 28 migrações em `supabase/migrations/`. Tem dois caminhos.
 
 ### Caminho A — Supabase CLI (recomendado, automatizado)
 

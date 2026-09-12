@@ -1,6 +1,6 @@
 # PRD — Largada
 
-> Estado da implementação (setembro de 2026): 26 migrações cobrem o núcleo de
+> Estado da implementação (setembro de 2026): 28 migrações cobrem o núcleo de
 > corridas e RSVP, monetização AbacatePay, assinaturas de organizadores,
 > analytics, Strava, notificações push, scrapers e recomendações por IA.
 
