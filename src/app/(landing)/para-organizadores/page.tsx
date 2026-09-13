@@ -216,7 +216,7 @@ export default function ParaOrganizadoresPage() {
           </div>
 
           <p className="mt-10 text-center text-xs text-[#6B7280]">
-            Pagamento único via PIX ou cartão. Sem assinatura recorrente.
+            Pagamento único via PIX. Sem assinatura recorrente.
           </p>
         </div>
       </section>
@@ -236,7 +236,7 @@ export default function ParaOrganizadoresPage() {
             <Step
               number="2"
               title="Compre o destaque"
-              text="Escolha Express, Total ou um pacote. Pagamento único via PIX ou cartão."
+              text="Escolha Express, Total ou um pacote. Pagamento único via PIX."
             />
             <Step
               number="3"

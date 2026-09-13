@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
 
     const billingResult = await createBilling({
       frequency: "ONE_TIME",
-      methods: ["PIX", "CARD"],
+      methods: ["PIX"],
       products: [
         {
           externalId: "radar-de-podio",

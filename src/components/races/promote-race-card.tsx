@@ -267,7 +267,7 @@ export function PromoteRaceCard({
           {!needsCustomer && (
             <p className="text-xs text-muted-foreground">
               Você será redirecionado para a página de pagamento seguro. Aceitamos
-              PIX e cartão de crédito.
+              Pagamento via PIX.
             </p>
           )}
 

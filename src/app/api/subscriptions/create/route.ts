@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
     // 6. Create billing on AbacatePay (ONE_TIME — no auto-charge)
     const billingResult = await createBilling({
       frequency: "ONE_TIME",
-      methods: ["PIX", "CARD"],
+      methods: ["PIX"],
       products: [
         {
           externalId: `subscription-${tier}-${user.id}`,
