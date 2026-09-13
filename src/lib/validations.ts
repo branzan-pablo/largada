@@ -58,7 +58,7 @@ export const raceSchemaBase = z.object({
   routeImageUrl: z.string().optional(),
   organizer: z.string().optional(),
   description: z.string().optional(),
-  status: z.enum(["confirmed", "pending_review", "postponed", "cancelled"]).default("confirmed"),
+  status: z.enum(["confirmed", "pending_review", "postponed", "cancelled", "rejected"]).default("confirmed"),
   isPromoted: z.boolean().optional(),
 });
 

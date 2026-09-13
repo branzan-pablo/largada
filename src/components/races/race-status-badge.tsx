@@ -5,6 +5,7 @@ const statusStyles: Record<string, string> = {
   confirmed: "bg-emerald-50 text-emerald-700 border-emerald-200",
   postponed: "bg-yellow-50 text-yellow-700 border-yellow-200",
   cancelled: "bg-red-50 text-red-700 border-red-200",
+  rejected: "bg-slate-100 text-slate-700 border-slate-300",
 };
 
 export function RaceStatusBadge({ status }: { status: string }) {

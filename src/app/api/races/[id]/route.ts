@@ -7,36 +7,6 @@ import { utcNow } from "@/lib/date";
 import { notifyNewRace } from "@/lib/notifications";
 import { enrichRace } from "@/lib/ai/enrich-race";
 
-export async function DELETE(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const authResult = await requireAdmin();
-  if (authResult instanceof NextResponse) return authResult;
-
-  const supabase = createAdminClient();
-  const { data: existing } = await supabase
-    .from("races")
-    .select("slug")
-    .eq("id", id)
-    .maybeSingle();
-
-  const { error } = await supabase
-    .from("races")
-    .update({ status: "cancelled" })
-    .eq("id", id);
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
-
-  revalidatePath("/corridas");
-  if (existing?.slug) revalidatePath(`/corrida/${existing.slug}`);
-
-  return NextResponse.json({ success: true });
-}
-
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

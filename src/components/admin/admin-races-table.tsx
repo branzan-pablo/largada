@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, Check, MapPin, MapPinOff, Pencil, Plus, Star, Trash2 } from "lucide-react";
+import { BarChart3, Check, MapPin, MapPinOff, Pencil, Plus, Star, X } from "lucide-react";
 import { formatDateShort } from "@/lib/date";
 import { RACE_STATUSES, RACE_ORIGINS } from "@/lib/constants";
 import { isWithinRegion } from "@/lib/geo";
@@ -33,10 +33,12 @@ function formatCtr(views: number, clicks: number): string {
 }
 
 const STATUS_FILTERS = [
+  { value: "active", label: "Ativas" },
   { value: "all", label: "Todas" },
   { value: "pending_review", label: "Pendentes" },
   { value: "confirmed", label: "Confirmadas" },
   { value: "cancelled", label: "Canceladas" },
+  { value: "rejected", label: "Rejeitadas" },
 ] as const;
 
 const ORIGIN_FILTERS = [
@@ -56,17 +58,19 @@ function isOutsideRegion(race: RaceRow) {
 
 export function AdminRacesTable({ races }: { races: RaceRow[] }) {
   const router = useRouter();
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("active");
   const [originFilter, setOriginFilter] = useState("all");
   const [coordsFilter, setCoordsFilter] = useState(false);
   const [outsideFilter, setOutsideFilter] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
   const [localUpdates, setLocalUpdates] = useState<Record<string, Partial<RaceRow>>>({});
 
   const filtered = races.filter((r) => {
-    if (removedIds.has(r.id)) return false;
-    if (statusFilter !== "all" && r.status !== statusFilter) return false;
+    if (statusFilter === "active") {
+      if (r.status === "cancelled" || r.status === "rejected") return false;
+    } else if (statusFilter !== "all" && r.status !== statusFilter) {
+      return false;
+    }
     if (originFilter !== "all" && r.origin !== originFilter) return false;
     if (coordsFilter && hasCoords(r)) return false;
     if (outsideFilter && !isOutsideRegion(r)) return false;
@@ -86,26 +90,9 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
         toast.error(data.error ?? "Erro ao atualizar corrida");
         return;
       }
-      setLocalUpdates((prev) => ({ ...prev, [raceId]: { status: "confirmed" } }));
-      toast.success("Corrida aprovada com sucesso");
-      router.refresh();
-    } finally {
-      setLoadingId(null);
-    }
-  }
-
-  async function handleDelete(raceId: string, raceName: string) {
-    if (!window.confirm(`Excluir "${raceName}"? Esta ação não pode ser desfeita.`)) return;
-    setLoadingId(raceId);
-    try {
-      const res = await fetch(`/api/races/${raceId}`, { method: "DELETE" });
-      if (!res.ok) {
-        const data = await res.json();
-        toast.error(data.error ?? "Erro ao excluir corrida");
-        return;
-      }
-      setRemovedIds((prev) => new Set(prev).add(raceId));
-      toast.success("Corrida excluída com sucesso");
+      const status = action === "approve" ? "confirmed" : "rejected";
+      setLocalUpdates((prev) => ({ ...prev, [raceId]: { status } }));
+      toast.success(action === "approve" ? "Corrida aprovada com sucesso" : "Corrida rejeitada");
       router.refresh();
     } finally {
       setLoadingId(null);
@@ -178,7 +165,7 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
 
         <div className="flex items-center gap-3 self-end sm:self-auto">
           <span className="text-xs text-muted-foreground">
-            {statusFilter !== "all" || originFilter !== "all" || coordsFilter || outsideFilter || removedIds.size > 0
+            {statusFilter !== "all" || originFilter !== "all" || coordsFilter || outsideFilter
               ? `${filtered.length} de ${races.length} corridas`
               : `${filtered.length} corridas`}
           </span>
@@ -264,16 +251,28 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
                 <td className="px-3 sm:px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
                     {race.status === "pending_review" && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-green-600 hover:text-green-700 hover:bg-green-50"
-                        title="Aprovar"
-                        disabled={loadingId === race.id}
-                        onClick={() => handleReview(race.id, "approve")}
-                      >
-                        <Check className="h-4 w-4" />
-                      </Button>
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-green-600 hover:bg-green-50 hover:text-green-700"
+                          title="Aprovar e publicar"
+                          disabled={loadingId === race.id}
+                          onClick={() => handleReview(race.id, "approve")}
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-slate-600 hover:bg-slate-100 hover:text-slate-800"
+                          title="Rejeitar e manter fora da listagem"
+                          disabled={loadingId === race.id}
+                          onClick={() => handleReview(race.id, "reject")}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </>
                     )}
                     <Button
                       variant="ghost"
@@ -296,16 +295,6 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
                       <Link href={`/admin/corridas/${race.id}/editar`}>
                         <Pencil className="h-4 w-4" />
                       </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      title="Excluir"
-                      disabled={loadingId === race.id}
-                      onClick={() => handleDelete(race.id, race.name)}
-                    >
-                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </td>
@@ -332,6 +321,7 @@ function StatusBadge({ status }: { status: string }) {
     postponed: "bg-yellow-50 text-yellow-700 border-yellow-200",
     cancelled: "bg-red-50 text-red-700 border-red-200",
     pending_review: "bg-amber-50 text-amber-700 border-amber-200",
+    rejected: "bg-slate-100 text-slate-700 border-slate-300",
   };
 
   return (

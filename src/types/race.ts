@@ -55,7 +55,7 @@ export interface Race {
   route_image_url: string | null;
   organizer: string | null;
   description: string | null;
-  status: "confirmed" | "postponed" | "cancelled" | "pending_review";
+  status: "confirmed" | "postponed" | "cancelled" | "pending_review" | "rejected";
   notes: string | null;
   link: string | null;
   is_promoted: boolean;
