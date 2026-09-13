@@ -987,6 +987,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                 <SelectContent>
                   <SelectItem value="confirmed">Confirmada</SelectItem>
                   <SelectItem value="pending_review">Pendente</SelectItem>
+                  <SelectItem value="rejected">Rejeitada</SelectItem>
                   <SelectItem value="postponed">Adiada</SelectItem>
                   <SelectItem value="cancelled">Cancelada</SelectItem>
                 </SelectContent>

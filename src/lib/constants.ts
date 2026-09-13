@@ -14,6 +14,7 @@ export const RACE_STATUSES = {
   postponed: "Adiada",
   cancelled: "Cancelada",
   pending_review: "Pendente",
+  rejected: "Rejeitada",
 } as const;
 export type RaceStatus = keyof typeof RACE_STATUSES;
 

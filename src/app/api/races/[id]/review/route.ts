@@ -41,7 +41,7 @@ export async function PATCH(
     );
   }
 
-  const newStatus = action === "approve" ? "confirmed" : "cancelled";
+  const newStatus = action === "approve" ? "confirmed" : "rejected";
 
   const { error: updateError } = await supabase
     .from("races")

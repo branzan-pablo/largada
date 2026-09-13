@@ -137,6 +137,11 @@ describe("raceSchema", () => {
         expect(result.success).toBe(true);
     });
 
+    it("accepts rejected as an administrative race status", () => {
+        const result = raceSchema.safeParse({ ...validRace, status: "rejected" });
+        expect(result.success).toBe(true);
+    });
+
     it("rejects name shorter than 3 characters", () => {
         const result = raceSchema.safeParse({ ...validRace, name: "AB" });
         expect(result.success).toBe(false);
