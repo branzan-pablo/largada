@@ -468,7 +468,7 @@ function ConfirmStep({
         </p>
         <p className="text-center text-lg font-bold text-[#0D1B2A]">R$ 29,90</p>
         <p className="mt-1 text-center text-xs text-muted-foreground">
-          PIX ou cartão · pagamento único
+          PIX · pagamento único
         </p>
       </div>
 

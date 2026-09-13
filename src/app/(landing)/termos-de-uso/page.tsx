@@ -100,8 +100,7 @@ export default function TermosDeUsoPage() {
             <p>
               Organizadores de corridas podem contratar o serviço de destaque
               para suas corridas mediante pagamento único de R$&nbsp;149,00 por
-              corrida. O pagamento é processado pela AbacatePay (PIX ou cartão
-              de crédito).
+              corrida. O pagamento via PIX é processado pela AbacatePay.
             </p>
             <ul className="list-disc pl-6 mt-3 space-y-1">
               <li>

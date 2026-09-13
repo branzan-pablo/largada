@@ -20,21 +20,6 @@ export class AbacatePayApiError extends AbacatePayError {
     }
 }
 
-export function isInvalidCustomerReferenceError(
-    error: unknown
-): error is AbacatePayApiError {
-    if (!(error instanceof AbacatePayApiError) || error.statusCode !== 400) {
-        return false;
-    }
-
-    const body = typeof error.responseBody === "string"
-        ? error.responseBody
-        : JSON.stringify(error.responseBody ?? "");
-
-    return /(customer|cliente)/i.test(body)
-        && /(not found|n[aã]o encontr|invalid|inv[aá]lid|does not exist|n[aã]o existe)/i.test(body);
-}
-
 export class AbacatePayValidationError extends AbacatePayError {
     constructor(
         message: string,

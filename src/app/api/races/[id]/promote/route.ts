@@ -186,7 +186,7 @@ export async function POST(
         // 6. Create billing on AbacatePay
         const billingResult = await createBilling({
             frequency: "ONE_TIME",
-            methods: ["PIX", "CARD"],
+            methods: ["PIX"],
             products: [
                 {
                     externalId: `race-promotion-${raceId}-${tier}`,
