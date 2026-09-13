@@ -1,5 +1,5 @@
 import { generateObject } from "ai";
-import { models, isAIEnabled } from "./provider";
+import { models, modelIds, isAIEnabled } from "./provider";
 import { withTelemetry } from "./observability";
 import {
   raceExtractionSchema,
@@ -51,7 +51,7 @@ export async function extractRaceFromUrl(
           completionTokens: usage?.outputTokens,
           totalTokens: usage?.totalTokens,
         },
-        model: "gemini-2.5-flash",
+        model: modelIds.extract,
       };
     },
     { source: "url", host: new URL(url).hostname, bytes: fetched.bytes },
@@ -104,7 +104,7 @@ export async function extractRaceFromImage(
           completionTokens: usage?.outputTokens,
           totalTokens: usage?.totalTokens,
         },
-        model: "gemini-2.5-flash",
+        model: modelIds.extract,
       };
     },
     { source: "image", mime: mimeType, bytes: imageBase64.length },

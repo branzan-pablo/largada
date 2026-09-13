@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { models, isAIEnabled } from "./provider";
+import { models, modelIds, isAIEnabled } from "./provider";
 import { withTelemetry } from "./observability";
 import {
   DESCRIBE_RACE_SYSTEM,
@@ -40,7 +40,7 @@ export async function describeRace(
           completionTokens: usage?.outputTokens,
           totalTokens: usage?.totalTokens,
         },
-        model: "gemini-2.5-flash-lite",
+        model: modelIds.describe,
       };
     },
     { name: input.name },
