@@ -1,5 +1,5 @@
 import { generateObject } from "ai";
-import { models, isAIEnabled } from "./provider";
+import { models, modelIds, isAIEnabled } from "./provider";
 import { withTelemetry } from "./observability";
 import {
   prizeStructuredSchema,
@@ -65,7 +65,7 @@ export async function extractPrizeStructured(
             completionTokens: usage?.outputTokens,
             totalTokens: usage?.totalTokens,
           },
-          model: "gemini-2.5-flash",
+          model: modelIds.extract,
         };
       },
       { prize_type: input.prizeType },

@@ -9,18 +9,23 @@ import { anthropic } from "@ai-sdk/anthropic";
  * tier (1000 req/day at the time of writing) which suits the bootstrap phase.
  * Anthropic Haiku 4.5 stays wired as a future failover lane.
  */
+export const modelIds = {
+  extract: "gemini-3.5-flash",
+  describe: "gemini-3.5-flash-lite",
+  classify: "gemini-3.5-flash-lite",
+  chat: "gemini-3.5-flash-lite",
+  embedding: "gemini-embedding-001",
+} as const;
+
 export const models = {
-  // Extraction tasks (race autofill, prize structuring) need higher fidelity
-  // than batch ops because the admin trusts the output directly. Flash (not
-  // lite) has 250 RPD on free tier — plenty for solo admin volume.
-  extract: google("gemini-2.5-flash"),
-  describe: google("gemini-2.5-flash-lite"),
-  classify: google("gemini-2.5-flash-lite"),
-  chat: google("gemini-2.5-flash-lite"),
+  extract: google(modelIds.extract),
+  describe: google(modelIds.describe),
+  classify: google(modelIds.classify),
+  chat: google(modelIds.chat),
   reasoning: anthropic("claude-haiku-4-5-20251001"),
 } as const;
 
-export const embeddingModel = google.textEmbedding("gemini-embedding-001");
+export const embeddingModel = google.textEmbedding(modelIds.embedding);
 
 /**
  * gemini-embedding-001 emits 3072-dim vectors natively, but supports Matryoshka

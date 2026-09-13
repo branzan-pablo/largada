@@ -1,6 +1,6 @@
 import { generateObject } from "ai";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { models, isAIEnabled } from "./provider";
+import { models, modelIds, isAIEnabled } from "./provider";
 import { withTelemetry } from "./observability";
 import { embedText, buildRaceFingerprint } from "./embed";
 import { extractRaceFromUrl } from "./extract-race";
@@ -165,7 +165,7 @@ export async function analyzeSuggestion(
             completionTokens: usage?.outputTokens,
             totalTokens: usage?.totalTokens,
           },
-          model: "gemini-2.5-flash",
+          model: modelIds.extract,
         };
       },
       { suggestion_id: suggestionId },
