@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
     AbacatePayError,
     AbacatePayApiError,
+    isInvalidCustomerReferenceError,
     AbacatePayValidationError,
     AbacatePayWebhookError,
 } from "@/lib/payments/errors";
@@ -42,6 +43,32 @@ describe("AbacatePayApiError", () => {
         const err = new AbacatePayApiError("error", 500);
         expect(err).toBeInstanceOf(AbacatePayError);
         expect(err).toBeInstanceOf(Error);
+    });
+});
+
+describe("isInvalidCustomerReferenceError", () => {
+    it("recognizes a stale customer returned by the gateway", () => {
+        const error = new AbacatePayApiError("Bad Request", 400, {
+            error: "Customer not found",
+        });
+
+        expect(isInvalidCustomerReferenceError(error)).toBe(true);
+    });
+
+    it("does not retry unrelated validation errors", () => {
+        const error = new AbacatePayApiError("Bad Request", 400, {
+            error: "Invalid product price",
+        });
+
+        expect(isInvalidCustomerReferenceError(error)).toBe(false);
+    });
+
+    it("does not retry authentication errors", () => {
+        const error = new AbacatePayApiError("Unauthorized", 401, {
+            error: "Invalid customer token",
+        });
+
+        expect(isInvalidCustomerReferenceError(error)).toBe(false);
     });
 });
 

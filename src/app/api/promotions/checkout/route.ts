@@ -7,8 +7,12 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createBilling } from "@/lib/payments/billing";
 import { createCustomer } from "@/lib/payments/customer";
-import { AbacatePayApiError } from "@/lib/payments/errors";
+import {
+  AbacatePayApiError,
+  isInvalidCustomerReferenceError,
+} from "@/lib/payments/errors";
 import { PROMOTION_TIERS, type PromotionTier } from "@/lib/promotions";
+import type { CreateBillingParams } from "@/types/payments";
 
 const VALID_TIERS: PromotionTier[] = ["express", "standard"];
 
@@ -36,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     const { data: existingCustomer } = await admin
       .from("payment_customers")
-      .select("id, abacatepay_id")
+      .select("id, abacatepay_id, name, email, cellphone, tax_id")
       .eq("user_id", user.id)
       .single();
 
@@ -72,7 +76,7 @@ export async function POST(request: NextRequest) {
       internalCustomerId = newCustomer?.id;
     }
 
-    const billingResult = await createBilling({
+    const billingInput: CreateBillingParams = {
       frequency: "ONE_TIME",
       methods: ["PIX", "CARD"],
       products: [{
@@ -86,7 +90,55 @@ export async function POST(request: NextRequest) {
       completionUrl: `${appUrl}/checkout/sucesso?tier=${tier}`,
       customerId: abacatepayCustomerId,
       metadata: { tier, userId: user.id, orderType: "promotion_reservation" },
-    });
+    };
+
+    let billingResult;
+    try {
+      billingResult = await createBilling(billingInput);
+    } catch (error) {
+      const storedCustomer = existingCustomer?.name
+        && existingCustomer.email
+        && existingCustomer.cellphone
+        && existingCustomer.tax_id
+        ? {
+            name: existingCustomer.name,
+            email: existingCustomer.email,
+            cellphone: existingCustomer.cellphone,
+            taxId: existingCustomer.tax_id,
+          }
+        : null;
+
+      if (!existingCustomer || !storedCustomer || !isInvalidCustomerReferenceError(error)) {
+        throw error;
+      }
+
+      console.warn("[Promotions/Checkout] Recreating stale AbacatePay customer", {
+        userId: user.id,
+        status: error.statusCode,
+        body: error.responseBody,
+      });
+
+      const customerResult = await createCustomer(storedCustomer);
+      if (customerResult.error) {
+        throw error;
+      }
+
+      const { error: mappingError } = await admin
+        .from("payment_customers")
+        .update({ abacatepay_id: customerResult.data.id })
+        .eq("id", existingCustomer.id);
+
+      if (mappingError) {
+        console.error("[Promotions/Checkout] Failed to update customer mapping", mappingError);
+        throw error;
+      }
+
+      abacatepayCustomerId = customerResult.data.id;
+      billingResult = await createBilling({
+        ...billingInput,
+        customerId: abacatepayCustomerId,
+      });
+    }
 
     if (billingResult.error) {
       return NextResponse.json({ error: "Falha ao criar cobrança", details: billingResult.error }, { status: 502 });
@@ -118,6 +170,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: billing.url });
   } catch (error) {
     if (error instanceof AbacatePayApiError) {
+      console.error("[Promotions/Checkout] AbacatePay API error", {
+        status: error.statusCode,
+        message: error.message,
+        body: error.responseBody,
+      });
       return NextResponse.json(
         { error: "Erro no gateway de pagamento", details: error.message },
         { status: error.statusCode >= 500 ? 502 : error.statusCode }
