@@ -71,8 +71,12 @@ describe("getDatePreset", () => {
         expect(getDatePreset(filters as RaceFilters)).toBe("next_3_months");
     });
 
-    it('returns "any" for non-matching custom range', () => {
+    it('returns "custom" for non-matching custom range', () => {
         const filters = { dateFrom: "2026-05-01", dateTo: "2026-05-15" };
-        expect(getDatePreset(filters as RaceFilters)).toBe("any");
+        expect(getDatePreset(filters as RaceFilters)).toBe("custom");
+    });
+
+    it('returns "custom" for an open-ended range', () => {
+        expect(getDatePreset({ dateTo: "2026-05-15" })).toBe("custom");
     });
 });

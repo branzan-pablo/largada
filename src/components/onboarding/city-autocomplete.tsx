@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useId } from "react";
 import { Input } from "@/components/ui/input";
 import { MapPin, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ interface CityAutocompleteProps {
   placeholder?: string;
   /** Extra classes merged into the inner <Input> — use to match surrounding context. */
   inputClassName?: string;
+  label?: string;
 }
 
 const DEBOUNCE_MS = 300;
@@ -32,12 +33,16 @@ export function CityAutocomplete({
   initialCity,
   placeholder = "Digite sua cidade...",
   inputClassName,
+  label = "Cidade",
 }: CityAutocompleteProps) {
   const [query, setQuery] = useState(initialCity ?? "");
   const [results, setResults] = useState<City[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialCity ? "initial" : null);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const inputId = useId();
+  const listboxId = `${inputId}-listbox`;
 
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   // Tracks the latest search invocation — stale responses are discarded.
@@ -52,6 +57,7 @@ export function CityAutocomplete({
     if (q.length < MIN_QUERY_LEN) {
       setResults([]);
       setIsOpen(false);
+      setActiveIndex(-1);
       return;
     }
 
@@ -60,6 +66,7 @@ export function CityAutocomplete({
     if (cached) {
       setResults(cached);
       setIsOpen(cached.length > 0);
+      setActiveIndex(-1);
       return;
     }
 
@@ -85,6 +92,7 @@ export function CityAutocomplete({
       cacheRef.current.set(q, cities);
       setResults(cities);
       setIsOpen(cities.length > 0);
+      setActiveIndex(-1);
     } catch (err) {
       // AbortError is expected — a newer request was started, ignore it.
       if ((err as Error).name === "AbortError") return;
@@ -113,6 +121,7 @@ export function CityAutocomplete({
       setResults([]);
       setIsOpen(false);
       setIsLoading(false);
+      setActiveIndex(-1);
       return;
     }
 
@@ -124,7 +133,30 @@ export function CityAutocomplete({
     setSelectedId(city.id);
     setResults([]);
     setIsOpen(false);
+    setActiveIndex(-1);
     onSelect(city);
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Escape") {
+      setIsOpen(false);
+      setActiveIndex(-1);
+      return;
+    }
+    if (!results.length || !["ArrowDown", "ArrowUp", "Enter"].includes(event.key)) return;
+    if (event.key === "Enter") {
+      if (isOpen && activeIndex >= 0) {
+        event.preventDefault();
+        handleSelect(results[activeIndex]);
+      }
+      return;
+    }
+    event.preventDefault();
+    setIsOpen(true);
+    setActiveIndex((current) => {
+      if (event.key === "ArrowDown") return current >= results.length - 1 ? 0 : current + 1;
+      return current <= 0 ? results.length - 1 : current - 1;
+    });
   }
 
   // Close dropdown on outside click.
@@ -149,10 +181,19 @@ export function CityAutocomplete({
   return (
     <div ref={wrapperRef} className="relative">
       <div className="relative">
-        <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <label htmlFor={inputId} className="sr-only">{label}</label>
+        <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
         <Input
+          id={inputId}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={isOpen}
+          aria-controls={listboxId}
+          aria-activedescendant={activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined}
+          autoComplete="off"
           value={query}
           onChange={handleChange}
+          onKeyDown={handleKeyDown}
           onFocus={() => {
             if (results.length > 0 && !selectedId) setIsOpen(true);
           }}
@@ -160,19 +201,23 @@ export function CityAutocomplete({
           className={cn("pl-9", inputClassName)}
         />
         {isLoading && (
-          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400" />
+          <><Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400 motion-reduce:animate-none" aria-hidden="true" /><span className="sr-only" role="status">Buscando cidades</span></>
         )}
       </div>
 
       {isOpen && results.length > 0 && (
-        <ul className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white py-1 shadow-lg">
-          {results.map((city) => (
+        <ul id={listboxId} role="listbox" aria-label="Cidades encontradas" className="absolute z-50 mt-1 w-full rounded-xl border border-slate-200 bg-white py-1 shadow-xl">
+          {results.map((city, index) => (
             <li
               key={city.id}
-              onClick={() => handleSelect(city)}
+              id={`${listboxId}-option-${index}`}
+              role="option"
+              aria-selected={activeIndex === index}
+              onMouseDown={(event) => { event.preventDefault(); handleSelect(city); }}
+              onMouseEnter={() => setActiveIndex(index)}
               className={cn(
-                "flex cursor-pointer items-center justify-between px-3 py-2 text-sm hover:bg-gray-50",
-                selectedId === city.id && "bg-gray-50"
+                "flex cursor-pointer items-center justify-between px-3 py-2.5 text-sm",
+                activeIndex === index ? "bg-[#FFF1EB] text-[#A93400]" : "hover:bg-slate-50",
               )}
             >
               <span>{city.name}</span>

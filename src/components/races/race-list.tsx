@@ -7,6 +7,7 @@ import { loadFilterDefaults, saveFilterDefaults } from "@/lib/filter-defaults";
 import { RaceCard } from "./race-card";
 import { RaceFiltersDesktop } from "./race-filters";
 import { RaceFiltersMobile } from "./race-filters-mobile";
+import { ActiveFilterChips } from "./active-filter-chips";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, ChevronDown, Search, X } from "lucide-react";
 import type { RaceFilters } from "@/types/race";
@@ -35,6 +36,8 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
   }, [
     hasInitializedFilters,
     filters.city,
+    filters.dateFrom,
+    filters.dateTo,
     filters.distances,
     filters.prizeType,
     filters,
@@ -107,9 +110,9 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
         </div>
 
         {!isLoading && races.length > 0 && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 shrink-0 self-start md:self-center">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 shrink-0 self-start md:self-center" role="status" aria-live="polite">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+              <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
             <span className="text-xs font-medium text-[#6B7280]">
@@ -120,20 +123,23 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
       </div>
 
       {/* Mobile: search bar + filter button (same row) */}
-      <div className="mb-4 md:hidden flex items-center gap-2">
+      <div className="mb-1 flex items-center gap-2 lg:hidden">
         <div className="relative group flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 group-focus-within:text-[#FF4D00] transition-colors pointer-events-none" />
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-[#FF4D00]" aria-hidden="true" />
+          <label htmlFor="mobile-race-search" className="sr-only">Buscar corridas</label>
           <input
-            type="text"
-            placeholder="Nome, cidade ou organizador..."
+            id="mobile-race-search"
+            type="search"
+            placeholder="Nome, cidade ou organizador"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-10 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-800 pl-9 pr-8 focus:outline-none focus:border-gray-300 focus:bg-white transition-all placeholder:text-gray-400"
+            className="h-12 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-9 text-sm font-semibold text-[#0D1B2A] shadow-sm outline-none transition-colors placeholder:font-medium placeholder:text-slate-400 focus:border-[#FF4D00] focus:ring-2 focus:ring-[#FF4D00]/20"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              type="button"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4D00]"
               aria-label="Limpar busca"
             >
               <X className="h-3.5 w-3.5" />
@@ -143,8 +149,6 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
         <RaceFiltersMobile
           filters={filters}
           onFiltersChange={setFilters}
-          search={search}
-          onSearchChange={setSearch}
           availableDistances={availableDistances}
         />
       </div>
@@ -157,6 +161,8 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
         onSearchChange={setSearch}
         availableDistances={availableDistances}
       />
+
+      <ActiveFilterChips filters={filters} onChange={setFilters} onClear={() => setFilters({})} />
 
       {/* Race grid */}
       <div className="mt-3">
@@ -173,7 +179,7 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
               Nenhuma corrida encontrada com esses filtros.
             </h3>
             <p className="mt-1 text-sm text-[#6B7280]">
-              Tente ampliar o raio de distância ou remover alguns filtros.
+              Remova um filtro ou tente uma busca mais ampla.
             </p>
           </div>
         ) : (
