@@ -8,6 +8,7 @@ import { ITEMS_PER_PAGE } from "@/lib/constants";
 import { todayInBrazil } from "@/lib/date";
 import { slugify } from "@/lib/utils";
 import { raceSchema } from "@/lib/validations";
+import { PUBLIC_RACE_SUMMARY_COLUMNS } from "@/lib/public-races";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from("races")
-    .select("*", { count: "exact" })
+    .select(PUBLIC_RACE_SUMMARY_COLUMNS, { count: "exact" })
     .eq("status", "confirmed")
     .gte("date", today)
     .gte("registration_deadline", today);

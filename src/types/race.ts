@@ -52,11 +52,22 @@ export interface Race {
   status: "confirmed" | "postponed" | "cancelled" | "pending_review" | "rejected";
   notes: string | null;
   link: string | null;
-  created_by: string;
-  origin: "admin" | "approved_suggestion" | "scraper";
-  created_at: string;
-  updated_at: string;
 }
+
+export type RaceSummary = Pick<
+  Race,
+  | "id"
+  | "name"
+  | "slug"
+  | "date"
+  | "start_time"
+  | "city"
+  | "state"
+  | "distances"
+  | "prize_type"
+  | "prize_structured"
+  | "image_url"
+>;
 
 export interface RaceFilters {
   city?: string;
@@ -67,19 +78,4 @@ export interface RaceFilters {
   search?: string;
   page?: number;
   limit?: number;
-}
-
-export interface RaceSuggestion {
-  id: string;
-  user_id: string;
-  name: string;
-  date: string | null;
-  city: string;
-  state: string;
-  link: string | null;
-  notes: string | null;
-  status: "pending" | "approved" | "rejected";
-  reviewed_by: string | null;
-  reviewed_at: string | null;
-  created_at: string;
 }
