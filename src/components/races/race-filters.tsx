@@ -15,7 +15,6 @@ import { X, CalendarDays, Search } from "lucide-react";
 import type { RaceFilters as Filters } from "@/types/race";
 import { Switch } from "@/components/ui/switch";
 import { getDateRange, getDatePreset } from "@/lib/filter-utils";
-import { SemanticSearchToggle } from "./semantic-search-toggle";
 
 interface RaceFiltersProps {
   filters: Filters;
@@ -86,12 +85,6 @@ export function RaceFiltersDesktop({
               className="w-full h-10 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 pl-9 pr-4 focus:outline-none focus:border-gray-300 focus:bg-white transition-all placeholder:text-gray-400"
             />
           </div>
-
-          <SemanticSearchToggle
-            enabled={!!filters.semantic}
-            hidden={!search}
-            onToggle={(next) => onFiltersChange({ ...filters, semantic: next })}
-          />
 
           {/* City */}
           <div className="w-full max-w-[300px]">
@@ -184,7 +177,7 @@ export function RaceFiltersDesktop({
           {hasActiveFilters && (
             <button
               onClick={() => {
-                onFiltersChange({ radius: filters.radius });
+                onFiltersChange({});
                 onSearchChange("");
                 setCityKey((k) => k + 1);
               }}

@@ -1,369 +1,65 @@
-# Ambiente de homologação (staging)
+# Staging do Largada
 
-Guia passo-a-passo para provisionar um ambiente isolado de produção,
-acoplado a Vercel Preview Deployments e a um projeto Supabase próprio.
+O ambiente de staging valida somente o calendário público, a gestão administrativa e os scrapers. Use um projeto Supabase e credenciais separados de produção.
 
-> **Resumo do isolamento:** banco separado, chaves separadas (Supabase, VAPID,
-> Strava, AbacatePay sandbox), URL própria. Nada que você fizer aqui pode
-> impactar a produção real.
+## Variáveis
 
----
+Configure no ambiente Preview da Vercel:
 
-## 0. Pré-requisitos
+- `NEXT_PUBLIC_APP_URL=https://staging.largadas.com.br`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `GOOGLE_GENERATIVE_AI_API_KEY`
+- `CRON_SECRET`
 
-- [ ] Projeto Supabase **largad-staging** criado (você já fez)
-- [ ] Acesso ao painel Vercel do projeto `largada`
-- [ ] `pnpm` instalado localmente
-- [ ] Senha do banco do Supabase staging anotada (criada no momento da criação do projeto — está no painel Supabase em Settings → Database)
+Para os testes Playwright remotos, configure também:
 
----
+- `E2E_BASE_URL=https://staging.largadas.com.br`
+- `E2E_ADMIN_EMAIL`
+- `E2E_ADMIN_PASSWORD`
+- `E2E_RACE_SLUG`
 
-## 1. Aplicar todas as migrações no Supabase staging
+## Supabase
 
-Você tem 28 migrações em `supabase/migrations/`. Tem dois caminhos.
+1. Aplique todas as migrations históricas com `pnpm exec supabase db push --linked`.
+2. Em Authentication, mantenha somente as contas administrativas necessárias.
+3. Garanta que cada Admin possua `profiles.role = 'admin'`.
+4. Habilite Google em Authentication > Providers somente se o login Google for usado.
+5. Configure `https://staging.largadas.com.br/auth/callback` na allowlist de Redirect URLs.
+6. No Google Cloud, use como callback o endereço exibido pelo provedor Google no Supabase: `https://<project-ref>.supabase.co/auth/v1/callback`.
 
-### Caminho A — Supabase CLI (recomendado, automatizado)
+Nunca exponha `SUPABASE_SERVICE_ROLE_KEY` ou o segredo OAuth do Google em variáveis `NEXT_PUBLIC_*`.
 
-```powershell
-# 1. Login (abre o navegador, autoriza)
-pnpm exec supabase login
+## Validação
 
-# 2. Linkar o projeto local ao staging
-#    O <project-ref> é o subdomínio: se a URL é https://abcdefgh.supabase.co,
-#    o ref é "abcdefgh". Está também em Settings → General → Reference ID.
-pnpm exec supabase link --project-ref <staging-project-ref>
-#    -> ele vai pedir a database password (a que você definiu na criação do projeto)
+Execute antes de promover:
 
-# 3. Aplicar todas as migrações
-pnpm exec supabase db push
+```bash
+pnpm lint
+pnpm test
+pnpm build
+pnpm test:e2e
 ```
 
-Após o `db push`, abra o **SQL Editor** do staging e rode:
+Valide manualmente:
 
-```sql
-SELECT count(*) AS total FROM information_schema.tables
-WHERE table_schema = 'public';
+1. `/` redireciona para `/corridas`.
+2. Busca, filtros, paginação e detalhe funcionam anonimamente.
+3. O link de inscrição abre o destino da corrida.
+4. `/admin` redireciona visitantes para `/admin/login`.
+5. Admin cria, edita, aprova e reprova corridas.
+6. Upload de imagem e preenchimento por IA funcionam.
+7. Uma execução controlada de scraper cria corrida como `pending_review` e não a publica antes da aprovação.
+
+## Crons
+
+A Vercel executa apenas os scrapers declarados em `vercel.json`. Todos exigem `Authorization: Bearer <CRON_SECRET>` quando acionados manualmente.
+
+Exemplo:
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" https://staging.largadas.com.br/api/cron/scrape-equilibrio
 ```
 
-Deve retornar pelo menos 15 tabelas (races, profiles, rsvps, link_clicks,
-race_views, payment_orders, etc.).
-
-> ⚠️ **`supabase link` é por máquina, não por branch.** Se você usar o mesmo
-> diretório para apontar pra prod depois, vai ter que `supabase link` de novo.
-> Para evitar acidente, nunca rode `db push` sem antes confirmar o `project-ref`
-> com `supabase status` ou olhando o `.supabase/config.toml` local.
-
-### Caminho B — SQL Editor manual (sem CLI)
-
-No painel do Supabase staging → **SQL Editor** → New query → cole o conteúdo
-de cada arquivo na ordem lexical exibida na pasta (de `001_…` até a migração
-timestamped mais recente) e rode um por um.
-
-É tedioso mas não exige login no CLI. Se algum falhar, leia a mensagem — pode
-ser dependência de uma migração anterior.
-
----
-
-## 2. Aplicar o seed de staging
-
-Após as migrações rodarem com sucesso, aplique o seed para ter dados visíveis:
-
-```powershell
-# Via CLI (depois do supabase link):
-pnpm exec supabase db reset --no-seed
-# Não — esse comando dropa o banco. NÃO USE em staging com migrations já aplicadas.
-```
-
-Em vez disso, abra `supabase/seed-staging.sql` e cole no **SQL Editor** do
-Supabase staging. Esse seed cria:
-
-- 5 cidades base (Noroeste Paulista)
-- 1 perfil admin de teste
-- 5 corridas de exemplo
-- ~80 page views e ~20 clicks fake distribuídos em 30 dias para o dashboard
-  de analytics ter algo visível
-
----
-
-## 3. Gerar credenciais novas que devem ser específicas de staging
-
-### 3.1 VAPID (Web Push)
-
-```powershell
-pnpm exec web-push generate-vapid-keys
-```
-
-Anote `Public Key` e `Private Key`. Vão para `NEXT_PUBLIC_VAPID_PUBLIC_KEY` e
-`VAPID_PRIVATE_KEY` no Vercel (escopo Preview).
-
-> Pelo isolamento ser bom, **ninguém de produção recebe push de staging**.
-> Você precisa testar push em staging assinando do zero a partir do navegador.
-
-### 3.2 CRON_SECRET
-
-```powershell
-# Gera um token aleatório
-[System.Security.Cryptography.RandomNumberGenerator]::GetBytes((New-Object byte[] 32)) -join ''
-# ou no bash:
-openssl rand -hex 32
-```
-
-### 3.3 STRAVA_WEBHOOK_VERIFY_TOKEN
-
-Qualquer string aleatória (similar ao CRON_SECRET).
-
----
-
-## 4. App Strava de staging
-
-O Strava só permite **um** redirect URI por app. Crie um app dedicado:
-
-1. https://www.strava.com/settings/api → **Create App** (ou se você já tem um
-   chamado "Largada", crie um segundo "Largada Staging")
-2. **Authorization Callback Domain:** o domínio do seu staging (ver §6 abaixo)
-   - Se vai usar URL Preview do Vercel: `largada-git-staging.vercel.app`
-   - Se vai usar alias custom: `staging.largadas.com.br`
-3. Anote `Client ID` e `Client Secret`
-4. **Webhook subscription** (opcional para staging): pode pular — é mais fácil
-   testar sem webhook em homologação
-
----
-
-## 5. AbacatePay em modo dev
-
-A AbacatePay tem **API Key de desenvolvimento** que não cobra de verdade
-(simula pagamento). No painel AbacatePay:
-
-1. Settings → API Keys → procurar **Dev/Sandbox key** (chave começa com prefixo
-   diferente da production)
-2. Use essa chave em `ABACATEPAY_API_KEY` no Vercel Preview
-3. Para o webhook, gere um secret novo só para staging
-
-> Se a sua conta AbacatePay não tiver chave de dev, fale com o suporte ou
-> abra uma conta separada de teste. Em último caso pode usar a chave de produção
-> com cuidado — o seed só usa CPFs de teste.
-
----
-
-## 6. Decidir o domínio do staging
-
-Tem três caminhos, ordem de robustez:
-
-| Opção | Esforço | Domínio | Estabilidade |
-|---|---|---|---|
-| **Preview por branch** (default) | 0 | `largada-git-<branch>-pablo.vercel.app` | Muda quando branch muda |
-| **Branch fixa `staging`** | 5 min | `largada-git-staging-pablo.vercel.app` | Estável enquanto a branch existir |
-| **Alias custom** | 10 min | `staging.largadas.com.br` | Estável e bonito |
-
-**Recomendado:** opção 2 ou 3 — porque webhook AbacatePay e callback Strava
-precisam de URL fixa. Se ficar mudando a URL, você reconfigura o tempo todo.
-
-### Como criar a branch + alias staging
-
-```powershell
-git checkout -b staging
-git push -u origin staging
-```
-
-No Vercel:
-- Settings → **Git** → "Production Branch" continua `main` (não mexer)
-- Settings → **Domains** → Add domain `staging.largadas.com.br`
-  → Branch: `staging`
-- Configure o DNS na Cloudflare/Registro.br: CNAME
-  `staging.largadas.com.br` → `cname.vercel-dns.com`
-
----
-
-## 7. Configurar variáveis de ambiente no Vercel
-
-Settings → **Environment Variables** → para cada var abaixo, cole o valor de
-staging e marque **apenas o escopo "Preview"** (deixa "Production" e
-"Development" desmarcados).
-
-Se você criou a branch `staging` (§6), pode usar **"Specific Branch: staging"**
-ao invés de "Preview" — fica ainda mais isolado.
-
-| Variável | Valor staging |
-|---|---|
-| `NEXT_PUBLIC_APP_URL` | `https://staging.largadas.com.br` (ou preview URL) |
-| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto staging Supabase |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key do staging |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key do staging |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Public VAPID gerado em §3.1 |
-| `VAPID_PRIVATE_KEY` | Private VAPID gerado em §3.1 |
-| `VAPID_SUBJECT` | `mailto:lucas.cabral@adaptedtech.com.br` (mesma OK) |
-| `NEXT_PUBLIC_STRAVA_CLIENT_ID` | Client ID do app Strava staging (§4) |
-| `STRAVA_CLIENT_SECRET` | Client Secret do app Strava staging |
-| `STRAVA_WEBHOOK_VERIFY_TOKEN` | Token gerado em §3.3 |
-| `ABACATEPAY_API_KEY` | API key sandbox (§5) |
-| `ABACATEPAY_WEBHOOK_SECRET` | Webhook secret de staging (§5) |
-| `CRON_SECRET` | Token gerado em §3.2 |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Chave Google AI exclusiva de staging |
-
-> ⚠️ **Nunca cole valores de staging no escopo Production por engano.**
-> Confira sempre o checkbox antes de salvar.
-
----
-
-## 8. Configurar URLs no Supabase Auth (staging)
-
-Painel Supabase staging → **Authentication** → **URL Configuration**:
-
-- **Site URL:** `https://staging.largadas.com.br` (ou a Preview URL)
-- **Redirect URLs (allow list):**
-  - `https://staging.largadas.com.br/auth/callback`
-  - `https://staging.largadas.com.br/auth/strava/callback`
-  - `https://staging.largadas.com.br/auth/confirm`
-  - `http://localhost:3000/auth/callback` (para dev local)
-
-Se quiser dev local apontando pro staging, você pode também colocar essas mesmas
-vars no `.env.local` da sua máquina.
-
----
-
-## 9. Atualizar webhook AbacatePay para staging
-
-Painel AbacatePay → Webhooks (em modo sandbox) → URL:
-
-```
-https://staging.largadas.com.br/api/payments/webhook?webhookSecret=<ABACATEPAY_WEBHOOK_SECRET-DE-STAGING>
-```
-
-(O código já espera o secret na query string — mesmo padrão da prod.)
-
-A AbacatePay também envia `X-Webhook-Signature`. A aplicação valida
-obrigatoriamente tanto esse HMAC quanto o `webhookSecret`; não substitua o
-query parameter por um header `Authorization`.
-
----
-
-## 10. Crons no staging
-
-**Vercel cron jobs só rodam em production deployments.** Em Preview/staging
-eles **não disparam sozinhos**.
-
-Pra testar manualmente, basta chamar a rota do cron passando o `CRON_SECRET`:
-
-```powershell
-curl https://staging.largadas.com.br/api/cron/scrape-equilibrio `
-  -H "Authorization: Bearer <CRON_SECRET-staging>"
-
-curl https://staging.largadas.com.br/api/cron/deadline-reminder `
-  -H "Authorization: Bearer <CRON_SECRET-staging>"
-```
-
-Se quiser cron de verdade em staging (não recomendo — gasta scrape gratuito de
-sites externos), você precisaria de um agendador externo (GitHub Actions ou
-cron-job.org) batendo nessas URLs.
-
----
-
-## 11. Validar smoke test em staging
-
-Acesse `https://staging.largadas.com.br` e confirme:
-
-- [ ] Listagem `/corridas` carrega 5 corridas seed
-- [ ] Login por email funciona (cria usuário no projeto staging, não na prod)
-- [ ] `/perfil/minhas-corridas?tab=created` mostra as corridas criadas
-- [ ] Botão "Analytics" abre a página com gráfico populado pelo seed
-- [ ] `/admin` mostra cards de Visualizações e Cliques com números do seed
-  (precisa marcar role='admin' no profile do user de teste — ver §12)
-- [ ] Disparo manual de cron retorna 200
-
----
-
-## 12. Promover seu user para admin no staging
-
-Após fazer login no staging com seu email, no SQL Editor:
-
-```sql
-UPDATE public.profiles SET role = 'admin'
-WHERE id = (SELECT id FROM auth.users WHERE email = 'lucas.cabral@adaptedtech.com.br');
-```
-
----
-
-## 13. Dev local apontando para staging (não prod)
-
-Por padrão, `pnpm dev` carrega `.env.local`. Se você deixar valores de
-produção lá, o seu localhost vai gravar/ler do banco real — perigoso.
-
-Para apontar o `.env.local` para o **staging** (preservando os valores
-de prod num backup), use o helper:
-
-```powershell
-# Aponta .env.local pro staging (faz backup automatico de prod no
-# .env.local.prod-backup na primeira vez)
-powershell -ExecutionPolicy Bypass -File scripts/switch-local-env.ps1 staging
-
-# Quando quiser voltar pra prod (raro, normalmente nao precisa):
-powershell -ExecutionPolicy Bypass -File scripts/switch-local-env.ps1 prod
-```
-
-O switch para staging também troca `NEXT_PUBLIC_APP_URL` para
-`http://localhost:3000` automaticamente — o resto (Supabase, AbacatePay,
-Strava, VAPID, CRON_SECRET) vem do `.env.staging`.
-
-Restart `pnpm dev` depois de trocar.
-
-> ⚠️ **Pra Supabase Auth funcionar em local**, o projeto staging precisa
-> ter `http://localhost:3000/auth/callback` na allowlist de Redirect URLs
-> (já configurado em §8). Sem isso, login local vai dar "redirect URL not
-> allowed".
-
----
-
-## 14. Fluxo de trabalho daqui pra frente
-
-```
-feat/affiliate-dashboard  → merge → staging  → smoke test em staging.largadas.com.br
-                                                ↓ ok?
-                                              merge → main → produção
-```
-
-```powershell
-# Após validar a feature na branch:
-git checkout staging
-git merge feat/affiliate-dashboard
-git push                                  # dispara deploy no staging
-
-# Smoke test manual...
-
-# Se ok:
-git checkout main
-git merge staging
-git push                                  # dispara deploy em produção
-```
-
----
-
-## Custos
-
-- **Vercel Preview:** grátis no plano Hobby, sem limite prático
-- **Supabase staging:** grátis (free tier permite 2 projetos por org)
-- **AbacatePay sandbox:** grátis
-- **Domínio staging.largadas.com.br:** grátis se já tem largadas.com.br
-
-Total: **R$ 0/mês** enquanto staging não exceder os limites do free tier do
-Supabase (500MB DB, 1GB bandwidth, 50k MAU).
-
----
-
-## Troubleshooting
-
-**`db push` falha com "permission denied":** confira se você está linkado ao
-projeto certo — `pnpm exec supabase status` mostra o `project_ref` ativo.
-
-**`/api/views` retorna 500 em staging:** valide que `race_views` existe
-(`SELECT * FROM race_views LIMIT 1` no SQL Editor).
-
-**Login redireciona pra prod:** você esqueceu de configurar Site URL no Auth
-do Supabase staging (§8).
-
-**Strava OAuth dá "invalid redirect_uri":** o callback domain do app Strava
-precisa bater com o domínio do staging exatamente (sem `https://`, sem path).
-
-**Push não chega:** VAPID public/private precisam ser do **mesmo par**. Se você
-trocou o private mas não o public no `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, todas as
-subscriptions ficam inválidas. Use sempre o output de uma única execução do
-`web-push generate-vapid-keys`.
+Não execute scrapers de staging contra o banco de produção.

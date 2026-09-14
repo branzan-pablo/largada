@@ -1,84 +1,30 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, useDeferredValue } from "react";
-import { useAuth } from "@/contexts/auth-context";
+import { useState, useEffect, useRef, useCallback, useDeferredValue } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useInfiniteRaces, type InitialRaceData } from "@/hooks/use-infinite-races";
 import { loadFilterDefaults, saveFilterDefaults } from "@/lib/filter-defaults";
 import { RaceCard } from "./race-card";
-import { RaceEmptyStateSuggestions } from "./race-empty-state-suggestions";
 import { RaceFiltersDesktop } from "./race-filters";
 import { RaceFiltersMobile } from "./race-filters-mobile";
-import { RadiusBanner } from "./radius-banner";
-import { SemanticSearchToggle } from "./semantic-search-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, ChevronDown, Search, X } from "lucide-react";
-import type { Race, RaceFilters } from "@/types/race";
-
-const PROMOTED_INSERT_INTERVAL = 7;
-
-function buildMergedGrid(races: Race[], promotedRaces: Race[]): Race[] {
-  if (promotedRaces.length === 0) return races;
-
-  const result: Race[] = [];
-  const promotedIds = new Set(promotedRaces.map((r) => r.id));
-  let promotedIdx = 0;
-  let regularCount = 0;
-
-  for (const race of races) {
-    // Insert a promoted card every PROMOTED_INSERT_INTERVAL regular cards
-    if (
-      regularCount > 0 &&
-      regularCount % PROMOTED_INSERT_INTERVAL === 0 &&
-      promotedIdx < promotedRaces.length
-    ) {
-      const promoted = promotedRaces[promotedIdx];
-      // Only insert if not already the same race we're about to add
-      if (promoted.id !== race.id) {
-        result.push(promoted);
-        promotedIdx++;
-      }
-    }
-
-    result.push(race);
-    if (!promotedIds.has(race.id)) {
-      regularCount++;
-    }
-  }
-
-  return result;
-}
+import type { RaceFilters } from "@/types/race";
 
 export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
-  const { profile, isLoading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<RaceFilters>({});
   const [hasInitializedFilters, setHasInitializedFilters] = useState(false);
 
-  // Initial filter resolution, in order of preference:
-  //   1. Sticky defaults persisted to localStorage from a previous visit.
-  //   2. Profile-derived radius (notification_radius_km) when the user has geo.
-  //   3. Empty.
-  // Runs once after auth settles so we never reset to empty between profile
-  // loads, and never block on profile for anonymous visitors.
   useEffect(() => {
     if (hasInitializedFilters) return;
-    if (authLoading) return;
-
     const stored = loadFilterDefaults();
     if (stored) {
-      // Hydrate client-only preferences after authentication settles.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilters(stored);
-    } else if (
-      profile?.notification_radius_km &&
-      profile.latitude &&
-      profile.longitude
-    ) {
-      setFilters({ radius: profile.notification_radius_km });
     }
     setHasInitializedFilters(true);
-  }, [profile, authLoading, hasInitializedFilters]);
+  }, [hasInitializedFilters]);
 
   // Persist the sticky slice of filters whenever the user changes them.
   // Gated by hasInitializedFilters so the empty initial state never wipes a
@@ -91,15 +37,20 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
     filters.city,
     filters.distances,
     filters.prizeType,
-    filters.radius,
     filters,
   ]);
   const [availableDistances, setAvailableDistances] = useState<string[]>([]);
 
   useEffect(() => {
     fetch("/api/races/distances")
-      .then((r) => r.json())
-      .then((data: string[]) => setAvailableDistances(data))
+      .then(async (response) => {
+        if (!response.ok) return [];
+        const data: unknown = await response.json();
+        return Array.isArray(data)
+          ? data.filter((distance): distance is string => typeof distance === "string")
+          : [];
+      })
+      .then(setAvailableDistances)
       .catch(() => {
         /* silently fall back to defaults in filter components */
       });
@@ -107,16 +58,8 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
   const debouncedSearch = useDebounce(search, 150);
   const deferredSearch = useDeferredValue(debouncedSearch);
 
-  // If radius filter is active and user has coordinates, pass them
-  const enrichedFilters: RaceFilters = {
-    ...filters,
-    ...(filters.radius && profile?.latitude && profile?.longitude
-      ? { lat: profile.latitude, lng: profile.longitude }
-      : {}),
-  };
-
   const { races, totalCount, isLoading, isLoadingMore, hasMore, restoredFromCache, loadMore, sentinelRef } =
-    useInfiniteRaces(enrichedFilters, deferredSearch, initialData);
+    useInfiniteRaces(filters, deferredSearch, initialData);
 
   // Save scroll position on scroll (throttled)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -150,26 +93,6 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
     });
   }, [restoredFromCache, races.length]);
 
-  const promotedRaces = useMemo(
-    () => races.filter((r) => r.is_promoted),
-    [races],
-  );
-
-  const mergedRaces = useMemo(
-    () => buildMergedGrid(races, promotedRaces),
-    [races, promotedRaces],
-  );
-
-  // Stable unique keys — promoted races may appear twice (top + inserted repeat)
-  const mergedKeys = useMemo(() => {
-    const seen = new Set<string>();
-    return mergedRaces.map((race) => {
-      if (seen.has(race.id)) return `${race.id}-repeat`;
-      seen.add(race.id);
-      return race.id;
-    });
-  }, [mergedRaces]);
-
   return (
     <>
       {/* Page Header */}
@@ -179,8 +102,7 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
             Calendário de Corridas
           </h1>
           <p className="text-[#6B7280] text-sm md:text-base">
-            Filtre por cidade, distância e premiação. Marque &quot;Vou
-            Nessa&quot; e veja quem da sua rede vai correr.
+            Encontre provas por cidade, data, distância e premiação.
           </p>
         </div>
 
@@ -218,11 +140,6 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
             </button>
           )}
         </div>
-        <SemanticSearchToggle
-          enabled={!!filters.semantic}
-          hidden={!search}
-          onToggle={(next) => setFilters({ ...filters, semantic: next })}
-        />
         <RaceFiltersMobile
           filters={filters}
           onFiltersChange={setFilters}
@@ -241,14 +158,6 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
         availableDistances={availableDistances}
       />
 
-      {/* Radius banner */}
-      {filters.radius && (
-        <RadiusBanner
-          radius={filters.radius}
-          onRemove={() => setFilters({ ...filters, radius: undefined })}
-        />
-      )}
-
       {/* Race grid */}
       <div className="mt-3">
         {isLoading ? (
@@ -266,27 +175,12 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
             <p className="mt-1 text-sm text-[#6B7280]">
               Tente ampliar o raio de distância ou remover alguns filtros.
             </p>
-            <RaceEmptyStateSuggestions
-              filters={filters}
-              search={search}
-              onApplyFilters={setFilters}
-              onApplySearch={setSearch}
-            />
-            <p className="mt-5 text-sm text-[#6B7280]">
-              Conhece uma corrida que deveria aparecer aqui?{" "}
-              <a
-                href="/sugerir"
-                className="text-[#FF4D00] hover:text-[#E04400] underline underline-offset-2 transition-colors"
-              >
-                Sugerir corrida
-              </a>
-            </p>
           </div>
         ) : (
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {mergedRaces.map((race, i) => (
-                <RaceCard key={mergedKeys[i]} race={race} priority={i < 2} />
+              {races.map((race, i) => (
+                <RaceCard key={race.id} race={race} priority={i < 2} />
               ))}
             </div>
 

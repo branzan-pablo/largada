@@ -4,9 +4,8 @@ import { RaceCardImage } from "./race-card-image";
 import { RaceDistanceBadges } from "./race-distance-badges";
 import { RacePrizeBadge } from "./race-prize-badge";
 import { RacePrizeAmountBadge } from "./race-prize-amount-badge";
-import { RaceMatchReasonChip } from "./race-match-reason-chip";
 import { RaceShareButton } from "./race-share-button";
-import { MapPin, Users, Star, CalendarDays } from "lucide-react";
+import { MapPin, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatTime, parseRaceDate } from "@/lib/date";
@@ -21,7 +20,7 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
   const shareUrl = `${baseUrl}/corrida/${race.slug}`;
 
   return (
-    <Link href={`/corrida/${race.slug}`} className={`block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden transition-colors ${race.is_promoted ? "ring-2 ring-[#FF4D00] shadow-lg shadow-[#FF4D00]/20 bg-linear-to-b from-[#FF4D00]/5 to-transparent" : ""}`}>
+    <Link href={`/corrida/${race.slug}`} className="block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden transition-colors">
       {/* Thumbnail */}
       <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-gray-100">
         <RaceCardImage
@@ -31,14 +30,6 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
           month={month}
           priority={priority}
         />
-
-        {/* Promoted badge — flush top right corner */}
-        {race.is_promoted && (
-          <div className="absolute top-0 right-0 z-10 flex items-center gap-1 sm:gap-1.5 bg-linear-to-r from-[#FF4D00] to-[#E04400] text-white text-[10px] sm:text-xs uppercase font-extrabold px-2 py-1 sm:px-3 sm:py-1.5 rounded-tr-xl rounded-bl-xl shadow-lg shadow-[#FF4D00]/40">
-            <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-white" />
-            Destaque
-          </div>
-        )}
 
         {/* Share button — top-left overlay */}
         <div className="absolute top-1.5 left-1.5 md:top-2 md:left-2 z-10">
@@ -65,11 +56,6 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
 
       {/* Info — below thumbnail, no border */}
       <div className="pt-1.5 pb-0.5 md:pt-2 md:pb-1">
-        {race.match_reason ? (
-          <div className="mb-0.5 md:mb-1">
-            <RaceMatchReasonChip reason={race.match_reason} />
-          </div>
-        ) : null}
         <h3 className="text-sm md:text-base font-bold text-[#0D1B2A] line-clamp-2 leading-snug mb-0.5 md:mb-1">
           {race.name}
         </h3>
@@ -83,13 +69,6 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
           <CalendarDays className="w-3 h-3 shrink-0" />
           <span className="truncate">{formattedDate}{race.start_time ? ` · ${formatTime(race.start_time)}` : ""}</span>
         </div>
-
-        {race.rsvp_count > 0 && (
-          <div className="flex min-w-0 items-center gap-1 text-xs text-[#6B7280] mb-1 md:mb-1.5">
-            <Users className="w-3 h-3 shrink-0" />
-            <span className="truncate">{race.rsvp_count === 1 ? "1 pessoa confirmou" : `${race.rsvp_count} pessoas confirmaram`}</span>
-          </div>
-        )}
 
         <div className="flex items-center gap-1 md:gap-1.5 flex-wrap">
           <RaceDistanceBadges distances={race.distances} />

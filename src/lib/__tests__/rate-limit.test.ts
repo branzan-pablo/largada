@@ -13,7 +13,7 @@ describe("rateLimit", () => {
 
   it("delegates enforcement to the distributed database function", async () => {
     rpc.mockResolvedValue({ data: false, error: null });
-    await expect(rateLimit("rsvp:user-123", { max: 5, windowMs: 60_001 }))
+    await expect(rateLimit("admin:user-123", { max: 5, windowMs: 60_001 }))
       .resolves.toEqual({ limited: false });
     expect(rpc).toHaveBeenCalledWith("consume_rate_limit", {
       p_key_hash: expect.stringMatching(/^[a-f0-9]{64}$/),

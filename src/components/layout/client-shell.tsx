@@ -2,22 +2,10 @@
 
 import dynamic from "next/dynamic";
 
-const LoginModal = dynamic(
-  () =>
-    import("@/components/auth/login-modal").then((m) => ({
-      default: m.LoginModal,
-    })),
-  { ssr: false }
-);
-
 const Toaster = dynamic(
   () => import("sonner").then((m) => ({ default: m.Toaster })),
   { ssr: false }
 );
-
-export function ClientLoginModal() {
-  return <LoginModal />;
-}
 
 export function ClientToaster() {
   return (
@@ -25,8 +13,8 @@ export function ClientToaster() {
       position="bottom-center"
       richColors
       closeButton
-      offset={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
-      mobileOffset={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
+      offset={24}
+      mobileOffset={24}
       duration={4500}
     />
   );

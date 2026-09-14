@@ -3,13 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { BarChart3, Check, MapPin, MapPinOff, Pencil, Plus, Star, X } from "lucide-react";
-import { formatDateShort } from "@/lib/date";
-import { RACE_STATUSES, RACE_ORIGINS } from "@/lib/constants";
-import { isWithinRegion } from "@/lib/geo";
+import { Check, MapPin, MapPinOff, Pencil, Plus, X } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { RACE_ORIGINS, RACE_STATUSES } from "@/lib/constants";
+import { formatDateShort } from "@/lib/date";
+import { isWithinRegion } from "@/lib/geo";
 
 interface RaceRow {
   id: string;
@@ -19,81 +19,47 @@ interface RaceRow {
   date: string;
   status: string;
   origin: string;
-  rsvp_count: number;
-  is_promoted: boolean;
-  views: number;
-  clicks: number;
   latitude: number;
   longitude: number;
 }
 
-function formatCtr(views: number, clicks: number): string {
-  if (views === 0) return "-";
-  return `${((clicks / views) * 100).toFixed(1)}%`;
-}
-
 const STATUS_FILTERS = [
-  { value: "active", label: "Ativas" },
-  { value: "all", label: "Todas" },
-  { value: "pending_review", label: "Pendentes" },
-  { value: "confirmed", label: "Confirmadas" },
-  { value: "cancelled", label: "Canceladas" },
-  { value: "rejected", label: "Rejeitadas" },
+  ["active", "Ativas"], ["all", "Todas"], ["pending_review", "Pendentes"],
+  ["confirmed", "Confirmadas"], ["cancelled", "Canceladas"], ["rejected", "Rejeitadas"],
 ] as const;
-
-const ORIGIN_FILTERS = [
-  { value: "all", label: "Todas" },
-  { value: "admin", label: "Admin" },
-  { value: "scraper", label: "Scraper" },
-  { value: "approved_suggestion", label: "Sugestão" },
-] as const;
-
-function hasCoords(race: RaceRow) {
-  return !(race.latitude === 0 && race.longitude === 0);
-}
-
-function isOutsideRegion(race: RaceRow) {
-  return hasCoords(race) && !isWithinRegion(race.latitude, race.longitude);
-}
+const ORIGIN_FILTERS = [["all", "Todas"], ["admin", "Admin"], ["scraper", "Scraper"]] as const;
+const hasCoords = (race: RaceRow) => !(race.latitude === 0 && race.longitude === 0);
+const isOutsideRegion = (race: RaceRow) => hasCoords(race) && !isWithinRegion(race.latitude, race.longitude);
 
 export function AdminRacesTable({ races }: { races: RaceRow[] }) {
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState("active");
   const [originFilter, setOriginFilter] = useState("all");
-  const [coordsFilter, setCoordsFilter] = useState(false);
-  const [outsideFilter, setOutsideFilter] = useState(false);
+  const [missingCoords, setMissingCoords] = useState(false);
+  const [outsideRegion, setOutsideRegion] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [localUpdates, setLocalUpdates] = useState<Record<string, Partial<RaceRow>>>({});
-
-  const filtered = races.filter((r) => {
-    if (statusFilter === "active") {
-      if (r.status === "cancelled" || r.status === "rejected") return false;
-    } else if (statusFilter !== "all" && r.status !== statusFilter) {
-      return false;
-    }
-    if (originFilter !== "all" && r.origin !== originFilter) return false;
-    if (coordsFilter && hasCoords(r)) return false;
-    if (outsideFilter && !isOutsideRegion(r)) return false;
+  const [updates, setUpdates] = useState<Record<string, string>>({});
+  const filtered = races.filter((raw) => {
+    const race = { ...raw, status: updates[raw.id] ?? raw.status };
+    if (statusFilter === "active" && ["cancelled", "rejected"].includes(race.status)) return false;
+    if (statusFilter !== "active" && statusFilter !== "all" && race.status !== statusFilter) return false;
+    if (originFilter !== "all" && race.origin !== originFilter) return false;
+    if (missingCoords && hasCoords(race)) return false;
+    if (outsideRegion && !isOutsideRegion(race)) return false;
     return true;
   });
 
-  async function handleReview(raceId: string, action: "approve" | "reject") {
-    setLoadingId(raceId);
+  async function review(id: string, action: "approve" | "reject") {
+    setLoadingId(id);
     try {
-      const res = await fetch(`/api/races/${raceId}/review`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        toast.error(data.error ?? "Erro ao atualizar corrida");
-        return;
-      }
-      const status = action === "approve" ? "confirmed" : "rejected";
-      setLocalUpdates((prev) => ({ ...prev, [raceId]: { status } }));
-      toast.success(action === "approve" ? "Corrida aprovada com sucesso" : "Corrida rejeitada");
+      const response = await fetch(`/api/races/${id}/review`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action }) });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "Erro ao atualizar corrida");
+      setUpdates((current) => ({ ...current, [id]: payload.status }));
+      toast.success(action === "approve" ? "Corrida aprovada" : "Corrida rejeitada");
       router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao atualizar corrida");
     } finally {
       setLoadingId(null);
     }
@@ -101,213 +67,23 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
 
   return (
     <>
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-          {/* Status filter */}
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="shrink-0 text-xs font-medium text-muted-foreground">Status:</span>
-            <div className="flex flex-wrap gap-1 rounded-lg bg-muted p-1">
-              {STATUS_FILTERS.map((f) => (
-                <button
-                  key={f.value}
-                  onClick={() => setStatusFilter(f.value)}
-                  className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${statusFilter === f.value
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                    }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          {/* Origin filter */}
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="shrink-0 text-xs font-medium text-muted-foreground">Origem:</span>
-            <div className="flex flex-wrap gap-1 rounded-lg bg-muted p-1">
-              {ORIGIN_FILTERS.map((f) => (
-                <button
-                  key={f.value}
-                  onClick={() => setOriginFilter(f.value)}
-                  className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${originFilter === f.value
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                    }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          {/* Missing coords filter */}
-          <button
-            onClick={() => setCoordsFilter((v) => !v)}
-            className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors ${coordsFilter
-              ? "bg-amber-100 text-amber-800"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            <MapPinOff className="h-3.5 w-3.5" />
-            Sem Coordenadas
-          </button>
-          {/* Outside region filter */}
-          <button
-            onClick={() => setOutsideFilter((v) => !v)}
-            className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors ${outsideFilter
-              ? "bg-red-100 text-red-800"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            <MapPin className="h-3.5 w-3.5" />
-            Fora da Região
-          </button>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <FilterGroup label="Status" options={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} />
+          <FilterGroup label="Origem" options={ORIGIN_FILTERS} value={originFilter} onChange={setOriginFilter} />
+          <FilterButton active={missingCoords} onClick={() => setMissingCoords((value) => !value)} icon={<MapPinOff className="h-3.5 w-3.5" />}>Sem coordenadas</FilterButton>
+          <FilterButton active={outsideRegion} onClick={() => setOutsideRegion((value) => !value)} icon={<MapPin className="h-3.5 w-3.5" />}>Fora da região</FilterButton>
         </div>
-
-        <div className="flex items-center gap-3 self-end sm:self-auto">
-          <span className="text-xs text-muted-foreground">
-            {statusFilter !== "all" || originFilter !== "all" || coordsFilter || outsideFilter
-              ? `${filtered.length} de ${races.length} corridas`
-              : `${filtered.length} corridas`}
-          </span>
-          <Button asChild size="sm">
-          <Link href="/admin/corridas/nova">
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Corrida
-          </Link>
-        </Button>
-        </div>
+        <div className="flex items-center gap-3"><span className="text-xs text-muted-foreground">{filtered.length} corridas</span><Button asChild size="sm"><Link href="/admin/corridas/nova"><Plus className="mr-2 h-4 w-4" />Nova corrida</Link></Button></div>
       </div>
-
-      <div className="rounded-md border overflow-x-auto">
+      <div className="overflow-x-auto rounded-md border">
         <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              <th className="px-3 sm:px-4 py-3 text-left font-medium">Nome</th>
-              <th className="hidden px-4 py-3 text-left font-medium sm:table-cell">Cidade</th>
-              <th className="hidden px-4 py-3 text-left font-medium md:table-cell">Data</th>
-              <th className="px-3 sm:px-4 py-3 text-left font-medium">Status</th>
-              <th className="hidden px-4 py-3 text-left font-medium lg:table-cell">Origem</th>
-              <th className="hidden px-4 py-3 text-right font-medium sm:table-cell">RSVPs</th>
-              <th className="hidden px-4 py-3 text-right font-medium md:table-cell">Views</th>
-              <th className="hidden px-4 py-3 text-right font-medium md:table-cell">Cliques</th>
-              <th className="hidden px-4 py-3 text-right font-medium lg:table-cell">CTR</th>
-              <th className="px-3 sm:px-4 py-3 text-right font-medium">Ação</th>
-            </tr>
-          </thead>
+          <thead><tr className="border-b bg-muted/50"><th className="px-4 py-3 text-left">Nome</th><th className="px-4 py-3 text-left">Cidade</th><th className="px-4 py-3 text-left">Data</th><th className="px-4 py-3 text-left">Status</th><th className="px-4 py-3 text-left">Origem</th><th className="px-4 py-3 text-right">Ações</th></tr></thead>
           <tbody>
-            {filtered.map((raw) => {
-              const race = { ...raw, ...localUpdates[raw.id] };
-              return (
-              <tr key={race.id} className="border-b">
-                <td className="px-3 sm:px-4 py-3 font-medium">
-                  <div className="flex items-start gap-1.5">
-                    {race.is_promoted && (
-                      <Star className="w-3.5 h-3.5 mt-0.5 fill-yellow-500 text-yellow-500 shrink-0" />
-                    )}
-                    <div className="min-w-0">
-                      <span className="line-clamp-2">{race.name}</span>
-                      <span className="block text-xs text-muted-foreground sm:hidden">{race.city} - {race.state}</span>
-                    </div>
-                  </div>
-                </td>
-                <td className="hidden px-4 py-3 sm:table-cell">
-                  <span className="flex items-center gap-1">
-                    {`${race.city} - ${race.state}`}
-                    {!hasCoords(race) && (
-                      <span title="Sem coordenadas. Defina a cidade para esta corrida">
-                        <MapPinOff className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                      </span>
-                    )}
-                    {isOutsideRegion(race) && (
-                      <span title="Fora da região (>200km)">
-                        <MapPinOff className="h-3.5 w-3.5 text-red-500 shrink-0" />
-                      </span>
-                    )}
-                  </span>
-                </td>
-                <td className="hidden px-4 py-3 md:table-cell">
-                  {formatDateShort(race.date)}
-                </td>
-                <td className="px-3 sm:px-4 py-3">
-                  <StatusBadge status={race.status} />
-                </td>
-                <td className="hidden px-4 py-3 lg:table-cell">
-                  <span className="text-xs text-muted-foreground">
-                    {RACE_ORIGINS[race.origin as keyof typeof RACE_ORIGINS] ?? race.origin}
-                  </span>
-                </td>
-                <td className="hidden px-4 py-3 text-right sm:table-cell">
-                  {race.rsvp_count}
-                </td>
-                <td className="hidden px-4 py-3 text-right md:table-cell">
-                  {race.views}
-                </td>
-                <td className="hidden px-4 py-3 text-right md:table-cell">
-                  {race.clicks}
-                </td>
-                <td className="hidden px-4 py-3 text-right lg:table-cell text-xs text-muted-foreground">
-                  {formatCtr(race.views, race.clicks)}
-                </td>
-                <td className="px-3 sm:px-4 py-3 text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    {race.status === "pending_review" && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-green-600 hover:bg-green-50 hover:text-green-700"
-                          title="Aprovar e publicar"
-                          disabled={loadingId === race.id}
-                          onClick={() => handleReview(race.id, "approve")}
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-slate-600 hover:bg-slate-100 hover:text-slate-800"
-                          title="Rejeitar e manter fora da listagem"
-                          disabled={loadingId === race.id}
-                          onClick={() => handleReview(race.id, "reject")}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      title="Analytics"
-                      asChild
-                    >
-                      <Link href={`/perfil/minhas-corridas/${race.id}/analytics`}>
-                        <BarChart3 className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      title="Editar"
-                      asChild
-                    >
-                      <Link href={`/admin/corridas/${race.id}/editar`}>
-                        <Pencil className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-              );
-            })}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">
-                  Nenhuma corrida encontrada.
-                </td>
-              </tr>
-            )}
+            {filtered.map((raw) => { const race = { ...raw, status: updates[raw.id] ?? raw.status }; return (
+              <tr key={race.id} className="border-b"><td className="px-4 py-3 font-medium">{race.name}</td><td className="px-4 py-3">{race.city} - {race.state}{!hasCoords(race) && <MapPinOff className="ml-1 inline h-3.5 w-3.5 text-amber-500" />}</td><td className="px-4 py-3">{formatDateShort(race.date)}</td><td className="px-4 py-3"><StatusBadge status={race.status} /></td><td className="px-4 py-3 text-xs text-muted-foreground">{RACE_ORIGINS[race.origin as keyof typeof RACE_ORIGINS] ?? race.origin}</td><td className="px-4 py-3"><div className="flex justify-end gap-1">{race.status === "pending_review" && <><Button variant="ghost" size="icon" title="Aprovar" disabled={loadingId === race.id} onClick={() => review(race.id, "approve")}><Check className="h-4 w-4 text-green-600" /></Button><Button variant="ghost" size="icon" title="Reprovar" disabled={loadingId === race.id} onClick={() => review(race.id, "reject")}><X className="h-4 w-4" /></Button></>}<Button variant="ghost" size="icon" title="Editar" asChild><Link href={`/admin/corridas/${race.id}/editar`}><Pencil className="h-4 w-4" /></Link></Button></div></td></tr>
+            ); })}
+            {!filtered.length && <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Nenhuma corrida encontrada.</td></tr>}
           </tbody>
         </table>
       </div>
@@ -315,18 +91,13 @@ export function AdminRacesTable({ races }: { races: RaceRow[] }) {
   );
 }
 
+function FilterGroup({ label, options, value, onChange }: { label: string; options: readonly (readonly [string, string])[]; value: string; onChange: (value: string) => void }) {
+  return <div className="flex items-center gap-1"><span className="text-xs text-muted-foreground">{label}:</span>{options.map(([key, text]) => <button key={key} onClick={() => onChange(key)} className={`rounded-full px-2 py-1 text-xs ${value === key ? "bg-foreground text-background" : "bg-muted text-muted-foreground"}`}>{text}</button>)}</div>;
+}
+function FilterButton({ active, onClick, icon, children }: { active: boolean; onClick: () => void; icon: React.ReactNode; children: React.ReactNode }) {
+  return <button onClick={onClick} className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs ${active ? "bg-amber-100 text-amber-800" : "text-muted-foreground"}`}>{icon}{children}</button>;
+}
 function StatusBadge({ status }: { status: string }) {
-  const variants: Record<string, string> = {
-    confirmed: "bg-green-50 text-green-700 border-green-200",
-    postponed: "bg-yellow-50 text-yellow-700 border-yellow-200",
-    cancelled: "bg-red-50 text-red-700 border-red-200",
-    pending_review: "bg-amber-50 text-amber-700 border-amber-200",
-    rejected: "bg-slate-100 text-slate-700 border-slate-300",
-  };
-
-  return (
-    <Badge variant="outline" className={variants[status] ?? ""}>
-      {RACE_STATUSES[status as keyof typeof RACE_STATUSES] ?? status}
-    </Badge>
-  );
+  const styles: Record<string, string> = { confirmed: "bg-green-50 text-green-700", postponed: "bg-yellow-50 text-yellow-700", cancelled: "bg-red-50 text-red-700", pending_review: "bg-amber-50 text-amber-700", rejected: "bg-slate-100 text-slate-700" };
+  return <Badge variant="outline" className={styles[status]}>{RACE_STATUSES[status as keyof typeof RACE_STATUSES] ?? status}</Badge>;
 }

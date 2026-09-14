@@ -12,7 +12,7 @@ interface EnrichResult {
 /**
  * Run AI enrichment on a race that was just created/edited:
  * - Extract structured prize info from `prize_details` into `prize_structured`
- * - Compute and store the fingerprint embedding for semantic dedup/recommendation
+ * - Compute and store the fingerprint embedding for scraper deduplication
  *
  * Designed to be safe to await from inside an API route (graceful failure,
  * never throws — degrades to a no-op when AI is disabled or a call fails).

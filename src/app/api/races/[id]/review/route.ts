@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { notifyNewRace } from "@/lib/notifications";
 
 export async function PATCH(
   request: Request,
@@ -54,15 +53,6 @@ export async function PATCH(
 
   revalidatePath("/corridas");
   if (race.slug) revalidatePath(`/corrida/${race.slug}`);
-
-  // Notify users when a race is approved
-  if (action === "approve") {
-    try {
-      await notifyNewRace(id);
-    } catch (err) {
-      console.error("[review] notifyNewRace failed:", err);
-    }
-  }
 
   return NextResponse.json({ id, status: newStatus });
 }

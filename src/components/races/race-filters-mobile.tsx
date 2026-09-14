@@ -190,7 +190,7 @@ export function RaceFiltersMobile({
               variant="outline"
               className="h-11 flex-1 border-gray-200 bg-transparent text-gray-700 hover:bg-gray-50 hover:text-[#0D1B2A]"
               onClick={() => {
-                onFiltersChange({ radius: filters.radius });
+                onFiltersChange({});
                 onSearchChange("");
                 setCityKey((k) => k + 1);
                 setOpen(false);
