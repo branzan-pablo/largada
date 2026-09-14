@@ -9,9 +9,9 @@ import { MapPin, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatTime, parseRaceDate } from "@/lib/date";
-import type { Race } from "@/types/race";
+import type { RaceSummary } from "@/types/race";
 
-export const RaceCard = memo(function RaceCard({ race, priority = false }: { race: Race; priority?: boolean }) {
+export const RaceCard = memo(function RaceCard({ race, priority = false }: { race: RaceSummary; priority?: boolean }) {
   const raceDate = parseRaceDate(race.date);
   const day = format(raceDate, "dd");
   const month = format(raceDate, "MMM", { locale: ptBR }).toUpperCase();

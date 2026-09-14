@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import type { Race, RaceFilters } from "@/types/race";
+import type { RaceFilters, RaceSummary } from "@/types/race";
 import { ITEMS_PER_PAGE } from "@/lib/constants";
 
 const CACHE_KEY = "race-list-cache";
 
 interface CachedState {
-  races: Race[];
+  races: RaceSummary[];
   totalCount: number | null;
   page: number;
   hasMore: boolean;
@@ -32,7 +32,7 @@ function loadCache(filterKey: string): CachedState | null {
 }
 
 interface UseInfiniteRacesResult {
-  races: Race[];
+  races: RaceSummary[];
   totalCount: number | null;
   isLoading: boolean;
   isLoadingMore: boolean;
@@ -60,7 +60,7 @@ export function buildUrl(filters: RaceFilters, search: string, pageNum: number) 
 }
 
 export interface InitialRaceData {
-  data: Race[];
+  data: RaceSummary[];
   count: number | null;
   hasMore: boolean;
 }
@@ -70,7 +70,7 @@ export function useInfiniteRaces(
   debouncedSearch: string,
   initialData?: InitialRaceData,
 ): UseInfiniteRacesResult {
-  const [races, setRaces] = useState<Race[]>(initialData?.data ?? []);
+  const [races, setRaces] = useState<RaceSummary[]>(initialData?.data ?? []);
   const [totalCount, setTotalCount] = useState<number | null>(initialData?.count ?? null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(initialData?.hasMore ?? true);
