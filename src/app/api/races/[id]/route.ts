@@ -4,7 +4,6 @@ import { raceSchemaBase } from "@/lib/validations";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { utcNow } from "@/lib/date";
-import { notifyNewRace } from "@/lib/notifications";
 import { enrichRace } from "@/lib/ai/enrich-race";
 
 export async function PATCH(
@@ -58,24 +57,12 @@ export async function PATCH(
     organizer: "organizer",
     description: "description",
     status: "status",
-    isPromoted: "is_promoted",
   };
 
   for (const [camel, snake] of Object.entries(fieldMap)) {
     if (body[camel] !== undefined) {
       updateData[snake] = body[camel];
     }
-  }
-
-  // Capture current status before update so we can detect a transition to confirmed
-  let previousStatus: string | null = null;
-  if (updateData.status === "confirmed") {
-    const { data: current } = await supabase
-      .from("races")
-      .select("status")
-      .eq("id", id)
-      .single();
-    previousStatus = current?.status ?? null;
   }
 
   // Resolve city_id when city changes
@@ -119,15 +106,6 @@ export async function PATCH(
       await enrichRace(id);
     } catch (err) {
       console.error("[ai] enrichRace on PATCH failed:", err);
-    }
-  }
-
-  // Notify when race transitions to confirmed for the first time
-  if (updateData.status === "confirmed" && previousStatus !== "confirmed") {
-    try {
-      await notifyNewRace(id);
-    } catch (err) {
-      console.error("[races/id] notifyNewRace failed:", err);
     }
   }
 

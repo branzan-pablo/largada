@@ -13,7 +13,7 @@ export default async function AdminLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/corridas?login=true");
+    redirect("/admin/login");
   }
 
   const { data: profile } = await supabase
@@ -23,22 +23,17 @@ export default async function AdminLayout({
     .single();
 
   if (profile?.role !== "admin") {
-    redirect("/corridas");
+    redirect("/admin/login?error=forbidden");
   }
-
-  const { count: pendingSuggestions } = await supabase
-    .from("race_suggestions")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "pending");
 
   return (
     <div className="min-h-screen">
       <div className="pb-4">
         <h1 className="text-2xl font-bold">Admin</h1>
-        <p className="text-muted-foreground">Gerencie corridas e sugestões</p>
+        <p className="text-muted-foreground">Gerencie o calendário de corridas</p>
       </div>
       <div className="border-b">
-        <AdminNav pendingSuggestions={pendingSuggestions ?? 0} />
+        <AdminNav />
       </div>
 
       <main className="py-8 md:py-12">{children}</main>

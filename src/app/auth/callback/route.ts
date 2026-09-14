@@ -4,11 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const rawNext = searchParams.get("next") ?? "/corridas";
+  const rawNext = searchParams.get("next") ?? "/admin";
   const next =
     rawNext.startsWith("/") && !rawNext.startsWith("//")
       ? rawNext
-      : "/corridas";
+      : "/admin";
 
   if (code) {
     const supabase = await createClient();
@@ -19,5 +19,5 @@ export async function GET(request: Request) {
   }
 
   // Auth error — redirect to login with error
-  return NextResponse.redirect(`${origin}/corridas?error=auth`);
+  return NextResponse.redirect(`${origin}/admin/login?error=auth`);
 }

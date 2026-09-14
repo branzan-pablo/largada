@@ -43,8 +43,8 @@ const nextConfig: NextConfig = {
     // React 19 / Next 16 dev mode uses eval() for HMR + callstack reconstruction.
     // Production never uses eval — keep CSP tight there.
     const scriptSrc = isDev
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com"
-      : "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com";
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+      : "script-src 'self' 'unsafe-inline'";
 
     return [
       {
@@ -75,20 +75,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              `default-src 'self'; ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://equilibrio.esp.br https://static.wixstatic.com https://tvcomrunning.com.br https://midia.recebedigital.com.br; font-src 'self'; connect-src 'self' https://*.supabase.co https://fcm.googleapis.com https://*.push.services.mozilla.com https://*.notify.windows.com https://*.push.apple.com; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';`,
-          },
-        ],
-      },
-      {
-        source: "/sw.js",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "no-cache, no-store, must-revalidate",
-          },
-          {
-            key: "Service-Worker-Allowed",
-            value: "/",
+              `default-src 'self'; ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://equilibrio.esp.br https://static.wixstatic.com https://tvcomrunning.com.br https://midia.recebedigital.com.br; font-src 'self'; connect-src 'self' https://*.supabase.co; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';`,
           },
         ],
       },

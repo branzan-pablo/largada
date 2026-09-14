@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -28,28 +28,16 @@ import { todayInBrazil } from "@/lib/date";
 
 interface RaceFormProps {
   race?: Race;
-  suggestionData?: {
-    name?: string;
-    city?: string;
-    state?: string;
-    date?: string;
-    link?: string;
-    notes?: string;
-    description?: string;
-    suggestionId?: string;
-    cityData?: { name: string; state_code: string; latitude: number; longitude: number };
-    extracted?: RaceExtraction;
-  };
 }
 
-export function RaceForm({ race, suggestionData }: RaceFormProps) {
+export function RaceForm({ race }: RaceFormProps) {
   const router = useRouter();
   const isEditing = !!race;
 
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [name, setName] = useState(race?.name ?? suggestionData?.name ?? "");
-  const [date, setDate] = useState(race?.date ?? suggestionData?.date ?? "");
+  const [name, setName] = useState(race?.name ?? "");
+  const [date, setDate] = useState(race?.date ?? "");
   const [startTime, setStartTime] = useState(race?.start_time?.slice(0, 5) ?? "07:00");
   const [selectedCity, setSelectedCity] = useState<{
     name: string;
@@ -59,7 +47,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   } | null>(
     race
       ? { name: race.city, state_code: race.state, latitude: race.latitude, longitude: race.longitude }
-      : suggestionData?.cityData ?? null
+      : null
   );
   const [address, setAddress] = useState(race?.address ?? "");
   const [distances, setDistances] = useState<string[]>(race?.distances ?? []);
@@ -78,11 +66,10 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
   const [prizeDetails, setPrizeDetails] = useState(race?.prize_details ?? "");
   const [routeDescription, setRouteDescription] = useState(race?.route_description ?? "");
   const [organizer, setOrganizer] = useState(race?.organizer ?? "");
-  const [description, setDescription] = useState(race?.description ?? suggestionData?.description ?? "");
+  const [description, setDescription] = useState(race?.description ?? "");
   const [status, setStatus] = useState<string>(race?.status ?? "confirmed");
-  const [notes, setNotes] = useState(race?.notes ?? suggestionData?.notes ?? "");
-  const [link, setLink] = useState(race?.link ?? suggestionData?.link ?? "");
-  const [isPromoted, setIsPromoted] = useState(race?.is_promoted ?? false);
+  const [notes, setNotes] = useState(race?.notes ?? "");
+  const [link, setLink] = useState(race?.link ?? "");
   const [imageUrl, setImageUrl] = useState<string | null>(race?.image_url ?? null);
   const [uploadFolder] = useState(() => race?.id ?? crypto.randomUUID());
   const [isDescribing, setIsDescribing] = useState(false);
@@ -300,20 +287,6 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
     for (const hint of hints) toast.info(hint);
   };
 
-  // When opening the form from a previously analyzed suggestion, apply the
-  // pre-extracted fields once on mount. Same "preserve admin input" gates as
-  // the URL autofill, so nothing is overwritten on a re-render or remount.
-  const appliedSuggestionExtractedRef = useRef(false);
-  useEffect(() => {
-    if (appliedSuggestionExtractedRef.current) return;
-    if (!suggestionData?.extracted) return;
-    appliedSuggestionExtractedRef.current = true;
-    // Apply the server-provided suggestion once when this form is initialized.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void handleExtracted(suggestionData.extracted);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -344,7 +317,6 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
       organizer: organizer || undefined,
       description: description || undefined,
       status,
-      isPromoted,
       imageUrl: imageUrl || undefined,
       link: link || undefined,
       notes: notes || undefined,
@@ -376,10 +348,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
 
     setIsLoading(true);
 
-    const payload = {
-      ...parsed.data,
-      origin: suggestionData?.suggestionId ? "approved_suggestion" : "admin",
-    };
+    const payload = parsed.data;
 
     try {
       const url = isEditing ? `/api/races/${race.id}` : "/api/races";
@@ -419,18 +388,6 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
         throw new Error(err.error || "Erro ao salvar corrida");
       }
 
-      // If approving a suggestion, update its status
-      if (suggestionData?.suggestionId) {
-        await fetch("/api/suggestions", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: suggestionData.suggestionId,
-            status: "approved",
-          }),
-        });
-      }
-
       toast.success(isEditing ? "Corrida atualizada!" : "Corrida criada!");
       router.push("/admin");
       router.refresh();
@@ -448,13 +405,6 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
           <RaceFiller onExtract={handleExtracted} disabled={isLoading} />
         </div>
       )}
-      {suggestionData?.suggestionId && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
-          Criando corrida a partir de uma sugestão. Os campos Nome, Cidade, Data, Link e Observações já
-          foram pré-preenchidos. Ao salvar, a sugestão será marcada como aprovada.
-        </div>
-      )}
-
       {/* Basic Info — full width */}
       <section className="space-y-4 rounded-lg border border-gray-200 p-5">
         <h2 className="text-lg font-semibold">Informações Básicas</h2>
@@ -532,15 +482,7 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
                   longitude: c.longitude,
                 })}
                 onClear={() => setSelectedCity(null)}
-                initialCity={
-                  race
-                    ? `${race.city} - ${race.state}`
-                    : suggestionData?.city && suggestionData?.state
-                      ? `${suggestionData.city} - ${suggestionData.state}`
-                      : suggestionData?.city
-                        ? suggestionData.city
-                        : undefined
-                }
+                initialCity={race ? `${race.city} - ${race.state}` : undefined}
                 inputClassName={errors.city ? "border-destructive" : ""}
               />
               {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
@@ -1005,16 +947,6 @@ export function RaceForm({ race, suggestionData }: RaceFormProps) {
               />
             </div>
 
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="isPromoted"
-                checked={isPromoted}
-                onCheckedChange={(checked) => setIsPromoted(checked === true)}
-              />
-              <Label htmlFor="isPromoted" className="cursor-pointer">
-                Destacar corrida (aparece no topo da listagem)
-              </Label>
-            </div>
           </div>
         </section>
       </div>

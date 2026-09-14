@@ -1,51 +1,54 @@
 import { expect, test, type Page } from "@playwright/test";
 
-async function login(page: Page) {
-  const email = process.env.E2E_USER_EMAIL;
-  const password = process.env.E2E_USER_PASSWORD;
-  test.skip(!email || !password, "Set E2E_USER_EMAIL and E2E_USER_PASSWORD");
-  await page.goto("/corridas?login=true");
+async function loginAsAdmin(page: Page) {
+  const email = process.env.E2E_ADMIN_EMAIL;
+  const password = process.env.E2E_ADMIN_PASSWORD;
+  test.skip(!email || !password, "Configure E2E_ADMIN_EMAIL e E2E_ADMIN_PASSWORD");
+  await page.goto("/admin/login");
   await page.getByLabel("E-mail").fill(email!);
   await page.getByLabel("Senha").fill(password!);
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(page.getByLabel("E-mail")).toBeHidden();
+  await expect(page).toHaveURL(/\/admin$/);
 }
 
-test("login modal is reachable from the protected-flow redirect", async ({ page }) => {
-  await page.goto("/perfil");
-  await expect(page).toHaveURL(/\/corridas\?login=true/);
-  await expect(page.getByLabel("E-mail")).toBeVisible();
-  await expect(page.getByLabel("Senha")).toBeVisible();
+test("home redirects to the race calendar", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/corridas$/);
 });
 
-test("race listing renders", async ({ page }) => {
+test("anonymous runner can search and filter races", async ({ page }) => {
   await page.goto("/corridas");
   await expect(page.getByRole("heading", { name: "Calendário de Corridas" })).toBeVisible();
-  await expect(page.getByPlaceholder(/Buscar por nome, cidade/)).toBeVisible();
+  const search = page.getByPlaceholder(/buscar por nome, cidade/i);
+  await expect(search).toBeVisible();
+  await search.fill("Rio Preto");
+  await expect(search).toHaveValue("Rio Preto");
 });
 
-test("authenticated user can toggle RSVP", async ({ page }) => {
-  test.skip(!process.env.E2E_RACE_SLUG, "Set E2E_RACE_SLUG to a disposable staging race");
-  await login(page);
+test("anonymous runner can consult a race and its registration link", async ({ page }) => {
+  test.skip(!process.env.E2E_RACE_SLUG, "Configure E2E_RACE_SLUG");
   await page.goto(`/corrida/${process.env.E2E_RACE_SLUG}`);
-  const button = page.getByRole("button", { name: /Vou nessa|Confirmado!/ }).first();
-  await expect(button).toBeVisible();
-  const initial = await button.textContent();
-  await button.click();
-  await expect(button).not.toHaveText(initial ?? "");
-  await button.click();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page.getByRole("link", { name: /inscreva-se/i })).toHaveAttribute("href", /\/api\/r\//);
 });
 
-test("checkout requires authentication", async ({ page }) => {
-  await page.goto("/para-organizadores");
-  await page.getByRole("button", { name: /Destacar minha corrida|Comprar pacote/ }).first().click();
-  await expect(page.getByLabel("E-mail")).toBeVisible();
+test("anonymous access to admin redirects to the dedicated login", async ({ page }) => {
+  await page.goto("/admin");
+  await expect(page).toHaveURL(/\/admin\/login$/);
+  await expect(page.getByRole("heading", { name: "Acesso administrativo" })).toBeVisible();
 });
 
-test("webhook rejects an invalid signature", async ({ request }) => {
-  const response = await request.post("/api/payments/webhook?webhookSecret=invalid", {
-    data: { id: "e2e-invalid", event: "billing.paid", data: {}, devMode: true },
-    headers: { "x-webhook-signature": "invalid" },
-  });
-  expect(response.status()).toBe(401);
+test("admin can access race management and the creation form", async ({ page }) => {
+  await loginAsAdmin(page);
+  await expect(page.getByRole("heading", { name: "Admin" })).toBeVisible();
+  await page.getByRole("link", { name: /nova corrida/i }).click();
+  await expect(page.getByRole("heading", { name: "Nova Corrida" })).toBeVisible();
+  await expect(page.getByText(/preencher com ia/i)).toBeVisible();
+});
+
+test("removed runner and monetization routes return not found", async ({ page }) => {
+  for (const path of ["/perfil", "/sugerir", "/radar-de-podio", "/para-organizadores"]) {
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(404);
+  }
 });
