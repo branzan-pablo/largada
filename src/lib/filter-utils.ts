@@ -39,10 +39,11 @@ export function getDateRange(value: string): { dateFrom?: string; dateTo?: strin
 }
 
 export function getDatePreset(filters: RaceFilters): string {
-  if (!filters.dateFrom) return "any";
+  if (!filters.dateFrom && !filters.dateTo) return "any";
+  if (!filters.dateFrom || !filters.dateTo) return "custom";
   for (const preset of ["this_week", "this_month", "next_month", "next_3_months"]) {
     const range = getDateRange(preset);
     if (range.dateFrom === filters.dateFrom && range.dateTo === filters.dateTo) return preset;
   }
-  return "any";
+  return "custom";
 }

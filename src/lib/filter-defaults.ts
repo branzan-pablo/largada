@@ -4,6 +4,8 @@ const STORAGE_KEY = "race-filter-defaults";
 
 export interface FilterDefaults {
   city?: string;
+  dateFrom?: string;
+  dateTo?: string;
   distances?: string[];
   prizeType?: string[];
 }
@@ -13,6 +15,8 @@ function normalize(value: unknown): FilterDefaults | null {
   const record = value as Record<string, unknown>;
   const result: FilterDefaults = {};
   if (typeof record.city === "string" && record.city.trim()) result.city = record.city.trim();
+  if (typeof record.dateFrom === "string" && /^\d{4}-\d{2}-\d{2}$/.test(record.dateFrom)) result.dateFrom = record.dateFrom;
+  if (typeof record.dateTo === "string" && /^\d{4}-\d{2}-\d{2}$/.test(record.dateTo)) result.dateTo = record.dateTo;
   if (Array.isArray(record.distances)) {
     const distances = record.distances.filter((item): item is string => typeof item === "string");
     if (distances.length) result.distances = distances;
@@ -36,6 +40,8 @@ export function saveFilterDefaults(filters: RaceFilters): void {
   try {
     const defaults = normalize({
       city: filters.city,
+      dateFrom: filters.dateFrom,
+      dateTo: filters.dateTo,
       distances: filters.distances,
       prizeType: filters.prizeType,
     });

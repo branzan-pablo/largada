@@ -19,10 +19,59 @@ test("home redirects to the race calendar", async ({ page }) => {
 test("anonymous runner can search and filter races", async ({ page }) => {
   await page.goto("/corridas");
   await expect(page.getByRole("heading", { name: "Calendário de Corridas" })).toBeVisible();
-  const search = page.getByPlaceholder(/buscar por nome, cidade/i);
+  const search = page.locator('input[type="search"]:visible');
   await expect(search).toBeVisible();
   await search.fill("Rio Preto");
   await expect(search).toHaveValue("Rio Preto");
+});
+
+test("desktop runner can combine and remove precise filters", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/corridas");
+
+  await page.getByRole("button", { name: /distância todas/i }).click();
+  await page.getByRole("button", { name: "5K", exact: true }).click();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Remover filtro 5K" })).toBeVisible();
+
+  await page.getByRole("button", { name: /premiação qualquer/i }).click();
+  await page.getByRole("button", { name: "Com troféu", exact: true }).click();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Remover filtro Com troféu" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Remover filtro 5K" }).click();
+  await expect(page.getByRole("button", { name: "Remover filtro 5K" })).not.toBeVisible();
+});
+
+test("city combobox supports keyboard selection", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.route("**/api/cities/search**", (route) => route.fulfill({
+    contentType: "application/json",
+    body: JSON.stringify([{ id: "1", name: "Araçatuba", state_code: "SP", slug: "aracatuba", latitude: -21.2, longitude: -50.4 }]),
+  }));
+  await page.goto("/corridas");
+  await page.getByRole("button", { name: /cidade todas/i }).click();
+  const city = page.getByRole("combobox", { name: "Buscar cidade" });
+  await city.fill("Ara");
+  await expect(page.getByRole("option", { name: /Araçatuba/ })).toBeVisible();
+  await city.press("ArrowDown");
+  await city.press("Enter");
+  await expect(page.getByRole("button", { name: "Remover filtro Araçatuba" })).toBeVisible();
+});
+
+test("mobile runner confirms or discards filter drafts", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/corridas");
+
+  await page.getByRole("button", { name: /^Filtros/ }).click();
+  await page.getByRole("button", { name: "10K", exact: true }).click();
+  await page.getByRole("button", { name: "Fechar" }).click();
+  await expect(page.getByRole("button", { name: "Remover filtro 10K" })).not.toBeVisible();
+
+  await page.getByRole("button", { name: /^Filtros/ }).click();
+  await page.getByRole("button", { name: "10K", exact: true }).click();
+  await page.getByRole("button", { name: "Ver resultados" }).click();
+  await expect(page.getByRole("button", { name: "Remover filtro 10K" })).toBeVisible();
 });
 
 test("anonymous runner can consult a race and its registration link", async ({ page }) => {

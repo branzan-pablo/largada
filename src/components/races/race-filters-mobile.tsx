@@ -1,209 +1,74 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { MapPin, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { ToggleChip } from "@/components/ui/toggle-chip";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { CityAutocomplete } from "@/components/onboarding/city-autocomplete";
-import { SlidersHorizontal, CalendarDays } from "lucide-react";
 import { DEFAULT_DISTANCES } from "@/lib/constants";
+import { getActiveFilterCount } from "@/lib/race-filter-controls";
 import type { RaceFilters as Filters } from "@/types/race";
-import { getDateRange, getDatePreset } from "@/lib/filter-utils";
+import { DateFilterFields, DistanceFilterFields, PrizeFilterFields } from "./race-filter-fields";
 
 interface RaceFiltersMobileProps {
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
-  search: string;
-  onSearchChange: (value: string) => void;
   availableDistances?: string[];
 }
 
-export function RaceFiltersMobile({
-  filters,
-  onFiltersChange,
-  onSearchChange,
-  availableDistances,
-}: RaceFiltersMobileProps) {
-  const distanceOptions = [
-    ...DEFAULT_DISTANCES,
-    ...(availableDistances ?? []).filter(
-      (d) => !(DEFAULT_DISTANCES as readonly string[]).includes(d)
-    ),
-  ].sort((a, b) => parseFloat(a) - parseFloat(b));
+export function RaceFiltersMobile({ filters, onFiltersChange, availableDistances }: RaceFiltersMobileProps) {
   const [open, setOpen] = useState(false);
-  const [cityKey, setCityKey] = useState(0);
+  const [draft, setDraft] = useState<Filters>(filters);
+  const activeCount = getActiveFilterCount(filters);
+  const distanceOptions = [...new Set([...DEFAULT_DISTANCES, ...(availableDistances ?? [])])].sort((a, b) => parseFloat(a) - parseFloat(b));
 
-  const activeCount = [
-    filters.city,
-    filters.dateFrom || filters.dateTo,
-    filters.distances?.length,
-    filters.prizeType?.length,
-  ].filter(Boolean).length;
-
-  const toggleDistance = (d: string) => {
-    const current = filters.distances ?? [];
-    const next = current.includes(d)
-      ? current.filter((x) => x !== d)
-      : [...current, d];
-    onFiltersChange({
-      ...filters,
-      distances: next.length > 0 ? next : undefined,
-    });
-  };
-
-  const togglePrize = (type: "money" | "trophy") => {
-    const current = filters.prizeType ?? [];
-    const next = current.includes(type)
-      ? current.filter((x) => x !== type)
-      : [...current, type];
-    onFiltersChange({
-      ...filters,
-      prizeType: next.length > 0 ? next : undefined,
-    });
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) setDraft(filters);
+    setOpen(nextOpen);
   };
 
   return (
-    <div className="md:hidden">
-      <Sheet open={open} onOpenChange={setOpen}>
+    <div className="lg:hidden">
+      <Sheet open={open} onOpenChange={handleOpenChange}>
         <SheetTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2 bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-[#0D1B2A]">
-            <SlidersHorizontal className="h-4 w-4" />
+          <Button variant="outline" className="h-12 shrink-0 gap-2 rounded-xl border-slate-300 bg-white px-3 font-bold text-[#0D1B2A] shadow-sm hover:border-[#FF4D00]/40 hover:bg-[#FFF8F5]">
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
             Filtros
-            {activeCount > 0 && (
-              <Badge className="ml-1 h-5 w-5 rounded-full p-0 text-xs bg-[#FF4D00]/10 text-[#FF4D00] border-[#FF4D00]/20 hover:bg-[#FF4D00]/20">
-                {activeCount}
-              </Badge>
-            )}
+            {activeCount > 0 && <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#FF4D00] px-1 text-[11px] font-black text-white" aria-label={`${activeCount} filtros ativos`}>{activeCount}</span>}
           </Button>
         </SheetTrigger>
-        <SheetContent side="bottom" className="flex h-auto max-h-[85dvh] flex-col rounded-t-2xl bg-white px-4 pb-0 text-gray-800" onOpenAutoFocus={(e) => e.preventDefault()}>
-          <SheetHeader className="shrink-0 px-0 pb-2 pt-4 text-left">
-            <SheetTitle className="text-base font-semibold text-[#0D1B2A]">Filtros</SheetTitle>
+        <SheetContent side="bottom" className="flex max-h-[90dvh] flex-col gap-0 rounded-t-[24px] border-t-0 bg-white px-0 pb-0 text-slate-900 shadow-[0_-24px_70px_-30px_rgba(13,27,42,0.5)]">
+          <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-slate-200" aria-hidden="true" />
+          <SheetHeader className="shrink-0 border-b border-slate-200 px-5 pb-4 pt-3 text-left">
+            <SheetTitle className="text-xl font-black tracking-tight text-[#0D1B2A]">Encontre sua próxima prova</SheetTitle>
+            <SheetDescription className="text-sm text-slate-500">Combine os filtros e confirme para atualizar a lista.</SheetDescription>
           </SheetHeader>
 
-          <div className="-mx-1 flex-1 space-y-4 overflow-y-auto px-1 pb-4">
-            {/* City */}
-            <div className="flex items-center gap-3">
-              <Label className="w-14 shrink-0 text-xs font-medium text-[#6B7280]">Cidade</Label>
-              <div className="flex-1">
-                <CityAutocomplete
-                  key={cityKey}
-                  initialCity={filters.city}
-                  onSelect={(c) => onFiltersChange({ ...filters, city: c.name })}
-                  onClear={() => onFiltersChange({ ...filters, city: undefined })}
-                  placeholder="Todas as cidades"
-                  inputClassName="border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 focus-visible:ring-gray-300"
-                />
-              </div>
-            </div>
+          <div className="flex-1 space-y-7 overflow-y-auto px-5 py-5">
+            <section aria-labelledby="mobile-city-title">
+              <h3 id="mobile-city-title" className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-slate-500"><MapPin className="h-4 w-4" aria-hidden="true" /> Cidade</h3>
+              <CityAutocomplete key={draft.city ?? "all-cities"} label="Buscar cidade" initialCity={draft.city} onSelect={(city) => setDraft({ ...draft, city: city.name })} onClear={() => setDraft({ ...draft, city: undefined })} placeholder="Digite ao menos 2 letras" inputClassName="h-12 rounded-xl border-slate-200 bg-slate-50 focus-visible:ring-[#FF4D00]" />
+            </section>
 
-            {/* Date Presets */}
-            <div className="flex items-center gap-3">
-              <Label className="w-14 shrink-0 text-xs font-medium text-[#6B7280]">Data</Label>
-              <div className="flex-1">
-                <Select
-                  value={getDatePreset(filters)}
-                  onValueChange={(v) => {
-                    const range = getDateRange(v);
-                    onFiltersChange({
-                      ...filters,
-                      dateFrom: range.dateFrom,
-                      dateTo: range.dateTo,
-                    });
-                  }}
-                >
-                  <SelectTrigger className="w-full bg-gray-50 border-gray-200 text-gray-800 focus:ring-gray-300">
-                    <div className="flex items-center gap-2">
-                      <CalendarDays className="h-4 w-4 text-gray-400 shrink-0" />
-                      <SelectValue placeholder="Qualquer data" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Qualquer data</SelectItem>
-                    <SelectItem value="this_week">Esta semana</SelectItem>
-                    <SelectItem value="this_month">Este mês</SelectItem>
-                    <SelectItem value="next_month">Próximo mês</SelectItem>
-                    <SelectItem value="next_3_months">Próximos 3 meses</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            <section aria-labelledby="mobile-date-title">
+              <h3 id="mobile-date-title" className="mb-3 text-xs font-black uppercase tracking-[0.14em] text-slate-500">Quando</h3>
+              <DateFilterFields filters={draft} onChange={setDraft} />
+            </section>
 
-            {/* Trophy Toggle */}
-            <div className="flex items-center justify-between">
-              <Label htmlFor="trophy-mobile" className="text-xs font-medium text-[#6B7280]">Com troféu</Label>
-              <Switch
-                id="trophy-mobile"
-                checked={filters.prizeType?.includes("trophy") ?? false}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    togglePrize("trophy");
-                  } else {
-                    onFiltersChange({
-                      ...filters,
-                      prizeType: filters.prizeType?.filter((x) => x !== "trophy"),
-                    });
-                  }
-                }}
-              />
-            </div>
+            <section aria-labelledby="mobile-distance-title">
+              <h3 id="mobile-distance-title" className="mb-3 text-xs font-black uppercase tracking-[0.14em] text-slate-500">Distância</h3>
+              <DistanceFilterFields filters={draft} onChange={setDraft} options={distanceOptions} />
+            </section>
 
-            {/* Distances */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-[#6B7280]">Distâncias</Label>
-              <div className="flex flex-wrap gap-1.5">
-                <ToggleChip
-                  label="Todos"
-                  active={!filters.distances || filters.distances.length === 0}
-                  onClick={() => onFiltersChange({ ...filters, distances: undefined })}
-                />
-                {distanceOptions.map((d) => (
-                  <ToggleChip
-                    key={d}
-                    label={d.toUpperCase()}
-                    active={filters.distances?.includes(d) ?? false}
-                    onClick={() => toggleDistance(d)}
-                  />
-                ))}
-              </div>
-            </div>
+            <section aria-labelledby="mobile-prize-title">
+              <h3 id="mobile-prize-title" className="mb-3 text-xs font-black uppercase tracking-[0.14em] text-slate-500">Premiação</h3>
+              <PrizeFilterFields filters={draft} onChange={setDraft} />
+            </section>
           </div>
 
-          <div className="sticky bottom-0 -mx-4 flex shrink-0 gap-2 border-t border-gray-200 bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
-            <Button
-              variant="outline"
-              className="h-11 flex-1 border-gray-200 bg-transparent text-gray-700 hover:bg-gray-50 hover:text-[#0D1B2A]"
-              onClick={() => {
-                onFiltersChange({});
-                onSearchChange("");
-                setCityKey((k) => k + 1);
-                setOpen(false);
-              }}
-            >
-              Limpar
-            </Button>
-            <Button
-              className="h-11 flex-1 border-0 bg-[#FF4D00] text-white hover:bg-[#E04400]"
-              onClick={() => setOpen(false)}
-            >
-              Ver resultados
-            </Button>
+          <div className="grid shrink-0 grid-cols-[0.9fr_1.35fr] gap-2 border-t border-slate-200 bg-white/95 px-4 pb-[max(0.9rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur">
+            <Button type="button" variant="outline" className="h-12 rounded-xl border-slate-300 font-bold text-slate-700" onClick={() => setDraft({})}>Limpar filtros</Button>
+            <Button type="button" className="h-12 rounded-xl bg-[#FF4D00] font-black text-white shadow-[0_8px_22px_-10px_rgba(255,77,0,0.9)] hover:bg-[#E64500]" onClick={() => { onFiltersChange(draft); setOpen(false); }}>Ver resultados</Button>
           </div>
         </SheetContent>
       </Sheet>
