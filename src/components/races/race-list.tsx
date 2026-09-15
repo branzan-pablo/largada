@@ -8,6 +8,7 @@ import { RaceCard } from "./race-card";
 import { RaceFiltersDesktop } from "./race-filters";
 import { RaceFiltersMobile } from "./race-filters-mobile";
 import { ActiveFilterChips } from "./active-filter-chips";
+import { SupportLargada } from "./support-largada";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, ChevronDown, Search, X } from "lucide-react";
 import type { RaceFilters } from "@/types/race";
@@ -118,17 +119,20 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
             </p>
           </div>
 
-          {!isLoading && races.length > 0 && (
-            <div className="flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 backdrop-blur-sm" role="status" aria-live="polite">
-            <span className="relative flex h-2 w-2">
-              <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span className="text-xs font-semibold text-white">
-              {totalCount !== null ? totalCount : hasMore ? `${races.length}+` : races.length} provas abertas
-            </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {!isLoading && races.length > 0 && (
+              <div className="flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 backdrop-blur-sm" role="status" aria-live="polite">
+                <span className="relative flex h-2 w-2">
+                  <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                <span className="text-xs font-semibold text-white">
+                  {totalCount !== null ? totalCount : hasMore ? `${races.length}+` : races.length} provas abertas
+                </span>
+              </div>
+            )}
+            <SupportLargada variant="hero" />
           </div>
-          )}
         </div>
         <div className="absolute inset-x-0 bottom-0 h-1 bg-[#FF4D00]" aria-hidden="true" />
       </section>

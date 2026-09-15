@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { LARGADA_PIX_PAYLOAD } from "@/lib/pix";
 
-export function SupportLargada() {
+export function SupportLargada({ variant = "card" }: { variant?: "card" | "hero" }) {
   const [copied, setCopied] = useState(false);
 
   async function copyPixCode() {
@@ -30,21 +30,27 @@ export function SupportLargada() {
   }
 
   return (
-    <div className="mt-4 border-t border-slate-200 pt-4">
-      <p className="text-xs font-semibold text-[#0D1B2A]">O Largada te ajudou?</p>
-      <p className="mt-1 text-xs leading-relaxed text-slate-500">
-        Uma contribuição opcional ajuda a manter o calendário gratuito e atualizado.
-      </p>
+    <div className={variant === "card" ? "mt-4 border-t border-slate-200 pt-4" : "shrink-0"}>
+      {variant === "card" && (
+        <>
+          <p className="text-xs font-semibold text-[#0D1B2A]">O Largada te ajudou?</p>
+          <p className="mt-1 text-xs leading-relaxed text-slate-500">
+            Uma contribuição opcional ajuda a manter o calendário gratuito e atualizado.
+          </p>
+        </>
+      )}
 
       <Dialog>
         <DialogTrigger asChild>
           <Button
             type="button"
             variant="outline"
-            className="mt-3 w-full border-[#FF4D00]/30 bg-white font-semibold text-[#C83D00] hover:border-[#FF4D00] hover:bg-[#FFF5F0] hover:text-[#A63200]"
+            className={variant === "hero"
+              ? "h-9 rounded-full border-white/20 bg-white/10 px-3 text-xs font-bold text-white backdrop-blur-sm hover:border-white/40 hover:bg-white/15 hover:text-white"
+              : "mt-3 w-full border-[#FF4D00]/30 bg-white font-semibold text-[#C83D00] hover:border-[#FF4D00] hover:bg-[#FFF5F0] hover:text-[#A63200]"}
           >
             <Heart className="mr-2 h-4 w-4" aria-hidden="true" />
-            Apoiar o Largada
+            {variant === "hero" ? "Apoie o projeto" : "Apoiar o Largada"}
           </Button>
         </DialogTrigger>
 
