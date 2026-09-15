@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { RaceImageFallback } from "./race-image-fallback";
 
 interface RaceCardImageProps {
   imageUrl: string | null;
@@ -21,12 +22,7 @@ export function RaceCardImage({
   const [failed, setFailed] = useState(false);
 
   if (!imageUrl || failed) {
-    return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-linear-to-br from-[#FF4D00]/10 via-gray-100 to-gray-200">
-        <span className="text-4xl font-black leading-none text-[#0D1B2A]">{day}</span>
-        <span className="mt-0.5 text-xs font-bold uppercase tracking-wider text-[#FF4D00]">{month}</span>
-      </div>
-    );
+    return <RaceImageFallback day={day} month={month} />;
   }
 
   const handleError = () => setFailed(true);

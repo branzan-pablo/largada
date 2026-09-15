@@ -87,7 +87,7 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  revalidatePath("/corridas");
+  revalidatePath("/");
   if (data?.slug) revalidatePath(`/corrida/${data.slug}`);
 
   // Re-run AI enrichment when fields that feed the embedding or the prize

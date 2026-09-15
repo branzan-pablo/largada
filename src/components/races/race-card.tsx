@@ -20,9 +20,9 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
   const shareUrl = `${baseUrl}/corrida/${race.slug}`;
 
   return (
-    <Link href={`/corrida/${race.slug}`} className="block group hover:bg-[#FF4D00]/10 rounded-xl p-2 overflow-hidden transition-colors">
+    <Link href={`/corrida/${race.slug}`} className="group block overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-2.5 shadow-[0_1px_2px_rgba(13,27,42,0.04)] transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-[#FF4D00]/30 hover:shadow-[0_18px_40px_-24px_rgba(13,27,42,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4D00] focus-visible:ring-offset-2">
       {/* Thumbnail */}
-      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-gray-100">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-900/5">
         <RaceCardImage
           imageUrl={race.image_url}
           raceName={race.name}
@@ -55,8 +55,8 @@ export const RaceCard = memo(function RaceCard({ race, priority = false }: { rac
       </div>
 
       {/* Info — below thumbnail, no border */}
-      <div className="pt-1.5 pb-0.5 md:pt-2 md:pb-1">
-        <h3 className="text-sm md:text-base font-bold text-[#0D1B2A] line-clamp-2 leading-snug mb-0.5 md:mb-1">
+      <div className="px-1 pb-1 pt-3">
+        <h3 className="mb-1.5 line-clamp-2 text-sm font-extrabold leading-snug tracking-[-0.01em] text-[#0D1B2A] md:text-base">
           {race.name}
         </h3>
 

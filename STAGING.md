@@ -44,7 +44,7 @@ pnpm test:e2e
 
 Valide manualmente:
 
-1. `/` redireciona para `/corridas`.
+1. `/` renderiza o calendário de corridas e `/corridas` redireciona permanentemente para `/`.
 2. Busca, filtros, paginação e detalhe funcionam anonimamente.
 3. O link de inscrição abre o destino da corrida.
 4. `/admin` redireciona visitantes para `/admin/login`.

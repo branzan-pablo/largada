@@ -5,8 +5,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, changeFrequency: "weekly", priority: 1.0 },
-    { url: `${baseUrl}/corridas`, changeFrequency: "daily", priority: 0.9 },
+    { url: baseUrl, changeFrequency: "daily", priority: 1.0 },
   ];
 
   // Preview builds may be created before Supabase credentials are configured.

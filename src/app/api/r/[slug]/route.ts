@@ -11,12 +11,12 @@ export async function GET(request: Request, { params }: RouteContext<"/api/r/[sl
     .single();
 
   if (!race?.registration_link) {
-    return NextResponse.redirect(new URL("/corridas", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   try {
     return NextResponse.redirect(new URL(race.registration_link), 307);
   } catch {
-    return NextResponse.redirect(new URL("/corridas", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 }

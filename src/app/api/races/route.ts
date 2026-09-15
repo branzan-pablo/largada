@@ -133,7 +133,7 @@ export async function POST(request: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  revalidatePath("/corridas");
+  revalidatePath("/");
   revalidatePath(`/corrida/${data.slug}`);
   try {
     await enrichRace(data.id);
