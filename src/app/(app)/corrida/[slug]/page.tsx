@@ -1,8 +1,9 @@
 import { cache } from "react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Banknote, Building2, CalendarDays, ChevronLeft, Clock, ExternalLink, Info, MapPin, Route, Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
@@ -11,8 +12,9 @@ import { RaceDistanceBadges } from "@/components/races/race-distance-badges";
 import { RacePrizeBadge } from "@/components/races/race-prize-badge";
 import { RacePrizeAmountBadge } from "@/components/races/race-prize-amount-badge";
 import { RaceShareButton } from "@/components/races/race-share-button";
+import { RaceDetailHeroImage } from "@/components/races/race-detail-hero-image";
 import { PRIZE_TYPES } from "@/lib/constants";
-import { formatDateFull, formatTime, todayInBrazil } from "@/lib/date";
+import { formatDateFull, formatTime, parseRaceDate, todayInBrazil } from "@/lib/date";
 import type { Race, RegistrationBatch } from "@/types/race";
 
 export const revalidate = 300;
@@ -49,6 +51,9 @@ export default async function RaceDetailPage({ params }: PageProps<"/corrida/[sl
   if (!race) notFound();
 
   const deadlinePassed = race.registration_deadline < todayInBrazil();
+  const raceDate = parseRaceDate(race.date);
+  const day = format(raceDate, "dd");
+  const month = format(raceDate, "MMM", { locale: ptBR }).toUpperCase();
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const jsonLd = {
     "@context": "https://schema.org",
@@ -72,7 +77,7 @@ export default async function RaceDetailPage({ params }: PageProps<"/corrida/[sl
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="mb-4 flex items-center justify-between gap-2">
-        <Link href="/corridas" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <Link href="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ChevronLeft className="h-4 w-4" /> Voltar para listagem
         </Link>
         <RaceShareButton
@@ -88,12 +93,7 @@ export default async function RaceDetailPage({ params }: PageProps<"/corrida/[sl
       </div>
 
       <div className="relative -mx-4 mb-6 aspect-video w-[calc(100%+2rem)] overflow-hidden md:mx-0 md:aspect-[21/9] md:w-full md:rounded-xl">
-        {race.image_url ? (
-          <Image src={race.image_url} alt={race.name} fill className="object-cover" sizes="100vw" priority unoptimized />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        <RaceDetailHeroImage imageUrl={race.image_url} raceName={race.name} day={day} month={month} />
         <div className="absolute inset-x-0 bottom-0 p-4 md:p-6">
           <div className="mb-2 flex flex-wrap gap-2"><RacePrizeBadge prizeType={race.prize_type} /></div>
           <h1 className="text-2xl font-bold leading-tight text-white md:text-3xl">{race.name}</h1>

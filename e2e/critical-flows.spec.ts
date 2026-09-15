@@ -11,14 +11,20 @@ async function loginAsAdmin(page: Page) {
   await expect(page).toHaveURL(/\/admin$/);
 }
 
-test("home redirects to the race calendar", async ({ page }) => {
+test("home renders the race calendar at the canonical URL", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveURL(/\/corridas$/);
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("heading", { name: /calendário de corridas/i })).toBeVisible();
+});
+
+test("legacy race calendar URL redirects to home", async ({ page }) => {
+  await page.goto("/corridas");
+  await expect(page).toHaveURL(/\/$/);
 });
 
 test("anonymous runner can search and filter races", async ({ page }) => {
-  await page.goto("/corridas");
-  await expect(page.getByRole("heading", { name: "Calendário de Corridas" })).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /calendário de corridas/i })).toBeVisible();
   const search = page.locator('input[type="search"]:visible');
   await expect(search).toBeVisible();
   await search.fill("Rio Preto");
@@ -27,7 +33,7 @@ test("anonymous runner can search and filter races", async ({ page }) => {
 
 test("desktop runner can combine and remove precise filters", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/corridas");
+  await page.goto("/");
 
   await page.getByRole("button", { name: /distância todas/i }).click();
   await page.getByRole("button", { name: "5K", exact: true }).click();
@@ -49,7 +55,7 @@ test("city combobox supports keyboard selection", async ({ page }) => {
     contentType: "application/json",
     body: JSON.stringify([{ id: "1", name: "Araçatuba", state_code: "SP", slug: "aracatuba", latitude: -21.2, longitude: -50.4 }]),
   }));
-  await page.goto("/corridas");
+  await page.goto("/");
   await page.getByRole("button", { name: /cidade todas/i }).click();
   const city = page.getByRole("combobox", { name: "Buscar cidade" });
   await city.fill("Ara");
@@ -61,7 +67,7 @@ test("city combobox supports keyboard selection", async ({ page }) => {
 
 test("mobile runner confirms or discards filter drafts", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/corridas");
+  await page.goto("/");
 
   await page.getByRole("button", { name: /^Filtros/ }).click();
   await page.getByRole("button", { name: "10K", exact: true }).click();

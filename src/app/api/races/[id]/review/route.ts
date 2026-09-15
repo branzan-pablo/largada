@@ -51,7 +51,7 @@ export async function PATCH(
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
-  revalidatePath("/corridas");
+  revalidatePath("/");
   if (race.slug) revalidatePath(`/corrida/${race.slug}`);
 
   return NextResponse.json({ id, status: newStatus });

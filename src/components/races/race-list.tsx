@@ -98,29 +98,40 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
 
   return (
     <>
-      {/* Page Header */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#0D1B2A] tracking-tight">
-            Calendário de Corridas
-          </h1>
-          <p className="text-[#6B7280] text-sm md:text-base">
-            Encontre provas por cidade, data, distância e premiação.
-          </p>
+      <section className="relative mb-5 overflow-hidden rounded-[1.5rem] bg-[#0D1B2A] px-5 py-5 text-white shadow-[0_22px_55px_-35px_rgba(13,27,42,0.85)] md:mb-8 md:rounded-[1.75rem] md:px-9 md:py-9">
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[42%] opacity-20 md:block" aria-hidden="true">
+          <div className="absolute -right-10 top-1/2 h-px w-full -rotate-12 bg-white" />
+          <div className="absolute -right-6 top-[60%] h-px w-full -rotate-12 bg-white" />
+          <div className="absolute -right-2 top-[70%] h-px w-full -rotate-12 bg-[#FF4D00]" />
         </div>
+        <div className="relative flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <p className="mb-2.5 flex items-center gap-2 text-[0.64rem] font-bold uppercase tracking-[0.2em] text-[#FF7A40] md:mb-3 md:text-[0.68rem] md:tracking-[0.22em]">
+              <span className="h-0.5 w-8 bg-[#FF4D00]" aria-hidden="true" />
+              Próximas largadas
+            </p>
+            <h1 className="max-w-2xl text-[1.75rem] font-extrabold leading-[1.05] tracking-[-0.035em] text-white min-[360px]:text-3xl md:text-5xl">
+              Calendário de corridas
+            </h1>
+            <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-slate-300 md:mt-3 md:text-base">
+              Encontre sua próxima prova por cidade, data, distância e premiação.
+            </p>
+          </div>
 
-        {!isLoading && races.length > 0 && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 shrink-0 self-start md:self-center" role="status" aria-live="polite">
+          {!isLoading && races.length > 0 && (
+            <div className="flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 backdrop-blur-sm" role="status" aria-live="polite">
             <span className="relative flex h-2 w-2">
               <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            <span className="text-xs font-medium text-[#6B7280]">
+            <span className="text-xs font-semibold text-white">
               {totalCount !== null ? totalCount : hasMore ? `${races.length}+` : races.length} provas abertas
             </span>
           </div>
-        )}
-      </div>
+          )}
+        </div>
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-[#FF4D00]" aria-hidden="true" />
+      </section>
 
       {/* Mobile: search bar + filter button (same row) */}
       <div className="mb-1 flex items-center gap-2 lg:hidden">
@@ -130,7 +141,7 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
           <input
             id="mobile-race-search"
             type="search"
-            placeholder="Nome, cidade ou organizador"
+            placeholder="Nome ou cidade"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-12 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-9 text-sm font-semibold text-[#0D1B2A] shadow-sm outline-none transition-colors placeholder:font-medium placeholder:text-slate-400 focus:border-[#FF4D00] focus:ring-2 focus:ring-[#FF4D00]/20"
@@ -165,7 +176,7 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
       <ActiveFilterChips filters={filters} onChange={setFilters} onClear={() => setFilters({})} />
 
       {/* Race grid */}
-      <div className="mt-3">
+      <div className="mt-5">
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -173,8 +184,8 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
             ))}
           </div>
         ) : races.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center rounded-lg border border-gray-200 bg-gray-50">
-            <Trophy className="mb-4 h-12 w-12 text-gray-300" />
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-10 text-center md:py-14">
+            <Trophy className="mb-3 h-10 w-10 text-slate-300 md:h-12 md:w-12" />
             <h3 className="text-lg font-semibold text-[#0D1B2A]">
               Nenhuma corrida encontrada com esses filtros.
             </h3>
@@ -184,6 +195,14 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
           </div>
         ) : (
           <>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+                Provas encontradas
+              </h2>
+              <span className="text-xs tabular-nums text-slate-500">
+                Exibindo {races.length}{totalCount !== null ? ` de ${totalCount}` : ""}
+              </span>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {races.map((race, i) => (
                 <RaceCard key={race.id} race={race} priority={i < 2} />
@@ -221,9 +240,9 @@ export function RaceList({ initialData }: { initialData?: InitialRaceData }) {
 
 function RaceCardSkeleton() {
   return (
-    <div className="p-2">
-      <Skeleton className="aspect-4/3 w-full rounded-xl bg-gray-200" />
-      <div className="pt-3 pb-1 space-y-2">
+    <div className="rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm">
+      <Skeleton className="aspect-video w-full rounded-xl bg-gray-200" />
+      <div className="space-y-2 px-1 pb-2 pt-3">
         <Skeleton className="h-5 w-full bg-gray-200 rounded" />
         <Skeleton className="h-4 w-3/4 bg-gray-200 rounded" />
         <Skeleton className="h-4 w-2/3 bg-gray-200 rounded" />

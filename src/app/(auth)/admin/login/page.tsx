@@ -8,7 +8,7 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: P
   const forbidden = (await searchParams).error === "forbidden";
   return (
     <div className="w-full max-w-md rounded-xl border bg-white p-6 shadow-sm">
-      <Link href="/corridas" className="mb-6 flex items-center justify-center gap-1">
+      <Link href="/" className="mb-6 flex items-center justify-center gap-1">
         <Image src="/logo_120.png" alt="" width={48} height={48} />
         <span className="font-[family-name:var(--font-logo)] text-3xl tracking-wide text-[#0D1B2A]">LARGADA</span>
       </Link>
