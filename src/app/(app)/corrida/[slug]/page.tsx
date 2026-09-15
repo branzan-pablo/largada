@@ -13,6 +13,7 @@ import { RacePrizeBadge } from "@/components/races/race-prize-badge";
 import { RacePrizeAmountBadge } from "@/components/races/race-prize-amount-badge";
 import { RaceShareButton } from "@/components/races/race-share-button";
 import { RaceDetailHeroImage } from "@/components/races/race-detail-hero-image";
+import { SupportLargada } from "@/components/races/support-largada";
 import { PRIZE_TYPES } from "@/lib/constants";
 import { formatDateFull, formatTime, parseRaceDate, todayInBrazil } from "@/lib/date";
 import type { Race, RegistrationBatch } from "@/types/race";
@@ -151,6 +152,7 @@ export default async function RaceDetailPage({ params }: PageProps<"/corrida/[sl
               <a href={`/api/r/${race.slug}`} target="_blank" rel="noopener noreferrer">Inscreva-se <ExternalLink className="ml-2 h-4 w-4" /></a>
             </Button>
           )}
+          <SupportLargada />
         </aside>
       </div>
     </>
