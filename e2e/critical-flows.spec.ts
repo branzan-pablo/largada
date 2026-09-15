@@ -15,6 +15,10 @@ test("home renders the race calendar at the canonical URL", async ({ page }) => 
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("heading", { name: /calendário de corridas/i })).toBeVisible();
+  await page.getByRole("button", { name: "Apoie o projeto" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.getByRole("img", { name: "QR Code Pix para apoiar o Largada" })).toBeVisible();
+  await page.getByRole("button", { name: "Fechar" }).click();
 });
 
 test("legacy race calendar URL redirects to home", async ({ page }) => {
