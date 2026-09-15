@@ -85,6 +85,11 @@ test("anonymous runner can consult a race and its registration link", async ({ p
   await page.goto(`/corrida/${process.env.E2E_RACE_SLUG}`);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByRole("link", { name: /inscreva-se/i })).toHaveAttribute("href", /\/api\/r\//);
+  await page.getByRole("button", { name: "Apoiar o Largada" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Ajude a manter o Largada" })).toBeVisible();
+  await expect(page.getByRole("img", { name: "QR Code Pix para apoiar o Largada" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copiar código Pix" })).toBeVisible();
 });
 
 test("anonymous access to admin redirects to the dedicated login", async ({ page }) => {
